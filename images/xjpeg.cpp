@@ -26,6 +26,75 @@ static XBinary::XCONVERT _TABLE_XJPEG_STRUCTID[] = {
     {XJpeg::STRUCTID_CHUNK, "CHUNK", QString("Chunk")},
 };
 
+namespace {
+const qint64 JPEG_MIN_SIZE = 20;
+const qint64 JPEG_SIGNATURE_SIZE = 2;
+const qint64 JPEG_SEGMENT_HEADER_SIZE = 4;
+const qint64 JPEG_DRI_SEGMENT_SIZE = 6;
+const qint64 JPEG_EXIF_DATA_OFFSET = 10;
+const qint32 JPEG_MAX_COMMENT_SIZE = 100;
+
+const qint64 JFIF_ID_OFFSET = 6;
+const qint32 JFIF_ID_SIZE = 5;
+const qint64 JFIF_VERSION_MAJOR_OFFSET = 0x0B;
+const qint64 JFIF_VERSION_MINOR_OFFSET = 0x0C;
+
+const quint8 JPEG_MARKER_PREFIX = 0xFF;
+const quint8 JPEG_MARKER_STUFFED_ZERO = 0x00;
+const quint8 JPEG_MARKER_RST0 = 0xD0;
+const quint8 JPEG_MARKER_RST7 = 0xD7;
+const quint8 JPEG_MARKER_SOI = 0xD8;
+const quint8 JPEG_MARKER_EOI = 0xD9;
+const quint8 JPEG_MARKER_SOS = 0xDA;
+const quint8 JPEG_MARKER_DQT = 0xDB;
+const quint8 JPEG_MARKER_DRI = 0xDD;
+const quint8 JPEG_MARKER_APP1 = 0xE1;
+const quint8 JPEG_MARKER_COM = 0xFE;
+
+qint32 jpegStructIdCount()
+{
+    return sizeof(_TABLE_XJPEG_STRUCTID) / sizeof(_TABLE_XJPEG_STRUCTID[0]);
+}
+
+bool isRestartMarker(quint8 nId)
+{
+    return (nId >= JPEG_MARKER_RST0) && (nId <= JPEG_MARKER_RST7);
+}
+
+bool isMarkerWithoutLength(quint8 nId)
+{
+    return (nId == JPEG_MARKER_SOI) || (nId == JPEG_MARKER_EOI) || isRestartMarker(nId);
+}
+
+qint64 chunkEndOffset(const XJpeg::CHUNK &chunk)
+{
+    return chunk.nDataOffset + chunk.nDataSize;
+}
+
+XJpeg::CHUNK createEntropyCodedDataChunk(qint64 nDataOffset, qint64 nDataEnd)
+{
+    XJpeg::CHUNK result = {};
+    result.bValid = true;
+    result.bEntropyCodedData = true;
+    result.nDataOffset = nDataOffset;
+    result.nDataSize = nDataEnd - nDataOffset;
+
+    return result;
+}
+
+XBinary::FPART createFilePart(XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize, const QString &sName)
+{
+    XBinary::FPART result = {};
+    result.filePart = filePart;
+    result.nFileOffset = nOffset;
+    result.nFileSize = nSize;
+    result.nVirtualAddress = -1;
+    result.sName = sName;
+
+    return result;
+}
+}  // namespace
+
 XJpeg::XJpeg(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -38,7 +107,7 @@ bool XJpeg::isValid(PDSTRUCT *pPdStruct)
 {
     bool bIsValid = false;
 
-    if (getSize() >= 20) {
+    if (getSize() >= JPEG_MIN_SIZE) {
         _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
         bIsValid = compareSignature(&memoryMap, "FFD8FFE0....'JFIF'00", 0, pPdStruct) || compareSignature(&memoryMap, "FFD8FFE1....'Exif'00", 0, pPdStruct) ||
                    compareSignature(&memoryMap, "FFD8FFDB", 0, pPdStruct);
@@ -93,11 +162,11 @@ QString XJpeg::getVersion()
 {
     QString sResult;
 
-    QString sIdent = read_ansiString(6, 5);
+    QString sIdent = read_ansiString(JFIF_ID_OFFSET, JFIF_ID_SIZE);
 
     if (sIdent == "JFIF") {
-        quint8 nMajor = read_uint8(0x0B);
-        quint8 nMinor = read_uint8(0x0C);
+        quint8 nMajor = read_uint8(JFIF_VERSION_MAJOR_OFFSET);
+        quint8 nMinor = read_uint8(JFIF_VERSION_MINOR_OFFSET);
 
         sResult = QString("%1.%2").arg(QString::number(nMajor), QString::number(nMinor));
     }
@@ -124,34 +193,29 @@ QList<XJpeg::CHUNK> XJpeg::getChunks(PDSTRUCT *pPdStruct)
 
         listResult.append(chunk);
 
-        nOffset = chunk.nDataOffset + chunk.nDataSize;
+        nOffset = chunkEndOffset(chunk);
 
-        if (chunk.nId == 0xDA) {
-            CHUNK chunkData = {};
-            chunkData.bValid = true;
-            chunkData.bEntropyCodedData = true;
-            chunkData.nDataOffset = nOffset;
+        if (chunk.nId == JPEG_MARKER_SOS) {
+            qint64 nDataOffset = nOffset;
 
             while (true) {
-                nOffset = find_uint8(nOffset, -1, 0xFF, pPdStruct);
+                nOffset = find_uint8(nOffset, -1, JPEG_MARKER_PREFIX, pPdStruct);
 
                 if (nOffset == -1) {
                     break;
                 }
 
-                if (read_uint8(nOffset + 1) != 0x00) {
+                if (read_uint8(nOffset + 1) != JPEG_MARKER_STUFFED_ZERO) {
                     break;
                 } else {
                     nOffset++;
                 }
             }
 
-            chunkData.nDataSize = nOffset - chunkData.nDataOffset;
-
-            listResult.append(chunkData);
+            listResult.append(createEntropyCodedDataChunk(nDataOffset, nOffset));
         }
 
-        if (chunk.nId == 0xD9) {  // END of image
+        if (chunk.nId == JPEG_MARKER_EOI) {
             break;
         }
     }
@@ -185,16 +249,16 @@ QString XJpeg::getComment(QList<CHUNK> *pListChunks, PDSTRUCT *pPdStruct)
 
     QString sResult;
 
-    QList<XJpeg::CHUNK> listComments = _getChunksById(pListChunks, 0xFE);  // COMMENT
+    QList<XJpeg::CHUNK> listComments = _getChunksById(pListChunks, JPEG_MARKER_COM);
 
     qint32 nNumberOfRecords = listComments.count();
 
     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-        sResult += read_ansiString(listComments.at(i).nDataOffset + 4, listComments.at(i).nDataSize - 4);
+        sResult += read_ansiString(listComments.at(i).nDataOffset + JPEG_SEGMENT_HEADER_SIZE, listComments.at(i).nDataSize - JPEG_SEGMENT_HEADER_SIZE);
     }
 
-    if (sResult.size() > 100) {
-        sResult.resize(100);
+    if (sResult.size() > JPEG_MAX_COMMENT_SIZE) {
+        sResult.resize(JPEG_MAX_COMMENT_SIZE);
     }
 
     sResult = sResult.remove("\r").remove("\n");
@@ -213,14 +277,14 @@ QString XJpeg::getDqtMD5(QList<CHUNK> *pListChunks)
 {
     QString sResult;
 
-    QList<XJpeg::CHUNK> listComments = _getChunksById(pListChunks, 0xDB);  // DQT
+    QList<XJpeg::CHUNK> listComments = _getChunksById(pListChunks, JPEG_MARKER_DQT);
 
     qint32 nNumberOfRecords = listComments.count();
 
     QCryptographicHash crypto(QCryptographicHash::Md5);
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        QByteArray baData = read_array(listComments.at(i).nDataOffset + 4, listComments.at(i).nDataSize - 4);
+        QByteArray baData = read_array(listComments.at(i).nDataOffset + JPEG_SEGMENT_HEADER_SIZE, listComments.at(i).nDataSize - JPEG_SEGMENT_HEADER_SIZE);
 
         crypto.addData(baData);
     }
@@ -257,15 +321,15 @@ XBinary::OFFSETSIZE XJpeg::getExif(QList<CHUNK> *pListChunks)
 {
     OFFSETSIZE result = {};
 
-    QList<CHUNK> listExif = _getChunksById(pListChunks, 0xE1);
+    QList<CHUNK> listExif = _getChunksById(pListChunks, JPEG_MARKER_APP1);
 
     if (listExif.count() > 0) {
         CHUNK chunkExif = listExif.at(0);
 
-        if (chunkExif.nDataSize > 10) {
-            if (read_ansiString(chunkExif.nDataOffset + 4) == "Exif") {
-                result.nOffset = chunkExif.nDataOffset + 10;
-                result.nSize = chunkExif.nDataSize - 10;
+        if (chunkExif.nDataSize > JPEG_EXIF_DATA_OFFSET) {
+            if (read_ansiString(chunkExif.nDataOffset + JPEG_SEGMENT_HEADER_SIZE) == "Exif") {
+                result.nOffset = chunkExif.nDataOffset + JPEG_EXIF_DATA_OFFSET;
+                result.nSize = chunkExif.nDataSize - JPEG_EXIF_DATA_OFFSET;
             }
         }
     }
@@ -285,17 +349,17 @@ QString XJpeg::getMIMEString()
 
 QString XJpeg::structIDToString(quint32 nID)
 {
-    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XJPEG_STRUCTID, sizeof(_TABLE_XJPEG_STRUCTID) / sizeof(XBinary::XCONVERT));
+    return XBinary::XCONVERT_idToTransString(nID, _TABLE_XJPEG_STRUCTID, jpegStructIdCount());
 }
 
 QString XJpeg::structIDToFtString(quint32 nID)
 {
-    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XJPEG_STRUCTID, sizeof(_TABLE_XJPEG_STRUCTID) / sizeof(XBinary::XCONVERT));
+    return XBinary::XCONVERT_idToFtString(nID, _TABLE_XJPEG_STRUCTID, jpegStructIdCount());
 }
 
 quint32 XJpeg::ftStringToStructID(const QString &sFtString)
 {
-    return XCONVERT_ftStringToId(sFtString, _TABLE_XJPEG_STRUCTID, sizeof(_TABLE_XJPEG_STRUCTID) / sizeof(XBinary::XCONVERT));
+    return XCONVERT_ftStringToId(sFtString, _TABLE_XJPEG_STRUCTID, jpegStructIdCount());
 }
 
 QList<XBinary::DATA_HEADER> XJpeg::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
@@ -318,21 +382,20 @@ QList<XBinary::DATA_HEADER> XJpeg::getDataHeaders(const DATA_HEADERS_OPTIONS &da
         if (nStartOffset != -1) {
             if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJpeg::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 2;  // SOI marker
-                dataHeader.listRecords.append(getDataRecord(0, 2, "SOI", VT_UINT16, DRF_UNKNOWN, ENDIAN_BIG));
+                dataHeader.nSize = JPEG_SIGNATURE_SIZE;
+                dataHeader.listRecords.append(getDataRecord(0, JPEG_SIGNATURE_SIZE, "SOI", VT_UINT16, DRF_UNKNOWN, ENDIAN_BIG));
                 listResult.append(dataHeader);
 
                 if (dataHeadersOptions.bChildren) {
                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
                     _dataHeadersOptions.nID = STRUCTID_CHUNK;
-                    _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + 2;
+                    _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + JPEG_SIGNATURE_SIZE;
                     _dataHeadersOptions.locType = dataHeadersOptions.locType;
-                    _dataHeadersOptions.nSize = getSize() - 2;
+                    _dataHeadersOptions.nSize = getSize() - JPEG_SIGNATURE_SIZE;
                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
                 }
             } else if (dataHeadersOptions.nID == STRUCTID_CHUNK) {
-                // Represent chunks as a table region starting after SOI
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJpeg::structIDToString(dataHeadersOptions.nID));
                 listResult.append(dataHeader);
             }
@@ -351,13 +414,7 @@ QList<XBinary::FPART> XJpeg::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
     qint64 nMaxOffset = 0;
 
     if (nFileParts & FILEPART_SIGNATURE) {
-        FPART rec = {};
-        rec.filePart = FILEPART_SIGNATURE;
-        rec.nFileOffset = 0;
-        rec.nFileSize = 2;
-        rec.nVirtualAddress = -1;
-        rec.sName = tr("Signature");
-        listResult.append(rec);
+        listResult.append(createFilePart(FILEPART_SIGNATURE, 0, JPEG_SIGNATURE_SIZE, tr("Signature")));
     }
 
     QList<CHUNK> chunks = getChunks(pPdStruct);
@@ -365,38 +422,20 @@ QList<XBinary::FPART> XJpeg::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         const CHUNK &ch = chunks.at(i);
         if (ch.bEntropyCodedData) {
             if (nFileParts & FILEPART_REGION) {
-                FPART rec = {};
-                rec.filePart = FILEPART_REGION;
-                rec.nFileOffset = ch.nDataOffset;
-                rec.nFileSize = ch.nDataSize;
-                rec.nVirtualAddress = -1;
-                rec.sName = tr("Data");
-                listResult.append(rec);
+                listResult.append(createFilePart(FILEPART_REGION, ch.nDataOffset, ch.nDataSize, tr("Data")));
             }
         } else {
             if (nFileParts & FILEPART_OBJECT) {
-                FPART rec = {};
-                rec.filePart = FILEPART_OBJECT;
-                rec.nFileOffset = ch.nDataOffset;
-                rec.nFileSize = ch.nDataSize;
-                rec.nVirtualAddress = -1;
-                rec.sName = valueToHex(ch.nId);
-                listResult.append(rec);
+                listResult.append(createFilePart(FILEPART_OBJECT, ch.nDataOffset, ch.nDataSize, valueToHex(ch.nId)));
             }
         }
 
-        nMaxOffset = qMax(nMaxOffset, ch.nDataOffset + ch.nDataSize);
+        nMaxOffset = qMax(nMaxOffset, chunkEndOffset(ch));
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
         if (nMaxOffset < nTotal) {
-            FPART rec = {};
-            rec.filePart = FILEPART_OVERLAY;
-            rec.nFileOffset = nMaxOffset;
-            rec.nFileSize = nTotal - nMaxOffset;
-            rec.nVirtualAddress = -1;
-            rec.sName = tr("Overlay");
-            listResult.append(rec);
+            listResult.append(createFilePart(FILEPART_OVERLAY, nMaxOffset, nTotal - nMaxOffset, tr("Overlay")));
         }
     }
 
@@ -409,20 +448,18 @@ XJpeg::CHUNK XJpeg::_readChunk(qint64 nOffset)
 
     quint8 nBegin = read_uint8(nOffset);
 
-    if (nBegin == 0xFF) {
+    if (nBegin == JPEG_MARKER_PREFIX) {
         result.bValid = true;
         result.nId = read_uint8(nOffset + 1);
 
         result.nDataOffset = nOffset;
 
-        if ((result.nId == 0xD8) || (result.nId == 0xD9)) {
-            result.nDataSize = 2;
-        } else if (result.nId == 0xDD) {
-            result.nDataSize = 2 + 4;
-        } else if ((result.nId >= 0xD0) && (result.nId <= 0xD7)) {
-            result.nDataSize = 2;
-        } else if (result.nId != 0x00) {
-            result.nDataSize = 2 + read_uint16(nOffset + 2, true);
+        if (isMarkerWithoutLength(result.nId)) {
+            result.nDataSize = JPEG_SIGNATURE_SIZE;
+        } else if (result.nId == JPEG_MARKER_DRI) {
+            result.nDataSize = JPEG_DRI_SEGMENT_SIZE;
+        } else if (result.nId != JPEG_MARKER_STUFFED_ZERO) {
+            result.nDataSize = JPEG_SIGNATURE_SIZE + read_uint16(nOffset + JPEG_SIGNATURE_SIZE, true);
         } else {
             result.bValid = false;
         }
