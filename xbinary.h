@@ -1118,7 +1118,7 @@ public:
         QString sInfoString;
         QString sErrorString;
         bool bForceStop;         // TODO !!!
-        qint32 nBufferSize;      // 0 =
+        qint32 nBufferSize;      // 0 => 0x4000
         qint32 nFileBufferSize;  // 0 => 0x10000
         PDSTRUCT_CALLBACK pCallback;
         void *pCallbackUserData;

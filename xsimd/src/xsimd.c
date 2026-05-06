@@ -299,17 +299,13 @@ xsimd_int64 xsimd_find_ansi(const void* pBuffer, xsimd_int64 nBufferSize,
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nBufferSize >= 32) {
-        j = _xsimd_find_ansi_AVX2(pData, nBufferSize, nMinLength, nOffset);
-        if (j >= 0 && j < nBufferSize) {
-            return j;
-        }
+        xsimd_int64 nResult = _xsimd_find_ansi_AVX2(pData, nBufferSize, nMinLength, nOffset);
+        return nResult;
     }
     /* SSE2: Process 16 bytes at a time */
     else if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nBufferSize >= 16) {
-        j = _xsimd_find_ansi_SSE2(pData, nBufferSize, nMinLength, nOffset);
-        if (j >= 0 && j < nBufferSize) {
-            return j;
-        }
+        xsimd_int64 nResult = _xsimd_find_ansi_SSE2(pData, nBufferSize, nMinLength, nOffset);
+        return nResult;
     }
 #endif
     
@@ -374,14 +370,16 @@ xsimd_int64 xsimd_find_notnull(const void* pBuffer, xsimd_int64 nBufferSize,
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nBufferSize >= 32) {
         xsimd_int64 result = _xsimd_find_notnull_AVX2(pData, nBufferSize, nMinLength, nOffset, j, runStart);
-        if (result < 0) return result;
+        if (result == -1) return -1;
+        if (result < -1) return -result - 2;
         j = result & 0xFFFFFFFF;
         runStart = (result >> 32) & 0xFFFFFFFF;
     }
     /* SSE2: Process 16 bytes at a time */
     else if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nBufferSize >= 16) {
         xsimd_int64 result = _xsimd_find_notnull_SSE2(pData, nBufferSize, nMinLength, nOffset, j, runStart);
-        if (result < 0) return result;
+        if (result == -1) return -1;
+        if (result < -1) return -result - 2;
         j = result & 0xFFFFFFFF;
         runStart = (result >> 32) & 0xFFFFFFFF;
     }
@@ -431,17 +429,13 @@ xsimd_int64 xsimd_find_not_ansi(const void* pBuffer, xsimd_int64 nBufferSize,
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nBufferSize >= 32) {
-        j = _xsimd_find_not_ansi_AVX2(pData, nBufferSize, nMinLength, nOffset);
-        if (j >= 0 && j < nBufferSize) {
-            return j;
-        }
+        xsimd_int64 nResult = _xsimd_find_not_ansi_AVX2(pData, nBufferSize, nMinLength, nOffset);
+        return nResult;
     }
     /* SSE2: Process 16 bytes at a time */
     else if ((g_nEnabledFeatures & XSIMD_FEATURE_SSE2) && nBufferSize >= 16) {
-        j = _xsimd_find_not_ansi_SSE2(pData, nBufferSize, nMinLength, nOffset);
-        if (j >= 0 && j < nBufferSize) {
-            return j;
-        }
+        xsimd_int64 nResult = _xsimd_find_not_ansi_SSE2(pData, nBufferSize, nMinLength, nOffset);
+        return nResult;
     }
 #endif
     
@@ -952,13 +946,31 @@ xsimd_int64 xsimd_find_ansi_string_i(const void* pBuffer, xsimd_int64 nBufferSiz
     }
     
     const unsigned char* pData = (const unsigned char*)pBuffer;
-    xsimd_int64 nSearchEnd = nBufferSize - (nStringSize - 1);
-    
-    /* Fallback scalar implementation */
-    for (i = 0; i < nSearchEnd; i++) {
+    const xsimd_int64 nSearchEnd = nBufferSize - (nStringSize - 1);
+    const unsigned char nFirstUpper = pUpperData[0];
+    const unsigned char nFirstLower = pLowerData[0];
+
+    for (i = 0; i < nSearchEnd;) {
+        const xsimd_int64 nRemaining = nSearchEnd - i;
+        const unsigned char *pFound = (const unsigned char*)memchr(pData + i, nFirstUpper, (size_t)nRemaining);
+
+        if (nFirstLower != nFirstUpper) {
+            const unsigned char *pFoundLower = (const unsigned char*)memchr(pData + i, nFirstLower, (size_t)nRemaining);
+
+            if (pFoundLower && (!pFound || pFoundLower < pFound)) {
+                pFound = pFoundLower;
+            }
+        }
+
+        if (!pFound) {
+            break;
+        }
+
+        i = pFound - pData;
+
         int bMatch = 1;
         xsimd_int64 j;
-        for (j = 0; j < nStringSize; j++) {
+        for (j = 1; j < nStringSize; j++) {
             if ((pData[i + j] != pUpperData[j]) && (pData[i + j] != pLowerData[j])) {
                 bMatch = 0;
                 break;
@@ -969,6 +981,8 @@ xsimd_int64 xsimd_find_ansi_string_i(const void* pBuffer, xsimd_int64 nBufferSiz
             free(pLowerData);
             return nOffset + i;
         }
+
+        i++;
     }
     
     free(pUpperData);

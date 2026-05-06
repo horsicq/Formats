@@ -15,6 +15,7 @@ add_library(xsimd_sse2 STATIC
     ${PROJECT_SOURCE_DIR}/src/xsimd_sse2.c
 )
 set_target_properties(xsimd_sse2 PROPERTIES LINKER_LANGUAGE C)
+target_compile_definitions(xsimd_sse2 PRIVATE USE_SSE2)
 
 # xsimd_avx2 library - AVX2 specific implementations
 add_library(xsimd_avx2 STATIC

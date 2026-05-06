@@ -26,13 +26,53 @@
 #include <immintrin.h>
 #endif
 
+#ifdef XSIMD_X86
+static xsimd_int64 xsimd_ctz32_avx2(xsimd_uint32 nMask)
+{
+#ifdef _MSC_VER
+    unsigned long nBitPos;
+    _BitScanForward(&nBitPos, (unsigned long)nMask);
+    return (xsimd_int64)nBitPos;
+#else
+    return (xsimd_int64)__builtin_ctz(nMask);
+#endif
+}
+#endif
+
 xsimd_int64 _xsimd_find_byte_AVX2(const unsigned char* pData, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64 nOffset)
 {
 #ifdef XSIMD_X86
     __m256i vNeedle = _mm256_set1_epi8((char)nByte);
     xsimd_int64 i = 0;
     
-    /* Process 64 bytes per iteration for better throughput */
+    /* Process 128 bytes per iteration for better throughput */
+    while (i + 128 <= nSize) {
+        __m256i vData0 = _mm256_loadu_si256((const __m256i*)(pData + i));
+        __m256i vData1 = _mm256_loadu_si256((const __m256i*)(pData + i + 32));
+        __m256i vData2 = _mm256_loadu_si256((const __m256i*)(pData + i + 64));
+        __m256i vData3 = _mm256_loadu_si256((const __m256i*)(pData + i + 96));
+        
+        __m256i vCmp0 = _mm256_cmpeq_epi8(vData0, vNeedle);
+        __m256i vCmp1 = _mm256_cmpeq_epi8(vData1, vNeedle);
+        __m256i vCmp2 = _mm256_cmpeq_epi8(vData2, vNeedle);
+        __m256i vCmp3 = _mm256_cmpeq_epi8(vData3, vNeedle);
+        
+        xsimd_uint32 nMask0 = (xsimd_uint32)_mm256_movemask_epi8(vCmp0);
+        xsimd_uint32 nMask1 = (xsimd_uint32)_mm256_movemask_epi8(vCmp1);
+        xsimd_uint32 nMask2 = (xsimd_uint32)_mm256_movemask_epi8(vCmp2);
+        xsimd_uint32 nMask3 = (xsimd_uint32)_mm256_movemask_epi8(vCmp3);
+        
+        if ((nMask0 | nMask1 | nMask2 | nMask3) != 0) {
+            if (nMask0 != 0) return i + xsimd_ctz32_avx2(nMask0);
+            if (nMask1 != 0) return i + 32 + xsimd_ctz32_avx2(nMask1);
+            if (nMask2 != 0) return i + 64 + xsimd_ctz32_avx2(nMask2);
+            return i + 96 + xsimd_ctz32_avx2(nMask3);
+        }
+        
+        i += 128;
+    }
+    
+    /* Process remaining 64-byte chunks */
     while (i + 64 <= nSize) {
         __m256i vData0 = _mm256_loadu_si256((const __m256i*)(pData + i));
         __m256i vData1 = _mm256_loadu_si256((const __m256i*)(pData + i + 32));
@@ -40,27 +80,12 @@ xsimd_int64 _xsimd_find_byte_AVX2(const unsigned char* pData, xsimd_int64 nSize,
         __m256i vCmp0 = _mm256_cmpeq_epi8(vData0, vNeedle);
         __m256i vCmp1 = _mm256_cmpeq_epi8(vData1, vNeedle);
         
-        xsimd_int32 nMask0 = _mm256_movemask_epi8(vCmp0);
-        xsimd_int32 nMask1 = _mm256_movemask_epi8(vCmp1);
+        xsimd_uint32 nMask0 = (xsimd_uint32)_mm256_movemask_epi8(vCmp0);
+        xsimd_uint32 nMask1 = (xsimd_uint32)_mm256_movemask_epi8(vCmp1);
         
-        if (nMask0 != 0) {
-#ifdef _MSC_VER
-            unsigned long nBitPos;
-            _BitScanForward(&nBitPos, (unsigned long)nMask0);
-            return i + nBitPos;
-#else
-            return i + __builtin_ctz((unsigned int)nMask0);
-#endif
-        }
-        
-        if (nMask1 != 0) {
-#ifdef _MSC_VER
-            unsigned long nBitPos;
-            _BitScanForward(&nBitPos, (unsigned long)nMask1);
-            return i + 32 + nBitPos;
-#else
-            return i + 32 + __builtin_ctz((unsigned int)nMask1);
-#endif
+        if ((nMask0 | nMask1) != 0) {
+            if (nMask0 != 0) return i + xsimd_ctz32_avx2(nMask0);
+            return i + 32 + xsimd_ctz32_avx2(nMask1);
         }
         
         i += 64;
@@ -70,16 +95,10 @@ xsimd_int64 _xsimd_find_byte_AVX2(const unsigned char* pData, xsimd_int64 nSize,
     while (i + 32 <= nSize) {
         __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
         __m256i vCmp = _mm256_cmpeq_epi8(vData, vNeedle);
-        xsimd_int32 nMask = _mm256_movemask_epi8(vCmp);
+        xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
         
         if (nMask != 0) {
-#ifdef _MSC_VER
-            unsigned long nBitPos;
-            _BitScanForward(&nBitPos, (unsigned long)nMask);
-            return i + nBitPos;
-#else
-            return i + __builtin_ctz((unsigned int)nMask);
-#endif
+            return i + xsimd_ctz32_avx2(nMask);
         }
         i += 32;
     }
@@ -362,35 +381,18 @@ xsimd_int64 _xsimd_find_pattern_bmh_2byte_AVX2(const char* pHay, xsimd_int64 nBu
 xsimd_int64 _xsimd_find_pattern_bmh_1byte_AVX2(const char* pHay, xsimd_int64 nBufferSize, char nByte, xsimd_int64 nOffset)
 {
 #ifdef XSIMD_X86
-    __m256i vPattern = _mm256_set1_epi8(nByte);
-    xsimd_int64 i = 0;
-    
-    /* Process 32 bytes per iteration */
-    while (i + 31 < nBufferSize) {
-        __m256i vData = _mm256_loadu_si256((const __m256i*)(pHay + i));
-        __m256i vCmp = _mm256_cmpeq_epi8(vData, vPattern);
-        xsimd_uint32 nMask = (xsimd_uint32)_mm256_movemask_epi8(vCmp);
-        
-        if (nMask != 0) {
-            /* Find first match using bit scan */
-#ifdef _MSC_VER
-            unsigned long bit;
-            _BitScanForward(&bit, nMask);
-#else
-            unsigned bit = __builtin_ctz(nMask);
-#endif
-            return nOffset + i + (xsimd_int64)bit;
-        }
-        
-        i += 32;
+    xsimd_int64 i = _xsimd_find_byte_AVX2((const unsigned char*)pHay, nBufferSize, (xsimd_uint8)nByte, 0);
+
+    if (i < nBufferSize && pHay[i] == nByte) {
+        return nOffset + i;
     }
-    
-    /* Scalar fallback for remaining bytes */
-    while (i < nBufferSize) {
-        if (pHay[i] == nByte) {
-            return nOffset + i;
+
+    if (i < nBufferSize) {
+        const void *pFound = memchr(pHay + i, nByte, (size_t)(nBufferSize - i));
+
+        if (pFound) {
+            return nOffset + ((const char*)pFound - pHay);
         }
-        i++;
     }
 #endif
     
@@ -496,7 +498,19 @@ xsimd_int64 _xsimd_find_ansi_AVX2(const unsigned char* pData, xsimd_int64 nBuffe
         }
     }
     
-    return j;
+    while (j < nBufferSize) {
+        while (j < nBufferSize && (pData[j] < 0x20 || pData[j] > 0x7E)) j++;
+        if (j >= nBufferSize) break;
+        
+        xsimd_int64 start = j;
+        while (j < nBufferSize && pData[j] >= 0x20 && pData[j] <= 0x7E) j++;
+        
+        if ((j - start) >= nMinLength) {
+            return nOffset + start;
+        }
+    }
+    
+    return -1;
 #else
     return 0;
 #endif
@@ -599,7 +613,19 @@ xsimd_int64 _xsimd_find_ansi_AVX2_2(const unsigned char* pData, xsimd_int64 nBuf
         }
     }
     
-    return j;
+    while (j < nBufferSize) {
+        while (j < nBufferSize && (pData[j] >= 0x20 && pData[j] <= 0x7E)) j++;
+        if (j >= nBufferSize) break;
+        
+        xsimd_int64 start = j;
+        while (j < nBufferSize && (pData[j] < 0x20 || pData[j] > 0x7E)) j++;
+        
+        if ((j - start) >= nMinLength) {
+            return nOffset + start;
+        }
+    }
+    
+    return -1;
 #else
     return 0;
 #endif
@@ -610,7 +636,19 @@ xsimd_int64 _xsimd_find_notnull_AVX2(const unsigned char* pData, xsimd_int64 nBu
 #ifdef XSIMD_X86
     const __m256i vZero = _mm256_setzero_si256();
     
-    /* First, skip any leading nulls */
+    /* First, skip any leading nulls with SIMD. */
+    while (j + 32 <= nBufferSize) {
+        __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + j));
+        xsimd_uint32 nZeroMask = (xsimd_uint32)_mm256_movemask_epi8(_mm256_cmpeq_epi8(vData, vZero));
+
+        if (nZeroMask != 0xFFFFFFFFU) {
+            j += xsimd_ctz32_avx2(~nZeroMask);
+            break;
+        }
+
+        j += 32;
+    }
+
     while (j < nBufferSize && pData[j] == 0) j++;
     if (j >= nBufferSize) return -1;
     runStart = j;
@@ -633,7 +671,7 @@ xsimd_int64 _xsimd_find_notnull_AVX2(const unsigned char* pData, xsimd_int64 nBu
             /* Check if current run is long enough */
             xsimd_int64 runLen = nullPos - runStart;
             if (runLen >= nMinLength) {
-                return nOffset + runStart;
+                return -(nOffset + runStart) - 2;
             }
             
             /* Skip past null byte(s) and find start of next run */
@@ -752,7 +790,19 @@ xsimd_int64 _xsimd_find_not_ansi_AVX2(const unsigned char* pData, xsimd_int64 nB
         }
     }
     
-    return j;
+    while (j < nBufferSize) {
+        while (j < nBufferSize && (pData[j] >= 0x20 && pData[j] <= 0x7E)) j++;
+        if (j >= nBufferSize) break;
+        
+        xsimd_int64 start = j;
+        while (j < nBufferSize && (pData[j] < 0x20 || pData[j] > 0x7E)) j++;
+        
+        if ((j - start) >= nMinLength) {
+            return nOffset + start;
+        }
+    }
+    
+    return -1;
 #else
     return 0;
 #endif
@@ -811,8 +861,7 @@ int _xsimd_is_not_null_AVX2(const char* ptr, xsimd_int64 nSize)
 int _xsimd_is_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
 {
 #ifdef XSIMD_X86
-    const __m256i low_bound = _mm256_set1_epi8(0x20 - 1);
-    const __m256i high_bound = _mm256_set1_epi8(0x7F);
+    const __m256i low_bound = _mm256_set1_epi8(0x20);
     
     /* Process 128 bytes per iteration for better throughput */
     while (nSize >= 128) {
@@ -821,21 +870,10 @@ int _xsimd_is_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
         __m256i chunk2 = _mm256_loadu_si256((const __m256i*)(ptr + 64));
         __m256i chunk3 = _mm256_loadu_si256((const __m256i*)(ptr + 96));
         
-        __m256i too_low0 = _mm256_cmpgt_epi8(low_bound, chunk0);
-        __m256i too_high0 = _mm256_cmpgt_epi8(chunk0, high_bound);
-        __m256i invalid0 = _mm256_or_si256(too_low0, too_high0);
-        
-        __m256i too_low1 = _mm256_cmpgt_epi8(low_bound, chunk1);
-        __m256i too_high1 = _mm256_cmpgt_epi8(chunk1, high_bound);
-        __m256i invalid1 = _mm256_or_si256(too_low1, too_high1);
-        
-        __m256i too_low2 = _mm256_cmpgt_epi8(low_bound, chunk2);
-        __m256i too_high2 = _mm256_cmpgt_epi8(chunk2, high_bound);
-        __m256i invalid2 = _mm256_or_si256(too_low2, too_high2);
-        
-        __m256i too_low3 = _mm256_cmpgt_epi8(low_bound, chunk3);
-        __m256i too_high3 = _mm256_cmpgt_epi8(chunk3, high_bound);
-        __m256i invalid3 = _mm256_or_si256(too_low3, too_high3);
+        __m256i invalid0 = _mm256_cmpgt_epi8(low_bound, chunk0);
+        __m256i invalid1 = _mm256_cmpgt_epi8(low_bound, chunk1);
+        __m256i invalid2 = _mm256_cmpgt_epi8(low_bound, chunk2);
+        __m256i invalid3 = _mm256_cmpgt_epi8(low_bound, chunk3);
         
         if (_mm256_movemask_epi8(invalid0) != 0 || _mm256_movemask_epi8(invalid1) != 0 ||
             _mm256_movemask_epi8(invalid2) != 0 || _mm256_movemask_epi8(invalid3) != 0) {
@@ -849,9 +887,7 @@ int _xsimd_is_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
     /* Process remaining 32-byte chunks */
     while (nSize >= 32) {
         __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
-        __m256i too_low = _mm256_cmpgt_epi8(low_bound, chunk);
-        __m256i too_high = _mm256_cmpgt_epi8(chunk, high_bound);
-        __m256i invalid = _mm256_or_si256(too_low, too_high);
+        __m256i invalid = _mm256_cmpgt_epi8(low_bound, chunk);
         
         if (_mm256_movemask_epi8(invalid) != 0) {
             return 0;
@@ -870,6 +906,8 @@ int _xsimd_is_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
 int _xsimd_is_not_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
 {
 #ifdef XSIMD_X86
+    const __m256i low_bound = _mm256_set1_epi8(0x20);
+
     /* Process 128 bytes per iteration for better throughput */
     while (nSize >= 128) {
         __m256i chunk0 = _mm256_loadu_si256((const __m256i*)ptr);
@@ -877,24 +915,13 @@ int _xsimd_is_not_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
         __m256i chunk2 = _mm256_loadu_si256((const __m256i*)(ptr + 64));
         __m256i chunk3 = _mm256_loadu_si256((const __m256i*)(ptr + 96));
         
-        __m256i ge_low0 = _mm256_cmpgt_epi8(chunk0, _mm256_set1_epi8(0x1F));
-        __m256i le_high0 = _mm256_cmpgt_epi8(_mm256_set1_epi8((char)0x80), chunk0);
-        __m256i printable0 = _mm256_and_si256(ge_low0, le_high0);
+        __m256i not_printable0 = _mm256_cmpgt_epi8(low_bound, chunk0);
+        __m256i not_printable1 = _mm256_cmpgt_epi8(low_bound, chunk1);
+        __m256i not_printable2 = _mm256_cmpgt_epi8(low_bound, chunk2);
+        __m256i not_printable3 = _mm256_cmpgt_epi8(low_bound, chunk3);
         
-        __m256i ge_low1 = _mm256_cmpgt_epi8(chunk1, _mm256_set1_epi8(0x1F));
-        __m256i le_high1 = _mm256_cmpgt_epi8(_mm256_set1_epi8((char)0x80), chunk1);
-        __m256i printable1 = _mm256_and_si256(ge_low1, le_high1);
-        
-        __m256i ge_low2 = _mm256_cmpgt_epi8(chunk2, _mm256_set1_epi8(0x1F));
-        __m256i le_high2 = _mm256_cmpgt_epi8(_mm256_set1_epi8((char)0x80), chunk2);
-        __m256i printable2 = _mm256_and_si256(ge_low2, le_high2);
-        
-        __m256i ge_low3 = _mm256_cmpgt_epi8(chunk3, _mm256_set1_epi8(0x1F));
-        __m256i le_high3 = _mm256_cmpgt_epi8(_mm256_set1_epi8((char)0x80), chunk3);
-        __m256i printable3 = _mm256_and_si256(ge_low3, le_high3);
-        
-        if (_mm256_movemask_epi8(printable0) != 0 || _mm256_movemask_epi8(printable1) != 0 ||
-            _mm256_movemask_epi8(printable2) != 0 || _mm256_movemask_epi8(printable3) != 0) {
+        if (_mm256_movemask_epi8(not_printable0) != (int)0xFFFFFFFF || _mm256_movemask_epi8(not_printable1) != (int)0xFFFFFFFF ||
+            _mm256_movemask_epi8(not_printable2) != (int)0xFFFFFFFF || _mm256_movemask_epi8(not_printable3) != (int)0xFFFFFFFF) {
             return 0;
         }
         
@@ -905,11 +932,9 @@ int _xsimd_is_not_ansi_AVX2(const char* ptr, xsimd_int64 nSize)
     /* Process remaining 32-byte chunks */
     while (nSize >= 32) {
         __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
-        __m256i ge_low = _mm256_cmpgt_epi8(chunk, _mm256_set1_epi8(0x1F));
-        __m256i le_high = _mm256_cmpgt_epi8(_mm256_set1_epi8((char)0x80), chunk);
-        __m256i printable = _mm256_and_si256(ge_low, le_high);
+        __m256i not_printable = _mm256_cmpgt_epi8(low_bound, chunk);
         
-        if (_mm256_movemask_epi8(printable) != 0) {
+        if (_mm256_movemask_epi8(not_printable) != (int)0xFFFFFFFF) {
             return 0;
         }
         
@@ -1027,17 +1052,38 @@ int _xsimd_is_not_ansi_and_null_AVX2(const char* ptr, xsimd_int64 nSize)
 {
 #ifdef XSIMD_X86
     const __m256i zero = _mm256_setzero_si256();
+    const __m256i low_bound = _mm256_set1_epi8(0x20);
+    const __m256i all_ones = _mm256_cmpeq_epi8(zero, zero);
     
+    while (nSize >= 128) {
+        __m256i chunk0 = _mm256_loadu_si256((const __m256i*)ptr);
+        __m256i chunk1 = _mm256_loadu_si256((const __m256i*)(ptr + 32));
+        __m256i chunk2 = _mm256_loadu_si256((const __m256i*)(ptr + 64));
+        __m256i chunk3 = _mm256_loadu_si256((const __m256i*)(ptr + 96));
+
+        __m256i invalid0 = _mm256_or_si256(_mm256_cmpeq_epi8(chunk0, zero), _mm256_andnot_si256(_mm256_cmpgt_epi8(low_bound, chunk0), all_ones));
+        __m256i invalid1 = _mm256_or_si256(_mm256_cmpeq_epi8(chunk1, zero), _mm256_andnot_si256(_mm256_cmpgt_epi8(low_bound, chunk1), all_ones));
+        __m256i invalid2 = _mm256_or_si256(_mm256_cmpeq_epi8(chunk2, zero), _mm256_andnot_si256(_mm256_cmpgt_epi8(low_bound, chunk2), all_ones));
+        __m256i invalid3 = _mm256_or_si256(_mm256_cmpeq_epi8(chunk3, zero), _mm256_andnot_si256(_mm256_cmpgt_epi8(low_bound, chunk3), all_ones));
+
+        if (_mm256_movemask_epi8(invalid0) != 0 || _mm256_movemask_epi8(invalid1) != 0 ||
+            _mm256_movemask_epi8(invalid2) != 0 || _mm256_movemask_epi8(invalid3) != 0) {
+            return 0;
+        }
+
+        ptr += 128;
+        nSize -= 128;
+    }
+
     while (nSize >= 32) {
         __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
         
         /* Check for zero bytes */
         __m256i is_zero = _mm256_cmpeq_epi8(chunk, zero);
         
-        /* Check for printable ASCII (0x20-0x7E) */
-        __m256i ge_low = _mm256_cmpgt_epi8(chunk, _mm256_set1_epi8(0x1F));
-        __m256i le_high = _mm256_cmpgt_epi8(_mm256_set1_epi8((char)0x80), chunk);
-        __m256i is_printable = _mm256_and_si256(ge_low, le_high);
+        /* Match scalar rule: ANSI if byte is >= 0x20 and < 0x80. */
+        __m256i not_printable = _mm256_cmpgt_epi8(low_bound, chunk);
+        __m256i is_printable = _mm256_andnot_si256(not_printable, all_ones);
         
         /* Invalid if zero OR printable */
         __m256i invalid = _mm256_or_si256(is_zero, is_printable);
@@ -1128,6 +1174,26 @@ int _xsimd_is_ansi_number_AVX2(const char* ptr, xsimd_int64 nSize)
     const __m256i digit_low = _mm256_set1_epi8(0x30);   /* '0' */
     const __m256i digit_high = _mm256_set1_epi8(0x39);  /* '9' */
     
+    while (nSize >= 128) {
+        __m256i chunk0 = _mm256_loadu_si256((const __m256i*)ptr);
+        __m256i chunk1 = _mm256_loadu_si256((const __m256i*)(ptr + 32));
+        __m256i chunk2 = _mm256_loadu_si256((const __m256i*)(ptr + 64));
+        __m256i chunk3 = _mm256_loadu_si256((const __m256i*)(ptr + 96));
+
+        __m256i invalid0 = _mm256_or_si256(_mm256_cmpgt_epi8(digit_low, chunk0), _mm256_cmpgt_epi8(chunk0, digit_high));
+        __m256i invalid1 = _mm256_or_si256(_mm256_cmpgt_epi8(digit_low, chunk1), _mm256_cmpgt_epi8(chunk1, digit_high));
+        __m256i invalid2 = _mm256_or_si256(_mm256_cmpgt_epi8(digit_low, chunk2), _mm256_cmpgt_epi8(chunk2, digit_high));
+        __m256i invalid3 = _mm256_or_si256(_mm256_cmpgt_epi8(digit_low, chunk3), _mm256_cmpgt_epi8(chunk3, digit_high));
+
+        if (_mm256_movemask_epi8(invalid0) != 0 || _mm256_movemask_epi8(invalid1) != 0 ||
+            _mm256_movemask_epi8(invalid2) != 0 || _mm256_movemask_epi8(invalid3) != 0) {
+            return 0;
+        }
+
+        ptr += 128;
+        nSize -= 128;
+    }
+
     while (nSize >= 32) {
         __m256i chunk = _mm256_loadu_si256((const __m256i*)ptr);
         
@@ -1156,7 +1222,27 @@ xsimd_int64 _xsimd_find_first_non_ansi_AVX2(const xsimd_uint8* pData, xsimd_int6
     __m256i vMin = _mm256_set1_epi8(0x20);  /* Minimum ANSI (space) */
     __m256i vMax = _mm256_set1_epi8(0x7F);  /* Maximum ANSI (DEL-1) */
     
-    /* Process 32 bytes at a time */
+    while (i + 128 <= nSize) {
+        __m256i vData0 = _mm256_loadu_si256((const __m256i*)(pData + i));
+        __m256i vData1 = _mm256_loadu_si256((const __m256i*)(pData + i + 32));
+        __m256i vData2 = _mm256_loadu_si256((const __m256i*)(pData + i + 64));
+        __m256i vData3 = _mm256_loadu_si256((const __m256i*)(pData + i + 96));
+
+        xsimd_uint32 nMask0 = (xsimd_uint32)_mm256_movemask_epi8(_mm256_or_si256(_mm256_cmpgt_epi8(vMin, vData0), _mm256_cmpgt_epi8(vData0, vMax)));
+        xsimd_uint32 nMask1 = (xsimd_uint32)_mm256_movemask_epi8(_mm256_or_si256(_mm256_cmpgt_epi8(vMin, vData1), _mm256_cmpgt_epi8(vData1, vMax)));
+        xsimd_uint32 nMask2 = (xsimd_uint32)_mm256_movemask_epi8(_mm256_or_si256(_mm256_cmpgt_epi8(vMin, vData2), _mm256_cmpgt_epi8(vData2, vMax)));
+        xsimd_uint32 nMask3 = (xsimd_uint32)_mm256_movemask_epi8(_mm256_or_si256(_mm256_cmpgt_epi8(vMin, vData3), _mm256_cmpgt_epi8(vData3, vMax)));
+
+        if ((nMask0 | nMask1 | nMask2 | nMask3) != 0) {
+            if (nMask0 != 0) return i + xsimd_ctz32_avx2(nMask0);
+            if (nMask1 != 0) return i + 32 + xsimd_ctz32_avx2(nMask1);
+            if (nMask2 != 0) return i + 64 + xsimd_ctz32_avx2(nMask2);
+            return i + 96 + xsimd_ctz32_avx2(nMask3);
+        }
+
+        i += 128;
+    }
+
     for (; i + 32 <= nSize; i += 32) {
         __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
         
@@ -1168,10 +1254,7 @@ xsimd_int64 _xsimd_find_first_non_ansi_AVX2(const xsimd_uint8* pData, xsimd_int6
         int nMask = _mm256_movemask_epi8(vNonAnsi);
         
         if (nMask != 0) {
-            /* Find first set bit */
-            int nPos = 0;
-            while (((nMask >> nPos) & 1) == 0) nPos++;
-            return i + nPos;
+            return i + xsimd_ctz32_avx2((xsimd_uint32)nMask);
         }
     }
     
@@ -1186,6 +1269,27 @@ xsimd_int64 _xsimd_find_null_byte_AVX2(const xsimd_uint8* pData, xsimd_int64 nSi
 #ifdef XSIMD_X86
     __m256i vZero = _mm256_setzero_si256();
     xsimd_int64 i = *pi;
+
+    while (i + 128 <= nSize) {
+        __m256i vData0 = _mm256_loadu_si256((const __m256i*)(pData + i));
+        __m256i vData1 = _mm256_loadu_si256((const __m256i*)(pData + i + 32));
+        __m256i vData2 = _mm256_loadu_si256((const __m256i*)(pData + i + 64));
+        __m256i vData3 = _mm256_loadu_si256((const __m256i*)(pData + i + 96));
+
+        xsimd_uint32 nMask0 = (xsimd_uint32)_mm256_movemask_epi8(_mm256_cmpeq_epi8(vData0, vZero));
+        xsimd_uint32 nMask1 = (xsimd_uint32)_mm256_movemask_epi8(_mm256_cmpeq_epi8(vData1, vZero));
+        xsimd_uint32 nMask2 = (xsimd_uint32)_mm256_movemask_epi8(_mm256_cmpeq_epi8(vData2, vZero));
+        xsimd_uint32 nMask3 = (xsimd_uint32)_mm256_movemask_epi8(_mm256_cmpeq_epi8(vData3, vZero));
+
+        if ((nMask0 | nMask1 | nMask2 | nMask3) != 0) {
+            if (nMask0 != 0) return i + xsimd_ctz32_avx2(nMask0);
+            if (nMask1 != 0) return i + 32 + xsimd_ctz32_avx2(nMask1);
+            if (nMask2 != 0) return i + 64 + xsimd_ctz32_avx2(nMask2);
+            return i + 96 + xsimd_ctz32_avx2(nMask3);
+        }
+
+        i += 128;
+    }
     
     for (; i + 32 <= nSize; i += 32) {
         __m256i vData = _mm256_loadu_si256((const __m256i*)(pData + i));
@@ -1262,11 +1366,13 @@ void _xsimd_count_char_AVX2(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_u
         __m256i vCmp = _mm256_cmpeq_epi8(vData, vNeedle);
         xsimd_uint32 nMask = _mm256_movemask_epi8(vCmp);
         
+        if (nMask != 0) {
 #ifdef _MSC_VER
-        *pnCount += __popcnt(nMask);
+            *pnCount += __popcnt(nMask);
 #else
-        *pnCount += __builtin_popcount(nMask);
+            *pnCount += __builtin_popcount(nMask);
 #endif
+        }
     }
     
     *pi = i;
@@ -1289,16 +1395,24 @@ void _xsimd_create_ansi_mask_AVX2(const xsimd_uint8* pData, xsimd_int64 nSize, x
         
         xsimd_uint32 nMask = _mm256_movemask_epi8(vIsAnsi);
         
-        pMaskData[i / 8] = (xsimd_uint8)(nMask & 0xFF);
-        pMaskData[i / 8 + 1] = (xsimd_uint8)((nMask >> 8) & 0xFF);
-        pMaskData[i / 8 + 2] = (xsimd_uint8)((nMask >> 16) & 0xFF);
-        pMaskData[i / 8 + 3] = (xsimd_uint8)((nMask >> 24) & 0xFF);
-        
+        if (nMask == 0xFFFFFFFFU) {
+            pMaskData[i / 8] = 0xFF;
+            pMaskData[i / 8 + 1] = 0xFF;
+            pMaskData[i / 8 + 2] = 0xFF;
+            pMaskData[i / 8 + 3] = 0xFF;
+            *pnAnsiCount += 32;
+        } else if (nMask != 0) {
+            pMaskData[i / 8] = (xsimd_uint8)(nMask & 0xFF);
+            pMaskData[i / 8 + 1] = (xsimd_uint8)((nMask >> 8) & 0xFF);
+            pMaskData[i / 8 + 2] = (xsimd_uint8)((nMask >> 16) & 0xFF);
+            pMaskData[i / 8 + 3] = (xsimd_uint8)((nMask >> 24) & 0xFF);
+
 #ifdef _MSC_VER
-        *pnAnsiCount += __popcnt(nMask);
+            *pnAnsiCount += __popcnt(nMask);
 #else
-        *pnAnsiCount += __builtin_popcount(nMask);
+            *pnAnsiCount += __builtin_popcount(nMask);
 #endif
+        }
     }
     
     *pi = i;
@@ -1318,11 +1432,6 @@ xsimd_int32 _xsimd_compare_sigbytes_AVX2(const xsimd_uint8 *pSigBytes, xsimd_int
         return 0;
     }
     
-    // Constants for ANSI range check (0x20 to 0x7E)
-    const __m256i vAnsiMin = _mm256_set1_epi8(0x20);
-    const __m256i vAnsiMax = _mm256_set1_epi8(0x7E);
-    const __m256i vZero = _mm256_setzero_si256();
-    
     // Process signature pattern byte by byte
     for (xsimd_int64 i = 0; i < nPatternLength; i++) {
         xsimd_uint8 nType = pSigBytes[i * 2];
@@ -1340,47 +1449,25 @@ xsimd_int32 _xsimd_compare_sigbytes_AVX2(const xsimd_uint8 *pSigBytes, xsimd_int
                 break;
                 
             case 2:  // ANSI - check if in range 0x20-0x7E
-            {
-                // Use AVX2 for single byte check (will be optimized by compiler)
-                __m256i vData = _mm256_set1_epi8(nDataByte);
-                __m256i vGte = _mm256_cmpgt_epi8(vData, _mm256_subs_epi8(vAnsiMin, _mm256_set1_epi8(1)));
-                __m256i vLte = _mm256_cmpgt_epi8(_mm256_adds_epi8(vAnsiMax, _mm256_set1_epi8(1)), vData);
-                __m256i vInRange = _mm256_and_si256(vGte, vLte);
-                xsimd_uint32 nMask = _mm256_movemask_epi8(vInRange);
-                if (nMask != 0xFFFFFFFF) {
+                if (nDataByte < 0x20 || nDataByte > 0x7E) {
                     return 0;
                 }
                 break;
-            }
             
             case 3:  // NOT_ANSI - check if NOT in range 0x20-0x7E
-            {
-                __m256i vData = _mm256_set1_epi8(nDataByte);
-                __m256i vGte = _mm256_cmpgt_epi8(vData, _mm256_subs_epi8(vAnsiMin, _mm256_set1_epi8(1)));
-                __m256i vLte = _mm256_cmpgt_epi8(_mm256_adds_epi8(vAnsiMax, _mm256_set1_epi8(1)), vData);
-                __m256i vInRange = _mm256_and_si256(vGte, vLte);
-                xsimd_uint32 nMask = _mm256_movemask_epi8(vInRange);
-                if (nMask == 0xFFFFFFFF) {
+                if (nDataByte >= 0x20 && nDataByte <= 0x7E) {
                     return 0;  // It IS in ANSI range, but we want NOT_ANSI
                 }
                 break;
-            }
             
             case 4:  // NOT_ANSI_AND_NOT_NULL
-            {
                 if (nDataByte == 0x00) {
                     return 0;  // Is null
                 }
-                __m256i vData = _mm256_set1_epi8(nDataByte);
-                __m256i vGte = _mm256_cmpgt_epi8(vData, _mm256_subs_epi8(vAnsiMin, _mm256_set1_epi8(1)));
-                __m256i vLte = _mm256_cmpgt_epi8(_mm256_adds_epi8(vAnsiMax, _mm256_set1_epi8(1)), vData);
-                __m256i vInRange = _mm256_and_si256(vGte, vLte);
-                xsimd_uint32 nMask = _mm256_movemask_epi8(vInRange);
-                if (nMask == 0xFFFFFFFF) {
+                if (nDataByte >= 0x20 && nDataByte <= 0x7E) {
                     return 0;  // Is in ANSI range
                 }
                 break;
-            }
             
             case 5:  // ANSI_ALPHANUMERIC
             {
@@ -1491,4 +1578,3 @@ xsimd_int64 _xsimd_find_sigbytes_AVX2(const xsimd_uint8 *pData, xsimd_int64 nDat
     return -1;  /* Not available */
 #endif
 }
-

@@ -16537,6 +16537,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                 if (!bResult) {
                     break;
                 }
+
             } while (moveToNext(&state, pPdStruct));
 
             finishUnpack(&state, pPdStruct);

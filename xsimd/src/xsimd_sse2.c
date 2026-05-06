@@ -26,69 +26,56 @@
 #include <emmintrin.h>
 #endif
 
+#ifdef _MSC_VER
+#define XSIMD_SSE2_RETURN_MASK(mask, base)         \
+    do {                                           \
+        unsigned long nBitPos;                     \
+        _BitScanForward(&nBitPos, (unsigned long)(mask)); \
+        return (base) + nBitPos;                   \
+    } while (0)
+#else
+#define XSIMD_SSE2_RETURN_MASK(mask, base)         \
+    do {                                           \
+        return (base) + __builtin_ctz((unsigned int)(mask)); \
+    } while (0)
+#endif
+
+#define XSIMD_SSE2_SCAN_64(base)                                      \
+    do {                                                              \
+        const xsimd_int64 nBase = (base);                             \
+        __m128i vData0 = _mm_loadu_si128((const __m128i*)(pData + nBase)); \
+        __m128i vData1 = _mm_loadu_si128((const __m128i*)(pData + nBase + 16)); \
+        __m128i vData2 = _mm_loadu_si128((const __m128i*)(pData + nBase + 32)); \
+        __m128i vData3 = _mm_loadu_si128((const __m128i*)(pData + nBase + 48)); \
+        __m128i vCmp0 = _mm_cmpeq_epi8(vData0, vNeedle);              \
+        __m128i vCmp1 = _mm_cmpeq_epi8(vData1, vNeedle);              \
+        __m128i vCmp2 = _mm_cmpeq_epi8(vData2, vNeedle);              \
+        __m128i vCmp3 = _mm_cmpeq_epi8(vData3, vNeedle);              \
+        int nMask0 = _mm_movemask_epi8(vCmp0);                        \
+        int nMask1 = _mm_movemask_epi8(vCmp1);                        \
+        int nMask2 = _mm_movemask_epi8(vCmp2);                        \
+        int nMask3 = _mm_movemask_epi8(vCmp3);                        \
+        if (nMask0 != 0) XSIMD_SSE2_RETURN_MASK(nMask0, nBase);       \
+        if (nMask1 != 0) XSIMD_SSE2_RETURN_MASK(nMask1, nBase + 16);  \
+        if (nMask2 != 0) XSIMD_SSE2_RETURN_MASK(nMask2, nBase + 32);  \
+        if (nMask3 != 0) XSIMD_SSE2_RETURN_MASK(nMask3, nBase + 48);  \
+    } while (0)
+
 xsimd_int64 _xsimd_find_byte_SSE2(const unsigned char* pData, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64 nOffset)
 {
 #ifdef XSIMD_X86
     __m128i vNeedle = _mm_set1_epi8((char)nByte);
     xsimd_int64 i = 0;
     
+    while (i + 128 <= nSize) {
+        XSIMD_SSE2_SCAN_64(i);
+        XSIMD_SSE2_SCAN_64(i + 64);
+        i += 128;
+    }
+    
     /* Process 64 bytes per iteration for better throughput */
     while (i + 64 <= nSize) {
-        __m128i vData0 = _mm_loadu_si128((const __m128i*)(pData + i));
-        __m128i vData1 = _mm_loadu_si128((const __m128i*)(pData + i + 16));
-        __m128i vData2 = _mm_loadu_si128((const __m128i*)(pData + i + 32));
-        __m128i vData3 = _mm_loadu_si128((const __m128i*)(pData + i + 48));
-        
-        __m128i vCmp0 = _mm_cmpeq_epi8(vData0, vNeedle);
-        __m128i vCmp1 = _mm_cmpeq_epi8(vData1, vNeedle);
-        __m128i vCmp2 = _mm_cmpeq_epi8(vData2, vNeedle);
-        __m128i vCmp3 = _mm_cmpeq_epi8(vData3, vNeedle);
-        
-        int nMask0 = _mm_movemask_epi8(vCmp0);
-        int nMask1 = _mm_movemask_epi8(vCmp1);
-        int nMask2 = _mm_movemask_epi8(vCmp2);
-        int nMask3 = _mm_movemask_epi8(vCmp3);
-        
-        if (nMask0 != 0) {
-#ifdef _MSC_VER
-            unsigned long nBitPos;
-            _BitScanForward(&nBitPos, (unsigned long)nMask0);
-            return i + nBitPos;
-#else
-            return i + __builtin_ctz((unsigned int)nMask0);
-#endif
-        }
-        
-        if (nMask1 != 0) {
-#ifdef _MSC_VER
-            unsigned long nBitPos;
-            _BitScanForward(&nBitPos, (unsigned long)nMask1);
-            return i + 16 + nBitPos;
-#else
-            return i + 16 + __builtin_ctz((unsigned int)nMask1);
-#endif
-        }
-        
-        if (nMask2 != 0) {
-#ifdef _MSC_VER
-            unsigned long nBitPos;
-            _BitScanForward(&nBitPos, (unsigned long)nMask2);
-            return i + 32 + nBitPos;
-#else
-            return i + 32 + __builtin_ctz((unsigned int)nMask2);
-#endif
-        }
-        
-        if (nMask3 != 0) {
-#ifdef _MSC_VER
-            unsigned long nBitPos;
-            _BitScanForward(&nBitPos, (unsigned long)nMask3);
-            return i + 48 + nBitPos;
-#else
-            return i + 48 + __builtin_ctz((unsigned int)nMask3);
-#endif
-        }
-        
+        XSIMD_SSE2_SCAN_64(i);
         i += 64;
     }
     
@@ -99,13 +86,7 @@ xsimd_int64 _xsimd_find_byte_SSE2(const unsigned char* pData, xsimd_int64 nSize,
         int nMask = _mm_movemask_epi8(vCmp);
         
         if (nMask != 0) {
-#ifdef _MSC_VER
-            unsigned long nBitPos;
-            _BitScanForward(&nBitPos, (unsigned long)nMask);
-            return i + nBitPos;
-#else
-            return i + __builtin_ctz((unsigned int)nMask);
-#endif
+            XSIMD_SSE2_RETURN_MASK(nMask, i);
         }
         i += 16;
     }
@@ -415,35 +396,18 @@ xsimd_int64 _xsimd_find_pattern_bmh_2byte_SSE2(const char* pHay, xsimd_int64 nBu
 xsimd_int64 _xsimd_find_pattern_bmh_1byte_SSE2(const char* pHay, xsimd_int64 nBufferSize, char nByte, xsimd_int64 nOffset)
 {
 #ifdef XSIMD_X86
-    __m128i vPattern = _mm_set1_epi8(nByte);
-    xsimd_int64 i = 0;
-    
-    /* Process 16 bytes per iteration */
-    while (i + 15 < nBufferSize) {
-        __m128i vData = _mm_loadu_si128((const __m128i*)(pHay + i));
-        __m128i vCmp = _mm_cmpeq_epi8(vData, vPattern);
-        int nMask = _mm_movemask_epi8(vCmp);
-        
-        if (nMask != 0) {
-            /* Find first match using bit scan */
-#ifdef _MSC_VER
-            unsigned long bit;
-            _BitScanForward(&bit, (unsigned long)nMask);
-#else
-            unsigned bit = __builtin_ctz((unsigned int)nMask);
-#endif
-            return nOffset + i + (xsimd_int64)bit;
-        }
-        
-        i += 16;
+    xsimd_int64 i = _xsimd_find_byte_SSE2((const unsigned char*)pHay, nBufferSize, (xsimd_uint8)nByte, 0);
+
+    if (i < nBufferSize && pHay[i] == nByte) {
+        return nOffset + i;
     }
-    
-    /* Scalar fallback for remaining bytes */
-    while (i < nBufferSize) {
-        if (pHay[i] == nByte) {
-            return nOffset + i;
+
+    if (i < nBufferSize) {
+        const void *pFound = memchr(pHay + i, nByte, (size_t)(nBufferSize - i));
+
+        if (pFound) {
+            return nOffset + ((const char*)pFound - pHay);
         }
-        i++;
     }
 #endif
     
@@ -603,7 +567,19 @@ xsimd_int64 _xsimd_find_ansi_SSE2(const unsigned char* pData, xsimd_int64 nBuffe
         }
     }
     
-    return j;
+    while (j < nBufferSize) {
+        while (j < nBufferSize && (pData[j] < 0x20 || pData[j] > 0x7E)) j++;
+        if (j >= nBufferSize) break;
+        
+        xsimd_int64 start = j;
+        while (j < nBufferSize && pData[j] >= 0x20 && pData[j] <= 0x7E) j++;
+        
+        if ((j - start) >= nMinLength) {
+            return nOffset + start;
+        }
+    }
+    
+    return -1;
 #else
     return 0;
 #endif
@@ -721,7 +697,19 @@ xsimd_int64 _xsimd_find_ansi_SSE2_2(const unsigned char* pData, xsimd_int64 nBuf
         }
     }
     
-    return j;
+    while (j < nBufferSize) {
+        while (j < nBufferSize && (pData[j] >= 0x20 && pData[j] <= 0x7E)) j++;
+        if (j >= nBufferSize) break;
+        
+        xsimd_int64 start = j;
+        while (j < nBufferSize && (pData[j] < 0x20 || pData[j] > 0x7E)) j++;
+        
+        if ((j - start) >= nMinLength) {
+            return nOffset + start;
+        }
+    }
+    
+    return -1;
 #else
     return 0;
 #endif
@@ -732,7 +720,26 @@ xsimd_int64 _xsimd_find_notnull_SSE2(const unsigned char* pData, xsimd_int64 nBu
 #ifdef XSIMD_X86
     const __m128i vZero = _mm_setzero_si128();
     
-    /* Skip leading nulls */
+    /* Skip leading nulls with SIMD. */
+    while (j + 16 <= nBufferSize) {
+        __m128i vData = _mm_loadu_si128((const __m128i*)(pData + j));
+        xsimd_uint32 nZeroMask = (xsimd_uint32)_mm_movemask_epi8(_mm_cmpeq_epi8(vData, vZero));
+
+        if (nZeroMask != 0xFFFFU) {
+            xsimd_uint32 nNonZeroMask = (~nZeroMask) & 0xFFFFU;
+#ifdef _MSC_VER
+            unsigned long nBitPos;
+            _BitScanForward(&nBitPos, (unsigned long)nNonZeroMask);
+            j += (xsimd_int64)nBitPos;
+#else
+            j += (xsimd_int64)__builtin_ctz(nNonZeroMask);
+#endif
+            break;
+        }
+
+        j += 16;
+    }
+
     while (j < nBufferSize && pData[j] == 0) j++;
     if (j >= nBufferSize) return -1;
     runStart = j;
@@ -752,7 +759,7 @@ xsimd_int64 _xsimd_find_notnull_SSE2(const unsigned char* pData, xsimd_int64 nBu
 #endif
             xsimd_int64 runLen = nullPos - runStart;
             if (runLen >= nMinLength) {
-                return nOffset + runStart;
+                return -(nOffset + runStart) - 2;
             }
             
             j = nullPos + 1;
@@ -923,7 +930,19 @@ xsimd_int64 _xsimd_find_not_ansi_SSE2(const unsigned char* pData, xsimd_int64 nB
         }
     }
     
-    return j;
+    while (j < nBufferSize) {
+        while (j < nBufferSize && (pData[j] >= 0x20 && pData[j] <= 0x7E)) j++;
+        if (j >= nBufferSize) break;
+        
+        xsimd_int64 start = j;
+        while (j < nBufferSize && (pData[j] < 0x20 || pData[j] > 0x7E)) j++;
+        
+        if ((j - start) >= nMinLength) {
+            return nOffset + start;
+        }
+    }
+    
+    return -1;
 #else
     return 0;
 #endif
@@ -995,8 +1014,7 @@ int _xsimd_is_not_null_SSE2(const char* ptr, xsimd_int64 nSize)
 int _xsimd_is_ansi_SSE2(const char* ptr, xsimd_int64 nSize)
 {
 #ifdef XSIMD_X86
-    const __m128i low_bound = _mm_set1_epi8(0x20 - 1);
-    const __m128i high_bound = _mm_set1_epi8(0x7F);
+    const __m128i low_bound = _mm_set1_epi8(0x20);
     
     /* Process 128 bytes per iteration for better throughput */
     while (nSize >= 128) {
@@ -1009,37 +1027,14 @@ int _xsimd_is_ansi_SSE2(const char* ptr, xsimd_int64 nSize)
         __m128i chunk6 = _mm_loadu_si128((const __m128i*)(ptr + 96));
         __m128i chunk7 = _mm_loadu_si128((const __m128i*)(ptr + 112));
         
-        __m128i too_low0 = _mm_cmpgt_epi8(low_bound, chunk0);
-        __m128i too_high0 = _mm_cmpgt_epi8(chunk0, high_bound);
-        __m128i invalid0 = _mm_or_si128(too_low0, too_high0);
-        
-        __m128i too_low1 = _mm_cmpgt_epi8(low_bound, chunk1);
-        __m128i too_high1 = _mm_cmpgt_epi8(chunk1, high_bound);
-        __m128i invalid1 = _mm_or_si128(too_low1, too_high1);
-        
-        __m128i too_low2 = _mm_cmpgt_epi8(low_bound, chunk2);
-        __m128i too_high2 = _mm_cmpgt_epi8(chunk2, high_bound);
-        __m128i invalid2 = _mm_or_si128(too_low2, too_high2);
-        
-        __m128i too_low3 = _mm_cmpgt_epi8(low_bound, chunk3);
-        __m128i too_high3 = _mm_cmpgt_epi8(chunk3, high_bound);
-        __m128i invalid3 = _mm_or_si128(too_low3, too_high3);
-        
-        __m128i too_low4 = _mm_cmpgt_epi8(low_bound, chunk4);
-        __m128i too_high4 = _mm_cmpgt_epi8(chunk4, high_bound);
-        __m128i invalid4 = _mm_or_si128(too_low4, too_high4);
-        
-        __m128i too_low5 = _mm_cmpgt_epi8(low_bound, chunk5);
-        __m128i too_high5 = _mm_cmpgt_epi8(chunk5, high_bound);
-        __m128i invalid5 = _mm_or_si128(too_low5, too_high5);
-        
-        __m128i too_low6 = _mm_cmpgt_epi8(low_bound, chunk6);
-        __m128i too_high6 = _mm_cmpgt_epi8(chunk6, high_bound);
-        __m128i invalid6 = _mm_or_si128(too_low6, too_high6);
-        
-        __m128i too_low7 = _mm_cmpgt_epi8(low_bound, chunk7);
-        __m128i too_high7 = _mm_cmpgt_epi8(chunk7, high_bound);
-        __m128i invalid7 = _mm_or_si128(too_low7, too_high7);
+        __m128i invalid0 = _mm_cmpgt_epi8(low_bound, chunk0);
+        __m128i invalid1 = _mm_cmpgt_epi8(low_bound, chunk1);
+        __m128i invalid2 = _mm_cmpgt_epi8(low_bound, chunk2);
+        __m128i invalid3 = _mm_cmpgt_epi8(low_bound, chunk3);
+        __m128i invalid4 = _mm_cmpgt_epi8(low_bound, chunk4);
+        __m128i invalid5 = _mm_cmpgt_epi8(low_bound, chunk5);
+        __m128i invalid6 = _mm_cmpgt_epi8(low_bound, chunk6);
+        __m128i invalid7 = _mm_cmpgt_epi8(low_bound, chunk7);
         
         if (_mm_movemask_epi8(invalid0) != 0 || _mm_movemask_epi8(invalid1) != 0 ||
             _mm_movemask_epi8(invalid2) != 0 || _mm_movemask_epi8(invalid3) != 0 ||
@@ -1055,9 +1050,7 @@ int _xsimd_is_ansi_SSE2(const char* ptr, xsimd_int64 nSize)
     /* Process remaining 16-byte chunks */
     while (nSize >= 16) {
         __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
-        __m128i too_low = _mm_cmpgt_epi8(low_bound, chunk);
-        __m128i too_high = _mm_cmpgt_epi8(chunk, high_bound);
-        __m128i invalid = _mm_or_si128(too_low, too_high);
+        __m128i invalid = _mm_cmpgt_epi8(low_bound, chunk);
         
         if (_mm_movemask_epi8(invalid) != 0) {
             return 0;
@@ -1076,6 +1069,8 @@ int _xsimd_is_ansi_SSE2(const char* ptr, xsimd_int64 nSize)
 int _xsimd_is_not_ansi_SSE2(const char* ptr, xsimd_int64 nSize)
 {
 #ifdef XSIMD_X86
+    const __m128i low_bound = _mm_set1_epi8(0x20);
+
     /* Process 128 bytes per iteration for better throughput */
     while (nSize >= 128) {
         __m128i chunk0 = _mm_loadu_si128((const __m128i*)ptr);
@@ -1087,42 +1082,19 @@ int _xsimd_is_not_ansi_SSE2(const char* ptr, xsimd_int64 nSize)
         __m128i chunk6 = _mm_loadu_si128((const __m128i*)(ptr + 96));
         __m128i chunk7 = _mm_loadu_si128((const __m128i*)(ptr + 112));
         
-        __m128i ge_low0 = _mm_cmpgt_epi8(chunk0, _mm_set1_epi8(0x1F));
-        __m128i le_high0 = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk0);
-        __m128i printable0 = _mm_and_si128(ge_low0, le_high0);
+        __m128i not_printable0 = _mm_cmpgt_epi8(low_bound, chunk0);
+        __m128i not_printable1 = _mm_cmpgt_epi8(low_bound, chunk1);
+        __m128i not_printable2 = _mm_cmpgt_epi8(low_bound, chunk2);
+        __m128i not_printable3 = _mm_cmpgt_epi8(low_bound, chunk3);
+        __m128i not_printable4 = _mm_cmpgt_epi8(low_bound, chunk4);
+        __m128i not_printable5 = _mm_cmpgt_epi8(low_bound, chunk5);
+        __m128i not_printable6 = _mm_cmpgt_epi8(low_bound, chunk6);
+        __m128i not_printable7 = _mm_cmpgt_epi8(low_bound, chunk7);
         
-        __m128i ge_low1 = _mm_cmpgt_epi8(chunk1, _mm_set1_epi8(0x1F));
-        __m128i le_high1 = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk1);
-        __m128i printable1 = _mm_and_si128(ge_low1, le_high1);
-        
-        __m128i ge_low2 = _mm_cmpgt_epi8(chunk2, _mm_set1_epi8(0x1F));
-        __m128i le_high2 = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk2);
-        __m128i printable2 = _mm_and_si128(ge_low2, le_high2);
-        
-        __m128i ge_low3 = _mm_cmpgt_epi8(chunk3, _mm_set1_epi8(0x1F));
-        __m128i le_high3 = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk3);
-        __m128i printable3 = _mm_and_si128(ge_low3, le_high3);
-        
-        __m128i ge_low4 = _mm_cmpgt_epi8(chunk4, _mm_set1_epi8(0x1F));
-        __m128i le_high4 = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk4);
-        __m128i printable4 = _mm_and_si128(ge_low4, le_high4);
-        
-        __m128i ge_low5 = _mm_cmpgt_epi8(chunk5, _mm_set1_epi8(0x1F));
-        __m128i le_high5 = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk5);
-        __m128i printable5 = _mm_and_si128(ge_low5, le_high5);
-        
-        __m128i ge_low6 = _mm_cmpgt_epi8(chunk6, _mm_set1_epi8(0x1F));
-        __m128i le_high6 = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk6);
-        __m128i printable6 = _mm_and_si128(ge_low6, le_high6);
-        
-        __m128i ge_low7 = _mm_cmpgt_epi8(chunk7, _mm_set1_epi8(0x1F));
-        __m128i le_high7 = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk7);
-        __m128i printable7 = _mm_and_si128(ge_low7, le_high7);
-        
-        if (_mm_movemask_epi8(printable0) != 0 || _mm_movemask_epi8(printable1) != 0 ||
-            _mm_movemask_epi8(printable2) != 0 || _mm_movemask_epi8(printable3) != 0 ||
-            _mm_movemask_epi8(printable4) != 0 || _mm_movemask_epi8(printable5) != 0 ||
-            _mm_movemask_epi8(printable6) != 0 || _mm_movemask_epi8(printable7) != 0) {
+        if (_mm_movemask_epi8(not_printable0) != 0xFFFF || _mm_movemask_epi8(not_printable1) != 0xFFFF ||
+            _mm_movemask_epi8(not_printable2) != 0xFFFF || _mm_movemask_epi8(not_printable3) != 0xFFFF ||
+            _mm_movemask_epi8(not_printable4) != 0xFFFF || _mm_movemask_epi8(not_printable5) != 0xFFFF ||
+            _mm_movemask_epi8(not_printable6) != 0xFFFF || _mm_movemask_epi8(not_printable7) != 0xFFFF) {
             return 0;
         }
         
@@ -1133,11 +1105,9 @@ int _xsimd_is_not_ansi_SSE2(const char* ptr, xsimd_int64 nSize)
     /* Process remaining 16-byte chunks */
     while (nSize >= 16) {
         __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
-        __m128i ge_low = _mm_cmpgt_epi8(chunk, _mm_set1_epi8(0x1F));
-        __m128i le_high = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk);
-        __m128i printable = _mm_and_si128(ge_low, le_high);
+        __m128i not_printable = _mm_cmpgt_epi8(low_bound, chunk);
         
-        if (_mm_movemask_epi8(printable) != 0) {
+        if (_mm_movemask_epi8(not_printable) != 0xFFFF) {
             return 0;
         }
         
@@ -1271,17 +1241,48 @@ int _xsimd_is_not_ansi_and_null_SSE2(const char* ptr, xsimd_int64 nSize)
 {
 #ifdef XSIMD_X86
     const __m128i zero = _mm_setzero_si128();
+    const __m128i low_bound = _mm_set1_epi8(0x20);
+    const __m128i all_ones = _mm_cmpeq_epi8(zero, zero);
     
+    while (nSize >= 128) {
+        __m128i chunk0 = _mm_loadu_si128((const __m128i*)ptr);
+        __m128i chunk1 = _mm_loadu_si128((const __m128i*)(ptr + 16));
+        __m128i chunk2 = _mm_loadu_si128((const __m128i*)(ptr + 32));
+        __m128i chunk3 = _mm_loadu_si128((const __m128i*)(ptr + 48));
+        __m128i chunk4 = _mm_loadu_si128((const __m128i*)(ptr + 64));
+        __m128i chunk5 = _mm_loadu_si128((const __m128i*)(ptr + 80));
+        __m128i chunk6 = _mm_loadu_si128((const __m128i*)(ptr + 96));
+        __m128i chunk7 = _mm_loadu_si128((const __m128i*)(ptr + 112));
+
+        __m128i invalid0 = _mm_or_si128(_mm_cmpeq_epi8(chunk0, zero), _mm_andnot_si128(_mm_cmpgt_epi8(low_bound, chunk0), all_ones));
+        __m128i invalid1 = _mm_or_si128(_mm_cmpeq_epi8(chunk1, zero), _mm_andnot_si128(_mm_cmpgt_epi8(low_bound, chunk1), all_ones));
+        __m128i invalid2 = _mm_or_si128(_mm_cmpeq_epi8(chunk2, zero), _mm_andnot_si128(_mm_cmpgt_epi8(low_bound, chunk2), all_ones));
+        __m128i invalid3 = _mm_or_si128(_mm_cmpeq_epi8(chunk3, zero), _mm_andnot_si128(_mm_cmpgt_epi8(low_bound, chunk3), all_ones));
+        __m128i invalid4 = _mm_or_si128(_mm_cmpeq_epi8(chunk4, zero), _mm_andnot_si128(_mm_cmpgt_epi8(low_bound, chunk4), all_ones));
+        __m128i invalid5 = _mm_or_si128(_mm_cmpeq_epi8(chunk5, zero), _mm_andnot_si128(_mm_cmpgt_epi8(low_bound, chunk5), all_ones));
+        __m128i invalid6 = _mm_or_si128(_mm_cmpeq_epi8(chunk6, zero), _mm_andnot_si128(_mm_cmpgt_epi8(low_bound, chunk6), all_ones));
+        __m128i invalid7 = _mm_or_si128(_mm_cmpeq_epi8(chunk7, zero), _mm_andnot_si128(_mm_cmpgt_epi8(low_bound, chunk7), all_ones));
+
+        if (_mm_movemask_epi8(invalid0) != 0 || _mm_movemask_epi8(invalid1) != 0 ||
+            _mm_movemask_epi8(invalid2) != 0 || _mm_movemask_epi8(invalid3) != 0 ||
+            _mm_movemask_epi8(invalid4) != 0 || _mm_movemask_epi8(invalid5) != 0 ||
+            _mm_movemask_epi8(invalid6) != 0 || _mm_movemask_epi8(invalid7) != 0) {
+            return 0;
+        }
+
+        ptr += 128;
+        nSize -= 128;
+    }
+
     while (nSize >= 16) {
         __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
         
         /* Check for zero bytes */
         __m128i is_zero = _mm_cmpeq_epi8(chunk, zero);
         
-        /* Check for printable ASCII */
-        __m128i ge_low = _mm_cmpgt_epi8(chunk, _mm_set1_epi8(0x1F));
-        __m128i le_high = _mm_cmpgt_epi8(_mm_set1_epi8((char)0x80), chunk);
-        __m128i is_printable = _mm_and_si128(ge_low, le_high);
+        /* Match scalar rule: ANSI if byte is >= 0x20 and < 0x80. */
+        __m128i not_printable = _mm_cmpgt_epi8(low_bound, chunk);
+        __m128i is_printable = _mm_andnot_si128(not_printable, all_ones);
         
         __m128i invalid = _mm_or_si128(is_zero, is_printable);
         
@@ -1371,6 +1372,36 @@ int _xsimd_is_ansi_number_SSE2(const char* ptr, xsimd_int64 nSize)
     const __m128i digit_low = _mm_set1_epi8(0x30);   /* '0' */
     const __m128i digit_high = _mm_set1_epi8(0x39);  /* '9' */
     
+    while (nSize >= 128) {
+        __m128i chunk0 = _mm_loadu_si128((const __m128i*)ptr);
+        __m128i chunk1 = _mm_loadu_si128((const __m128i*)(ptr + 16));
+        __m128i chunk2 = _mm_loadu_si128((const __m128i*)(ptr + 32));
+        __m128i chunk3 = _mm_loadu_si128((const __m128i*)(ptr + 48));
+        __m128i chunk4 = _mm_loadu_si128((const __m128i*)(ptr + 64));
+        __m128i chunk5 = _mm_loadu_si128((const __m128i*)(ptr + 80));
+        __m128i chunk6 = _mm_loadu_si128((const __m128i*)(ptr + 96));
+        __m128i chunk7 = _mm_loadu_si128((const __m128i*)(ptr + 112));
+
+        __m128i invalid0 = _mm_or_si128(_mm_cmplt_epi8(chunk0, digit_low), _mm_cmpgt_epi8(chunk0, digit_high));
+        __m128i invalid1 = _mm_or_si128(_mm_cmplt_epi8(chunk1, digit_low), _mm_cmpgt_epi8(chunk1, digit_high));
+        __m128i invalid2 = _mm_or_si128(_mm_cmplt_epi8(chunk2, digit_low), _mm_cmpgt_epi8(chunk2, digit_high));
+        __m128i invalid3 = _mm_or_si128(_mm_cmplt_epi8(chunk3, digit_low), _mm_cmpgt_epi8(chunk3, digit_high));
+        __m128i invalid4 = _mm_or_si128(_mm_cmplt_epi8(chunk4, digit_low), _mm_cmpgt_epi8(chunk4, digit_high));
+        __m128i invalid5 = _mm_or_si128(_mm_cmplt_epi8(chunk5, digit_low), _mm_cmpgt_epi8(chunk5, digit_high));
+        __m128i invalid6 = _mm_or_si128(_mm_cmplt_epi8(chunk6, digit_low), _mm_cmpgt_epi8(chunk6, digit_high));
+        __m128i invalid7 = _mm_or_si128(_mm_cmplt_epi8(chunk7, digit_low), _mm_cmpgt_epi8(chunk7, digit_high));
+
+        if (_mm_movemask_epi8(invalid0) != 0 || _mm_movemask_epi8(invalid1) != 0 ||
+            _mm_movemask_epi8(invalid2) != 0 || _mm_movemask_epi8(invalid3) != 0 ||
+            _mm_movemask_epi8(invalid4) != 0 || _mm_movemask_epi8(invalid5) != 0 ||
+            _mm_movemask_epi8(invalid6) != 0 || _mm_movemask_epi8(invalid7) != 0) {
+            return 0;
+        }
+
+        ptr += 128;
+        nSize -= 128;
+    }
+
     while (nSize >= 16) {
         __m128i chunk = _mm_loadu_si128((const __m128i*)ptr);
         
@@ -1399,7 +1430,27 @@ xsimd_int64 _xsimd_find_first_non_ansi_SSE2(const xsimd_uint8* pData, xsimd_int6
     __m128i vMin = _mm_set1_epi8(0x20);
     __m128i vMax = _mm_set1_epi8(0x7F);
     
-    /* Process 16 bytes at a time */
+    while (i + 64 <= nSize) {
+        __m128i vData0 = _mm_loadu_si128((const __m128i*)(pData + i));
+        __m128i vData1 = _mm_loadu_si128((const __m128i*)(pData + i + 16));
+        __m128i vData2 = _mm_loadu_si128((const __m128i*)(pData + i + 32));
+        __m128i vData3 = _mm_loadu_si128((const __m128i*)(pData + i + 48));
+
+        int nMask0 = _mm_movemask_epi8(_mm_or_si128(_mm_cmplt_epi8(vData0, vMin), _mm_cmpgt_epi8(vData0, vMax)));
+        int nMask1 = _mm_movemask_epi8(_mm_or_si128(_mm_cmplt_epi8(vData1, vMin), _mm_cmpgt_epi8(vData1, vMax)));
+        int nMask2 = _mm_movemask_epi8(_mm_or_si128(_mm_cmplt_epi8(vData2, vMin), _mm_cmpgt_epi8(vData2, vMax)));
+        int nMask3 = _mm_movemask_epi8(_mm_or_si128(_mm_cmplt_epi8(vData3, vMin), _mm_cmpgt_epi8(vData3, vMax)));
+
+        if ((nMask0 | nMask1 | nMask2 | nMask3) != 0) {
+            if (nMask0 != 0) XSIMD_SSE2_RETURN_MASK(nMask0, i);
+            if (nMask1 != 0) XSIMD_SSE2_RETURN_MASK(nMask1, i + 16);
+            if (nMask2 != 0) XSIMD_SSE2_RETURN_MASK(nMask2, i + 32);
+            XSIMD_SSE2_RETURN_MASK(nMask3, i + 48);
+        }
+
+        i += 64;
+    }
+
     for (; i + 16 <= nSize; i += 16) {
         __m128i vData = _mm_loadu_si128((const __m128i*)(pData + i));
         
@@ -1410,9 +1461,7 @@ xsimd_int64 _xsimd_find_first_non_ansi_SSE2(const xsimd_uint8* pData, xsimd_int6
         int nMask = _mm_movemask_epi8(vNonAnsi);
         
         if (nMask != 0) {
-            int nPos = 0;
-            while (((nMask >> nPos) & 1) == 0) nPos++;
-            return i + nPos;
+            XSIMD_SSE2_RETURN_MASK(nMask, i);
         }
     }
     
@@ -1427,6 +1476,39 @@ xsimd_int64 _xsimd_find_null_byte_SSE2(const xsimd_uint8* pData, xsimd_int64 nSi
 #ifdef XSIMD_X86
     __m128i vZero = _mm_setzero_si128();
     xsimd_int64 i = *pi;
+
+    while (i + 128 <= nSize) {
+        __m128i vData0 = _mm_loadu_si128((const __m128i*)(pData + i));
+        __m128i vData1 = _mm_loadu_si128((const __m128i*)(pData + i + 16));
+        __m128i vData2 = _mm_loadu_si128((const __m128i*)(pData + i + 32));
+        __m128i vData3 = _mm_loadu_si128((const __m128i*)(pData + i + 48));
+        __m128i vData4 = _mm_loadu_si128((const __m128i*)(pData + i + 64));
+        __m128i vData5 = _mm_loadu_si128((const __m128i*)(pData + i + 80));
+        __m128i vData6 = _mm_loadu_si128((const __m128i*)(pData + i + 96));
+        __m128i vData7 = _mm_loadu_si128((const __m128i*)(pData + i + 112));
+
+        int nMask0 = _mm_movemask_epi8(_mm_cmpeq_epi8(vData0, vZero));
+        int nMask1 = _mm_movemask_epi8(_mm_cmpeq_epi8(vData1, vZero));
+        int nMask2 = _mm_movemask_epi8(_mm_cmpeq_epi8(vData2, vZero));
+        int nMask3 = _mm_movemask_epi8(_mm_cmpeq_epi8(vData3, vZero));
+        int nMask4 = _mm_movemask_epi8(_mm_cmpeq_epi8(vData4, vZero));
+        int nMask5 = _mm_movemask_epi8(_mm_cmpeq_epi8(vData5, vZero));
+        int nMask6 = _mm_movemask_epi8(_mm_cmpeq_epi8(vData6, vZero));
+        int nMask7 = _mm_movemask_epi8(_mm_cmpeq_epi8(vData7, vZero));
+
+        if ((nMask0 | nMask1 | nMask2 | nMask3 | nMask4 | nMask5 | nMask6 | nMask7) != 0) {
+            if (nMask0 != 0) XSIMD_SSE2_RETURN_MASK(nMask0, i);
+            if (nMask1 != 0) XSIMD_SSE2_RETURN_MASK(nMask1, i + 16);
+            if (nMask2 != 0) XSIMD_SSE2_RETURN_MASK(nMask2, i + 32);
+            if (nMask3 != 0) XSIMD_SSE2_RETURN_MASK(nMask3, i + 48);
+            if (nMask4 != 0) XSIMD_SSE2_RETURN_MASK(nMask4, i + 64);
+            if (nMask5 != 0) XSIMD_SSE2_RETURN_MASK(nMask5, i + 80);
+            if (nMask6 != 0) XSIMD_SSE2_RETURN_MASK(nMask6, i + 96);
+            XSIMD_SSE2_RETURN_MASK(nMask7, i + 112);
+        }
+
+        i += 128;
+    }
     
     for (; i + 16 <= nSize; i += 16) {
         __m128i vData = _mm_loadu_si128((const __m128i*)(pData + i));
@@ -1503,11 +1585,13 @@ void _xsimd_count_char_SSE2(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_u
         __m128i vCmp = _mm_cmpeq_epi8(vData, vNeedle);
         xsimd_uint16 nMask = _mm_movemask_epi8(vCmp);
         
+        if (nMask != 0) {
 #ifdef _MSC_VER
-        *pnCount += __popcnt(nMask);
+            *pnCount += __popcnt(nMask);
 #else
-        *pnCount += __builtin_popcount(nMask);
+            *pnCount += __builtin_popcount(nMask);
 #endif
+        }
     }
     
     *pi = i;
@@ -1530,14 +1614,20 @@ void _xsimd_create_ansi_mask_SSE2(const xsimd_uint8* pData, xsimd_int64 nSize, x
         
         xsimd_uint16 nMask = _mm_movemask_epi8(vIsAnsi);
         
-        pMaskData[i / 8] = (xsimd_uint8)(nMask & 0xFF);
-        pMaskData[i / 8 + 1] = (xsimd_uint8)((nMask >> 8) & 0xFF);
-        
+        if (nMask == 0xFFFFU) {
+            pMaskData[i / 8] = 0xFF;
+            pMaskData[i / 8 + 1] = 0xFF;
+            *pnAnsiCount += 16;
+        } else if (nMask != 0) {
+            pMaskData[i / 8] = (xsimd_uint8)(nMask & 0xFF);
+            pMaskData[i / 8 + 1] = (xsimd_uint8)((nMask >> 8) & 0xFF);
+
 #ifdef _MSC_VER
-        *pnAnsiCount += __popcnt(nMask);
+            *pnAnsiCount += __popcnt(nMask);
 #else
-        *pnAnsiCount += __builtin_popcount(nMask);
+            *pnAnsiCount += __builtin_popcount(nMask);
 #endif
+        }
     }
     
     *pi = i;
@@ -1557,11 +1647,6 @@ xsimd_int32 _xsimd_compare_sigbytes_SSE2(const xsimd_uint8 *pSigBytes, xsimd_int
         return 0;
     }
     
-    // Constants for ANSI range check (0x20 to 0x7E)
-    const __m128i vAnsiMin = _mm_set1_epi8(0x20);
-    const __m128i vAnsiMax = _mm_set1_epi8(0x7E);
-    const __m128i vZero = _mm_setzero_si128();
-    
     // Process signature pattern byte by byte
     for (xsimd_int64 i = 0; i < nPatternLength; i++) {
         xsimd_uint8 nType = pSigBytes[i * 2];
@@ -1579,47 +1664,25 @@ xsimd_int32 _xsimd_compare_sigbytes_SSE2(const xsimd_uint8 *pSigBytes, xsimd_int
                 break;
                 
             case 2:  // ANSI - check if in range 0x20-0x7E
-            {
-                // Use SIMD for single byte check (will be optimized by compiler)
-                __m128i vData = _mm_set1_epi8(nDataByte);
-                __m128i vGte = _mm_cmpgt_epi8(vData, _mm_subs_epi8(vAnsiMin, _mm_set1_epi8(1)));
-                __m128i vLte = _mm_cmpgt_epi8(_mm_adds_epi8(vAnsiMax, _mm_set1_epi8(1)), vData);
-                __m128i vInRange = _mm_and_si128(vGte, vLte);
-                xsimd_int32 nMask = _mm_movemask_epi8(vInRange);
-                if (nMask != 0xFFFF) {
+                if (nDataByte < 0x20 || nDataByte > 0x7E) {
                     return 0;
                 }
                 break;
-            }
             
             case 3:  // NOT_ANSI - check if NOT in range 0x20-0x7E
-            {
-                __m128i vData = _mm_set1_epi8(nDataByte);
-                __m128i vGte = _mm_cmpgt_epi8(vData, _mm_subs_epi8(vAnsiMin, _mm_set1_epi8(1)));
-                __m128i vLte = _mm_cmpgt_epi8(_mm_adds_epi8(vAnsiMax, _mm_set1_epi8(1)), vData);
-                __m128i vInRange = _mm_and_si128(vGte, vLte);
-                xsimd_int32 nMask = _mm_movemask_epi8(vInRange);
-                if (nMask == 0xFFFF) {
+                if (nDataByte >= 0x20 && nDataByte <= 0x7E) {
                     return 0;  // It IS in ANSI range, but we want NOT_ANSI
                 }
                 break;
-            }
             
             case 4:  // NOT_ANSI_AND_NOT_NULL
-            {
                 if (nDataByte == 0x00) {
                     return 0;  // Is null
                 }
-                __m128i vData = _mm_set1_epi8(nDataByte);
-                __m128i vGte = _mm_cmpgt_epi8(vData, _mm_subs_epi8(vAnsiMin, _mm_set1_epi8(1)));
-                __m128i vLte = _mm_cmpgt_epi8(_mm_adds_epi8(vAnsiMax, _mm_set1_epi8(1)), vData);
-                __m128i vInRange = _mm_and_si128(vGte, vLte);
-                xsimd_int32 nMask = _mm_movemask_epi8(vInRange);
-                if (nMask == 0xFFFF) {
+                if (nDataByte >= 0x20 && nDataByte <= 0x7E) {
                     return 0;  // Is in ANSI range
                 }
                 break;
-            }
             
             case 5:  // ANSI_ALPHANUMERIC
             {
@@ -1730,4 +1793,3 @@ xsimd_int64 _xsimd_find_sigbytes_SSE2(const xsimd_uint8 *pData, xsimd_int64 nDat
     return -1;  /* Not available */
 #endif
 }
-
