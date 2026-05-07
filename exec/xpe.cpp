@@ -589,7 +589,7 @@ QList<QString> XPE::getSearchSignatures()
 {
     QList<QString> listResult;
 
-    listResult.append("'MZ'");
+    listResult.append("'MZ'"); // Magic number: 4D 5A
 
     return listResult;
 }
