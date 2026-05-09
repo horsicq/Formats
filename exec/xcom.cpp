@@ -30,22 +30,13 @@ XCOM::XCOM(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress) : XBinary(pD
     XBinary::setBaseAddress(XCOM_DEF::ADDRESS_BEGIN);
 }
 
-XCOM::~XCOM()
-{
-}
-
 bool XCOM::isValid(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
     bool bResult = false;
 
-    // mb TODO mb
-    if (getSize() <= (XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN)) {
-        bResult = true;
-    }
-
-    return bResult;
+    return getSize() <= (XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN);
 }
 
 bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
@@ -69,11 +60,7 @@ XBinary::MODE XCOM::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddr
 
 QList<XBinary::MAPMODE> XCOM::getMapModesList()
 {
-    QList<MAPMODE> listResult;
-
-    listResult.append(MAPMODE_REGIONS);
-
-    return listResult;
+    return {MAPMODE_REGIONS};
 }
 
 XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdStruct)
@@ -101,7 +88,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdS
     result.endian = getEndian();
     result.sType = getTypeAsString();
 
-    qint64 nCodeSize = qMin(nTotalSize, (qint64)(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN));
+    qint64 nCodeSize = qMin(nTotalSize, static_cast<qint64>(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN));
 
     _MEMORY_RECORD record = {};
     record.nAddress = 0;
@@ -121,7 +108,7 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdS
 
     result.listRecords.append(recordMain);
 
-    qint64 nVirtualSize = (qint64)(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN) - nTotalSize;
+    qint64 nVirtualSize = static_cast<qint64>(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN) - nTotalSize;
 
     if (nVirtualSize > 0) {
         _MEMORY_RECORD record = {};
@@ -167,7 +154,7 @@ XBinary::FT XCOM::getFileType()
 
 QString XCOM::getVersion()
 {
-    return QString("");
+    return {};
 }
 
 qint32 XCOM::getType()
@@ -182,14 +169,12 @@ XBinary::OSNAME XCOM::getOsName()
 
 QString XCOM::typeIdToString(qint32 nType)
 {
-    QString sResult = tr("Unknown");
-
     switch (nType) {
-        case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
-        case TYPE_EXECUTABLE: sResult = QString("EXE"); break;
+        case TYPE_UNKNOWN: return tr("Unknown");
+        case TYPE_EXECUTABLE: return "EXE";
     }
 
-    return sResult;
+    return tr("Unknown");
 }
 
 QString XCOM::getMIMEString()

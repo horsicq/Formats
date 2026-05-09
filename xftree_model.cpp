@@ -164,7 +164,7 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
         }
     } else if (role == Qt::TextAlignmentRole) {
         if (nColumn == COLUMN_OFFSET) {
-            result = (int)(Qt::AlignRight | Qt::AlignVCenter);
+            result = static_cast<int>(Qt::AlignRight | Qt::AlignVCenter);
         }
     }
 
@@ -214,8 +214,8 @@ void XFTreeModel::clear()
         while (!listToDelete.isEmpty()) {
             TREEITEM *pItem = listToDelete.takeLast();
 
-            for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
-                listToDelete.append(pItem->listChildren.at(i));
+            for (TREEITEM *pChild : pItem->listChildren) {
+                listToDelete.append(pChild);
             }
 
             delete pItem;
@@ -227,12 +227,10 @@ void XFTreeModel::clear()
 
 void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders)
 {
-    // Build a map from GUID -> TREEITEM for parent lookup
     QMap<QString, TREEITEM *> mapItems;
 
     qint32 nCount = listHeaders.count();
 
-    // First pass: create all tree items
     QList<TREEITEM *> listItems;
 
     for (qint32 i = 0; i < nCount; i++) {
@@ -244,7 +242,6 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders)
         mapItems.insert(pItem->xfHeader.sTag, pItem);
     }
 
-    // Second pass: establish parent-child relationships
     for (qint32 i = 0; i < nCount; i++) {
         TREEITEM *pItem = listItems.at(i);
         QString sParentTag = pItem->xfHeader.sParentTag;
@@ -255,7 +252,6 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders)
             pItem->nRow = pParentItem->listChildren.count();
             pParentItem->listChildren.append(pItem);
         } else {
-            // Root-level item
             pItem->pParent = m_pRootItem;
             pItem->nRow = m_pRootItem->listChildren.count();
             m_pRootItem->listChildren.append(pItem);
@@ -276,10 +272,8 @@ QString XFTreeModel::treeToString(XFTreeModel *pModel, const QString &sTitle)
     }
 
     TREEITEM *pRoot = pModel->m_pRootItem;
-    qint32 nChildCount = pRoot->listChildren.count();
-
-    for (qint32 i = 0; i < nChildCount; i++) {
-        appendTreeLines(&listLines, pModel->m_pXBinary, pRoot->listChildren.at(i), "");
+    for (TREEITEM *pChild : pRoot->listChildren) {
+        appendTreeLines(&listLines, pModel->m_pXBinary, pChild, "");
     }
 
     return listLines.join("\n");
@@ -289,10 +283,10 @@ void XFTreeModel::printToConsole(XFTreeModel *pModel, const QString &sTitle)
 {
     QString sOutput = treeToString(pModel, sTitle);
 
-    QStringList listLines = sOutput.split("\n");
+    const QStringList listLines = sOutput.split("\n");
 
-    for (qint32 i = 0; i < listLines.count(); i++) {
-        qDebug().noquote() << listLines.at(i);
+    for (const QString &sLine : listLines) {
+        qDebug().noquote() << sLine;
     }
 }
 
@@ -311,10 +305,8 @@ void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TR
 
     pListLines->append(sLine);
 
-    qint32 nChildCount = pItem->listChildren.count();
-
-    for (qint32 i = 0; i < nChildCount; i++) {
-        appendTreeLines(pListLines, pXBinary, pItem->listChildren.at(i), sPrefix + "    ");
+    for (TREEITEM *pChild : pItem->listChildren) {
+        appendTreeLines(pListLines, pXBinary, pChild, sPrefix + "    ");
     }
 }
 
@@ -410,8 +402,8 @@ void XFTreeModel::appendXMLLines(QStringList *pListLines, XBinary *pXBinary, TRE
         pListLines->append(sTag + "/>");
     } else {
         pListLines->append(sTag + ">");
-        for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
-            appendXMLLines(pListLines, pXBinary, pItem->listChildren.at(i), sIndent + "  ");
+        for (TREEITEM *pChild : pItem->listChildren) {
+            appendXMLLines(pListLines, pXBinary, pChild, sIndent + "  ");
         }
         pListLines->append(sIndent + "</item>");
     }
@@ -433,8 +425,9 @@ void XFTreeModel::appendJSONLines(QStringList *pListLines, XBinary *pXBinary, TR
         pListLines->append(sInner + "\"children\": []");
     } else {
         pListLines->append(sInner + "\"children\": [");
-        for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
-            appendJSONLines(pListLines, pXBinary, pItem->listChildren.at(i), sInner + "  ", i == pItem->listChildren.count() - 1);
+        const qint32 nChildCount = pItem->listChildren.count();
+        for (qint32 i = 0; i < nChildCount; i++) {
+            appendJSONLines(pListLines, pXBinary, pItem->listChildren.at(i), sInner + "  ", i == nChildCount - 1);
         }
         pListLines->append(sInner + "]");
     }
@@ -449,8 +442,8 @@ void XFTreeModel::appendSVLines(QStringList *pListLines, XBinary *pXBinary, TREE
            << svQuote(getItemFileType(pItem), cSep) << svQuote(getItemOffset(pItem), cSep) << svQuote(getItemSize(pItem), cSep) << svQuote(getItemRows(pItem), cSep);
     pListLines->append(fields.join(cSep));
 
-    for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
-        appendSVLines(pListLines, pXBinary, pItem->listChildren.at(i), cSep);
+    for (TREEITEM *pChild : pItem->listChildren) {
+        appendSVLines(pListLines, pXBinary, pChild, cSep);
     }
 }
 
@@ -480,8 +473,8 @@ QString XFTreeModel::toFormattedString()
     QString sResult;
 
     if (m_pRootItem) {
-        for (qint32 i = 0; i < m_pRootItem->listChildren.count(); i++) {
-            _toFormattedString(&sResult, m_pXBinary, m_pRootItem->listChildren.at(i), 1);
+        for (TREEITEM *pChild : m_pRootItem->listChildren) {
+            _toFormattedString(&sResult, m_pXBinary, pChild, 1);
         }
     }
 
@@ -494,8 +487,8 @@ void XFTreeModel::_toFormattedString(QString *pString, XBinary *pXBinary, TREEIT
     sIndent = sIndent.leftJustified(4 * (nLevel - 1), ' ');
     pString->append(QString("%1%2 %3\n").arg(sIndent).arg(getItemName(pXBinary, pItem)).arg(getItemString(pXBinary, pItem)));
 
-    for (qint32 i = 0; i < pItem->listChildren.count(); i++) {
-        _toFormattedString(pString, pXBinary, pItem->listChildren.at(i), nLevel + 1);
+    for (TREEITEM *pChild : pItem->listChildren) {
+        _toFormattedString(pString, pXBinary, pChild, nLevel + 1);
     }
 }
 
@@ -507,8 +500,8 @@ QString XFTreeModel::toXML() const
     listLines.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     listLines.append("<tree>");
 
-    for (qint32 i = 0; i < m_pRootItem->listChildren.count(); i++) {
-        appendXMLLines(&listLines, m_pXBinary, m_pRootItem->listChildren.at(i), "  ");
+    for (TREEITEM *pChild : m_pRootItem->listChildren) {
+        appendXMLLines(&listLines, m_pXBinary, pChild, "  ");
     }
 
     listLines.append("</tree>");
@@ -538,8 +531,8 @@ QString XFTreeModel::toCSV() const
     QStringList listLines;
     listLines.append("Name,Type,String,FileType,Offset,Size,Rows");
 
-    for (qint32 i = 0; i < m_pRootItem->listChildren.count(); i++) {
-        appendSVLines(&listLines, m_pXBinary, m_pRootItem->listChildren.at(i), ',');
+    for (TREEITEM *pChild : m_pRootItem->listChildren) {
+        appendSVLines(&listLines, m_pXBinary, pChild, ',');
     }
 
     return listLines.join("\n");
@@ -552,8 +545,8 @@ QString XFTreeModel::toTSV() const
     QStringList listLines;
     listLines.append("Name\tType\tString\tFileType\tOffset\tSize\tRows");
 
-    for (qint32 i = 0; i < m_pRootItem->listChildren.count(); i++) {
-        appendSVLines(&listLines, m_pXBinary, m_pRootItem->listChildren.at(i), '\t');
+    for (TREEITEM *pChild : m_pRootItem->listChildren) {
+        appendSVLines(&listLines, m_pXBinary, pChild, '\t');
     }
 
     return listLines.join("\n");

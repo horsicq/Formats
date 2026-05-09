@@ -39,35 +39,34 @@ public:
     };
 
     explicit XCOM(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
-    ~XCOM();
 
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
+    bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, PDSTRUCT *pPdStruct = nullptr);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
-    virtual bool isExecutable() override;
+    bool isExecutable() override;
 
-    virtual QList<MAPMODE> getMapModesList() override;
-    virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
-    virtual QString getArch() override;
-    virtual MODE getMode() override;
-    virtual ENDIAN getEndian() override;
-    virtual qint64 getImageSize() override;
-    virtual FT getFileType() override;
-    virtual QString getVersion() override;
-    virtual qint32 getType() override;
-    virtual OSNAME getOsName() override;
-    virtual QString typeIdToString(qint32 nType) override;
-    virtual QString getMIMEString() override;
-    virtual QString getFileFormatExt() override;
-    virtual QString getFileFormatExtsString() override;
-    virtual qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
+    QList<MAPMODE> getMapModesList() override;
+    _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    QString getArch() override;
+    MODE getMode() override;
+    ENDIAN getEndian() override;
+    qint64 getImageSize() override;
+    FT getFileType() override;
+    QString getVersion() override;
+    qint32 getType() override;
+    OSNAME getOsName() override;
+    QString typeIdToString(qint32 nType) override;
+    QString getMIMEString() override;
+    QString getFileFormatExt() override;
+    QString getFileFormatExtsString() override;
+    qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
 
-    virtual QString structIDToString(quint32 nID) override;
-    virtual QString structIDToFtString(quint32 nID) override;
-    virtual quint32 ftStringToStructID(const QString &sFtString) override;
-    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
-    virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+    QString structIDToString(quint32 nID) override;
+    QString structIDToFtString(quint32 nID) override;
+    quint32 ftStringToStructID(const QString &sFtString) override;
+    QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 };
 
 #endif  // XCOM_H

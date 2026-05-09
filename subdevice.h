@@ -34,12 +34,12 @@ public:
 
     QIODevice *getOrigDevice();
 
-    virtual bool seek(qint64 nPos);
-    virtual bool reset();
+    bool seek(qint64 nPos) override;
+    bool reset() override;
 
 protected:
-    virtual qint64 readData(char *pData, qint64 nMaxSize);
-    virtual qint64 writeData(const char *pData, qint64 nMaxSize);
+    qint64 readData(char *pData, qint64 nMaxSize) override;
+    qint64 writeData(const char *pData, qint64 nMaxSize) override;
 
 private:
     QIODevice *m_pDevice;

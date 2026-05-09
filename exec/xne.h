@@ -33,14 +33,14 @@ public:
         STRUCTID_UNKNOWN = 0,
         STRUCTID_IMAGE_DOS_HEADER,        // Reuse from base via call
         STRUCTID_IMAGE_DOS_HEADEREX,      // Reuse from base via call
-        STRUCTID_IMAGE_OS2_HEADER,        // NE header
-        STRUCTID_ENTRY_TABLE,             // Raw entry table (hex)
-        STRUCTID_SEGMENT_TABLE,           // Table of NE_SEGMENT
-        STRUCTID_RESOURCE_TABLE,          // Raw resource table (hex)
-        STRUCTID_RESIDENT_NAME_TABLE,     // Raw resident name table (hex)
-        STRUCTID_MODULE_REFERENCE_TABLE,  // Raw module reference table (hex)
-        STRUCTID_IMPORTED_NAMES_TABLE,    // Raw imported names table (hex)
-        STRUCTID_NONRESIDENT_NAME_TABLE   // Raw non-resident name table (hex)
+        STRUCTID_IMAGE_OS2_HEADER,
+        STRUCTID_ENTRY_TABLE,
+        STRUCTID_SEGMENT_TABLE,
+        STRUCTID_RESOURCE_TABLE,
+        STRUCTID_RESIDENT_NAME_TABLE,
+        STRUCTID_MODULE_REFERENCE_TABLE,
+        STRUCTID_IMPORTED_NAMES_TABLE,
+        STRUCTID_NONRESIDENT_NAME_TABLE
     };
     enum TYPE {
         TYPE_UNKNOWN = 0,
@@ -52,7 +52,7 @@ public:
     };
 
     explicit XNE(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
-    virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
+    bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, PDSTRUCT *pPdStruct = nullptr);
     static MODE getMode(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
@@ -146,31 +146,29 @@ public:
 
     qint64 getModuleAddress();
 
-    virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
-    virtual MODE getMode() override;
-    virtual QString getArch() override;
-    virtual ENDIAN getEndian() override;
-    virtual FT getFileType() override;
-    virtual qint32 getType() override;
-    virtual qint64 getImageSize() override;
-    virtual XADDR _getEntryPointAddress() override;
-    virtual OSNAME getOsName() override;
-    virtual QString getOsVersion() override;
-    virtual QString typeIdToString(qint32 nType) override;
+    _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    MODE getMode() override;
+    QString getArch() override;
+    ENDIAN getEndian() override;
+    FT getFileType() override;
+    qint32 getType() override;
+    qint64 getImageSize() override;
+    XADDR _getEntryPointAddress() override;
+    OSNAME getOsName() override;
+    QString getOsVersion() override;
+    QString typeIdToString(qint32 nType) override;
 
-    virtual QString getFileFormatExtsString() override;
-    virtual QList<MAPMODE> getMapModesList() override;
+    QString getFileFormatExtsString() override;
+    QList<MAPMODE> getMapModesList() override;
 
-    // Data headers/inspection
-    virtual QString structIDToString(quint32 nID) override;
-    virtual QString structIDToFtString(quint32 nID) override;
-    virtual quint32 ftStringToStructID(const QString &sFtString) override;
-    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
+    QString structIDToString(quint32 nID) override;
+    QString structIDToFtString(quint32 nID) override;
+    quint32 ftStringToStructID(const QString &sFtString) override;
+    QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
 
-    // File parts (header/segments/overlay)
-    virtual QList<XBinary::FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
-    virtual QList<QString> getSearchSignatures() override;
-    virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
+    QList<XBinary::FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+    QList<QString> getSearchSignatures() override;
+    XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
 };
 
 #endif  // XNE_H

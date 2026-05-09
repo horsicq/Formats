@@ -84,8 +84,6 @@ bool XNE::isValid(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    bool bResult = false;
-
     quint16 magic = get_magic();
 
     if (magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) {
@@ -96,12 +94,12 @@ bool XNE::isValid(PDSTRUCT *pPdStruct)
             quint32 signature = read_uint16(lfanew);
 
             if (signature == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
-                bResult = true;
+                return true;
             }
         }
     }
 
-    return bResult;
+    return false;
 }
 
 bool XNE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
@@ -910,7 +908,6 @@ XBinary::_MEMORY_MAP XNE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     XBinary::_MEMORY_MAP result = {};
 
-    // Default to segmented view
     if (mapMode == MAPMODE_UNKNOWN) {
         mapMode = MAPMODE_SEGMENTS;
     }
@@ -964,7 +961,7 @@ XBinary::MODE XNE::getMode()
 
 QString XNE::getArch()
 {
-    QString sResult = QString("286");
+    QString sResult = "286";
 
     quint16 nOS = getImageOS2Header_exetyp();
 
@@ -997,7 +994,6 @@ qint32 XNE::getType()
 
     quint16 nFlags = getImageOS2Header_flags();
 
-    // If library/driver bit set in NE flags
     if (nFlags & 0x8000) {
         // Heuristic: scan non-resident name table for the word 'driver'
         // If found, treat as DRIVER; if 'font' present, treat as FONT; otherwise classify as DLL
@@ -1024,7 +1020,6 @@ qint32 XNE::getType()
                     bIsFont = true;
                     // don't break yet; prefer 'driver' if both appear, but mark font
                 }
-                // Skip name bytes and trailing ordinal (2 bytes)
                 nPos += nLen + 2;
             }
         }
@@ -1043,26 +1038,18 @@ qint32 XNE::getType()
 
 qint64 XNE::getImageSize()
 {
-    // Sum of segment virtual sizes in NE: N * 0x10000
     qint32 nNumberOfSegments = qMax<qint32>(1, getImageOS2Header_cseg());
-    return (qint64)nNumberOfSegments * 0x10000;
+    return static_cast<qint64>(nNumberOfSegments) * 0x10000;
 }
 
 QString XNE::getOsVersion()
 {
-    QString sResult = "";
-
     quint16 nOS = getImageOS2Header_exetyp();
 
-    if (nOS == 3) {
-        sResult = "4.x";
-    } else if (nOS == 0x81) {
-        sResult = "PharLap Dos Extender";
-    } else if (nOS == 0x82) {
-        sResult = "PharLap Dos Extender";
-    }
+    if (nOS == 3) return "4.x";
+    if (nOS == 0x81 || nOS == 0x82) return "PharLap Dos Extender";
 
-    return sResult;
+    return {};
 }
 
 XBinary::OSNAME XNE::getOsName()
@@ -1092,39 +1079,34 @@ XBinary::OSNAME XNE::getOsName()
 
 QString XNE::typeIdToString(qint32 nType)
 {
-    QString sResult = tr("Unknown");
-
     switch (nType) {
-        case TYPE_UNKNOWN: sResult = tr("Unknown"); break;
-        case TYPE_EXE: sResult = QString("EXE"); break;
-        case TYPE_DLL: sResult = QString("DLL"); break;
-        case TYPE_DRIVER: sResult = QString("Driver"); break;
-        case TYPE_FONT: sResult = QString("Font"); break;
+        case TYPE_UNKNOWN: return tr("Unknown");
+        case TYPE_EXE: return "EXE";
+        case TYPE_DLL: return "DLL";
+        case TYPE_DRIVER: return "Driver";
+        case TYPE_FONT: return "Font";
     }
 
-    return sResult;
+    return tr("Unknown");
 }
 
 QString XNE::getFileFormatExtsString()
 {
-    return QString("ne");
+    return "ne";
 }
 
 QList<XBinary::MAPMODE> XNE::getMapModesList()
 {
-    QList<MAPMODE> listResult;
-    listResult.append(MAPMODE_SEGMENTS);
-    return listResult;
+    return {MAPMODE_SEGMENTS};
 }
 
 XADDR XNE::_getEntryPointAddress()
 {
-    // CS:IP encoded in ne_csip
     XADDR nModule = getModuleAddress();
     quint32 csip = getImageOS2Header_csip();
-    quint16 ip = (quint16)(csip & 0xFFFF);
-    quint16 cs = (quint16)((csip >> 16) & 0xFFFF);
-    return nModule + ((XADDR)cs) * 0x10000 + ip;
+    quint16 ip = static_cast<quint16>(csip & 0xFFFF);
+    quint16 cs = static_cast<quint16>((csip >> 16) & 0xFFFF);
+    return nModule + static_cast<XADDR>(cs) * 0x10000 + ip;
 }
 
 QString XNE::structIDToString(quint32 nID)
@@ -1147,14 +1129,12 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
     QList<DATA_HEADER> listResult;
 
     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        // Root: add defaults and DOS header, then NE header at e_lfanew with children
         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
         _dataHeadersOptions.bChildren = true;
         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
-        // Append DOS header (extended) via base implementation
         {
             DATA_HEADERS_OPTIONS dosOpts = _dataHeadersOptions;
             dosOpts.nID = XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX;
@@ -1164,7 +1144,6 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
             listResult.append(listDos);
         }
 
-        // Append NE header
         {
             DATA_HEADERS_OPTIONS neOpts = _dataHeadersOptions;
             neOpts.nID = STRUCTID_IMAGE_OS2_HEADER;
@@ -1177,11 +1156,9 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
 
         if (nStartOffset != -1) {
             if (dataHeadersOptions.nID == STRUCTID_IMAGE_OS2_HEADER) {
-                // NE header
                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XNE::structIDToString(dataHeadersOptions.nID));
                 dataHeader.nSize = sizeof(XNE_DEF::IMAGE_OS2_HEADER);
 
-                // Fields
                 dataHeader.listRecords.append(
                     getDataRecord(offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_magic), 2, "ne_magic", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
                 dataHeader.listRecords.append(
@@ -1246,7 +1223,6 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                 listResult.append(dataHeader);
 
                 if (dataHeadersOptions.bChildren) {
-                    // Compute key offsets/sizes
                     const qint64 nBase = getImageOS2HeaderOffset();
                     const quint16 offEntry = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_enttab));
                     const quint16 cbEntry = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbenttab));
@@ -1258,13 +1234,11 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                     const quint32 offNonRes = read_uint32(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_nrestab));
                     const quint16 cSeg = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cseg));
 
-                    // Entry table (hex)
                     if (cbEntry && _isOffsetValid(nBase + offEntry)) {
                         listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_ENTRY_TABLE), dataHeader.dsID, STRUCTID_ENTRY_TABLE,
                                                          nBase + offEntry, cbEntry));
                     }
 
-                    // Segment table (table mode)
                     if (cSeg && _isOffsetValid(nBase + offSeg)) {
                         DATA_HEADERS_OPTIONS segOpts = dataHeadersOptions;
                         segOpts.dhMode = XBinary::DHMODE_TABLE;
@@ -1272,7 +1246,7 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         segOpts.locType = LT_OFFSET;
                         segOpts.nLocation = nBase + offSeg;
                         segOpts.nCount = cSeg;
-                        segOpts.nSize = (qint64)cSeg * (qint64)sizeof(XNE_DEF::NE_SEGMENT);
+                        segOpts.nSize = static_cast<qint64>(cSeg) * static_cast<qint64>(sizeof(XNE_DEF::NE_SEGMENT));
 
                         DATA_HEADER segHeader = _initDataHeader(segOpts, XNE::structIDToString(STRUCTID_SEGMENT_TABLE));
                         segHeader.dsID = segOpts.dsID_parent;  // keep chaining
@@ -1294,7 +1268,6 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         listResult.append(segHeader);
                     }
 
-                    // Resource table: from rsrctab to restab
                     if (_isOffsetValid(nBase + offRes) && (offResNames > offRes)) {
                         qint64 nResSize = (qint64)offResNames - (qint64)offRes;
                         if (nResSize > 0) {
@@ -1303,7 +1276,6 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         }
                     }
 
-                    // Resident name table: from restab to modtab
                     if (_isOffsetValid(nBase + offResNames) && (offModRef > offResNames)) {
                         qint64 nSize = (qint64)offModRef - (qint64)offResNames;
                         if (nSize > 0) {
@@ -1312,7 +1284,6 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         }
                     }
 
-                    // Module reference table: from modtab to imptab
                     if (_isOffsetValid(nBase + offModRef) && (offImpNames > offModRef)) {
                         qint64 nSize = (qint64)offImpNames - (qint64)offModRef;
                         if (nSize > 0) {
@@ -1321,7 +1292,6 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         }
                     }
 
-                    // Imported names table: from imptab to (nrestab low 16?) In NE, nrestab is file offset for non-resident names.
                     if (_isOffsetValid(nBase + offImpNames)) {
                         qint64 nEnd = offNonRes ? (qint64)offNonRes : (qint64)getSize();
                         if (nEnd > (nBase + offImpNames)) {
@@ -1333,7 +1303,6 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                         }
                     }
 
-                    // Non-resident names table: absolute file offset and size cbnrestab
                     const quint16 cbNonRes = read_uint16(nBase + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbnrestab));
                     if (offNonRes && cbNonRes && _isOffsetValid(offNonRes)) {
                         listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_NONRESIDENT_NAME_TABLE), dataHeader.dsID,
@@ -1341,7 +1310,6 @@ QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &data
                     }
                 }
             } else if ((dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) || (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX)) {
-                // Delegate to base for DOS headers if requested explicitly
                 listResult.append(XMSDOS::getDataHeaders(dataHeadersOptions, pPdStruct));
             }
         }
@@ -1366,12 +1334,11 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
     qint64 nTotalSize = getSize();
     qint64 nMaxOffset = 0;
 
-    // Header
     if (bCalcAddress || (nFileParts & FILEPART_HEADER) || (nFileParts & FILEPART_OVERLAY)) {
         FPART record = {};
         record.filePart = FILEPART_HEADER;
-        record.nVirtualAddress = nModuleAddress;  // NE header maps at module base
-        record.nVirtualSize = 0x200;              // minimal header page; not used for calc
+        record.nVirtualAddress = nModuleAddress;
+        record.nVirtualSize = 0x200;
         record.nFileOffset = 0;
         record.nFileSize = qMin<qint64>(getImageOS2HeaderOffset() + sizeof(XNE_DEF::IMAGE_OS2_HEADER), nTotalSize);
         record.sName = tr("Header");
@@ -1385,7 +1352,6 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
     }
 
-    // Segments (16-bit segmented model)
     if (bCalcAddress || (nFileParts & FILEPART_SEGMENT) || (nFileParts & FILEPART_OVERLAY)) {
         QList<XNE_DEF::NE_SEGMENT> listSegments = getSegmentList();
         quint16 nShift = getImageOS2Header_align();
@@ -1394,7 +1360,7 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             const XNE_DEF::NE_SEGMENT &seg = listSegments.at(i);
 
             qint64 nFileSize = seg.dwFileSize ? seg.dwFileSize : 0x10000;
-            qint64 nFileOffset = (qint64)seg.dwFileOffset << nShift;
+            qint64 nFileOffset = static_cast<qint64>(seg.dwFileOffset) << nShift;
 
             if (nFileOffset > nTotalSize) {
                 continue;
@@ -1407,7 +1373,7 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             record.filePart = FILEPART_SEGMENT;
             record.nFileOffset = nFileOffset;
             record.nFileSize = nFileSize;
-            record.nVirtualAddress = nModuleAddress + (XADDR)((i + 1) * 0x10000);
+            record.nVirtualAddress = nModuleAddress + static_cast<XADDR>((i + 1) * 0x10000);
             record.nVirtualSize = 0x10000;
             record.sName = QString("%1 %2").arg(tr("Segment"), QString::number(i + 1));
 
@@ -1422,7 +1388,6 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         }
     }
 
-    // Overlay
     if (nFileParts & FILEPART_OVERLAY) {
         if (nMaxOffset < nTotalSize) {
             FPART record = {};
@@ -1441,11 +1406,7 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
 QList<QString> XNE::getSearchSignatures()
 {
-    QList<QString> listResult;
-
-    listResult.append("'MZ'");
-
-    return listResult;
+    return {"'MZ'"};
 }
 
 XBinary *XNE::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)

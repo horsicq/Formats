@@ -39,7 +39,7 @@ SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *
         nSize = 0;
     }
 
-    this->m_pDevice = pDevice;
+    m_pDevice = pDevice;
 
     setInitLocation(nOffset);
     setSize(nSize);
@@ -47,13 +47,11 @@ SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *
     //    reset();
     pDevice->seek(nOffset);
 
-    QVariant varBackupDevice = (quint64)pDevice;
-
-    setProperty("BACKUPDEVICE", varBackupDevice);
-    const char *pMemory = (const char *)(pDevice->property("Memory").toULongLong());
+    setProperty("BACKUPDEVICE", reinterpret_cast<quint64>(pDevice));
+    const char *pMemory = reinterpret_cast<const char *>(pDevice->property("Memory").toULongLong());
 
     if (pMemory) {
-        setProperty("Memory", (quint64)pMemory + nOffset);
+        setProperty("Memory", reinterpret_cast<quint64>(pMemory) + nOffset);
     }
 }
 
@@ -91,16 +89,12 @@ qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
 {
     nMaxSize = qMin(nMaxSize, size() - pos());
 
-    qint64 nLen = m_pDevice->read(pData, nMaxSize);
-
-    return nLen;
+    return m_pDevice->read(pData, nMaxSize);
 }
 
 qint64 SubDevice::writeData(const char *pData, qint64 nMaxSize)
 {
     nMaxSize = qMin(nMaxSize, size() - pos());
 
-    qint64 nLen = m_pDevice->write(pData, nMaxSize);
-
-    return nLen;
+    return m_pDevice->write(pData, nMaxSize);
 }

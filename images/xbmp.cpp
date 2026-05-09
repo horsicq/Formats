@@ -30,10 +30,6 @@ XBMP::XBMP(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
 
-XBMP::~XBMP()
-{
-}
-
 bool XBMP::isValid(PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
@@ -71,7 +67,7 @@ bool XBMP::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XBMP xbmp(pDevice);
 
-    return xbmp.isValid();
+    return xbmp.isValid(pPdStruct);
 }
 
 QString XBMP::getMIMEString()
@@ -81,7 +77,7 @@ QString XBMP::getMIMEString()
 
 QString XBMP::getArch()
 {
-    return "";
+    return {};
 }
 
 XBinary::ENDIAN XBMP::getEndian()
@@ -117,7 +113,7 @@ qint64 XBMP::getFileFormatSize(PDSTRUCT *pPdStruct)
 
     BMPFILEHEADER fileHeader = getFileHeader();
 
-    if (fileHeader.bfSize > 0 && fileHeader.bfSize <= (quint64)getSize()) {
+    if (fileHeader.bfSize > 0 && fileHeader.bfSize <= static_cast<quint64>(getSize())) {
         nResult = fileHeader.bfSize;
     }
 
@@ -313,7 +309,7 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         listResult.append(rec);
     }
 
-    if ((fh.bfOffBits > 0) && (fh.bfOffBits < nTotal) && (fh.bfSize <= (quint64)nTotal)) {
+    if ((fh.bfOffBits > 0) && (fh.bfOffBits < nTotal) && (fh.bfSize <= static_cast<quint64>(nTotal))) {
         if (nFileParts & FILEPART_DATA) {
             FPART rec = {};
             rec.filePart = FILEPART_DATA;
@@ -324,7 +320,7 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             listResult.append(rec);
         }
 
-        nMaxOffset = qMax(nMaxOffset, (qint64)(fh.bfSize));
+        nMaxOffset = qMax(nMaxOffset, static_cast<qint64>(fh.bfSize));
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
@@ -344,11 +340,7 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
 
 QList<QString> XBMP::getSearchSignatures()
 {
-    QList<QString> listResult;
-
-    listResult.append("'BM'");
-
-    return listResult;
+    return {"'BM'"};
 }
 
 XBinary *XBMP::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
