@@ -23,6 +23,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <algorithm>
+
 XFormats::XFormats(QObject *pParent) : XThreadObject(pParent)
 {
     m_mode = MODE_UNKNOWN;
@@ -418,17 +420,21 @@ bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDir
     XPE pe(pDevice);
 
     if (pe.isValid()) {
+        bResult = true;
+
         QList<XPE::RESOURCE_RECORD> listResources = pe.getResources(10000);
         QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_ICON, -1, &listResources);
 
-        qint32 nNumberOfRecords = listIcons.count();
+        qint32 nNumberOfRecords = listIcons.size();
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
             XPE::RESOURCE_RECORD resourceRecord = listIcons.at(i);
 
             QString sFileName = sDirectoryName + QDir::separator() + QString("%1.ico").arg(XBinary::convertFileNameSymbols(XPE::resourceRecordToString(resourceRecord)));
 
-            XFormats::savePE_ICOToFile(pDevice, &listResources, resourceRecord, sFileName);
+            if (!XFormats::savePE_ICOToFile(pDevice, &listResources, resourceRecord, sFileName)) {
+                bResult = false;
+            }
         }
     }
 
@@ -437,15 +443,17 @@ bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDir
 
 bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sDirectoryName)
 {
-    bool bResult = true;
+    bool bResult = false;
 
     XPE pe(pDevice);
 
     if (pe.isValid()) {
+        bResult = true;
+
         QList<XPE::RESOURCE_RECORD> listResources = pe.getResources(10000);
         QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_CURSOR, -1, &listResources);
 
-        qint32 nNumberOfRecords = listIcons.count();
+        qint32 nNumberOfRecords = listIcons.size();
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
             XPE::RESOURCE_RECORD resourceRecord = listIcons.at(i);
@@ -488,7 +496,7 @@ bool XFormats::savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> 
 
                     QList<XIcon::GRPICONDIRENTRY> listDirectories = icon.getIconGPRDirectories();
 
-                    qint32 nNumberOfRecords = listDirectories.count();
+                    qint32 nNumberOfRecords = listDirectories.size();
 
                     for (qint32 i = 0; i < nNumberOfRecords; i++) {
                         XPE::RESOURCE_RECORD _resourceRecord = xpe.getResourceRecord(nChunkType, listDirectories.at(i).nID, pListResourceRecords);
@@ -687,7 +695,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
     QString sRootTag = listSegments.at(0);
     bool bIsParent = false;
     QStringList listFilterTags;
-    qint32 nSegmentCount = listSegments.count();
+    qint32 nSegmentCount = listSegments.size();
 
     if (nSegmentCount == 1) {
         // No '#' found -> no parent flag
@@ -708,7 +716,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
     // Parse root tag: Offset::FileTypeFt::StructFt::TypeName[::Count]
     QStringList listParts = sRootTag.split("::");
 
-    if (listParts.count() >= 4) {
+    if (listParts.size() >= 4) {
         QString sOffset = listParts.at(0);
         QString sFileTypeFt = listParts.at(1);
         QString sStructFt = listParts.at(2);
@@ -747,7 +755,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                 xfStruct.bIsParent = bIsParent;
                 xfStruct.nCount = -1;
 
-                if (listParts.count() >= 5) {
+                if (listParts.size() >= 5) {
                     bool bCountOk = false;
                     qint32 nCount = listParts.at(4).toInt(&bCountOk);
                     if (bCountOk) {
@@ -761,7 +769,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                     listResult = listAllHeaders;
                 } else {
                     // Pre-parse filter criteria
-                    qint32 nFilterCount = listFilterTags.count();
+                    qint32 nFilterCount = listFilterTags.size();
                     QList<qint32> listFilterPartCounts;
                     QList<XBinary::FT> listFilterFileTypes;
                     QList<quint32> listFilterStructIDs;
@@ -770,7 +778,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
 
                     for (qint32 i = 0; i < nFilterCount; i++) {
                         QStringList listFilterParts = listFilterTags.at(i).split("::");
-                        qint32 nFilterPartCount = listFilterParts.count();
+                        qint32 nFilterPartCount = listFilterParts.size();
 
                         qint64 nFilterOffset = 0;
                         XBinary::FT filterFileType = XBinary::FT_UNKNOWN;
@@ -806,7 +814,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                     }
 
                     // Filter headers against pre-parsed criteria
-                    qint32 nAllCount = listAllHeaders.count();
+                    qint32 nAllCount = listAllHeaders.size();
 
                     for (qint32 i = 0; i < nAllCount; i++) {
                         const XBinary::XFHEADER &header = listAllHeaders.at(i);
@@ -1043,7 +1051,7 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
             QList<XBinary::XFRECORD> listFields = pBinary->getXFRecords(fileType, xfStruct.nStructID, xLoc);
 
             for (const XBinary::XFRECORD &record : qAsConst(listFields)) {
-                nDefaultRowSize = qMax(nDefaultRowSize, (qint64)record.nOffset + record.nSize);
+                nDefaultRowSize = (std::max)(nDefaultRowSize, (qint64)record.nOffset + record.nSize);
             }
 
             if ((nSize != nDefaultRowSize) && ((nSize % nCount) == 0)) {
@@ -1056,7 +1064,7 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
 
         QList<XBinary::XFHEADER> listResult = pBinary->getXFHeaders(xfStruct, pPdStruct);
 
-        if (listResult.count() > 0) {
+        if (listResult.size() > 0) {
             result = listResult.last();
         }
     }
@@ -1608,7 +1616,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             }
         }
 
-        if ((stResult.count() <= 1) || (stResult.contains(XBinary::FT_PLAINTEXT))) {
+        if ((stResult.size() <= 1) || (stResult.contains(XBinary::FT_PLAINTEXT)) || (XBinary::getDeviceFileSuffix(pDevice).toUpper() == "COM")) {
             if (XCOM::isValid(pDevice, false, -1, pPdStruct)) {
                 if (XBinary::getDeviceFileSuffix(pDevice).toUpper() == "COM") {
                     stResult.insert(XBinary::FT_COM);
@@ -1683,7 +1691,11 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #endif
     bool bResult = false;
 
-    qint32 nNumberOfRecords = pListRecords->count();
+    if ((pListRecords == nullptr) || (pDevice == nullptr)) {
+        return bResult;
+    }
+
+    qint32 nNumberOfRecords = pListRecords->size();
 #ifdef QT_DEBUG
     qDebug("XFormats::extractArchiveRecordsToFolder: Number of records=%d", nNumberOfRecords);
 #endif
@@ -1720,7 +1732,7 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #ifdef QT_DEBUG
                     qDebug("XFormats::extractArchiveRecordsToFolder: Path traversal detected for %s", sPrefName.toLatin1().data());
 #endif
-                    emit errorMessage(QString("%1: %2").arg(tr("Path traversal detected"), sPrefName));
+                    emit errorMessage(QString("%1: %2").arg(tr("Path traversal detected")).arg(sPrefName));
                     bResult = false;
                     XBinary::setPdStructCurrentIncrement(pPdStruct, nGlobalIndex);
                     continue;
@@ -1742,7 +1754,7 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #ifdef QT_DEBUG
                             qDebug() << "Cannot decompress" << sPrefName;
 #endif
-                            emit errorMessage(QString("%1: %2").arg(tr("Cannot decompress"), sPrefName));
+                            emit errorMessage(QString("%1: %2").arg(tr("Cannot decompress")).arg(sPrefName));
                             bResult = false;
                         }
 #endif
@@ -1755,14 +1767,14 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #ifdef QT_DEBUG
                         qDebug("XFormats::extractArchiveRecordsToFolder: Cannot create file %s", sResultFileName.toLatin1().data());
 #endif
-                        emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), sResultFileName));
+                        emit errorMessage(QString("%1: %2").arg(tr("Cannot create")).arg(sResultFileName));
                         bResult = false;
                     }
                 } else {
 #ifdef QT_DEBUG
                     qDebug("XFormats::extractArchiveRecordsToFolder: Cannot create directory %s", fi.absolutePath().toLatin1().data());
 #endif
-                    emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), fi.absolutePath()));
+                    emit errorMessage(QString("%1: %2").arg(tr("Cannot create")).arg(fi.absolutePath()));
                     bResult = false;
                 }
 
@@ -1777,7 +1789,7 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #ifdef QT_DEBUG
             qDebug("XFormats::extractArchiveRecordsToFolder: Cannot create folder %s", sFolderName.toLatin1().data());
 #endif
-            emit errorMessage(QString("%1: %2").arg(tr("Cannot create"), sFolderName));
+            emit errorMessage(QString("%1: %2").arg(tr("Cannot create")).arg(sFolderName));
             bResult = false;
         }
     }
@@ -1822,7 +1834,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
 
     pComboBox->clear();
 
-    qint32 nNumberOfListTypes = listFileTypes.count();
+    qint32 nNumberOfListTypes = listFileTypes.size();
 
     for (qint32 i = 0; i < nNumberOfListTypes; i++) {
         XBinary::FT _fileType = listFileTypes.at(i);
@@ -1929,7 +1941,7 @@ XBinary::MAPMODE XFormats::getMapModesList(XBinary::FT fileType, QComboBox *pCom
 
     QList<XBinary::MAPMODE> listMapModes = getMapModesList(fileType);
 
-    qint32 nNumberOfRecords = listMapModes.count();
+    qint32 nNumberOfRecords = listMapModes.size();
 
     if (nNumberOfRecords) {
         result = listMapModes.at(0);
@@ -1974,7 +1986,7 @@ XBinary::DM XFormats::setDisasmModeComboBox(XBinary::DM disasmMode, QComboBox *p
     pComboBox->clear();
 
     if (disasmMode == XBinary::DM_UNKNOWN) {
-        pComboBox->addItem(XBinary::disasmIdToString(XBinary::DM_X86_16), XBinary::DM_X86_16);
+        pComboBox->addItem(XBinary::disasmIdToString(XBinary::DM_8086), XBinary::DM_8086);
         pComboBox->addItem(XBinary::disasmIdToString(XBinary::DM_X86_32), XBinary::DM_X86_32);
         pComboBox->addItem(XBinary::disasmIdToString(XBinary::DM_X86_64), XBinary::DM_X86_64);
         pComboBox->addItem(XBinary::disasmIdToString(XBinary::DM_ARM_LE), XBinary::DM_ARM_LE);
@@ -2033,7 +2045,7 @@ XBinary::DM XFormats::setDisasmModeComboBox(XBinary::DM disasmMode, QComboBox *p
 QString XFormats::toJSON(const QVector<XBinary::KeyValueItem> &listItems)
 {
     QJsonObject jsonObject;
-    qint32 nCount = listItems.count();
+    qint32 nCount = listItems.size();
     for (qint32 i = 0; i < nCount; i++) {
         jsonObject[listItems.at(i).key] = QJsonValue::fromVariant(listItems.at(i).value);
     }
@@ -2047,19 +2059,24 @@ QString XFormats::toXML(const QVector<XBinary::KeyValueItem> &listItems)
     xml.setAutoFormatting(true);
     xml.writeStartDocument();
     xml.writeStartElement("items");
-    qint32 nCount = listItems.count();
+    qint32 nCount = listItems.size();
     for (qint32 i = 0; i < nCount; i++) {
         xml.writeTextElement(listItems.at(i).key, listItems.at(i).value.toString());
     }
     xml.writeEndElement();
     xml.writeEndDocument();
+
+    if (xml.hasError()) {
+        return QString();
+    }
+
     return sResult;
 }
 
 QString XFormats::toCSV(const QVector<XBinary::KeyValueItem> &listItems)
 {
     QStringList keys, values;
-    qint32 nCount = listItems.count();
+    qint32 nCount = listItems.size();
     for (qint32 i = 0; i < nCount; i++) {
         keys.append(listItems.at(i).key);
         values.append(listItems.at(i).value.toString());
@@ -2070,7 +2087,7 @@ QString XFormats::toCSV(const QVector<XBinary::KeyValueItem> &listItems)
 QString XFormats::toTSV(const QVector<XBinary::KeyValueItem> &listItems)
 {
     QStringList keys, values;
-    qint32 nCount = listItems.count();
+    qint32 nCount = listItems.size();
     for (qint32 i = 0; i < nCount; i++) {
         keys.append(listItems.at(i).key);
         values.append(listItems.at(i).value.toString());
@@ -2081,9 +2098,9 @@ QString XFormats::toTSV(const QVector<XBinary::KeyValueItem> &listItems)
 QString XFormats::toFormattedString(const QVector<XBinary::KeyValueItem> &listItems)
 {
     QString sResult;
-    qint32 nCount = listItems.count();
+    qint32 nCount = listItems.size();
     for (qint32 i = 0; i < nCount; i++) {
-        sResult += QString("%1: %2\n").arg(listItems.at(i).key, listItems.at(i).value.toString());
+        sResult += QString("%1: %2\n").arg(listItems.at(i).key).arg(listItems.at(i).value.toString());
     }
     return sResult;
 }
@@ -2104,7 +2121,7 @@ QVector<XBinary::KeyValueItem> XFormats::getEntropy(QIODevice *pDevice, bool bIs
     XBinary::FT fileType = getPrefFileType(pDevice, true, pPdStruct);
     XBinary::_MEMORY_MAP memoryMap = getMemoryMap(fileType, XBinary::MAPMODE_UNKNOWN, pDevice, bIsImage, nModuleAddress, pPdStruct);
 
-    qint32 nNumberOfRecords = memoryMap.listRecords.count();
+    qint32 nNumberOfRecords = memoryMap.listRecords.size();
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         const XBinary::_MEMORY_RECORD &record = memoryMap.listRecords.at(i);
 

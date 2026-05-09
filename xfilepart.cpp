@@ -124,19 +124,19 @@ qint64 XFilePart::getFileFormatSize(PDSTRUCT *pPdStruct)
 
 QList<XBinary::FPART> XFilePart::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-
     QList<FPART> listResult;
 
     if ((nLimit != 0) && (nFileParts & m_filePart)) {
-        qint64 nFilePartSize = getFileFormatSize();
+        qint64 nFilePartSize = getFileFormatSize(pPdStruct);
         qint64 nFilePartVirtualSize = m_nFilePartVirtualSize;
 
         if (nFilePartVirtualSize == -1) {
             nFilePartVirtualSize = nFilePartSize;
         }
 
-        listResult.append(getFPART(m_filePart, m_sFilePartName, m_nFilePartOffset, nFilePartSize, m_nFilePartVirtualAddress, nFilePartVirtualSize));
+        if ((nFilePartSize >= 0) && (nFilePartVirtualSize >= 0)) {
+            listResult.append(getFPART(m_filePart, m_sFilePartName, m_nFilePartOffset, nFilePartSize, m_nFilePartVirtualAddress, nFilePartVirtualSize));
+        }
     }
 
     return listResult;

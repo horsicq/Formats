@@ -653,6 +653,13 @@ public:
         // TODO more
     };
 
+    enum ARCH {
+        ARCH_UNKNOWN = 0,
+        ARCH_8086,
+        ARCH_X86_32,
+        ARCH_X86_64
+    };
+
     enum DMFAMILY {
         DMFAMILY_UNKNOWN,
         DMFAMILY_X86,
@@ -680,7 +687,7 @@ public:
     enum DM {
         DM_UNKNOWN = 0,
         DM_DATA,
-        DM_X86_16,
+        DM_8086,
         DM_X86_32,
         DM_X86_64,
         DM_ARM_LE,
@@ -2170,6 +2177,7 @@ public:
     static QString syntaxIdToString(SYNTAX syntax);
     static SYNTAX stringToSyntaxId(const QString &sString);
     static QString osNameIdToString(OSNAME osName);
+    static ARCH fileFormatInfoToArch(const FILEFORMATINFO *pFileFormatInfo);
     DM getDisasmMode();
     static DM getDisasmMode(_MEMORY_MAP *pMemoryMap);
     static DM getDisasmMode(const QString &sArch, bool bIsBigEndian = false, MODE mode = MODE_UNKNOWN);

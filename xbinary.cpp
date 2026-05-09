@@ -1446,19 +1446,13 @@ XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 
 XBinary::XBinary(const QString &sFileName)
 {
+    QFile *pFile = new QFile(sFileName);
+
+    tryToOpen(pFile);
+
+    setData(pFile);
     m_sFileName = sFileName;
-
-    if (m_pFile) {
-        m_pFile->close();
-
-        delete m_pFile;
-    }
-
-    m_pFile = new QFile(sFileName);
-
-    tryToOpen(m_pFile);
-
-    setData(m_pFile);
+    m_pFile = pFile;
 }
 
 XBinary::~XBinary()
@@ -4491,8 +4485,8 @@ bool XBinary::_compareSigBytes(const char *pSigBytes, qint64 nSigBytesSize, cons
     const quint8 *pDat = (const quint8 *)pData;
 
     // Check cancellation less frequently for better performance
-    qint64 nCheckInterval = 64;
-    qint64 nNextCheck = nCheckInterval;
+    qint64 nCheckStride = 64;
+    qint64 nNextCheck = nCheckStride;
 
     while (pSig < pSigEnd) {
         quint8 nType = *pSig++;
@@ -4542,7 +4536,7 @@ bool XBinary::_compareSigBytes(const char *pSigBytes, qint64 nSigBytesSize, cons
             if (!isPdStructNotCanceled(pPdStruct)) {
                 return false;
             }
-            nNextCheck += nCheckInterval;
+            nNextCheck += nCheckStride;
         }
     }
 
@@ -5517,7 +5511,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
 
         if (nCurrentRecords >= ssOptions.nLimit) {
-            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
+            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nCurrentRecords)));
 
             break;
         }
@@ -5588,7 +5582,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
     // Enforce final limit if needed
     if (ssOptions.nLimit > 0 && listResult.size() > ssOptions.nLimit) {
         listResult.resize(ssOptions.nLimit);
-        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum"), QString::number(ssOptions.nLimit)));
+        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(ssOptions.nLimit)));
     }
 
     return listResult;
@@ -5912,7 +5906,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
 
         if (nCurrentRecords >= ssOptions.nLimit) {
-            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
+            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nCurrentRecords)));
             break;
         }
     }
@@ -6132,7 +6126,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
 
         if (nCurrentRecords >= ssOptions.nLimit) {
-            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
+            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nCurrentRecords)));
             break;
         }
     }
@@ -6211,7 +6205,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryM
         nCurrentRecords++;
 
         if (nCurrentRecords >= nLimit) {
-            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
+            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nCurrentRecords)));
 
             break;
         }
@@ -6302,7 +6296,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
         nCurrentRecords++;
 
         if (nCurrentRecords >= nLimit) {
-            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum"), QString::number(nCurrentRecords)));
+            setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nCurrentRecords)));
 
             break;
         }
@@ -8347,7 +8341,7 @@ bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignatur
     if (listSignatureRecords.count()) {
         bResult = _compareSignature(pMemoryMap, &listSignatureRecords, nOffset, pPdStruct);
     } else {
-        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Invalid signature"), sOrigin));
+        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Invalid signature")).arg(sOrigin));
     }
 
     return bResult;
@@ -8661,7 +8655,7 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
 
         file.close();
     } else {
-        _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file"), sFileName));
+        _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file")).arg(sFileName));
     }
 
     return bResult;
@@ -8743,7 +8737,7 @@ bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64
 
         file.close();
     } else {
-        _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file"), sFileName));
+        _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file")).arg(sFileName));
     }
 
     return bResult;
@@ -9415,6 +9409,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         // Special
         FT_SIGNATURE,
         FT_DJVU,
+        FT_COM,
 
         // Text/encoding
         FT_UNICODE,
@@ -9422,7 +9417,6 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_TEXT,
 
         // Generic
-        FT_COM,
         FT_DATA,
         FT_BINARY,
     };
@@ -9726,11 +9720,11 @@ QString XBinary::valueToHexColon(MODE mode, quint64 nValue, bool bIsBigEndian)
     if (mode == MODE_64) {
         quint32 nHigh = (quint32)(nValue >> 32);
         quint32 nLow = (quint32)(nValue);
-        sResult = QString("%1:%2").arg(valueToHex(nHigh), valueToHex(nLow));
+        sResult = QString("%1:%2").arg(valueToHex(nHigh)).arg(valueToHex(nLow));
     } else if (mode == MODE_32) {
         quint16 nHigh = (quint16)(nValue >> 16);
         quint16 nLow = (quint16)(nValue);
-        sResult = QString("%1:%2").arg(valueToHex(nHigh), valueToHex(nLow));
+        sResult = QString("%1:%2").arg(valueToHex(nHigh)).arg(valueToHex(nLow));
     } else {
         sResult = valueToHex(mode, nValue, bIsBigEndian);
     }
@@ -11633,7 +11627,7 @@ bool XBinary::_addCheckFormatTest(QList<FMT_MSG> *pListFmtMsgs, bool *pbContinue
             FMT_MSG record = {};
             record.type = type;
             record.code = code;
-            record.sString += QString("%1: %2: %3").arg(sString, tr("Corrupted data"), sInfo);
+            record.sString += QString("%1: %2: %3").arg(sString).arg(tr("Corrupted data")).arg(sInfo);
             record.value = value;
 
             pListFmtMsgs->append(record);
@@ -12368,12 +12362,12 @@ QString XBinary::get_uint8_full_version(quint8 nValue)
 
 QString XBinary::get_uint16_full_version(quint16 nValue)
 {
-    return QString("%1.%2").arg(QString::number((nValue >> 8) & 0xFF), QString::number((nValue) & 0xFF));
+    return QString("%1.%2").arg(QString::number((nValue >> 8) & 0xFF)).arg(QString::number((nValue) & 0xFF));
 }
 
 QString XBinary::get_uint32_full_version(quint32 nValue)
 {
-    return QString("%1.%2.%3").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue >> 8) & 0xFF), QString::number((nValue) & 0xFF));
+    return QString("%1.%2.%3").arg(QString::number((nValue >> 16) & 0xFFFF)).arg(QString::number((nValue >> 8) & 0xFF)).arg(QString::number((nValue) & 0xFF));
 }
 
 QString XBinary::get_uint64_full_version(quint64 nValue)
@@ -12383,7 +12377,7 @@ QString XBinary::get_uint64_full_version(quint64 nValue)
     quint32 nValue1 = (nValue >> 32) & 0xFFFFFFFF;
     quint32 nValue2 = nValue & 0xFFFFFFFF;
 
-    sResult = QString("%1.%2").arg(get_uint32_full_version(nValue1), get_uint32_full_version(nValue2));
+    sResult = QString("%1.%2").arg(get_uint32_full_version(nValue1)).arg(get_uint32_full_version(nValue2));
 
     return sResult;
 }
@@ -12395,7 +12389,7 @@ QString XBinary::get_uint16_version(quint16 nValue)
 
 QString XBinary::get_uint32_version(quint32 nValue)
 {
-    return QString("%1.%2").arg(QString::number((nValue >> 16) & 0xFFFF), QString::number((nValue) & 0xFFFF));
+    return QString("%1.%2").arg(QString::number((nValue >> 16) & 0xFFFF)).arg(QString::number((nValue) & 0xFFFF));
 }
 
 bool XBinary::isResizeEnable(QIODevice *pDevice)
@@ -12545,7 +12539,7 @@ QString XBinary::read_ASN_OIDString(qint64 nOffset, qint64 nSize)
     if (nSize > 0) {
         quint8 nStart = read_uint8(nOffset);
 
-        sResult += QString("%1.%2").arg(QString::number(nStart / 40), QString::number(nStart % 40));
+        sResult += QString("%1.%2").arg(QString::number(nStart / 40)).arg(QString::number(nStart % 40));
 
         nOffset++;
         nSize--;
@@ -13367,7 +13361,7 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
 
     switch (disasmMode) {
         case DM_DATA: sResult = tr("Data"); break;
-        case DM_X86_16: sResult = QString("x86 16-bit mode"); break;
+        case DM_8086: sResult = QString("8086 mode"); break;
         case DM_X86_32: sResult = QString("x86 32-bit mode"); break;
         case DM_X86_64: sResult = QString("x86 64-bit mode"); break;
         case DM_ARM_LE: sResult = QString("ARM"); break;
@@ -13429,7 +13423,7 @@ QString XBinary::disasmIdToArch(DM disasmMode)
 
     switch (disasmMode) {
         case DM_DATA: sResult = QString("data"); break;
-        case DM_X86_16:
+        case DM_8086:
         case DM_X86_32:
         case DM_X86_64: sResult = QString("x86"); break;
         case DM_ARM_LE:
@@ -13656,10 +13650,10 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
             dmResult = DM_AARCH64_LE;
         }
     } else if ((_sArch == "8086") || (_sArch == "286")) {
-        dmResult = DM_X86_16;
+        dmResult = DM_8086;
     } else if ((_sArch == "386") || (_sArch == "80386") || (_sArch == "80486") || (_sArch == "80586") || (_sArch == "I386") || (_sArch == "486") || (_sArch == "X86")) {
         if ((mode == MODE_16) || (mode == MODE_16SEG)) {
-            dmResult = DM_X86_16;
+            dmResult = DM_8086;
         } else {
             dmResult = DM_X86_32;
         }
@@ -13706,11 +13700,29 @@ XBinary::DM XBinary::getDisasmMode(FILEFORMATINFO *pFileFormatInfo)
     return getDisasmMode(pFileFormatInfo->sArch, (pFileFormatInfo->endian == ENDIAN_BIG), pFileFormatInfo->mode);
 }
 
+XBinary::ARCH XBinary::fileFormatInfoToArch(const XBinary::FILEFORMATINFO *pFileFormatInfo)
+{
+    XBinary::ARCH result = XBinary::ARCH_UNKNOWN;
+
+    if(pFileFormatInfo) {
+        XBinary::DM disasmMode = XBinary::getDisasmMode(pFileFormatInfo->sArch, (pFileFormatInfo->endian == XBinary::ENDIAN_BIG), pFileFormatInfo->mode);
+
+        switch (disasmMode) {
+            case XBinary::DM_8086: result = XBinary::ARCH_8086; break;
+            case XBinary::DM_X86_32: result = XBinary::ARCH_X86_32; break;
+            case XBinary::DM_X86_64: result = XBinary::ARCH_X86_64; break;
+            default: break;
+        }
+    }
+
+    return result;
+}
+
 XBinary::DMFAMILY XBinary::getDisasmFamily(XBinary::DM disasmMode)
 {
     DMFAMILY result = DMFAMILY_UNKNOWN;
 
-    if ((disasmMode == DM_X86_16) || (disasmMode == DM_X86_32) || (disasmMode == DM_X86_64)) {
+    if ((disasmMode == DM_8086) || (disasmMode == DM_X86_32) || (disasmMode == DM_X86_64)) {
         result = DMFAMILY_X86;
     } else if ((disasmMode == DM_ARM_BE) || (disasmMode == DM_ARM_LE)) {
         result = DMFAMILY_ARM;
@@ -13784,7 +13796,7 @@ XBinary::MODE XBinary::getModeFromDisasmMode(DM disasmMode)
 {
     MODE result = MODE_32;
 
-    if (disasmMode == DM_X86_16) {
+    if (disasmMode == DM_8086) {
         result = MODE_16;
     } else if (disasmMode == DM_X86_32) {
         result = MODE_32;
@@ -14202,7 +14214,7 @@ bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSiz
         if (uleb128.bIsValid) {
             pOpcode->nAddress = *pnAddress;
             pOpcode->nSize = uleb128.nByteSize;
-            pOpcode->sName = QString("%1(%2)").arg(sPrefix, QString::number((qint64)uleb128.nValue));
+            pOpcode->sName = QString("%1(%2)").arg(sPrefix).arg(QString::number((qint64)uleb128.nValue));
 
             *pnSize -= pOpcode->nSize;
             *ppData += pOpcode->nSize;
@@ -14220,21 +14232,24 @@ bool XBinary::_read_opcode_ansiString(XBinary::OPCODE *pOpcode, char **ppData, q
 {
     bool bResult = false;
 
-    if (*pnSize > 0) {
-        QString sString = *ppData;
+    if (pOpcode && ppData && *ppData && pnSize && pnAddress && pnResult && (*pnSize > 0)) {
+        const char *pStringEnd = (const char *)memchr(*ppData, '\0', (size_t)(*pnSize));
 
-        if (sString.size() < (*pnSize))  // We need cstring with \0
-        {
-            pOpcode->nAddress = *pnAddress;
-            pOpcode->nSize = sString.size() + 1;
-            pOpcode->sName = QString("%1(\"%2\")").arg(sPrefix, sString);
+        if (pStringEnd) {
+            qint64 nStringSize = pStringEnd - *ppData;
+            if (nStringSize <= 0x7fffffff) {
+                QString sString = QString::fromLatin1(*ppData, (int)nStringSize);
+                pOpcode->nAddress = *pnAddress;
+                pOpcode->nSize = nStringSize + 1;
+                pOpcode->sName = QString("%1(\"%2\")").arg(sPrefix).arg(sString);
 
-            *pnSize -= pOpcode->nSize;
-            *ppData += pOpcode->nSize;
-            *pnResult += pOpcode->nSize;
-            *pnAddress += pOpcode->nSize;
+                *pnSize -= pOpcode->nSize;
+                *ppData += pOpcode->nSize;
+                *pnResult += pOpcode->nSize;
+                *pnAddress += pOpcode->nSize;
 
-            bResult = true;
+                bResult = true;
+            }
         }
     }
 
@@ -14466,25 +14481,25 @@ QString XBinary::bytesCountToString(quint64 nValue, quint64 nBase)
         sValue = QString::number((double)nValue / nBase, 'f', 2);
 
         if (nBase == 1024) sUnit = tr("KiB");
-        else tr("kB");
+        else sUnit = tr("kB");
     } else if (nValue < (nBase * nBase * nBase)) {
         sValue = QString::number((double)nValue / (nBase * nBase), 'f', 2);
 
         if (nBase == 1024) sUnit = tr("MiB");
-        else tr("MB");
+        else sUnit = tr("MB");
     } else if (nValue < (nBase * nBase * nBase * nBase)) {
         sValue = QString::number((double)nValue / (nBase * nBase * nBase), 'f', 2);
 
         if (nBase == 1024) sUnit = tr("GiB");
-        else tr("GB");
+        else sUnit = tr("GB");
     } else {
         sValue = QString::number((double)nValue / (nBase * nBase * nBase * nBase), 'f', 2);
 
         if (nBase == 1024) sUnit = tr("TiB");
-        else tr("TB");
+        else sUnit = tr("TB");
     }
 
-    sResult = QString("%1 %2").arg(sValue, sUnit);
+    sResult = QString("%1 %2").arg(sValue).arg(sUnit);
 
     return sResult;
 }
@@ -14553,6 +14568,10 @@ QString XBinary::formatXML(const QString &sXML)
         if (!reader.isWhitespace()) {
             writer.writeCurrentToken(reader);
         }
+    }
+
+    if (reader.hasError() || writer.hasError()) {
+        sResult = sXML;
     }
 
     return sResult;
@@ -16121,7 +16140,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
     }
 
     if (!(*pbValid)) {
-        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Invalid signature"), sSignature));
+        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Invalid signature")).arg(sSignature));
     }
 
     return nResult;
