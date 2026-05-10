@@ -46,7 +46,9 @@ void XFModel_header::setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeade
 
 int XFModel_header::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent)
+    if (parent.isValid()) {
+        return 0;
+    }
 
     return m_xfHeader.listFields.count();
 }

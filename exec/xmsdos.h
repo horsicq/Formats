@@ -35,12 +35,12 @@ public:
         quint32 nCount;
     };
 
-    enum TYPE {
+    enum TYPE : qint32 {
         TYPE_UNKNOWN = 0,
-        TYPE_EXE
+        TYPE_EXE,
     };
 
-    enum STRUCTID {
+    enum STRUCTID : qint32 {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_IMAGE_DOS_HEADER,
         STRUCTID_IMAGE_DOS_HEADEREX,

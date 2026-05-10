@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xbinary.h"
+#include <algorithm>
 #include <cstring>
 #include <QDebug>
 #ifdef Q_OS_WIN
@@ -1575,7 +1576,7 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
-    if (pDevice->size() > nPos) {
+    if (pDevice && pData && (nLen >= 0) && (pDevice->size() > nPos)) {
         if (pDevice->seek(nPos)) {
             qint64 nBufferSize = getBufferSize(pPdStruct);
 
@@ -1584,7 +1585,8 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 
                 nCurrentSize = pDevice->write(pData, nCurrentSize);
 
-                if (nCurrentSize == 0) {
+                if (nCurrentSize <= 0) {
+                    setPdStructErrorString(pPdStruct, tr("Write error"));
                     break;
                 }
 
@@ -4330,8 +4332,8 @@ void XBinary::endian_float(float *pValue, bool bIsBigEndian)
 #endif
 
     if (bReverse) {
-        qSwap(((quint8 *)pValue)[0], ((quint8 *)pValue)[3]);
-        qSwap(((quint8 *)pValue)[1], ((quint8 *)pValue)[2]);
+        std::swap(((quint8 *)pValue)[0], ((quint8 *)pValue)[3]);
+        std::swap(((quint8 *)pValue)[1], ((quint8 *)pValue)[2]);
     }
 }
 
@@ -4346,10 +4348,10 @@ void XBinary::endian_double(double *pValue, bool bIsBigEndian)
 #endif
 
     if (bReverse) {
-        qSwap(((quint8 *)pValue)[0], ((quint8 *)pValue)[7]);
-        qSwap(((quint8 *)pValue)[1], ((quint8 *)pValue)[6]);
-        qSwap(((quint8 *)pValue)[2], ((quint8 *)pValue)[5]);
-        qSwap(((quint8 *)pValue)[3], ((quint8 *)pValue)[4]);
+        std::swap(((quint8 *)pValue)[0], ((quint8 *)pValue)[7]);
+        std::swap(((quint8 *)pValue)[1], ((quint8 *)pValue)[6]);
+        std::swap(((quint8 *)pValue)[2], ((quint8 *)pValue)[5]);
+        std::swap(((quint8 *)pValue)[3], ((quint8 *)pValue)[4]);
     }
 }
 
@@ -7089,7 +7091,10 @@ bool XBinary::_isMemoryZeroFilled(char *pSource, qint64 nSize)
 {
     // Check in 8-byte chunks for better performance
     while (nSize >= 8) {
-        if (*((quint64 *)pSource) != 0) {
+        quint64 nValue = 0;
+        memcpy(&nValue, pSource, sizeof(nValue));
+
+        if (nValue != 0) {
             return false;
         }
         pSource += 8;
@@ -7114,19 +7119,19 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
     return xsimd_is_not_null(pSource, nSize) != 0;
 #else
     // Fallback: 64-bit processing
-    const char *ptr = pSource;
-    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(ptr);
+    const char *pCurrent = pSource;
     while (nSize >= 8) {
-        quint64 v = *pSource64;
+        quint64 v = 0;
+        memcpy(&v, pCurrent, sizeof(v));
         if (((v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL) != 0) {
             return false;
         }
-        pSource64++;
+        pCurrent += 8;
         nSize -= 8;
     }
 
     // Process remaining bytes
-    const char *pRemaining = reinterpret_cast<const char *>(pSource64);
+    const char *pRemaining = pCurrent;
     while (nSize > 0) {
         if (*pRemaining == 0) {
             return false;
@@ -7145,23 +7150,24 @@ bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
     return xsimd_is_ansi(pSource, nSize) != 0;
 #else
     // Fallback: 64-bit processing
-    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
+    const char *pCurrent = pSource;
     while (nSize >= 8) {
-        quint64 v = *pSource64;
+        quint64 v = 0;
+        memcpy(&v, pCurrent, sizeof(v));
         if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) != 0) {
-            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pSource64);
+            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pCurrent);
             for (qint32 i = 0; i < 8; i++) {
                 if (pCheck[i] < 0x20 || pCheck[i] >= 0x80) {
                     return false;
                 }
             }
         }
-        pSource64++;
+        pCurrent += 8;
         nSize -= 8;
     }
 
     // Process remaining bytes
-    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pSource64);
+    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pCurrent);
     while (nSize > 0) {
         if (*pRemaining < 0x20 || *pRemaining >= 0x80) {
             return false;
@@ -7180,23 +7186,24 @@ bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
     return xsimd_is_not_ansi(pSource, nSize) != 0;
 #else
     // Fallback: 64-bit processing
-    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
+    const char *pCurrent = pSource;
     while (nSize >= 8) {
-        quint64 v = *pSource64;
+        quint64 v = 0;
+        memcpy(&v, pCurrent, sizeof(v));
         if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) == 0) {
-            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pSource64);
+            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pCurrent);
             for (qint32 i = 0; i < 8; i++) {
                 if (pCheck[i] >= 0x20 && pCheck[i] < 0x80) {
                     return false;
                 }
             }
         }
-        pSource64++;
+        pCurrent += 8;
         nSize -= 8;
     }
 
     // Process remaining bytes
-    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pSource64);
+    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pCurrent);
     while (nSize > 0) {
         if (*pRemaining >= 0x20 && *pRemaining < 0x80) {
             return false;
@@ -7215,26 +7222,27 @@ bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
     return xsimd_is_not_ansi_and_null(pSource, nSize) ? true : false;
 #else
     // Fallback: 64-bit processing
-    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
+    const char *pCurrent = pSource;
     while (nSize >= 8) {
-        quint64 v = *pSource64;
+        quint64 v = 0;
+        memcpy(&v, pCurrent, sizeof(v));
         if (((v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL) != 0) {
             return false;
         }
         if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) == 0) {
-            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pSource64);
+            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pCurrent);
             for (qint32 i = 0; i < 8; i++) {
                 if (pCheck[i] >= 0x20 && pCheck[i] < 0x80) {
                     return false;
                 }
             }
         }
-        pSource64++;
+        pCurrent += 8;
         nSize -= 8;
     }
 
     // Process remaining bytes
-    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pSource64);
+    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pCurrent);
     while (nSize > 0) {
         if (*pRemaining == 0 || (*pRemaining >= 0x20 && *pRemaining < 0x80)) {
             return false;
@@ -7253,24 +7261,25 @@ bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
     return xsimd_is_ansi_number(pSource, nSize) ? true : false;
 #else
     // Fallback: 64-bit processing
-    const quint64 *__restrict pSource64 = reinterpret_cast<const quint64 *>(pSource);
+    const char *pCurrent = pSource;
     while (nSize >= 8) {
-        quint64 v = *pSource64;
+        quint64 v = 0;
+        memcpy(&v, pCurrent, sizeof(v));
         quint64 v_minus_0x30 = v - 0x3030303030303030ULL;
         if (((v_minus_0x30 | (v_minus_0x30 >> 4)) & 0xF0F0F0F0F0F0F0F0ULL) != 0) {
-            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pSource64);
+            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pCurrent);
             for (qint32 i = 0; i < 8; i++) {
                 if (pCheck[i] < 0x30 || pCheck[i] > 0x39) {
                     return false;
                 }
             }
         }
-        pSource64++;
+        pCurrent += 8;
         nSize -= 8;
     }
 
     // Process remaining bytes
-    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pSource64);
+    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pCurrent);
     while (nSize > 0) {
         if (*pRemaining < 0x30 || *pRemaining > 0x39) {
             return false;
@@ -7326,13 +7335,17 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
         nBufferSize = 0x1000;
     }
 
+    if ((nSourceOffset < 0) || (nDestOffset < 0) || (nSize < 0)) {
+        return false;
+    }
+
     if (nDestOffset == nSourceOffset) {
         return true;
     }
 
     qint64 nMaxSize = getSize();
 
-    if ((nDestOffset + nSize > nMaxSize) || (nSourceOffset + nSize > nMaxSize)) {
+    if ((nDestOffset > nMaxSize) || (nSourceOffset > nMaxSize) || (nSize > (nMaxSize - nDestOffset)) || (nSize > (nMaxSize - nSourceOffset))) {
         return false;
     }
 
@@ -7354,8 +7367,10 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
             nDestOffset -= nTempSize;
         }
 
-        read_array(nSourceOffset, pBuffer, nTempSize);
-        write_array(nDestOffset, pBuffer, nTempSize);
+        if ((read_array(nSourceOffset, pBuffer, nTempSize) != nTempSize) || (write_array(nDestOffset, pBuffer, nTempSize) != nTempSize)) {
+            bResult = false;
+            break;
+        }
 
         if (!bReverse) {
             nSourceOffset += nTempSize;
@@ -7419,41 +7434,12 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
     return bSuccess && (nSize == 0);
 }
 
-bool XBinary::compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize)
+bool XBinary::compareMemory(const char *pMemory1, const char *pMemory2, qint64 nSize)
 {
 #ifdef USE_XSIMD
-    return xsimd_compare_memory(pMemory1, pMemory2, nSize) != 0;
+    return xsimd_compare_memory(const_cast<char *>(pMemory1), pMemory2, nSize) != 0;
 #else
-    const char *__restrict ptr1 = pMemory1;
-    const char *__restrict ptr2 = pMemory2;
-
-    // 64-bit comparison
-    const quint64 *__restrict p1_64 = reinterpret_cast<const quint64 *>(ptr1);
-    const quint64 *__restrict p2_64 = reinterpret_cast<const quint64 *>(ptr2);
-
-    while (nSize >= 8) {
-        if (*p1_64 != *p2_64) {
-            return false;
-        }
-        p1_64++;
-        p2_64++;
-        nSize -= 8;
-    }
-
-    // Process remaining 0-7 bytes
-    ptr1 = reinterpret_cast<const char *>(p1_64);
-    ptr2 = reinterpret_cast<const char *>(p2_64);
-
-    while (nSize > 0) {
-        if (*ptr1 != *ptr2) {
-            return false;
-        }
-        ptr1++;
-        ptr2++;
-        nSize--;
-    }
-
-    return true;
+    return (pMemory1 && pMemory2 && (nSize >= 0) && (memcmp(pMemory1, pMemory2, (size_t)nSize) == 0));
 #endif
 }
 
@@ -8582,12 +8568,10 @@ bool XBinary::dumpToFile(const QString &sFileName, const char *pData, qint64 nDa
 
     QFile file;
     file.setFileName(sFileName);
-    file.resize(0);
 
-    if (file.open(QIODevice::ReadWrite)) {
-        file.write(pData, nDataSize);
+    if ((nDataSize >= 0) && file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        bResult = (file.write(pData, nDataSize) == nDataSize);
         file.close();
-        bResult = true;
     }
 
     return bResult;
@@ -12449,7 +12433,7 @@ XBinary::PACKED_UINT XBinary::read_uleb128(qint64 nOffset, qint64 nSize)
     return result;
 }
 
-XBinary::PACKED_UINT XBinary::_read_uleb128(char *pData, qint64 nSize)
+XBinary::PACKED_UINT XBinary::_read_uleb128(const char *pData, qint64 nSize)
 {
     PACKED_UINT result = {};
 
@@ -12851,11 +12835,11 @@ bool XBinary::addOverlay(char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct)
 
     qint64 nRawSize = getOverlayOffset(pPdStruct);
 
-    if (resize(getDevice(), nRawSize + nDataSize)) {
-        if (nDataSize) {
-            write_array(nRawSize, pData, nDataSize);
-
+    if ((nDataSize >= 0) && resize(getDevice(), nRawSize + nDataSize)) {
+        if (nDataSize == 0) {
             bResult = true;
+        } else if (pData) {
+            bResult = (write_array(nRawSize, pData, nDataSize) == nDataSize);
         }
     }
 
@@ -12922,7 +12906,7 @@ bool XBinary::isSignatureInFilePartPresent(XBinary::_MEMORY_MAP *pMemoryMap, qin
     return bResult;
 }
 
-QString XBinary::getStringCollision(QList<QString> *pListStrings, const QString &sString1, const QString &sString2)
+QString XBinary::getStringCollision(const QList<QString> *pListStrings, const QString &sString1, const QString &sString2)
 {
     // TODO Check&optimize
     QString sResult;
@@ -12960,11 +12944,9 @@ bool XBinary::writeToFile(const QString &sFileName, const QByteArray &baData)
     QFile file;
     file.setFileName(sFileName);
 
-    if (file.open(QIODevice::ReadWrite)) {
-        file.resize(0);
-        file.write(baData.data(), baData.size());
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        bResult = (file.write(baData.constData(), baData.size()) == baData.size());
         file.close();
-        bResult = true;
     }
 
     return bResult;
@@ -12997,9 +12979,9 @@ bool XBinary::appendToFile(const QString &sFileName, const QString &sString)
 
     if (file.open(QIODevice::ReadWrite | QIODevice::Append)) {
         _sString += "\r\n";  // TODO Linux
-        file.write(_sString.toUtf8());
+        QByteArray baData = _sString.toUtf8();
+        bResult = (file.write(baData.constData(), baData.size()) == baData.size());
         file.close();
-        bResult = true;
     }
 
     return bResult;
@@ -13021,7 +13003,7 @@ bool XBinary::clearFile(const QString &sFileName)
     return bResult;
 }
 
-qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
+qint32 XBinary::getStringNumberFromList(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -13044,7 +13026,7 @@ qint32 XBinary::getStringNumberFromList(QList<QString> *pListStrings, const QStr
     return nResult;
 }
 
-qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
+qint32 XBinary::getStringNumberFromListExp(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
 {
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
@@ -13067,17 +13049,17 @@ qint32 XBinary::getStringNumberFromListExp(QList<QString> *pListStrings, const Q
     return nResult;
 }
 
-bool XBinary::isStringInListPresent(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
+bool XBinary::isStringInListPresent(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
 {
     return (getStringNumberFromList(pListStrings, sString, pPdStruct) != -1);
 }
 
-bool XBinary::isStringInListPresentExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
+bool XBinary::isStringInListPresentExp(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
 {
     return (getStringNumberFromListExp(pListStrings, sString, pPdStruct) != -1);
 }
 
-QString XBinary::getStringByIndex(QList<QString> *pListStrings, qint32 nIndex, qint32 nNumberOfStrings)
+QString XBinary::getStringByIndex(const QList<QString> *pListStrings, qint32 nIndex, qint32 nNumberOfStrings)
 {
     QString sResult;
 
@@ -13409,7 +13391,11 @@ QString XBinary::disasmIdToString(XBinary::DM disasmMode)
         case DM_WASM: sResult = QString("WASM"); break;
         case DM_BPF_LE: sResult = QString("BPF LE"); break;
         case DM_BPF_BE: sResult = QString("BPF BE"); break;
+        case DM_CUSTOM: sResult = tr("Custom"); break;
         case DM_CUSTOM_MACH_REBASE: sResult = QString("MACH REBASE"); break;
+        case DM_CUSTOM_MACH_BIND: sResult = QString("MACH BIND"); break;
+        case DM_CUSTOM_MACH_WEAK: sResult = QString("MACH WEAK"); break;
+        case DM_CUSTOM_MACH_EXPORT: sResult = QString("MACH EXPORT"); break;
         case DM_CUSTOM_7ZIP_PROPERTIES: sResult = QString("7ZIP PROPERTIES"); break;
         default: sResult = tr("Unknown");
     }
@@ -15732,7 +15718,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 } else {
                     QByteArray ba = read_array(nOffset, need);
                     if (ba.size() != need) return false;
-                    if (!compareMemory((char *)ba.constData(), rec.baData.constData(), need)) return false;
+                    if (!compareMemory(ba.constData(), rec.baData.constData(), need)) return false;
                 }
                 nOffset += need;
             } break;

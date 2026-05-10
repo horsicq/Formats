@@ -20,6 +20,8 @@
  */
 #include "xtext.h"
 
+#include <algorithm>
+
 XText::XText(QIODevice *pDevice) : XBinary(pDevice)
 {
 }
@@ -34,7 +36,7 @@ bool XText::isValid(PDSTRUCT *pPdStruct)
 
     if (getSize() > 0) {
         // Check if file contains primarily text content
-        QByteArray baData = read_array_process(0, qMin(getSize(), qint64(8192)), pPdStruct);
+        QByteArray baData = read_array_process(0, (std::min)(getSize(), qint64(8192)), pPdStruct);
 
         // Check for BOM markers
         TEXT_TYPE bomType = _detectBOM();
@@ -152,7 +154,7 @@ XText::TEXT_INFO XText::getTextInfo(PDSTRUCT *pPdStruct)
     result.nCharacterCount = getCharacterCount();
 
     // Calculate word count from a sample of text
-    QString sampleText = getText(result.nBOMSize, qMin(qint64(32768), getSize() - result.nBOMSize));
+    QString sampleText = getText(result.nBOMSize, (std::min)(qint64(32768), getSize() - result.nBOMSize));
     result.nWordCount = _countWords(sampleText);
 
     return result;
@@ -167,7 +169,7 @@ XText::TEXT_TYPE XText::detectTextType(PDSTRUCT *pPdStruct)
     }
 
     // Read sample data for analysis
-    QByteArray baData = read_array_process(0, qMin(getSize(), qint64(8192)), pPdStruct);
+    QByteArray baData = read_array_process(0, (std::min)(getSize(), qint64(8192)), pPdStruct);
 
     // Check if it's printable ASCII
     if (_isPrintableASCII(baData)) {
@@ -195,7 +197,7 @@ XText::TEXT_TYPE XText::detectTextType(PDSTRUCT *pPdStruct)
 
 XText::LINE_ENDING XText::detectLineEnding(PDSTRUCT *pPdStruct)
 {
-    QByteArray baData = read_array_process(0, qMin(getSize(), qint64(8192)), pPdStruct);
+    QByteArray baData = read_array_process(0, (std::min)(getSize(), qint64(8192)), pPdStruct);
     return _detectLineEndingInData(baData);
 }
 
@@ -270,7 +272,7 @@ qint64 XText::getCharacterCount()
         default:
             // For UTF-8 and single-byte encodings, approximate character count
             QString text = getText();
-            return text.length();
+            return text.size();
     }
 }
 
@@ -380,7 +382,7 @@ XText::TEXT_TYPE XText::_detectBOM()
 
 bool XText::_isValidUTF8(const QByteArray &data, qint64 nMaxCheck)
 {
-    qint64 nCheck = qMin(nMaxCheck, qint64(data.size()));
+    qint64 nCheck = (std::min)(nMaxCheck, qint64(data.size()));
 
     for (qint64 i = 0; i < nCheck;) {
         quint8 byte = data.at(i);
@@ -413,7 +415,7 @@ bool XText::_isValidUTF8(const QByteArray &data, qint64 nMaxCheck)
 
 bool XText::_isValidUTF16(const QByteArray &data, bool bBigEndian, qint64 nMaxCheck)
 {
-    qint64 nCheck = qMin(nMaxCheck, qint64(data.size()));
+    qint64 nCheck = (std::min)(nMaxCheck, qint64(data.size()));
 
     if (nCheck % 2 != 0) return false;
 
@@ -450,7 +452,7 @@ bool XText::_isValidUTF16(const QByteArray &data, bool bBigEndian, qint64 nMaxCh
 
 bool XText::_isPrintableASCII(const QByteArray &data, qint64 nMaxCheck)
 {
-    qint64 nCheck = qMin(nMaxCheck, qint64(data.size()));
+    qint64 nCheck = (std::min)(nMaxCheck, qint64(data.size()));
     qint32 nPrintableCount = 0;
 
     for (qint64 i = 0; i < nCheck; i++) {

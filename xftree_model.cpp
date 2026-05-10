@@ -53,7 +53,7 @@ void XFTreeModel::setData(XBinary *pXBinary, const QList<XBinary::XFHEADER> &lis
 
 QModelIndex XFTreeModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (!m_pRootItem) {
+    if (!m_pRootItem || ((parent.isValid()) && (parent.column() != 0)) || !hasIndex(row, column, parent)) {
         return QModelIndex();
     }
 
@@ -96,7 +96,7 @@ QModelIndex XFTreeModel::parent(const QModelIndex &child) const
 
 int XFTreeModel::rowCount(const QModelIndex &parent) const
 {
-    if (!m_pRootItem) {
+    if (!m_pRootItem || ((parent.isValid()) && (parent.column() != 0))) {
         return 0;
     }
 
@@ -190,12 +190,12 @@ QVariant XFTreeModel::headerData(int section, Qt::Orientation orientation, int r
     return result;
 }
 
-XFTreeModel::TREEITEM *XFTreeModel::rootItem() const
+const XFTreeModel::TREEITEM *XFTreeModel::rootItem() const
 {
     return m_pRootItem;
 }
 
-XFTreeModel::TREEITEM *XFTreeModel::itemFromIndex(const QModelIndex &index) const
+const XFTreeModel::TREEITEM *XFTreeModel::itemFromIndex(const QModelIndex &index) const
 {
     if (!index.isValid()) {
         return nullptr;

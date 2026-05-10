@@ -764,7 +764,7 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
 
     // Set as valid if we successfully parsed key fields
     // Name might be empty or a reference in Python 3.11+
-    codeObject.bValid = (codeObject.baCode.size() > 0 || codeObject.listConsts.count() > 0 || !codeObject.sName.isEmpty());
+    codeObject.bValid = (codeObject.baCode.size() > 0 || codeObject.listConsts.size() > 0 || !codeObject.sName.isEmpty());
 
     return codeObject;
 }
@@ -777,7 +777,7 @@ bool XPYC::isConstPresent(const QString &sConstValue, PDSTRUCT *pPdStruct)
         return false;
     }
 
-    for (qint32 i = 0; i < codeObject.listConsts.count(); i++) {
+    for (qint32 i = 0; i < codeObject.listConsts.size(); i++) {
         if (codeObject.listConsts[i].vValue.type() == QVariant::String) {
             QString sValue = codeObject.listConsts[i].vValue.toString();
             if (sValue == sConstValue) {
@@ -797,7 +797,7 @@ bool XPYC::isConstPresent(const CODE_OBJECT *pCodeObject, const QString &sConstV
         return false;
     }
 
-    for (qint32 i = 0; i < pCodeObject->listConsts.count(); i++) {
+    for (qint32 i = 0; i < pCodeObject->listConsts.size(); i++) {
         if (pCodeObject->listConsts[i].vValue.type() == QVariant::String) {
             QString sValue = pCodeObject->listConsts[i].vValue.toString();
             if (sValue == sConstValue) {
@@ -1072,7 +1072,7 @@ void XPYC::_parseVersionNumbers(const QString &sVersion, qint32 *pnMajor, qint32
         *pnMinor = 0;
     }
 
-    qint32 nLength = sVersion.length();
+    qint32 nLength = sVersion.size();
     qint32 nIndex = 0;
 
     qint32 nCurrentMajor = 0;

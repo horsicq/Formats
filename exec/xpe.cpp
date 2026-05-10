@@ -4153,7 +4153,7 @@ QString XPE::resourceRecordToString(const RESOURCE_RECORD &resourceRecord)
     QString sResID2 = XPE::resourceIdNameToString(resourceRecord.irin[1], 1);
     QString sResID3 = XPE::resourceIdNameToString(resourceRecord.irin[2], 2);
 
-    sResult = QString("%1_%2_%3.bin").arg(sResID1, sResID2, sResID3);
+    sResult = QString("%1_%2_%3.bin").arg(sResID1).arg(sResID2).arg(sResID3);
 
     return sResult;
 }
@@ -4825,7 +4825,7 @@ bool XPE::addSection(const QString &sFileName, bool bIsImage, XPE_DEF::IMAGE_SEC
 
         file.close();
     } else {
-        _errorMessage(QString("%1: %2").arg(tr("Cannot open file"), sFileName), pPdStruct);
+        _errorMessage(QString("%1: %2").arg(tr("Cannot open file")).arg(sFileName), pPdStruct);
     }
 
     return bResult;
@@ -7968,7 +7968,7 @@ QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemor
                 record.nModuleAddress = nModuleAddress;
                 record.nOrdinal = importHeaders.at(i).listPositions.at(j).nOrdinal;
                 record.sName = importHeaders.at(i).listPositions.at(j).sName;
-                record.sFunction = QString("%1#%2").arg(sName, importHeaders.at(i).listPositions.at(j).sFunction);
+                record.sFunction = QString("%1#%2").arg(sName).arg(importHeaders.at(i).listPositions.at(j).sFunction);
 
                 listResult.append(record);
             }
@@ -8852,7 +8852,7 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
         } else if (lStatus == CRYPT_E_SECURITY_SETTINGS) {
             result.sStatus = tr("The signature error");
         } else {
-            result.sStatus = QString("%1: %2").arg(tr("Error"), valueToHex((quint32)lStatus));
+            result.sStatus = QString("%1: %2").arg(tr("Error")).arg(valueToHex((quint32)lStatus));
         }
 
         HCERTSTORE hStore = NULL;
@@ -8922,6 +8922,8 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
 
                                         result.sIssuer = getCertNameString(pCertContext, CERTNAMESTRING_ISSUER);
                                         result.sSubject = getCertNameString(pCertContext, CERTNAMESTRING_SUBJECT);
+
+                                        CertFreeCertificateContext(pCertContext);
                                     }
 
                                     delete[] _pOpusInfo;
@@ -8963,6 +8965,8 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
 
                                             result.sTSIssuer = getCertNameString(pCertContext, CERTNAMESTRING_ISSUER);
                                             result.sTSSubject = getCertNameString(pCertContext, CERTNAMESTRING_SUBJECT);
+
+                                            CertFreeCertificateContext(pCertContext);
                                         }
                                     }
 
@@ -8980,6 +8984,14 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
 
                 delete[] _pSignerInfo;
             }
+        }
+
+        if (hMsg) {
+            CryptMsgClose(hMsg);
+        }
+
+        if (hStore) {
+            CertCloseStore(hStore, 0);
         }
 
         wintrustData.dwStateAction = WTD_STATEACTION_CLOSE;
@@ -9159,7 +9171,7 @@ quint64 XPE::getImageFileHeader(XPE_DEF::IMAGE_FILE_HEADER *pHeader, const QStri
     else if (sString == "SizeOfOptionalHeader") nResult = pHeader->SizeOfOptionalHeader;
     else if (sString == "Characteristics") nResult = pHeader->Characteristics;
     else {
-        emit errorMessage(QString("%1: %2").arg(tr("Invalid"), sString));
+        emit errorMessage(QString("%1: %2").arg(tr("Invalid")).arg(sString));
     }
 
     return nResult;
@@ -9200,7 +9212,7 @@ quint64 XPE::getImageOptionalHeader32(XPE_DEF::IMAGE_OPTIONAL_HEADER32 *pHeader,
     else if (sString == "LoaderFlags") nResult = pHeader->LoaderFlags;
     else if (sString == "NumberOfRvaAndSizes") nResult = pHeader->NumberOfRvaAndSizes;
     else {
-        emit errorMessage(QString("%1: %2").arg(tr("Invalid"), sString));
+        emit errorMessage(QString("%1: %2").arg(tr("Invalid")).arg(sString));
     }
 
     return nResult;
@@ -9241,7 +9253,7 @@ quint64 XPE::getImageOptionalHeader64(XPE_DEF::IMAGE_OPTIONAL_HEADER64 *pHeader,
     else if (sString == "LoaderFlags") nResult = pHeader->LoaderFlags;
     else if (sString == "NumberOfRvaAndSizes") nResult = pHeader->NumberOfRvaAndSizes;
     else {
-        emit errorMessage(QString("%1: %2").arg(tr("Invalid"), sString));
+        emit errorMessage(QString("%1: %2").arg(tr("Invalid")).arg(sString));
     }
 
     return nResult;
@@ -10946,7 +10958,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                 _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
                 _sSectionName = convertSectionName(_sSectionName, &osStringTable);
                 record.mapProperties.insert(FPART_PROP_ORIGINALNAME, _sSectionName);
-                record.sName = QString("%1 (%2) [\"%3\"]").arg(tr("Section"), QString::number(i + 1), _sSectionName);
+                record.sName = QString("%1 (%2) [\"%3\"]").arg(tr("Section")).arg(QString::number(i + 1)).arg(_sSectionName);
                 listResult.append(record);
             }
 
@@ -10981,7 +10993,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                     record.nFileSize = nResourceSize;
                     record.nVirtualAddress = nAddress;
                     record.nVirtualSize = nResourceSize;
-                    record.sName = QString("%1 %2").arg(tr("Resource"), QString::number(i));
+                    record.sName = QString("%1 %2").arg(tr("Resource")).arg(QString::number(i));
 
                     if (listResources.at(i).irin[0].bIsName) {
                         record.mapProperties.insert(FPART_PROP_RESOURCEID, listResources.at(i).irin[0].sName);
@@ -13124,18 +13136,23 @@ bool XPE::rebuildDump(const QString &sResultFile, REBUILD_OPTIONS *pRebuildOptio
 
         QFile file;
         file.setFileName(sResultFile);
+        bResult = false;
 
         if (file.open(QIODevice::ReadWrite)) {
 #ifdef QT_DEBUG
             qDebug("XPE::rebuildDump:write:start: %lld msec", timer.elapsed());
 #endif
-            file.resize(baBuffer.size());
-            file.write(baBuffer.data(), baBuffer.size());
+            bool bWriteOk = file.resize(baBuffer.size());
+
+            if (bWriteOk) {
+                bWriteOk = (file.write(baBuffer.data(), baBuffer.size()) == baBuffer.size());
+            }
+
             file.close();
 #ifdef QT_DEBUG
             qDebug("XPE::rebuildDump:write: %lld msec", timer.elapsed());
 #endif
-            bResult = true;
+            bResult = bWriteOk && (file.error() == QFile::NoError);
         }
     }
 
@@ -13479,7 +13496,7 @@ QString XPE::resourceIdNameToString(const RESOURCES_ID_NAME &resourceIdName, qin
             QString sType = mapRT.value(resourceIdName.nID);
 
             if (sType != "") {
-                sResult = QString("%1(%2)").arg(sType, QString::number(resourceIdName.nID));
+                sResult = QString("%1(%2)").arg(sType).arg(QString::number(resourceIdName.nID));
             } else {
                 sResult = QString("%1").arg(resourceIdName.nID);
             }

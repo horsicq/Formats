@@ -1714,7 +1714,7 @@ public:
     static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 1, bool bReverse = false);
     bool zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
-    static bool compareMemory(char *pMemory1, const char *pMemory2, qint64 nSize);
+    static bool compareMemory(const char *pMemory1, const char *pMemory2, qint64 nSize);
     // For strings compare
     static bool compareMemoryByteI(quint8 *pMemory, const quint8 *pMemoryU, const quint8 *pMemoryL,
                                    qint64 nSize);  // Ansi
@@ -2091,7 +2091,7 @@ public:
     };
 
     PACKED_UINT read_uleb128(qint64 nOffset, qint64 nSize);
-    static PACKED_UINT _read_uleb128(char *pData, qint64 nSize);
+    static PACKED_UINT _read_uleb128(const char *pData, qint64 nSize);
 
     PACKED_UINT read_acn1_integer(qint64 nOffset, qint64 nSize);
     static PACKED_UINT _read_acn1_integer(char *pData, qint64 nSize);
@@ -2127,17 +2127,17 @@ public:
     bool isSignatureInFilePartPresent(qint32 nFilePartNumber, const QString &sSignature);
     bool isSignatureInFilePartPresent(_MEMORY_MAP *pMemoryMap, qint32 nFilePartNumber, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
 
-    static QString getStringCollision(QList<QString> *pListStrings, const QString &sString1, const QString &sString2);
+    static QString getStringCollision(const QList<QString> *pListStrings, const QString &sString1, const QString &sString2);
 
     static bool writeToFile(const QString &sFileName, const QByteArray &baData);
     static bool writeToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     static bool appendToFile(const QString &sFileName, const QString &sString);  // TODO rename
     static bool clearFile(const QString &sFileName);
-    static qint32 getStringNumberFromList(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
-    static qint32 getStringNumberFromListExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
-    static bool isStringInListPresent(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
-    static bool isStringInListPresentExp(QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
-    static QString getStringByIndex(QList<QString> *pListStrings, qint32 nIndex, qint32 nNumberOfStrings = -1);
+    static qint32 getStringNumberFromList(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
+    static qint32 getStringNumberFromListExp(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
+    static bool isStringInListPresent(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
+    static bool isStringInListPresentExp(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct = nullptr);
+    static QString getStringByIndex(const QList<QString> *pListStrings, qint32 nIndex, qint32 nNumberOfStrings = -1);
 
     static bool isStringUnicode(const QString &sString, qint32 nMaxCheckSize = -1);
 

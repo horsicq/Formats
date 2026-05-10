@@ -67,14 +67,18 @@ void XFModel_table::setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader
 
 int XFModel_table::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent)
+    if (parent.isValid()) {
+        return 0;
+    }
 
     return m_listTableRowValues.count();
 }
 
 int XFModel_table::columnCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent)
+    if (parent.isValid()) {
+        return 0;
+    }
 
     return m_listColumnMap.count();
 }

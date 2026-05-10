@@ -3031,7 +3031,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         }
 
         for (qint32 i = 0; i < nNumberOfSegments; i++) {
-            QString sName = QString("%1(%2)").arg(QString("PT_LOAD"), QString::number(i));
+            QString sName = QString("%1(%2)").arg(QString("PT_LOAD")).arg(QString::number(i));
 
             quint64 nVirtualAlign = listSegments.at(i).p_align;  // TODO Check!
 
@@ -3718,7 +3718,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset = pListSectionHeaders->at(i).sh_offset;
             dataset.nSize = pListSectionHeaders->at(i).sh_size;
             dataset.nType = DS_INTERPRETER;
-            dataset.sName = QString("%1[%2]").arg("Interpreter", sSectionName);  // TODO mb translate
+            dataset.sName = QString("%1[%2]").arg("Interpreter").arg(sSectionName);  // TODO mb translate
 
             listResult.append(dataset);
         } else if (pListSectionHeaders->at(i).sh_type == 2)  // Symbol table TODO const
@@ -3729,7 +3729,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset = pListSectionHeaders->at(i).sh_offset;
             dataset.nSize = pListSectionHeaders->at(i).sh_size;
             dataset.nType = DS_SYMBOLTABLE;
-            dataset.sName = QString("%1[%2]").arg("Symbol table", sSectionName);  // TODO mb translate
+            dataset.sName = QString("%1[%2]").arg("Symbol table").arg(sSectionName);  // TODO mb translate
 
             qint32 nSectionIndex = getSectionIndexByName(".strtab");
 
@@ -3749,7 +3749,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset = pListSectionHeaders->at(i).sh_offset;
             dataset.nSize = pListSectionHeaders->at(i).sh_size;
             dataset.nType = DS_SYMBOLTABLE;
-            dataset.sName = QString("%1[%2]").arg("Symbol table", sSectionName);  // TODO mb translate
+            dataset.sName = QString("%1[%2]").arg("Symbol table").arg(sSectionName);  // TODO mb translate
 
             qint32 nSectionIndex = getSectionIndexByName(".dynstr");
 
@@ -3769,7 +3769,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset = pListSectionHeaders->at(i).sh_offset;
             dataset.nSize = pListSectionHeaders->at(i).sh_size;
             dataset.nType = DS_STRINGTABLE;
-            dataset.sName = QString("%1[%2]").arg("String table", sSectionName);  // TODO mb translate
+            dataset.sName = QString("%1[%2]").arg("String table").arg(sSectionName);  // TODO mb translate
 
             listResult.append(dataset);
         } else if (pListSectionHeaders->at(i).sh_type == 4)  // RELA TODO const
@@ -3780,7 +3780,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset = pListSectionHeaders->at(i).sh_offset;
             dataset.nSize = pListSectionHeaders->at(i).sh_size;
             dataset.nType = DS_RELA;
-            dataset.sName = QString("%1[%2]").arg("RELA", sSectionName);  // TODO mb translate
+            dataset.sName = QString("%1[%2]").arg("RELA").arg(sSectionName);  // TODO mb translate
 
             listResult.append(dataset);
         } else if (pListSectionHeaders->at(i).sh_type == 6)  // Dynamic TODO const
@@ -3791,7 +3791,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset = pListSectionHeaders->at(i).sh_offset;
             dataset.nSize = pListSectionHeaders->at(i).sh_size;
             dataset.nType = DS_DYNAMICTAGS;
-            dataset.sName = QString("%1[%2]").arg("Dynamic tags", sSectionName);  // TODO mb translate
+            dataset.sName = QString("%1[%2]").arg("Dynamic tags").arg(sSectionName);  // TODO mb translate
 
             listResult.append(dataset);
         } else if (pListSectionHeaders->at(i).sh_type == 7)  // Notes TODO const
@@ -3802,7 +3802,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset = pListSectionHeaders->at(i).sh_offset;
             dataset.nSize = pListSectionHeaders->at(i).sh_size;
             dataset.nType = DS_NOTES;
-            dataset.sName = QString("%1[%2]").arg("Notes", sSectionName);  // TODO mb translate
+            dataset.sName = QString("%1[%2]").arg("Notes").arg(sSectionName);  // TODO mb translate
 
             listResult.append(dataset);
         } else if (pListSectionHeaders->at(i).sh_type == 9)  // REL TODO const
@@ -3813,7 +3813,7 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             dataset.nOffset = pListSectionHeaders->at(i).sh_offset;
             dataset.nSize = pListSectionHeaders->at(i).sh_size;
             dataset.nType = DS_REL;
-            dataset.sName = QString("%1[%2]").arg("REL", sSectionName);  // TODO mb translate
+            dataset.sName = QString("%1[%2]").arg("REL").arg(sSectionName);  // TODO mb translate
 
             listResult.append(dataset);
         }
@@ -4519,7 +4519,7 @@ QString XELF::getMIMEString()
 
 bool XELF::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOptions, PDSTRUCT *pPdStruct)
 {
-    bool bResult = true;
+    bool bResult = false;
 
     QFile file;
     file.setFileName(sResultFile);
@@ -4528,18 +4528,22 @@ bool XELF::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOpt
         if (file.open(QIODevice::ReadWrite)) {
             QByteArray baHeaders = getHeaders();
 
-            file.write(baHeaders);
+            bool bWriteOk = (file.write(baHeaders) == baHeaders.size());
 
             // TODO
 
             file.close();
+
+            bResult = bWriteOk && (file.error() == QFile::NoError);
         }
     } else {
         QString sSrcFile = getDeviceFileName(getDevice());
-        XBinary::copyFile(sSrcFile, sResultFile);
+        bResult = XBinary::copyFile(sSrcFile, sResultFile);
     }
 
-    if (fixDumpOptions.bSetEntryPoint) {
+    if (bResult && fixDumpOptions.bSetEntryPoint) {
+        bResult = false;
+
         if (file.open(QIODevice::ReadWrite)) {
             XELF elf(&file);
 
@@ -4565,9 +4569,13 @@ bool XELF::fixDump(const QString &sResultFile, const FIXDUMP_OPTIONS &fixDumpOpt
                         elf.setHdr32_entry((quint32)fixDumpOptions.nEntryPoint);
                     }
                 }
+
+                bResult = true;
             }
 
             file.close();
+
+            bResult = bResult && (file.error() == QFile::NoError);
         }
     }
 

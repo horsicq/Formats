@@ -20,10 +20,12 @@
  */
 #include "xmsdos.h"
 
+#include <algorithm>
+
 XBinary::XCONVERT _TABLE_XMSDOS_STRUCTID[] = {
     {XMSDOS::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XMSDOS::STRUCTID_IMAGE_DOS_HEADER, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
-    {XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
+    {XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX, "IMAGE_DOS_HEADEREX", QString("IMAGE_DOS_HEADEREX")},
 };
 
 XBinary::XIDSTRING _TABLE_XMSDOS_ImageMagics[] = {
@@ -123,13 +125,13 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
     qint64 nMaxOffset = (nEcp == 0) ? nTotal : ((quint32)nEcp * 0x200 - ((-get_e_cblp()) & 0x1ff));
 
     qint64 nBodyOffset = nHeaderSize;
-    qint64 nBodySize = qMax<qint64>(0, qMin<qint64>(nTotal, nMaxOffset) - nBodyOffset);
+    qint64 nBodySize = (std::max)((qint64)0, (std::min)(nTotal, nMaxOffset) - nBodyOffset);
 
     if (nFileParts & FILEPART_HEADER) {
         FPART record = {};
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
-        record.nFileSize = qMin<qint64>(nHeaderSize, nTotal);
+        record.nFileSize = (std::min)(nHeaderSize, nTotal);
         record.nVirtualAddress = -1;
         record.sName = tr("Header");
         listResult.append(record);
@@ -262,7 +264,7 @@ void XMSDOS::set_e_ovno(quint16 nValue)
 
 void XMSDOS::set_e_res(qint32 nPosition, quint16 nValue)
 {
-    if (nPosition < 4)  // TODO nPosition>=0
+    if ((nPosition >= 0) && (nPosition < 4))
     {
         write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + sizeof(quint16) * nPosition, nValue);
     }
@@ -280,7 +282,7 @@ void XMSDOS::set_e_oeminfo(quint16 nValue)
 
 void XMSDOS::set_e_res2(qint32 nPosition, quint16 nValue)
 {
-    if (nPosition < 10)  // TODO nPosition>=0
+    if ((nPosition >= 0) && (nPosition < 10))
     {
         write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + sizeof(quint16) * nPosition, nValue);
     }
@@ -365,7 +367,7 @@ quint16 XMSDOS::get_e_res(qint32 nPosition)
 {
     quint16 nResult = 0;
 
-    if (nPosition < 10)  // TODO nPosition>=0
+    if ((nPosition >= 0) && (nPosition < 4))
     {
         nResult = read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + sizeof(quint16) * nPosition);
     }
@@ -387,7 +389,7 @@ quint16 XMSDOS::get_e_res2(qint32 nPosition)
 {
     quint16 nResult = 0;
 
-    if (nPosition < 10)  // TODO nPosition>=0
+    if ((nPosition >= 0) && (nPosition < 10))
     {
         nResult = read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + sizeof(quint16) * nPosition);
     }
@@ -449,7 +451,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
     // qint64 nCodeSize = 0;
     qint64 nOverlayOffset = nMaxOffset;
-    qint64 nOverlaySize = qMax(getSize() - nMaxOffset, (qint64)0);
+    qint64 nOverlaySize = (std::max)(getSize() - nMaxOffset, (qint64)0);
 
     // if (nMaxOffset > nCodeOffset) {
     //     nCodeSize = S_ALIGN_UP(nMaxOffset - nCodeOffset, 512);
@@ -715,7 +717,7 @@ qint64 XMSDOS::getDosStubSize()
 {
     qint64 nSize = (qint64)get_lfanew() - sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
 
-    nSize = qMax(nSize, (qint64)0);
+    nSize = (std::max)(nSize, (qint64)0);
 
     return nSize;
 }

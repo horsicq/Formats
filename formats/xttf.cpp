@@ -209,7 +209,7 @@ QString XTTF::getVersion(QList<TTF_TABLE_RECORD> *pListTables, PDSTRUCT *pPdStru
         QString sVersion = XBinary::get_uint32_version(nVersionFixed);
         QString sRevision = XBinary::get_uint32_version(nRevisionFixed);
 
-        sResult = QString("%1 rev %2").arg(sVersion, sRevision);
+        sResult = QString("%1 rev %2").arg(sVersion).arg(sRevision);
     }
 
     return sResult;

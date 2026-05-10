@@ -20,6 +20,8 @@
  */
 #include "xdataconvertor.h"
 
+#include <algorithm>
+
 XDataConvertor::XDataConvertor(QObject *pParent) : XThreadObject(pParent)
 {
     m_options = {};
@@ -48,13 +50,17 @@ void XDataConvertor::process()
     qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
     XBinary::setPdStructInit(pPdStruct, _nFreeIndex, 0);
 
+    m_pData->bValid = false;
+
     if (m_method == CMETHOD_NONE) {
         m_pData->pTmpFile = nullptr;
         m_pData->dEntropy = XBinary::getEntropy(m_pDeviceIn, pPdStruct);
+        m_pData->bValid = (!pPdStruct->bIsStop);
     } else {
         m_pData->pTmpFile = new QTemporaryFile;
 
         if (m_pData->pTmpFile->open()) {
+            bool bConvertOk = false;
             qint64 nOutSize = 0;
             qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
             qint64 nInSize = m_pDeviceIn->size();
@@ -85,8 +91,10 @@ void XDataConvertor::process()
             char *pBuffer = new char[nBufferSize];
 
             if (XBinary::resize(m_pData->pTmpFile, nOutSize)) {
+                bConvertOk = true;
+
                 for (qint32 i = 0; i < nInSize;) {
-                    qint64 _nBufferSize = qMin((qint64)nBufferSize, nInSize - i);
+                    qint64 _nBufferSize = (std::min)((qint64)nBufferSize, nInSize - i);
                     qint64 nProcessedSize = 0;
                     QByteArray baOut;
 
@@ -110,11 +118,21 @@ void XDataConvertor::process()
                         }
                     }
 
-                    m_pDeviceIn->seek(i);
-                    m_pData->pTmpFile->seek(i);
+                    if (bInvalidSize) {
+                        XBinary::setPdStructInfoString(pPdStruct, tr("Invalid size"));
+                        bConvertOk = false;
+                        break;
+                    }
+
+                    if (!m_pDeviceIn->seek(i) || !m_pData->pTmpFile->seek(i)) {
+                        XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
+                        bConvertOk = false;
+                        break;
+                    }
 
                     if ((m_pDeviceIn->read(pBuffer, _nBufferSize) != _nBufferSize) || (_nBufferSize == 0)) {
                         XBinary::setPdStructInfoString(pPdStruct, ("Read error"));
+                        bConvertOk = false;
                         break;
                     }
 
@@ -203,11 +221,7 @@ void XDataConvertor::process()
 
                     if (m_pData->pTmpFile->write(baOut.data(), nProcessedSize) != nProcessedSize) {
                         XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
-                        break;
-                    }
-
-                    if (bInvalidSize) {
-                        XBinary::setPdStructInfoString(pPdStruct, tr("Invalid size"));
+                        bConvertOk = false;
                         break;
                     }
 
@@ -218,12 +232,14 @@ void XDataConvertor::process()
             }
 
             delete[] pBuffer;
+
+            m_pData->bValid = bConvertOk && (!pPdStruct->bIsStop);
         }
 
-        m_pData->dEntropy = XBinary::getEntropy(m_pData->pTmpFile, pPdStruct);
+        if (m_pData->bValid) {
+            m_pData->dEntropy = XBinary::getEntropy(m_pData->pTmpFile, pPdStruct);
+        }
     }
-
-    m_pData->bValid = (!pPdStruct->bIsStop);
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 }

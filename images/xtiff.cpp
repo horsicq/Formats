@@ -137,7 +137,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                     record.nOffset = nOffset;
                     record.nSize = nDataSize;
                     record.nAddress = -1;
-                    record.sName = QString("%1-%2").arg(XBinary::valueToHex(nTag), XBinary::valueToHex(nType));
+                    record.sName = QString("%1-%2").arg(XBinary::valueToHex(nTag)).arg(XBinary::valueToHex(nType));
 
                     result.listRecords.append(record);
                 }
@@ -322,7 +322,7 @@ QString XTiff::getExifCameraName(QIODevice *pDevice, OFFSETSIZE osExif, QList<CH
                 }
 
                 if ((sMake != "") || (sModel != "")) {
-                    sResult = QString("%1(%2)").arg(sMake, sModel);
+                    sResult = QString("%1(%2)").arg(sMake).arg(sModel);
                 }
             }
         }

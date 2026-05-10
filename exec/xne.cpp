@@ -1375,7 +1375,7 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             record.nFileSize = nFileSize;
             record.nVirtualAddress = nModuleAddress + static_cast<XADDR>((i + 1) * 0x10000);
             record.nVirtualSize = 0x10000;
-            record.sName = QString("%1 %2").arg(tr("Segment"), QString::number(i + 1));
+            record.sName = QString("%1 %2").arg(tr("Segment")).arg(QString::number(i + 1));
 
             if (bCalcAddress) {
                 _listCalc.append(record);

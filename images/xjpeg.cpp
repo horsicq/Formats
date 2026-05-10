@@ -168,7 +168,7 @@ QString XJpeg::getVersion()
         quint8 nMajor = read_uint8(JFIF_VERSION_MAJOR_OFFSET);
         quint8 nMinor = read_uint8(JFIF_VERSION_MINOR_OFFSET);
 
-        sResult = QString("%1.%2").arg(QString::number(nMajor), QString::number(nMinor));
+        sResult = QString("%1.%2").arg(QString::number(nMajor)).arg(QString::number(nMinor));
     }
 
     return sResult;

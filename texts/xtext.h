@@ -27,7 +27,7 @@ class XText : public XBinary {
     Q_OBJECT
 
 public:
-    enum TEXT_TYPE {
+    enum TEXT_TYPE : qint32 {
         TEXT_TYPE_UNKNOWN = 0,
         TEXT_TYPE_PLAINTEXT,
         TEXT_TYPE_UTF8,
@@ -40,7 +40,7 @@ public:
         TEXT_TYPE_ANSI
     };
 
-    enum LINE_ENDING {
+    enum LINE_ENDING : qint32 {
         LINE_ENDING_UNKNOWN = 0,
         LINE_ENDING_LF,    // Unix/Linux (\n)
         LINE_ENDING_CRLF,  // Windows (\r\n)

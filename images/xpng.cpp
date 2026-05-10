@@ -22,6 +22,8 @@
 #include <QBuffer>
 #include <zlib.h>
 
+#include <algorithm>
+
 XBinary::XCONVERT _TABLE_XPNG_STRUCTID[] = {
     {XPNG::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XPNG::STRUCTID_SIGNATURE, "Signature", QObject::tr("Signature")},
@@ -387,10 +389,14 @@ QByteArray XPNG::_compressData(const QByteArray &data)
     // Create input and output devices
     QBuffer inputBuffer;
     inputBuffer.setData(data);
-    inputBuffer.open(QIODevice::ReadOnly);
+    if (!inputBuffer.open(QIODevice::ReadOnly)) {
+        return result;
+    }
 
     QBuffer outputBuffer;
-    outputBuffer.open(QIODevice::WriteOnly);
+    if (!outputBuffer.open(QIODevice::WriteOnly)) {
+        return result;
+    }
 
     // Setup compression state
     XBinary::DATAPROCESS_STATE compressState = {};
@@ -446,7 +452,7 @@ QByteArray XPNG::_convertImageData(const char *pData, qint32 nDataSize, quint32 
             qint32 nInputRowOffset = y * nBytesPerRow;
 
             // Filter byte is already 0 (None) from fill
-            qint32 nCopySize = qMin(nBytesPerRow, nDataSize - nInputRowOffset);
+            qint32 nCopySize = (std::min)(nBytesPerRow, nDataSize - nInputRowOffset);
 
             if (nCopySize > 0) {
                 memcpy(baResult.data() + nOutputRowOffset + 1, pData + nInputRowOffset, nCopySize);

@@ -27,7 +27,7 @@ class XPYC : public XBinary {
     Q_OBJECT
 
 public:
-    enum STRUCTID {
+    enum STRUCTID : qint32 {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_HEADER,
         STRUCTID_CODEOBJECT
@@ -45,7 +45,7 @@ public:
     };
 
     // Marshal format type codes
-    enum MARSHAL_TYPE {
+    enum MARSHAL_TYPE : qint32 {
         TYPE_NULL = '0',
         TYPE_NONE = 'N',
         TYPE_FALSE = 'F',

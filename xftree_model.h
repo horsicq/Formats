@@ -56,8 +56,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    TREEITEM *rootItem() const;
-    TREEITEM *itemFromIndex(const QModelIndex &index) const;
+    const TREEITEM *rootItem() const;
+    const TREEITEM *itemFromIndex(const QModelIndex &index) const;
 
     static QString treeToString(XFTreeModel *pModel, const QString &sTitle = QString());
     static void printToConsole(XFTreeModel *pModel, const QString &sTitle = QString());

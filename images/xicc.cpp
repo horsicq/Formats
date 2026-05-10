@@ -105,7 +105,7 @@ QString XICC::getVersion()
     quint8 nMinor = (nVersion >> 20) & 0x0F;
     quint8 nBugFix = (nVersion >> 16) & 0x0F;
 
-    sResult = QString("%1.%2.%3").arg(QString::number(nMajor), QString::number(nMinor), QString::number(nBugFix));
+    sResult = QString("%1.%2.%3").arg(QString::number(nMajor)).arg(QString::number(nMinor)).arg(QString::number(nBugFix));
 
     return sResult;
 }
