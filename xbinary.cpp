@@ -1830,6 +1830,11 @@ QString XBinary::getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo)
     return sResult;
 }
 
+QString XBinary::getOperationSystemInfoString(const FILEFORMATINFO *pFileFormatInfo)
+{
+    return QString("%1, %2").arg(pFileFormatInfo->sArch).arg(modeIdToString(pFileFormatInfo->mode));
+}
+
 XBinary::OSNAME XBinary::getOsName(const FILEFORMATINFO *pFileFormatInfo)
 {
     return pFileFormatInfo->osName;

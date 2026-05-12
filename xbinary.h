@@ -1337,6 +1337,8 @@ public:
     static QString getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo);
     static OSNAME getOsName(const FILEFORMATINFO *pFileFormatInfo);
 
+    static QString getOperationSystemInfoString(const FILEFORMATINFO *pFileFormatInfo);
+
     void setFileFormatExt(const QString &sFileFormatExt);
 
     void setFileFormatSize(qint64 nFileFormatSize);
