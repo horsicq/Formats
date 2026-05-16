@@ -620,7 +620,11 @@ bool XFModel::exportToFile(const QAbstractItemModel *pModel, EXPORT_FORMAT expor
     }
 
     QTextStream stream(&file);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    stream.setEncoding(QStringConverter::Utf8);
+#else
     stream.setCodec("UTF-8");
+#endif
     stream << sContent;
 
     file.close();
