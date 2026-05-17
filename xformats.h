@@ -157,8 +157,8 @@ public:
     static qint64 getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr,
                                     qint64 nOffset = 0, qint64 nSize = -1);
 
-    static QList<XBinary::DATA_HEADER> getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions,
-                                                      bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    // static QList<XBinary::DATA_HEADER> getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions,
+    //                                                   bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static QList<XBinary::XFHEADER> getXFHeaders(QIODevice *pDevice, const QString &sTag, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                  XBinary::PDSTRUCT *pPdStruct = nullptr);  // Obsolete
@@ -169,9 +169,9 @@ public:
     static QList<XBinary::ARCHIVERECORD> getArchiveRecords(XBinary::FT fileType, QIODevice *pDevice, qint32 nLimit = -1, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                            XBinary::PDSTRUCT *pPdStruct = nullptr);
 
-    static qint32 getDataRecordValues(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions,
-                                      QList<XBinary::DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, bool bIsImage = false, XADDR nModuleAddress = -1,
-                                      XBinary::PDSTRUCT *pPdStruct = nullptr);
+    // static qint32 getDataRecordValues(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions,
+    //                                   QList<XBinary::DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, bool bIsImage = false, XADDR nModuleAddress = -1,
+    //                                   XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static QString getFileFormatExtsString(XBinary::FT fileType);
     static bool isArchive(XBinary::FT fileType);

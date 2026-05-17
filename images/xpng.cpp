@@ -586,192 +586,192 @@ quint32 XPNG::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XPNG_STRUCTID, sizeof(_TABLE_XPNG_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
-        _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 8;
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = 8;
 
-                dataHeader.listRecords.append(getDataRecord(0, 8, "Signature", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(0, 8, "Signature", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
-                listResult.append(dataHeader);
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    qint64 nCurrentOffset = 8;  // Start after the PNG signature
-                    qint64 nTotalSize = getSize();
-                    qint32 nNumberOfChunks = 0;
+//                 if (dataHeadersOptions.bChildren) {
+//                     qint64 nCurrentOffset = 8;  // Start after the PNG signature
+//                     qint64 nTotalSize = getSize();
+//                     qint32 nNumberOfChunks = 0;
 
-                    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
-                        qint64 nDataSize = read_uint32(nCurrentOffset, true);
-                        QString sTag = read_ansiString(nCurrentOffset + 4, 4);
+//                     while (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//                         qint64 nDataSize = read_uint32(nCurrentOffset, true);
+//                         QString sTag = read_ansiString(nCurrentOffset + 4, 4);
 
-                        if (nCurrentOffset + nDataSize + 12 > nTotalSize) {
-                            break;  // Prevent reading beyond the file size
-                        }
+//                         if (nCurrentOffset + nDataSize + 12 > nTotalSize) {
+//                             break;  // Prevent reading beyond the file size
+//                         }
 
-                        nNumberOfChunks++;
+//                         nNumberOfChunks++;
 
-                        // End Tag
-                        if (sTag == "IEND") {
-                            break;
-                        }
+//                         // End Tag
+//                         if (sTag == "IEND") {
+//                             break;
+//                         }
 
-                        nCurrentOffset += (12 + nDataSize);
-                    }
+//                         nCurrentOffset += (12 + nDataSize);
+//                     }
 
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
 
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                    _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-                    _dataHeadersOptions.nID = STRUCTID_CHUNK;
-                    _dataHeadersOptions.locType = LT_OFFSET;
-                    _dataHeadersOptions.nLocation = 8;  // Start after the PNG signature;
-                    _dataHeadersOptions.nCount = nNumberOfChunks;
-                    _dataHeadersOptions.nSize = nCurrentOffset - 8;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                     _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//                     _dataHeadersOptions.nID = STRUCTID_CHUNK;
+//                     _dataHeadersOptions.locType = LT_OFFSET;
+//                     _dataHeadersOptions.nLocation = 8;  // Start after the PNG signature;
+//                     _dataHeadersOptions.nCount = nNumberOfChunks;
+//                     _dataHeadersOptions.nSize = nCurrentOffset - 8;
 
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_CHUNK) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_CHUNK) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
 
-                quint32 nDataSize = read_uint32(nStartOffset, true);
+//                 quint32 nDataSize = read_uint32(nStartOffset, true);
 
-                dataHeader.nSize = 12 + nDataSize;
+//                 dataHeader.nSize = 12 + nDataSize;
 
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(8 + nDataSize, 4, "CRC", XBinary::VT_UINT32, 0, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(8 + nDataSize, 4, "CRC", XBinary::VT_UINT32, 0, XBinary::ENDIAN_BIG));
 
-                listResult.append(dataHeader);
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    qint64 nCurrentOffset = nStartOffset;
-                    qint64 nLocation = dataHeadersOptions.nLocation;
+//                 if (dataHeadersOptions.bChildren) {
+//                     qint64 nCurrentOffset = nStartOffset;
+//                     qint64 nLocation = dataHeadersOptions.nLocation;
 
-                    for (int i = 0; i < dataHeader.nCount; i++) {
-                        qint64 nDataSize = read_uint32(nCurrentOffset, true);
-                        QString sTag = read_ansiString(nCurrentOffset + 4, 4);
+//                     for (int i = 0; i < dataHeader.nCount; i++) {
+//                         qint64 nDataSize = read_uint32(nCurrentOffset, true);
+//                         QString sTag = read_ansiString(nCurrentOffset + 4, 4);
 
-                        if (sTag == "IHDR") {
-                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         if (sTag == "IHDR") {
+//                             DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
 
-                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                            _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-                            _dataHeadersOptions.nID = STRUCTID_IHDR;
-                            _dataHeadersOptions.locType = LT_OFFSET;
-                            _dataHeadersOptions.nLocation = nLocation;
-                            _dataHeadersOptions.nSize = nDataSize + 12;
+//                             _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                             _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//                             _dataHeadersOptions.nID = STRUCTID_IHDR;
+//                             _dataHeadersOptions.locType = LT_OFFSET;
+//                             _dataHeadersOptions.nLocation = nLocation;
+//                             _dataHeadersOptions.nSize = nDataSize + 12;
 
-                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                        } else if (sTag == "pHYs") {
-                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                             listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                         } else if (sTag == "pHYs") {
+//                             DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
 
-                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                            _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-                            _dataHeadersOptions.nID = STRUCTID_pHYs;
-                            _dataHeadersOptions.locType = LT_OFFSET;
-                            _dataHeadersOptions.nLocation = nLocation;
-                            _dataHeadersOptions.nSize = nDataSize + 12;
+//                             _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                             _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//                             _dataHeadersOptions.nID = STRUCTID_pHYs;
+//                             _dataHeadersOptions.locType = LT_OFFSET;
+//                             _dataHeadersOptions.nLocation = nLocation;
+//                             _dataHeadersOptions.nSize = nDataSize + 12;
 
-                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                        } else if (sTag == "bKGD") {
-                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                             listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                         } else if (sTag == "bKGD") {
+//                             DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
 
-                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                            _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-                            _dataHeadersOptions.nID = STRUCTID_bKGD;
-                            _dataHeadersOptions.locType = LT_OFFSET;
-                            _dataHeadersOptions.nLocation = nLocation;
-                            _dataHeadersOptions.nSize = nDataSize + 12;
+//                             _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                             _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//                             _dataHeadersOptions.nID = STRUCTID_bKGD;
+//                             _dataHeadersOptions.locType = LT_OFFSET;
+//                             _dataHeadersOptions.nLocation = nLocation;
+//                             _dataHeadersOptions.nSize = nDataSize + 12;
 
-                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                        }
+//                             listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                         }
 
-                        nCurrentOffset += (12 + nDataSize);
-                        nLocation += (12 + nDataSize);
-                    }
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_IHDR) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
+//                         nCurrentOffset += (12 + nDataSize);
+//                         nLocation += (12 + nDataSize);
+//                     }
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_IHDR) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
 
-                dataHeader.nSize = 25;  // IHDR size is always 25 bytes
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(8, 4, "Width", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(12, 4, "Height", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(16, 1, "Bit Depth", XBinary::VT_UINT8, DRF_COUNT, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(17, 1, "Color Type", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(18, 1, "Compression", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(19, 1, "Filter", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(20, 1, "Interlace", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(21, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.nSize = 25;  // IHDR size is always 25 bytes
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(8, 4, "Width", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(12, 4, "Height", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(16, 1, "Bit Depth", XBinary::VT_UINT8, DRF_COUNT, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(17, 1, "Color Type", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(18, 1, "Compression", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(19, 1, "Filter", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(20, 1, "Interlace", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(21, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
 
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_pHYs) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_pHYs) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
 
-                dataHeader.nSize = 21;  // pHYs size is always 21 bytes (length=9)
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(8, 4, "Pixels per Unit X", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(12, 4, "Pixels per Unit Y", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(16, 1, "Unit Specifier", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(17, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.nSize = 21;  // pHYs size is always 21 bytes (length=9)
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(8, 4, "Pixels per Unit X", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(12, 4, "Pixels per Unit Y", XBinary::VT_UINT32, DRF_COUNT, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(16, 1, "Unit Specifier", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(17, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
 
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_bKGD) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_bKGD) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPNG::structIDToString(dataHeadersOptions.nID));
 
-                // Data part of bKGD can be 1 (indexed), 2 (grayscale), or 6 (truecolor) bytes
-                quint32 nLen = read_uint32(nStartOffset, true);
-                dataHeader.nSize = 12 + nLen;  // length + type + data + crc
+//                 // Data part of bKGD can be 1 (indexed), 2 (grayscale), or 6 (truecolor) bytes
+//                 quint32 nLen = read_uint32(nStartOffset, true);
+//                 dataHeader.nSize = 12 + nLen;  // length + type + data + crc
 
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                if (nLen == 1) {
-                    dataHeader.listRecords.append(getDataRecord(8, 1, "Palette Index", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                    dataHeader.listRecords.append(getDataRecord(9, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                } else if (nLen == 2) {
-                    dataHeader.listRecords.append(getDataRecord(8, 2, "Gray", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                    dataHeader.listRecords.append(getDataRecord(10, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                } else if (nLen == 6) {
-                    dataHeader.listRecords.append(getDataRecord(8, 2, "Red", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                    dataHeader.listRecords.append(getDataRecord(10, 2, "Green", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                    dataHeader.listRecords.append(getDataRecord(12, 2, "Blue", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                    dataHeader.listRecords.append(getDataRecord(14, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                } else {
-                    // Unknown size, just show raw data
-                    dataHeader.listRecords.append(getDataRecord(8, nLen, "Data", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                    dataHeader.listRecords.append(getDataRecord(8 + nLen, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                }
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "Length", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(4, 4, "Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 if (nLen == 1) {
+//                     dataHeader.listRecords.append(getDataRecord(8, 1, "Palette Index", XBinary::VT_UINT8, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                     dataHeader.listRecords.append(getDataRecord(9, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 } else if (nLen == 2) {
+//                     dataHeader.listRecords.append(getDataRecord(8, 2, "Gray", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                     dataHeader.listRecords.append(getDataRecord(10, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 } else if (nLen == 6) {
+//                     dataHeader.listRecords.append(getDataRecord(8, 2, "Red", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                     dataHeader.listRecords.append(getDataRecord(10, 2, "Green", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                     dataHeader.listRecords.append(getDataRecord(12, 2, "Blue", XBinary::VT_UINT16, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                     dataHeader.listRecords.append(getDataRecord(14, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 } else {
+//                     // Unknown size, just show raw data
+//                     dataHeader.listRecords.append(getDataRecord(8, nLen, "Data", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                     dataHeader.listRecords.append(getDataRecord(8 + nLen, 4, "CRC", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 }
 
-                listResult.append(dataHeader);
-            } else {
-                // mb TODO
-            }
-        }
-    }
+//                 listResult.append(dataHeader);
+//             } else {
+//                 // mb TODO
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
@@ -839,30 +839,30 @@ QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     return listResult;
 }
 
-qint32 XPNG::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                          void *pUserData, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(locType)
-    Q_UNUSED(nLocation)
-    Q_UNUSED(dataRecordsOptions)
-    Q_UNUSED(pUserData)
+// qint32 XPNG::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+//                           void *pUserData, PDSTRUCT *pPdStruct)
+// {
+//     Q_UNUSED(locType)
+//     Q_UNUSED(nLocation)
+//     Q_UNUSED(dataRecordsOptions)
+//     Q_UNUSED(pUserData)
 
-    qint32 nResult = 0;
+//     qint32 nResult = 0;
 
-    if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_CHUNK) {
-        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
+//     if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_CHUNK) {
+//         nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
 
-        qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation);
+//         qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation);
 
-        quint32 nChunkLenght = read_uint32(nStartOffset, true);
+//         quint32 nChunkLenght = read_uint32(nStartOffset, true);
 
-        nResult = nChunkLenght + 12;
-    } else {
-        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
-    }
+//         nResult = nChunkLenght + 12;
+//     } else {
+//         nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
+//     }
 
-    return nResult;
-}
+//     return nResult;
+// }
 
 QList<QString> XPNG::getSearchSignatures()
 {

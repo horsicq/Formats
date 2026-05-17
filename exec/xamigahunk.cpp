@@ -495,63 +495,63 @@ bool XAmigaHunk::isExecutable()
     return true;
 }
 
-qint32 XAmigaHunk::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                                void *pUserData, PDSTRUCT *pPdStruct)
-{
-    qint32 nResult = 0;
+// qint32 XAmigaHunk::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+//                                 void *pUserData, PDSTRUCT *pPdStruct)
+// {
+//     qint32 nResult = 0;
 
-    if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_HUNK) {
-        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
+//     if (dataRecordsOptions.dataHeaderFirst.dsID.nID == STRUCTID_HUNK) {
+//         nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
 
-        qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation);
+//         qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, locType, nLocation);
 
-        qint64 nHunkSize = _getHunkSize(nStartOffset, pPdStruct);
+//         qint64 nHunkSize = _getHunkSize(nStartOffset, pPdStruct);
 
-        if (nHunkSize > 0) {
-            nResult = (qint32)nHunkSize;
-        }
-    } else {
-        nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
-    }
+//         if (nHunkSize > 0) {
+//             nResult = (qint32)nHunkSize;
+//         }
+//     } else {
+//         nResult = XBinary::readTableRow(nRow, locType, nLocation, dataRecordsOptions, pListDataRecords, pUserData, pPdStruct);
+//     }
 
-    return nResult;
-}
+//     return nResult;
+// }
 
-QList<XBinary::DATA_HEADER> XAmigaHunk::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XAmigaHunk::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<XBinary::DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-        _dataHeadersOptions.nID = STRUCTID_HUNK;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//         _dataHeadersOptions.nID = STRUCTID_HUNK;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-        QList<XAmigaHunk::HUNK> listHunks = getHunks(pPdStruct);
+//         QList<XAmigaHunk::HUNK> listHunks = getHunks(pPdStruct);
 
-        _dataHeadersOptions.nCount = listHunks.count();
+//         _dataHeadersOptions.nCount = listHunks.count();
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_HUNK) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XAmigaHunk::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 4;
-                dataHeader.listRecords.append(getDataRecord(0, 4, "hunk_id", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_HUNK) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XAmigaHunk::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = 4;
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "hunk_id", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

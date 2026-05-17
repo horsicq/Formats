@@ -175,97 +175,97 @@ quint32 XDJVU::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XDJVU_STRUCTID, sizeof(_TABLE_XDJVU_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-QList<XBinary::DATA_HEADER> XDJVU::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XDJVU::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
-        _dataHeadersOptions.nID = STRUCTID_HEADER;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         _dataHeadersOptions.nID = STRUCTID_HEADER;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_HEADER) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XDJVU::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 16;
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XDJVU::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = 16;
 
-                dataHeader.listRecords.append(getDataRecord(0, 8, "Signature", VT_ANSI, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(8, 4, "Size", VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(12, 4, "Type", VT_ANSI, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(0, 8, "Signature", VT_ANSI, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(8, 4, "Size", VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(12, 4, "Type", VT_ANSI, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
 
-                listResult.append(dataHeader);
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    HEADER header = getHeader();
+//                 if (dataHeadersOptions.bChildren) {
+//                     HEADER header = getHeader();
 
-                    if (header.bIsValid && !header.bIsSecure) {
-                        qint64 nCurrentOffset = 16;
-                        qint64 nEndOffset = qMin((qint64)(header.nSize + 12), getSize());
-                        qint32 nNumberOfChunks = 0;
+//                     if (header.bIsValid && !header.bIsSecure) {
+//                         qint64 nCurrentOffset = 16;
+//                         qint64 nEndOffset = qMin((qint64)(header.nSize + 12), getSize());
+//                         qint32 nNumberOfChunks = 0;
 
-                        while (nCurrentOffset < nEndOffset) {
-                            if (nCurrentOffset + 8 > nEndOffset) break;
+//                         while (nCurrentOffset < nEndOffset) {
+//                             if (nCurrentOffset + 8 > nEndOffset) break;
 
-                            qint64 nChunkSize = read_uint32(nCurrentOffset + 4, true);
-                            QString sChunkName = read_ansiString(nCurrentOffset, 4);
+//                             qint64 nChunkSize = read_uint32(nCurrentOffset + 4, true);
+//                             QString sChunkName = read_ansiString(nCurrentOffset, 4);
 
-                            if (!_isChunkValid(sChunkName)) {
-                                break;
-                            }
+//                             if (!_isChunkValid(sChunkName)) {
+//                                 break;
+//                             }
 
-                            if (nCurrentOffset + 8 + nChunkSize > nEndOffset) {
-                                break;
-                            }
+//                             if (nCurrentOffset + 8 + nChunkSize > nEndOffset) {
+//                                 break;
+//                             }
 
-                            nNumberOfChunks++;
-                            nCurrentOffset += (8 + nChunkSize);
+//                             nNumberOfChunks++;
+//                             nCurrentOffset += (8 + nChunkSize);
 
-                            if (nCurrentOffset & 1) {
-                                nCurrentOffset++;
-                            }
+//                             if (nCurrentOffset & 1) {
+//                                 nCurrentOffset++;
+//                             }
 
-                            if (XBinary::isPdStructNotCanceled(pPdStruct) == false) {
-                                break;
-                            }
-                        }
+//                             if (XBinary::isPdStructNotCanceled(pPdStruct) == false) {
+//                                 break;
+//                             }
+//                         }
 
-                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                        _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                        _dataHeadersOptions.nID = STRUCTID_CHUNK;
-                        _dataHeadersOptions.nLocation = 16;
-                        _dataHeadersOptions.nCount = nNumberOfChunks;
-                        _dataHeadersOptions.nSize = nCurrentOffset - 16;
+//                         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                         _dataHeadersOptions.nID = STRUCTID_CHUNK;
+//                         _dataHeadersOptions.nLocation = 16;
+//                         _dataHeadersOptions.nCount = nNumberOfChunks;
+//                         _dataHeadersOptions.nSize = nCurrentOffset - 16;
 
-                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                    }
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_CHUNK) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XDJVU::structIDToString(dataHeadersOptions.nID));
+//                         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                     }
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_CHUNK) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XDJVU::structIDToString(dataHeadersOptions.nID));
 
-                quint32 nChunkSize = read_uint32(nStartOffset + 4, true);
-                dataHeader.nSize = 8 + nChunkSize;
+//                 quint32 nChunkSize = read_uint32(nStartOffset + 4, true);
+//                 dataHeader.nSize = 8 + nChunkSize;
 
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Name", VT_ANSI, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(8, nChunkSize, "Data", VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "Name", VT_ANSI, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(8, nChunkSize, "Data", VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
 
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

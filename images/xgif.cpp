@@ -124,145 +124,145 @@ quint32 XGif::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XGIF_STRUCTID, sizeof(_TABLE_XGIF_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-QList<XBinary::DATA_HEADER> XGif::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XGif::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
-        _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XGif::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 6;  // GIF87a/GIF89a
-                dataHeader.listRecords.append(getDataRecord(0, 6, "Signature", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XGif::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = 6;  // GIF87a/GIF89a
+//                 dataHeader.listRecords.append(getDataRecord(0, 6, "Signature", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    // Logical Screen Descriptor follows at offset 6
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                    _dataHeadersOptions.nID = STRUCTID_LOGICAL_SCREEN_DESCRIPTOR;
-                    _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + 6;
-                    _dataHeadersOptions.locType = dataHeadersOptions.locType;
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_LOGICAL_SCREEN_DESCRIPTOR) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XGif::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 7;  // Width(2), Height(2), Packed(1), BgColor(1), PixelAspect(1)
-                dataHeader.listRecords.append(getDataRecord(0, 2, "Width", VT_UINT16, DRF_COUNT, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(2, 2, "Height", VT_UINT16, DRF_COUNT, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(4, 1, "Packed", VT_UINT8, DRF_UNKNOWN, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(5, 1, "Background Color Index", VT_UINT8, DRF_UNKNOWN, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(6, 1, "Pixel Aspect Ratio", VT_UINT8, DRF_UNKNOWN, ENDIAN_LITTLE));
-                listResult.append(dataHeader);
+//                 if (dataHeadersOptions.bChildren) {
+//                     // Logical Screen Descriptor follows at offset 6
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                     _dataHeadersOptions.nID = STRUCTID_LOGICAL_SCREEN_DESCRIPTOR;
+//                     _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + 6;
+//                     _dataHeadersOptions.locType = dataHeadersOptions.locType;
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_LOGICAL_SCREEN_DESCRIPTOR) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XGif::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = 7;  // Width(2), Height(2), Packed(1), BgColor(1), PixelAspect(1)
+//                 dataHeader.listRecords.append(getDataRecord(0, 2, "Width", VT_UINT16, DRF_COUNT, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(2, 2, "Height", VT_UINT16, DRF_COUNT, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(4, 1, "Packed", VT_UINT8, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(5, 1, "Background Color Index", VT_UINT8, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(6, 1, "Pixel Aspect Ratio", VT_UINT8, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    quint8 nPacked = read_uint8(nStartOffset + 4);
-                    bool bGCT = (nPacked & 0x80) != 0;  // Global Color Table Flag
-                    quint8 nGCTSizeCode = (nPacked & 0x07);
-                    qint64 nNextOffset = nStartOffset + 7;
+//                 if (dataHeadersOptions.bChildren) {
+//                     quint8 nPacked = read_uint8(nStartOffset + 4);
+//                     bool bGCT = (nPacked & 0x80) != 0;  // Global Color Table Flag
+//                     quint8 nGCTSizeCode = (nPacked & 0x07);
+//                     qint64 nNextOffset = nStartOffset + 7;
 
-                    if (bGCT) {
-                        // Size is 3 * 2^(n+1)
-                        qint64 nGCTSize = 3 * ((qint64)1 << (nGCTSizeCode + 1));
-                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                        _dataHeadersOptions.nID = STRUCTID_GLOBAL_COLOR_TABLE;
-                        _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + 7;
-                        _dataHeadersOptions.nSize = nGCTSize;
-                        _dataHeadersOptions.locType = dataHeadersOptions.locType;
-                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                        nNextOffset += nGCTSize;
-                    }
+//                     if (bGCT) {
+//                         // Size is 3 * 2^(n+1)
+//                         qint64 nGCTSize = 3 * ((qint64)1 << (nGCTSizeCode + 1));
+//                         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                         _dataHeadersOptions.nID = STRUCTID_GLOBAL_COLOR_TABLE;
+//                         _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + 7;
+//                         _dataHeadersOptions.nSize = nGCTSize;
+//                         _dataHeadersOptions.locType = dataHeadersOptions.locType;
+//                         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                         nNextOffset += nGCTSize;
+//                     }
 
-                    // Add a generic block table starting at next offset
-                    // We don’t expand children here; FileParts can present detailed blocks
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                    _dataHeadersOptions.nID = STRUCTID_BLOCK;
-                    _dataHeadersOptions.nLocation = nNextOffset;
-                    _dataHeadersOptions.locType = LT_OFFSET;
-                    // Count unknown; leave nCount=0, nSize=remaining bytes
-                    _dataHeadersOptions.nSize = getSize() - nNextOffset;
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_GLOBAL_COLOR_TABLE) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XGif::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = dataHeadersOptions.nSize;
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_BLOCK) {
-                // Represent the sequence of blocks as a table; each entry spans one complete block
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XGif::structIDToString(dataHeadersOptions.nID));
+//                     // Add a generic block table starting at next offset
+//                     // We don’t expand children here; FileParts can present detailed blocks
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                     _dataHeadersOptions.nID = STRUCTID_BLOCK;
+//                     _dataHeadersOptions.nLocation = nNextOffset;
+//                     _dataHeadersOptions.locType = LT_OFFSET;
+//                     // Count unknown; leave nCount=0, nSize=remaining bytes
+//                     _dataHeadersOptions.nSize = getSize() - nNextOffset;
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_GLOBAL_COLOR_TABLE) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XGif::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = dataHeadersOptions.nSize;
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_BLOCK) {
+//                 // Represent the sequence of blocks as a table; each entry spans one complete block
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XGif::structIDToString(dataHeadersOptions.nID));
 
-                // We’ll fill nCount by walking blocks once to compute extent
-                qint64 nCurrentOffset = nStartOffset;
-                qint64 nEndOffset = getSize();
-                qint32 nCount = 0;
+//                 // We’ll fill nCount by walking blocks once to compute extent
+//                 qint64 nCurrentOffset = nStartOffset;
+//                 qint64 nEndOffset = getSize();
+//                 qint32 nCount = 0;
 
-                while ((nCurrentOffset < nEndOffset) && XBinary::isPdStructNotCanceled(pPdStruct)) {
-                    quint8 marker = read_uint8(nCurrentOffset);
-                    if (marker == 0x3B) {  // Trailer
-                        nCount++;
-                        nCurrentOffset += 1;
-                        break;
-                    } else if (marker == 0x2C) {  // Image Descriptor
-                        // Skip Image Descriptor (10 bytes) + optional Local Color Table + Image Data (LZW blocks)
-                        qint64 nBlockStart = nCurrentOffset;
-                        nCurrentOffset += 10;  // descriptor
-                        quint8 packed = read_uint8(nBlockStart + 9);
-                        if (packed & 0x80) {  // Local Color Table
-                            quint8 sizeCode = (packed & 0x07);
-                            nCurrentOffset += 3 * ((qint64)1 << (sizeCode + 1));
-                        }
-                        // LZW minimum code size + sub-blocks
-                        nCurrentOffset += 1;
-                        while (XBinary::isPdStructNotCanceled(pPdStruct)) {
-                            quint8 sub = read_uint8(nCurrentOffset++);
-                            if (sub == 0) break;
-                            nCurrentOffset += sub;
-                            if (nCurrentOffset > nEndOffset) break;
-                        }
-                        nCount++;
-                    } else if (marker == 0x21) {  // Extension
-                        quint8 label = read_uint8(nCurrentOffset + 1);
-                        qint64 nBlockStart = nCurrentOffset;
-                        nCurrentOffset += 2;  // skip introducer + label
-                        // Sub-blocks until size 0
-                        while (XBinary::isPdStructNotCanceled(pPdStruct)) {
-                            quint8 sub = read_uint8(nCurrentOffset++);
-                            if (sub == 0) break;
-                            nCurrentOffset += sub;
-                            if (nCurrentOffset > nEndOffset) break;
-                        }
-                        Q_UNUSED(label)
-                        nCount++;
-                    } else {
-                        break;  // Unknown marker
-                    }
-                }
+//                 while ((nCurrentOffset < nEndOffset) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+//                     quint8 marker = read_uint8(nCurrentOffset);
+//                     if (marker == 0x3B) {  // Trailer
+//                         nCount++;
+//                         nCurrentOffset += 1;
+//                         break;
+//                     } else if (marker == 0x2C) {  // Image Descriptor
+//                         // Skip Image Descriptor (10 bytes) + optional Local Color Table + Image Data (LZW blocks)
+//                         qint64 nBlockStart = nCurrentOffset;
+//                         nCurrentOffset += 10;  // descriptor
+//                         quint8 packed = read_uint8(nBlockStart + 9);
+//                         if (packed & 0x80) {  // Local Color Table
+//                             quint8 sizeCode = (packed & 0x07);
+//                             nCurrentOffset += 3 * ((qint64)1 << (sizeCode + 1));
+//                         }
+//                         // LZW minimum code size + sub-blocks
+//                         nCurrentOffset += 1;
+//                         while (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//                             quint8 sub = read_uint8(nCurrentOffset++);
+//                             if (sub == 0) break;
+//                             nCurrentOffset += sub;
+//                             if (nCurrentOffset > nEndOffset) break;
+//                         }
+//                         nCount++;
+//                     } else if (marker == 0x21) {  // Extension
+//                         quint8 label = read_uint8(nCurrentOffset + 1);
+//                         qint64 nBlockStart = nCurrentOffset;
+//                         nCurrentOffset += 2;  // skip introducer + label
+//                         // Sub-blocks until size 0
+//                         while (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//                             quint8 sub = read_uint8(nCurrentOffset++);
+//                             if (sub == 0) break;
+//                             nCurrentOffset += sub;
+//                             if (nCurrentOffset > nEndOffset) break;
+//                         }
+//                         Q_UNUSED(label)
+//                         nCount++;
+//                     } else {
+//                         break;  // Unknown marker
+//                     }
+//                 }
 
-                dataHeader.nCount = nCount;
-                dataHeader.nSize = qMax<qint64>(0, nCurrentOffset - nStartOffset);
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 dataHeader.nCount = nCount;
+//                 dataHeader.nSize = qMax<qint64>(0, nCurrentOffset - nStartOffset);
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

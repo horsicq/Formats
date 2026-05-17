@@ -287,39 +287,39 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     return result;
 }
 
-QList<XBinary::DATA_HEADER> XTTF::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XTTF::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<XBinary::DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
 
-        _dataHeadersOptions.nID = -1;
+//         _dataHeadersOptions.nID = -1;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            // TODO
-        }
-    }
+//         if (nStartOffset != -1) {
+//             // TODO
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
-QList<QString> XTTF::getTableTitles(const DATA_RECORDS_OPTIONS & /*dataRecordsOptions*/)
-{
-    QList<QString> list;
-    list << "Tag"
-         << "Checksum"
-         << "Offset"
-         << "Length";
-    return list;
-}
+// QList<QString> XTTF::getTableTitles(const DATA_RECORDS_OPTIONS & /*dataRecordsOptions*/)
+// {
+//     QList<QString> list;
+//     list << "Tag"
+//          << "Checksum"
+//          << "Offset"
+//          << "Length";
+//     return list;
+// }
 
 QString XTTF::tagToString(quint32 tag)
 {

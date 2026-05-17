@@ -5762,126 +5762,126 @@ XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSi
     return nResult;
 }
 
-QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XMACH::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<XBinary::DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
-        if (dataHeadersOptions.pMemoryMap->mode == MODE_64) {
-            _dataHeadersOptions.nID = STRUCTID_mach_header_64;
-        } else {
-            _dataHeadersOptions.nID = STRUCTID_mach_header;
-        }
+//         if (dataHeadersOptions.pMemoryMap->mode == MODE_64) {
+//             _dataHeadersOptions.nID = STRUCTID_mach_header_64;
+//         } else {
+//             _dataHeadersOptions.nID = STRUCTID_mach_header;
+//         }
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if ((dataHeadersOptions.nID == STRUCTID_mach_header) || (dataHeadersOptions.nID == STRUCTID_mach_header_64)) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMACH::structIDToString(dataHeadersOptions.nID));
+//         if (nStartOffset != -1) {
+//             if ((dataHeadersOptions.nID == STRUCTID_mach_header) || (dataHeadersOptions.nID == STRUCTID_mach_header_64)) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMACH::structIDToString(dataHeadersOptions.nID));
 
-                if (dataHeadersOptions.nID == STRUCTID_mach_header) {
-                    dataHeader.nSize = sizeof(XMACH_DEF::mach_header);
-                    quint32 cputype = read_uint32(nStartOffset + offsetof(XMACH_DEF::mach_header, cputype));
+//                 if (dataHeadersOptions.nID == STRUCTID_mach_header) {
+//                     dataHeader.nSize = sizeof(XMACH_DEF::mach_header);
+//                     quint32 cputype = read_uint32(nStartOffset + offsetof(XMACH_DEF::mach_header, cputype));
 
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), VL_TYPE_LIST));
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuTypesS(), VL_TYPE_LIST));
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuSubTypesS(cputype), VL_TYPE_LIST));
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFileTypesS(), VL_TYPE_LIST));
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMACH_DEF::mach_header, ncmds), 4, "ncmds", VT_UINT32, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), VL_TYPE_FLAGS));
-                } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
-                    dataHeader.nSize = sizeof(XMACH_DEF::mach_header_64);
-                    quint32 cputype = read_uint32(nStartOffset + offsetof(XMACH_DEF::mach_header_64, cputype));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), VL_TYPE_LIST));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuTypesS(), VL_TYPE_LIST));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuSubTypesS(cputype), VL_TYPE_LIST));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFileTypesS(), VL_TYPE_LIST));
+//                     dataHeader.listRecords.append(
+//                         getDataRecord(offsetof(XMACH_DEF::mach_header, ncmds), 4, "ncmds", VT_UINT32, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+//                     dataHeader.listRecords.append(
+//                         getDataRecord(offsetof(XMACH_DEF::mach_header, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), VL_TYPE_FLAGS));
+//                 } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
+//                     dataHeader.nSize = sizeof(XMACH_DEF::mach_header_64);
+//                     quint32 cputype = read_uint32(nStartOffset + offsetof(XMACH_DEF::mach_header_64, cputype));
 
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), VL_TYPE_LIST));
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuTypesS(), VL_TYPE_LIST));
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuSubTypesS(cputype), VL_TYPE_LIST));
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFileTypesS(), VL_TYPE_LIST));
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMACH_DEF::mach_header_64, ncmds), 4, "ncmds", VT_UINT32, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                    dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
-                                                                  dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), VL_TYPE_FLAGS));
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                }
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, magic), 4, "magic", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderMagicsS(), VL_TYPE_LIST));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, cputype), 4, "cputype", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuTypesS(), VL_TYPE_LIST));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, cpusubtype), 4, "cpusubtype", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderCpuSubTypesS(cputype), VL_TYPE_LIST));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, filetype), 4, "filetype", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFileTypesS(), VL_TYPE_LIST));
+//                     dataHeader.listRecords.append(
+//                         getDataRecord(offsetof(XMACH_DEF::mach_header_64, ncmds), 4, "ncmds", VT_UINT32, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+//                     dataHeader.listRecords.append(
+//                         getDataRecord(offsetof(XMACH_DEF::mach_header_64, sizeofcmds), 4, "sizeofcmds", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::mach_header_64, flags), 4, "flags", VT_UINT32, DRF_UNKNOWN,
+//                                                                   dataHeadersOptions.pMemoryMap->endian, XMACH::getHeaderFlagsS(), VL_TYPE_FLAGS));
+//                     dataHeader.listRecords.append(
+//                         getDataRecord(offsetof(XMACH_DEF::mach_header_64, reserved), 4, "reserved", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 }
 
-                listResult.append(dataHeader);
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    qint64 nCommandsOffset = 0;
-                    qint64 nCommandsSize = 0;
-                    qint32 nCommandCount = 0;
+//                 if (dataHeadersOptions.bChildren) {
+//                     qint64 nCommandsOffset = 0;
+//                     qint64 nCommandsSize = 0;
+//                     qint32 nCommandCount = 0;
 
-                    if (dataHeadersOptions.nID == STRUCTID_mach_header) {
-                        nCommandsOffset = sizeof(XMACH_DEF::mach_header);
+//                     if (dataHeadersOptions.nID == STRUCTID_mach_header) {
+//                         nCommandsOffset = sizeof(XMACH_DEF::mach_header);
 
-                        XMACH_DEF::mach_header mh = _read_mach_header(nStartOffset);
+//                         XMACH_DEF::mach_header mh = _read_mach_header(nStartOffset);
 
-                        nCommandCount = mh.ncmds;
-                        nCommandsSize = mh.sizeofcmds;
-                    } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
-                        nCommandsOffset = sizeof(XMACH_DEF::mach_header_64);
+//                         nCommandCount = mh.ncmds;
+//                         nCommandsSize = mh.sizeofcmds;
+//                     } else if (dataHeadersOptions.nID == STRUCTID_mach_header_64) {
+//                         nCommandsOffset = sizeof(XMACH_DEF::mach_header_64);
 
-                        XMACH_DEF::mach_header_64 mh = _read_mach_header_64(nStartOffset);
+//                         XMACH_DEF::mach_header_64 mh = _read_mach_header_64(nStartOffset);
 
-                        nCommandCount = mh.ncmds;
-                        nCommandsSize = mh.sizeofcmds;
-                    }
+//                         nCommandCount = mh.ncmds;
+//                         nCommandsSize = mh.sizeofcmds;
+//                     }
 
-                    if (nCommandsSize) {
-                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                        _dataHeadersOptions.bChildren = true;
-                        _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                        _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                        _dataHeadersOptions.nID = STRUCTID_load_command;
-                        _dataHeadersOptions.nLocation = dataHeader.nLocation + nCommandsOffset;
-                        _dataHeadersOptions.locType = dataHeader.locType;
-                        _dataHeadersOptions.nCount = nCommandCount;
-                        _dataHeadersOptions.nSize = nCommandsSize;
+//                     if (nCommandsSize) {
+//                         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         _dataHeadersOptions.bChildren = true;
+//                         _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                         _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                         _dataHeadersOptions.nID = STRUCTID_load_command;
+//                         _dataHeadersOptions.nLocation = dataHeader.nLocation + nCommandsOffset;
+//                         _dataHeadersOptions.locType = dataHeader.locType;
+//                         _dataHeadersOptions.nCount = nCommandCount;
+//                         _dataHeadersOptions.nSize = nCommandsSize;
 
-                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                    }
-                }
+//                         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                     }
+//                 }
 
-            } else if (dataHeadersOptions.nID == STRUCTID_load_command) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMACH::structIDToString(dataHeadersOptions.nID));
+//             } else if (dataHeadersOptions.nID == STRUCTID_load_command) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMACH::structIDToString(dataHeadersOptions.nID));
 
-                dataHeader.nSize = sizeof(XMACH_DEF::load_command);
+//                 dataHeader.nSize = sizeof(XMACH_DEF::load_command);
 
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::load_command, cmd), 4, "cmd", VT_UINT32, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XMACH::getLoadCommandTypesS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMACH_DEF::load_command, cmdsize), 4, "cmdsize", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XMACH_DEF::load_command, cmd), 4, "cmd", VT_UINT32, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XMACH::getLoadCommandTypesS(), VL_TYPE_LIST));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMACH_DEF::load_command, cmdsize), 4, "cmdsize", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<QString> XMACH::getSearchSignatures()
 {

@@ -234,14 +234,14 @@ quint32 XCLIAssembly::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XCLIASSEMBLY_STRUCTID, sizeof(_TABLE_XCLIASSEMBLY_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-QList<XBinary::DATA_HEADER> XCLIAssembly::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XCLIAssembly::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    // TODO
+//     // TODO
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XCLIAssembly::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

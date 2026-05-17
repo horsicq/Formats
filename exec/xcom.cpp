@@ -214,39 +214,39 @@ quint32 XCOM::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XCOM_STRUCTID, sizeof(_TABLE_XCOM_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-QList<XBinary::DATA_HEADER> XCOM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XCOM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
-        _dataHeadersOptions.nID = STRUCTID_HEADER;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         _dataHeadersOptions.nID = STRUCTID_HEADER;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_HEADER) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XCOM::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = getSize();
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XCOM::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = getSize();
 
-                dataHeader.listRecords.append(getDataRecord(0, dataHeader.nSize, "Data", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(0, dataHeader.nSize, "Data", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XCOM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

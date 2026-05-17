@@ -275,56 +275,56 @@ quint32 XICC::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XICC_STRUCTID, sizeof(_TABLE_XICC_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-QList<XBinary::DATA_HEADER> XICC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XICC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
-        _dataHeadersOptions.nID = STRUCTID_HEADER;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         _dataHeadersOptions.nID = STRUCTID_HEADER;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_HEADER) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XICC::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 128;
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XICC::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = 128;
 
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Profile Size", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(4, 4, "CMM Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(8, 4, "Version", XBinary::VT_UINT32, DRF_VERSION, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(12, 4, "Device Class", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(16, 4, "Data Color Space", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(20, 4, "PCS", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(24, 12, "Date", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(40, 4, "Platform", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(44, 4, "Flags", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(48, 4, "Device Manufacturer", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(52, 4, "Device Model", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(56, 8, "Device Attributes", XBinary::VT_UINT64, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(64, 4, "Rendering Intent", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(68, 4, "Illuminant X", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(72, 4, "Illuminant Y", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(76, 4, "Illuminant Z", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(80, 4, "Creator", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
-                dataHeader.listRecords.append(getDataRecord(84, 44, "Reserved", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "Profile Size", XBinary::VT_UINT32, DRF_SIZE, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(4, 4, "CMM Type", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(8, 4, "Version", XBinary::VT_UINT32, DRF_VERSION, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(12, 4, "Device Class", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(16, 4, "Data Color Space", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(20, 4, "PCS", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(24, 12, "Date", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(40, 4, "Platform", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(44, 4, "Flags", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(48, 4, "Device Manufacturer", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(52, 4, "Device Model", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(56, 8, "Device Attributes", XBinary::VT_UINT64, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(64, 4, "Rendering Intent", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(68, 4, "Illuminant X", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(72, 4, "Illuminant Y", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(76, 4, "Illuminant Z", XBinary::VT_UINT32, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(80, 4, "Creator", XBinary::VT_CHAR_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
+//                 dataHeader.listRecords.append(getDataRecord(84, 44, "Reserved", XBinary::VT_BYTE_ARRAY, DRF_UNKNOWN, XBinary::ENDIAN_BIG));
 
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

@@ -105,26 +105,26 @@ bool XMP4::isTagValid(const QString &sTagName)
     return bResult;
 }
 
-QList<XBinary::DATA_HEADER> XMP4::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(pPdStruct)
-    QList<DATA_HEADER> list;
+// QList<XBinary::DATA_HEADER> XMP4::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     Q_UNUSED(pPdStruct)
+//     QList<DATA_HEADER> list;
 
-    if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_BOX)) {
-        DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
-        opt.nID = STRUCTID_BOX;
-        opt.dhMode = DHMODE_TABLE;
-        DATA_HEADER t = _initDataHeader(opt, tr("Boxes"));
-        t.locType = LT_OFFSET;
-        t.nLocation = 0;
-        t.nSize = getSize();
-        t.listRecords.append(getDataRecord(0, 4, "size", VT_UINT32, DRF_SIZE, ENDIAN_BIG));
-        t.listRecords.append(getDataRecord(4, 4, "type", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
-        list.append(t);
-    }
+//     if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_BOX)) {
+//         DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
+//         opt.nID = STRUCTID_BOX;
+//         opt.dhMode = DHMODE_TABLE;
+//         DATA_HEADER t = _initDataHeader(opt, tr("Boxes"));
+//         t.locType = LT_OFFSET;
+//         t.nLocation = 0;
+//         t.nSize = getSize();
+//         t.listRecords.append(getDataRecord(0, 4, "size", VT_UINT32, DRF_SIZE, ENDIAN_BIG));
+//         t.listRecords.append(getDataRecord(4, 4, "type", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+//         list.append(t);
+//     }
 
-    return list;
-}
+//     return list;
+// }
 
 QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

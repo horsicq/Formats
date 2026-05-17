@@ -10064,801 +10064,801 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
     return nResult;
 }
 
-QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::DATA_HEADER> listResult;
-
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-        _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADER;
-
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
-
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == XPE::STRUCTID_IMAGE_DOS_HEADER) {
-                {
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.bChildren = false;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                    _dataHeadersOptions.fileType = FT_MSDOS;
-                    _dataHeadersOptions.nID = XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX;
-
-                    listResult.append(XMSDOS::getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-
-                if (dataHeadersOptions.bChildren) {
-                    {
-                        // DOS Stub
-                    }
-                    {
-                        // Rich
-                    }
-
-                    {
-                        quint32 nLNew = read_uint32(nStartOffset + offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
-
-                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                        _dataHeadersOptions.nLocation += nLNew;
-                        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-
-                        if (dataHeadersOptions.fileType == FT_PE32) {
-                            _dataHeadersOptions.nID = STRUCTID_IMAGE_NT_HEADERS32;
-                        } else {
-                            _dataHeadersOptions.nID = STRUCTID_IMAGE_NT_HEADERS64;
-                        }
-
-                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                    }
-                }
-            } else if ((dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS32) || (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS64)) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-
-                if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS32) {
-                    dataHeader.nSize = sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
-                } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS64) {
-                    dataHeader.nSize = sizeof(XPE_DEF::IMAGE_NT_HEADERS64);
-                }
-
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_NT_HEADERS32, Signature), 4, "Signature", VT_DWORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageNtHeadersSignaturesS(), VL_TYPE_LIST));
-
-                listResult.append(dataHeader);
-
-                if (dataHeadersOptions.bChildren) {
-                    {
-                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                        _dataHeadersOptions.nLocation += 4;
-                        _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                        _dataHeadersOptions.nID = STRUCTID_IMAGE_FILE_HEADER;
-                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                    }
-                    {
-                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                        _dataHeadersOptions.nLocation += 4 + sizeof(XPE_DEF::IMAGE_FILE_HEADER);
-                        _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-
-                        if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS32) {
-                            _dataHeadersOptions.nID = STRUCTID_IMAGE_OPTIONAL_HEADER32;
-                        } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS64) {
-                            _dataHeadersOptions.nID = STRUCTID_IMAGE_OPTIONAL_HEADER64;
-                        }
-
-                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                    }
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_FILE_HEADER) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_FILE_HEADER);
-
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine), 2, "Machine", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderMachinesS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections), 2, "NumberOfSections", VT_WORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, PointerToSymbolTable), 4, "PointerToSymbolTable", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSymbols), 4, "NumberOfSymbols", VT_DWORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader), 2, "SizeOfOptionalHeader", VT_WORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Characteristics), 2, "Characteristics", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderCharacteristicsS(), VL_TYPE_FLAGS));
-                listResult.append(dataHeader);
-
-                if (dataHeadersOptions.bChildren) {
-                    quint32 SizeOfOptionalHeader = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader));
-                    quint32 NumberOfSections = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections));
-
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.nLocation += sizeof(XPE_DEF::IMAGE_FILE_HEADER) + SizeOfOptionalHeader;
-                    _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                    _dataHeadersOptions.nCount = NumberOfSections;
-                    _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_SECTION_HEADER) * NumberOfSections;
-                    _dataHeadersOptions.nID = STRUCTID_IMAGE_SECTION_HEADER;
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_OPTIONAL_HEADER32) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32);
-
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Magic), 2, "Magic", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfCode), 4, "SizeOfCode", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfInitializedData), 4, "SizeOfInitializedData", VT_DWORD,
-                                                            DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfUninitializedData), 4, "SizeOfUninitializedData", VT_DWORD,
-                                                            DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, AddressOfEntryPoint), 4, "AddressOfEntryPoint", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfCode), 4, "BaseOfCode", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfData), 4, "BaseOfData", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, ImageBase), 4, "ImageBase", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SectionAlignment), 4, "SectionAlignment", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, FileAlignment), 4, "FileAlignment", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorOperatingSystemVersion), 2, "MajorOperatingSystemVersion",
-                                                            VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorOperatingSystemVersion), 2, "MinorOperatingSystemVersion",
-                                                            VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorImageVersion), 2, "MajorImageVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorImageVersion), 2, "MinorImageVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorSubsystemVersion), 2, "MajorSubsystemVersion", VT_WORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorSubsystemVersion), 2, "MinorSubsystemVersion", VT_WORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Win32VersionValue), 4, "Win32VersionValue", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfImage), 4, "SizeOfImage", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfHeaders), 4, "SizeOfHeaders", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, CheckSum), 4, "CheckSum", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Subsystem), 2, "Subsystem", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderSubsystemS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DllCharacteristics), 2, "DllCharacteristics", VT_WORD,
-                                                              DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderDllCharacteristicsS(),
-                                                              VL_TYPE_FLAGS));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackReserve), 4, "SizeOfStackReserve", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackCommit), 4, "SizeOfStackCommit", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfHeapReserve), 4, "SizeOfHeapReserve", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfHeapCommit), 4, "SizeOfHeapCommit", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, LoaderFlags), 4, "LoaderFlags", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, NumberOfRvaAndSizes), 4, "NumberOfRvaAndSizes", VT_DWORD,
-                                                            DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-
-                listResult.append(dataHeader);
-
-                if (dataHeadersOptions.bChildren) {
-                    quint32 NumberOfRvaAndSizes = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, NumberOfRvaAndSizes));
-
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.nLocation += offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory);
-                    _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                    _dataHeadersOptions.nCount = NumberOfRvaAndSizes;
-                    _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) * NumberOfRvaAndSizes;
-                    _dataHeadersOptions.nID = STRUCTID_IMAGE_DATA_DIRECTORY;
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_OPTIONAL_HEADER64) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64);
-
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Magic), 2, "Magic", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfCode), 4, "SizeOfCode", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfInitializedData), 4, "SizeOfInitializedData", VT_DWORD,
-                                                            DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfUninitializedData), 4, "SizeOfUninitializedData", VT_DWORD,
-                                                            DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, AddressOfEntryPoint), 4, "AddressOfEntryPoint", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, BaseOfCode), 4, "BaseOfCode", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, ImageBase), 8, "ImageBase", VT_QWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SectionAlignment), 4, "SectionAlignment", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, FileAlignment), 4, "FileAlignment", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorOperatingSystemVersion), 2, "MajorOperatingSystemVersion",
-                                                            VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorOperatingSystemVersion), 2, "MinorOperatingSystemVersion",
-                                                            VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorImageVersion), 2, "MajorImageVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorImageVersion), 2, "MinorImageVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorSubsystemVersion), 2, "MajorSubsystemVersion", VT_WORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorSubsystemVersion), 2, "MinorSubsystemVersion", VT_WORD,
-                                                            DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Win32VersionValue), 4, "Win32VersionValue", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfImage), 4, "SizeOfImage", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfHeaders), 4, "SizeOfHeaders", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, CheckSum), 4, "CheckSum", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Subsystem), 2, "Subsystem", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderSubsystemS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DllCharacteristics), 2, "DllCharacteristics", VT_WORD,
-                                                              DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderDllCharacteristicsS(),
-                                                              VL_TYPE_FLAGS));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackReserve), 8, "SizeOfStackReserve", VT_QWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackCommit), 8, "SizeOfStackCommit", VT_QWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfHeapReserve), 8, "SizeOfHeapReserve", VT_QWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfHeapCommit), 8, "SizeOfHeapCommit", VT_QWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, LoaderFlags), 4, "LoaderFlags", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, NumberOfRvaAndSizes), 4, "NumberOfRvaAndSizes", VT_DWORD,
-                                                            DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-
-                if (dataHeadersOptions.bChildren) {
-                    quint32 NumberOfRvaAndSizes = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, NumberOfRvaAndSizes));
-
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.nLocation += offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory);
-                    _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                    _dataHeadersOptions.nCount = NumberOfRvaAndSizes;
-                    _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) * NumberOfRvaAndSizes;
-                    _dataHeadersOptions.nID = STRUCTID_IMAGE_DATA_DIRECTORY;
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_SECTION_HEADER) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
-
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), 8, "Name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData), 4, "SizeOfRawData", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData), 4, "PointerToRawData", VT_DWORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations), 4, "PointerToRelocations", VT_DWORD,
-                                                            DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers), 4, "PointerToLinenumbers", VT_DWORD,
-                                                            DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations), 2, "NumberOfRelocations", VT_WORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers), 2, "NumberOfLinenumbers", VT_WORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getImageSectionHeaderFlags(), VL_TYPE_FLAGS));
-
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DATA_DIRECTORY) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY);
-
-                // TODO OFFSET for cert
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-
-                if (dataHeadersOptions.bChildren) {
-                    for (qint32 i = 0; i < dataHeadersOptions.nCount; i++) {
-                        XPE_DEF::IMAGE_DATA_DIRECTORY idd = read_IMAGE_DATA_DIRECTORY(nStartOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
-
-                        if (!isDataDirectoryValid(&idd, dataHeadersOptions.pMemoryMap)) {
-                            continue;
-                        }
-
-                        // Special-case: Security directory uses file offset, not RVA
-                        if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY) {
-                            if (checkOffsetSize(idd.VirtualAddress, idd.Size)) {
-                                listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_WIN_CERT_RECORD), dataHeader.dsID,
-                                                                 STRUCTID_WIN_CERT_RECORD, idd.VirtualAddress, idd.Size));
-                            }
-                            continue;
-                        }
-
-                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, idd.VirtualAddress);
-                        if (nStructOffset == -1) {
-                            continue;
-                        }
-
-                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                        _dataHeadersOptions.nLocation = nStructOffset;
-                        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
-                        _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                        _dataHeadersOptions.nCount = 1;
-                        _dataHeadersOptions.nSize = idd.Size;
-
-                        switch (i) {
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT: _dataHeadersOptions.nID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
-                                _dataHeadersOptions.nID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR;
-                                _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                                _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
-                                break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE: _dataHeadersOptions.nID = STRUCTID_IMAGE_RESOURCE_DIRECTORY; break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION:
-                                if (getMode() == MODE_64) {
-                                    _dataHeadersOptions.nID = STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY;
-                                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                                    _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY);
-                                } else {
-                                    _dataHeadersOptions.nID = STRUCTID_UNKNOWN;
-                                }
-                                break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG:
-                                _dataHeadersOptions.nID = STRUCTID_IMAGE_DEBUG_DIRECTORY;
-                                _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                                _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
-                                break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS:
-                                _dataHeadersOptions.nID = (getMode() == MODE_64) ? STRUCTID_IMAGE_TLS_DIRECTORY64 : STRUCTID_IMAGE_TLS_DIRECTORY32;
-                                break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG:
-                                _dataHeadersOptions.nID = (getMode() == MODE_64) ? STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64 : STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32;
-                                break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:
-                                _dataHeadersOptions.nID = STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR;
-                                _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                                _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR);
-                                break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IAT:
-                                // Show as HEX chunk
-                                listResult.append(_dataHeaderHex(dataHeadersOptions, QString("IAT"), dataHeader.dsID, STRUCTID_UNKNOWN, nStructOffset, idd.Size));
-                                _dataHeadersOptions.nID = STRUCTID_UNKNOWN;
-                                break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT:
-                                _dataHeadersOptions.nID = STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR;
-                                _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                                _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
-                                break;
-                            case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR: _dataHeadersOptions.nID = STRUCTID_IMAGE_COR20_HEADER; break;
-                            default: _dataHeadersOptions.nID = STRUCTID_UNKNOWN; break;
-                        }
-
-                        if (_dataHeadersOptions.nID != STRUCTID_UNKNOWN) {
-                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                        }
-                    }
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DIRECTORY) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
-
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfNamedEntries), 2, "NumberOfNamedEntries", VT_WORD,
-                                                            DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfIdEntries), 2, "NumberOfIdEntries", VT_WORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-
-                listResult.append(dataHeader);
-
-                // if (dataHeadersOptions.bChildren) {
-                //     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                //     _dataHeadersOptions.nLocation += sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
-                //     _dataHeadersOptions.locType = XBinary::LT_OFFSET;
-                //     _dataHeadersOptions.nID = STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY;
-                //     _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                //     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                //     _dataHeadersOptions.nCount = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfNamedEntries)) +
-                //                                 read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfIdEntries));
-                //     _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY) *
-                //                                 _dataHeadersOptions.nCount; // TODO: check size
-                //     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                // }
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_COR20_HEADER) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_COR20_HEADER);
-
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, cb), 4, "cb", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MajorRuntimeVersion), 2, "MajorRuntimeVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MinorRuntimeVersion), 2, "MinorRuntimeVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData.VirtualAddress), 4, "MetaData.VirtualAddress", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData.Size), 4, "MetaData.Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Flags), 4, "Flags", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, EntryPointToken), 4, "EntryPointToken", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources.VirtualAddress), 4, "Resources.VirtualAddress", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources.Size), 4, "Resources.Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature.VirtualAddress), 4,
-                                                            "StrongNameSignature.VirtualAddress", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature.Size), 4, "StrongNameSignature.Size", VT_DWORD,
-                                                            DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, CodeManagerTable.VirtualAddress), 4, "CodeManagerTable.VirtualAddress",
-                                                            VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, CodeManagerTable.Size), 4, "CodeManagerTable.Size", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, VTableFixups.VirtualAddress), 4, "VTableFixups.VirtualAddress",
-                                                            VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, VTableFixups.Size), 4, "VTableFixups.Size", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, ExportAddressTableJumps.VirtualAddress), 4,
-                                                            "ExportAddressTableJumps.VirtualAddress", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, ExportAddressTableJumps.Size), 4, "ExportAddressTableJumps.Size",
-                                                            VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, ManagedNativeHeader.VirtualAddress), 4,
-                                                            "ManagedNativeHeader.VirtualAddress", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, ManagedNativeHeader.Size), 4, "ManagedNativeHeader.Size", VT_DWORD,
-                                                            DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-
-                listResult.append(dataHeader);
-
-                if (dataHeadersOptions.bChildren) {
-                    XPE_DEF::IMAGE_COR20_HEADER ich = _read_IMAGE_COR20_HEADER(nStartOffset);
-
-                    if (isDataDirectoryValid(&(ich.MetaData), dataHeadersOptions.pMemoryMap)) {
-                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.MetaData.VirtualAddress);
-
-                        if (nStructOffset != -1) {
-                            quint32 nVersionLength = read_uint32(nStructOffset + 12);
-
-                            DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                            _dataHeadersOptions.nLocation = nStructOffset;
-                            _dataHeadersOptions.dsID_parent = dataHeader.dsID;
-                            _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                            _dataHeadersOptions.nCount = 1;
-                            _dataHeadersOptions.nSize = 20 + nVersionLength;  // Header + version string + 2 words
-                            // _dataHeadersOptions.nSize = ich.MetaData.Size;
-                            _dataHeadersOptions.nID = STRUCTID_NET_METADATA;
-                            listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-
-                            quint16 nNumberOfStreams = read_uint16(nStructOffset + 18 + nVersionLength);
-
-                            // Streams
-                            qint64 nStreamOffset = nStructOffset + 20 + nVersionLength;
-                            qint32 i = 0;
-
-                            while ((i < nNumberOfStreams) && (nStreamOffset + 8 < nStructOffset + ich.MetaData.Size)) {
-                                QString sName = read_ansiString(nStreamOffset + 8, 32);
-                                qint32 j = sName.length();
-
-                                // Align
-                                j = (j + 4) & ~3;
-
-                                quint32 nOffset = read_uint32(nStreamOffset);    // TODO Check
-                                quint32 nSize = read_uint32(nStreamOffset + 4);  // TODO Check
-
-                                listResult.append(_dataHeaderHex(dataHeadersOptions, sName, dataHeader.dsID, STRUCTID_NET_METADATA_STREAM, nOffset, nSize));
-
-                                nStreamOffset += 8 + j;
-                                i++;
-                            }
-                        }
-                    }
-
-                    if (isDataDirectoryValid(&(ich.Resources), dataHeadersOptions.pMemoryMap)) {
-                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.Resources.VirtualAddress);
-
-                        if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_RESOURCES), dataHeader.dsID, STRUCTID_NET_RESOURCES,
-                                                             nStructOffset, ich.Resources.Size));
-                        }
-                    }
-
-                    if (isDataDirectoryValid(&(ich.StrongNameSignature), dataHeadersOptions.pMemoryMap)) {
-                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.StrongNameSignature.VirtualAddress);
-
-                        if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_STRONGNAMESIGNATURE), dataHeader.dsID,
-                                                             STRUCTID_NET_STRONGNAMESIGNATURE, nStructOffset, ich.StrongNameSignature.Size));
-                        }
-                    }
-
-                    if (isDataDirectoryValid(&(ich.CodeManagerTable), dataHeadersOptions.pMemoryMap)) {
-                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.CodeManagerTable.VirtualAddress);
-
-                        if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_CODEMANAGERTABLE), dataHeader.dsID,
-                                                             STRUCTID_NET_CODEMANAGERTABLE, nStructOffset, ich.CodeManagerTable.Size));
-                        }
-                    }
-
-                    if (isDataDirectoryValid(&(ich.VTableFixups), dataHeadersOptions.pMemoryMap)) {
-                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.VTableFixups.VirtualAddress);
-
-                        if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_VTABLEFIXUPS), dataHeader.dsID, STRUCTID_NET_VTABLEFIXUPS,
-                                                             nStructOffset, ich.VTableFixups.Size));
-                        }
-                    }
-
-                    if (isDataDirectoryValid(&(ich.ExportAddressTableJumps), dataHeadersOptions.pMemoryMap)) {
-                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.ExportAddressTableJumps.VirtualAddress);
-
-                        if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_EXPORTADDRESSTABLEJUMPS), dataHeader.dsID,
-                                                             STRUCTID_NET_EXPORTADDRESSTABLEJUMPS, nStructOffset, ich.ExportAddressTableJumps.Size));
-                        }
-                    }
-
-                    if (isDataDirectoryValid(&(ich.ManagedNativeHeader), dataHeadersOptions.pMemoryMap)) {
-                        qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.ManagedNativeHeader.VirtualAddress);
-
-                        if (nStructOffset != -1) {
-                            listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_MANAGEDNATIVEHEADER), dataHeader.dsID,
-                                                             STRUCTID_NET_MANAGEDNATIVEHEADER, nStructOffset, ich.ManagedNativeHeader.Size));
-                        }
-                    }
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_EXPORT_DIRECTORY) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_EXPORT_DIRECTORY);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name), 4, "Name", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Base), 4, "Base", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfFunctions), 4, "NumberOfFunctions", VT_DWORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfNames), 4, "NumberOfNames", VT_DWORD, DRF_COUNT,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), 4, "AddressOfFunctions", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNames), 4, "AddressOfNames", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals), 4, "AddressOfNameOrdinals", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk), 4, "OriginalFirstThunk", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, ForwarderChain), 4, "ForwarderChain", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4, "Name", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, FirstThunk), 4, "FirstThunk", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, OffsetModuleName), 2, "OffsetModuleName", VT_WORD,
-                                                            DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, NumberOfModuleForwarderRefs), 2,
-                                                            "NumberOfModuleForwarderRefs", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DEBUG_DIRECTORY) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Type), 4, "Type", VT_DWORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XPE::getDebugTypesS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, SizeOfData), 4, "SizeOfData", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, AddressOfRawData), 4, "AddressOfRawData", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, PointerToRawData), 4, "PointerToRawData", VT_DWORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_TLS_DIRECTORY32) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, StartAddressOfRawData), 4, "StartAddressOfRawData", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, EndAddressOfRawData), 4, "EndAddressOfRawData", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, AddressOfIndex), 4, "AddressOfIndex", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, AddressOfCallBacks), 4, "AddressOfCallBacks", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, SizeOfZeroFill), 4, "SizeOfZeroFill", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_TLS_DIRECTORY64) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, StartAddressOfRawData), 8, "StartAddressOfRawData", VT_QWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, EndAddressOfRawData), 8, "EndAddressOfRawData", VT_QWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, AddressOfIndex), 8, "AddressOfIndex", VT_QWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, AddressOfCallBacks), 8, "AddressOfCallBacks", VT_QWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, SizeOfZeroFill), 4, "SizeOfZeroFill", VT_DWORD, DRF_SIZE,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32);
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SecurityCookie), 4, "SecurityCookie", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardFlags), 4, "GuardFlags", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64);
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SecurityCookie), 8, "SecurityCookie", VT_QWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardFlags), 4, "GuardFlags", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, AllAttributes), 4, "AllAttributes", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, DllNameRVA), 4, "DllNameRVA", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ModuleHandleRVA), 4, "ModuleHandleRVA", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, "ImportAddressTableRVA", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportNameTableRVA), 4, "ImportNameTableRVA", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4, "BoundImportAddressTableRVA",
-                                                            VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4, "UnloadInformationTableRVA",
-                                                            VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY, Name), 4, "Name", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY, OffsetToData), 4, "OffsetToData", VT_DWORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DATA_ENTRY) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, OffsetToData), 4, "OffsetToData", VT_DWORD, DRF_OFFSET,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, CodePage), 4, "CodePage", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Reserved), 4, "Reserved", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_BASE_RELOCATION) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, SizeOfBlock), 4, "SizeOfBlock", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY);
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, BeginAddress), 4, "BeginAddress", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, EndAddress), 4, "EndAddress", VT_DWORD, DRF_ADDRESS,
-                                                            dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, UnwindInfoAddress), 4, "UnwindInfoAddress", VT_DWORD,
-                                                            DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-                listResult.append(dataHeader);
-            } else if (dataHeadersOptions.nID == STRUCTID_NET_METADATA) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
-
-                // .NET Metadata Storage Signature Header
-                // quint32 nSignature = read_uint32(nStartOffset);
-                // quint16 nMajorVersion = read_uint16(nStartOffset + 4);
-                // quint16 nMinorVersion = read_uint16(nStartOffset + 6);
-                // quint32 nExtraData = read_uint32(nStartOffset + 8);
-                quint32 nVersionLength = read_uint32(nStartOffset + 12);
-
-                dataHeader.nSize = 16 + nVersionLength;  // Header + version string
-
-                dataHeader.listRecords.append(getDataRecord(0, 4, "Signature", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(4, 2, "MajorVersion", VT_WORD, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(6, 2, "MinorVersion", VT_WORD, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(8, 4, "ExtraData", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(12, 4, "VersionLength", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(16, nVersionLength, "Version", VT_CHAR_ARRAY, DRF_VOLATILE, dataHeadersOptions.pMemoryMap->endian));
-                // Flags
-                dataHeader.listRecords.append(getDataRecordDV(16 + nVersionLength, 2, "Flags", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian,
-                                                              XPE::getNetMetadataFlagsS(), VL_TYPE_FLAGS));
-                dataHeader.listRecords.append(getDataRecord(18 + nVersionLength, 2, "NumberOfStreams", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
-
-                listResult.append(dataHeader);
-            }
-        }
-    }
-
-    return listResult;
-}
+// QList<XBinary::DATA_HEADER> XPE::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<XBinary::DATA_HEADER> listResult;
+
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//         _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADER;
+
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == XPE::STRUCTID_IMAGE_DOS_HEADER) {
+//                 {
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.bChildren = false;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                     _dataHeadersOptions.fileType = FT_MSDOS;
+//                     _dataHeadersOptions.nID = XMSDOS::STRUCTID_IMAGE_DOS_HEADEREX;
+
+//                     listResult.append(XMSDOS::getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+
+//                 if (dataHeadersOptions.bChildren) {
+//                     {
+//                         // DOS Stub
+//                     }
+//                     {
+//                         // Rich
+//                     }
+
+//                     {
+//                         quint32 nLNew = read_uint32(nStartOffset + offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew));
+
+//                         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         _dataHeadersOptions.nLocation += nLNew;
+//                         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+
+//                         if (dataHeadersOptions.fileType == FT_PE32) {
+//                             _dataHeadersOptions.nID = STRUCTID_IMAGE_NT_HEADERS32;
+//                         } else {
+//                             _dataHeadersOptions.nID = STRUCTID_IMAGE_NT_HEADERS64;
+//                         }
+
+//                         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                     }
+//                 }
+//             } else if ((dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS32) || (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS64)) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+
+//                 if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS32) {
+//                     dataHeader.nSize = sizeof(XPE_DEF::IMAGE_NT_HEADERS32);
+//                 } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS64) {
+//                     dataHeader.nSize = sizeof(XPE_DEF::IMAGE_NT_HEADERS64);
+//                 }
+
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_NT_HEADERS32, Signature), 4, "Signature", VT_DWORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageNtHeadersSignaturesS(), VL_TYPE_LIST));
+
+//                 listResult.append(dataHeader);
+
+//                 if (dataHeadersOptions.bChildren) {
+//                     {
+//                         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         _dataHeadersOptions.nLocation += 4;
+//                         _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                         _dataHeadersOptions.nID = STRUCTID_IMAGE_FILE_HEADER;
+//                         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                     }
+//                     {
+//                         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         _dataHeadersOptions.nLocation += 4 + sizeof(XPE_DEF::IMAGE_FILE_HEADER);
+//                         _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+
+//                         if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS32) {
+//                             _dataHeadersOptions.nID = STRUCTID_IMAGE_OPTIONAL_HEADER32;
+//                         } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_NT_HEADERS64) {
+//                             _dataHeadersOptions.nID = STRUCTID_IMAGE_OPTIONAL_HEADER64;
+//                         }
+
+//                         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                     }
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_FILE_HEADER) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_FILE_HEADER);
+
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Machine), 2, "Machine", VT_WORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderMachinesS(), VL_TYPE_LIST));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections), 2, "NumberOfSections", VT_WORD, DRF_COUNT,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, PointerToSymbolTable), 4, "PointerToSymbolTable", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSymbols), 4, "NumberOfSymbols", VT_DWORD, DRF_COUNT,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader), 2, "SizeOfOptionalHeader", VT_WORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_FILE_HEADER, Characteristics), 2, "Characteristics", VT_WORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageFileHeaderCharacteristicsS(), VL_TYPE_FLAGS));
+//                 listResult.append(dataHeader);
+
+//                 if (dataHeadersOptions.bChildren) {
+//                     quint32 SizeOfOptionalHeader = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, SizeOfOptionalHeader));
+//                     quint32 NumberOfSections = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections));
+
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.nLocation += sizeof(XPE_DEF::IMAGE_FILE_HEADER) + SizeOfOptionalHeader;
+//                     _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                     _dataHeadersOptions.nCount = NumberOfSections;
+//                     _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_SECTION_HEADER) * NumberOfSections;
+//                     _dataHeadersOptions.nID = STRUCTID_IMAGE_SECTION_HEADER;
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_OPTIONAL_HEADER32) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER32);
+
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Magic), 2, "Magic", VT_WORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), VL_TYPE_LIST));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfCode), 4, "SizeOfCode", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfInitializedData), 4, "SizeOfInitializedData", VT_DWORD,
+//                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfUninitializedData), 4, "SizeOfUninitializedData", VT_DWORD,
+//                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, AddressOfEntryPoint), 4, "AddressOfEntryPoint", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfCode), 4, "BaseOfCode", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfData), 4, "BaseOfData", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, ImageBase), 4, "ImageBase", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SectionAlignment), 4, "SectionAlignment", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, FileAlignment), 4, "FileAlignment", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorOperatingSystemVersion), 2, "MajorOperatingSystemVersion",
+//                                                             VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorOperatingSystemVersion), 2, "MinorOperatingSystemVersion",
+//                                                             VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorImageVersion), 2, "MajorImageVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorImageVersion), 2, "MinorImageVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorSubsystemVersion), 2, "MajorSubsystemVersion", VT_WORD,
+//                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorSubsystemVersion), 2, "MinorSubsystemVersion", VT_WORD,
+//                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Win32VersionValue), 4, "Win32VersionValue", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfImage), 4, "SizeOfImage", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfHeaders), 4, "SizeOfHeaders", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, CheckSum), 4, "CheckSum", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Subsystem), 2, "Subsystem", VT_WORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderSubsystemS(), VL_TYPE_LIST));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DllCharacteristics), 2, "DllCharacteristics", VT_WORD,
+//                                                               DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderDllCharacteristicsS(),
+//                                                               VL_TYPE_FLAGS));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackReserve), 4, "SizeOfStackReserve", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackCommit), 4, "SizeOfStackCommit", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfHeapReserve), 4, "SizeOfHeapReserve", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfHeapCommit), 4, "SizeOfHeapCommit", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, LoaderFlags), 4, "LoaderFlags", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, NumberOfRvaAndSizes), 4, "NumberOfRvaAndSizes", VT_DWORD,
+//                                                             DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+
+//                 listResult.append(dataHeader);
+
+//                 if (dataHeadersOptions.bChildren) {
+//                     quint32 NumberOfRvaAndSizes = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, NumberOfRvaAndSizes));
+
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.nLocation += offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DataDirectory);
+//                     _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                     _dataHeadersOptions.nCount = NumberOfRvaAndSizes;
+//                     _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) * NumberOfRvaAndSizes;
+//                     _dataHeadersOptions.nID = STRUCTID_IMAGE_DATA_DIRECTORY;
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_OPTIONAL_HEADER64) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_OPTIONAL_HEADER64);
+
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Magic), 2, "Magic", VT_WORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), VL_TYPE_LIST));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfCode), 4, "SizeOfCode", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfInitializedData), 4, "SizeOfInitializedData", VT_DWORD,
+//                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfUninitializedData), 4, "SizeOfUninitializedData", VT_DWORD,
+//                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, AddressOfEntryPoint), 4, "AddressOfEntryPoint", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, BaseOfCode), 4, "BaseOfCode", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, ImageBase), 8, "ImageBase", VT_QWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SectionAlignment), 4, "SectionAlignment", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, FileAlignment), 4, "FileAlignment", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorOperatingSystemVersion), 2, "MajorOperatingSystemVersion",
+//                                                             VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorOperatingSystemVersion), 2, "MinorOperatingSystemVersion",
+//                                                             VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorImageVersion), 2, "MajorImageVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorImageVersion), 2, "MinorImageVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorSubsystemVersion), 2, "MajorSubsystemVersion", VT_WORD,
+//                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorSubsystemVersion), 2, "MinorSubsystemVersion", VT_WORD,
+//                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Win32VersionValue), 4, "Win32VersionValue", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfImage), 4, "SizeOfImage", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfHeaders), 4, "SizeOfHeaders", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, CheckSum), 4, "CheckSum", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Subsystem), 2, "Subsystem", VT_WORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderSubsystemS(), VL_TYPE_LIST));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DllCharacteristics), 2, "DllCharacteristics", VT_WORD,
+//                                                               DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderDllCharacteristicsS(),
+//                                                               VL_TYPE_FLAGS));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackReserve), 8, "SizeOfStackReserve", VT_QWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackCommit), 8, "SizeOfStackCommit", VT_QWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfHeapReserve), 8, "SizeOfHeapReserve", VT_QWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfHeapCommit), 8, "SizeOfHeapCommit", VT_QWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, LoaderFlags), 4, "LoaderFlags", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, NumberOfRvaAndSizes), 4, "NumberOfRvaAndSizes", VT_DWORD,
+//                                                             DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+
+//                 if (dataHeadersOptions.bChildren) {
+//                     quint32 NumberOfRvaAndSizes = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, NumberOfRvaAndSizes));
+
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.nLocation += offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DataDirectory);
+//                     _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                     _dataHeadersOptions.nCount = NumberOfRvaAndSizes;
+//                     _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY) * NumberOfRvaAndSizes;
+//                     _dataHeadersOptions.nID = STRUCTID_IMAGE_DATA_DIRECTORY;
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_SECTION_HEADER) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_SECTION_HEADER);
+
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Name), 8, "Name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData), 4, "SizeOfRawData", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData), 4, "PointerToRawData", VT_DWORD, DRF_OFFSET,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations), 4, "PointerToRelocations", VT_DWORD,
+//                                                             DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToLinenumbers), 4, "PointerToLinenumbers", VT_DWORD,
+//                                                             DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfRelocations), 2, "NumberOfRelocations", VT_WORD, DRF_COUNT,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, NumberOfLinenumbers), 2, "NumberOfLinenumbers", VT_WORD, DRF_COUNT,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageSectionHeaderFlags(), VL_TYPE_FLAGS));
+
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DATA_DIRECTORY) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY);
+
+//                 // TODO OFFSET for cert
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+
+//                 if (dataHeadersOptions.bChildren) {
+//                     for (qint32 i = 0; i < dataHeadersOptions.nCount; i++) {
+//                         XPE_DEF::IMAGE_DATA_DIRECTORY idd = read_IMAGE_DATA_DIRECTORY(nStartOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
+
+//                         if (!isDataDirectoryValid(&idd, dataHeadersOptions.pMemoryMap)) {
+//                             continue;
+//                         }
+
+//                         // Special-case: Security directory uses file offset, not RVA
+//                         if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY) {
+//                             if (checkOffsetSize(idd.VirtualAddress, idd.Size)) {
+//                                 listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_WIN_CERT_RECORD), dataHeader.dsID,
+//                                                                  STRUCTID_WIN_CERT_RECORD, idd.VirtualAddress, idd.Size));
+//                             }
+//                             continue;
+//                         }
+
+//                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, idd.VirtualAddress);
+//                         if (nStructOffset == -1) {
+//                             continue;
+//                         }
+
+//                         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         _dataHeadersOptions.nLocation = nStructOffset;
+//                         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//                         _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                         _dataHeadersOptions.nCount = 1;
+//                         _dataHeadersOptions.nSize = idd.Size;
+
+//                         switch (i) {
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT: _dataHeadersOptions.nID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
+//                                 _dataHeadersOptions.nID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR;
+//                                 _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                                 _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
+//                                 break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE: _dataHeadersOptions.nID = STRUCTID_IMAGE_RESOURCE_DIRECTORY; break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION:
+//                                 if (getMode() == MODE_64) {
+//                                     _dataHeadersOptions.nID = STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY;
+//                                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                                     _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY);
+//                                 } else {
+//                                     _dataHeadersOptions.nID = STRUCTID_UNKNOWN;
+//                                 }
+//                                 break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG:
+//                                 _dataHeadersOptions.nID = STRUCTID_IMAGE_DEBUG_DIRECTORY;
+//                                 _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                                 _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
+//                                 break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS:
+//                                 _dataHeadersOptions.nID = (getMode() == MODE_64) ? STRUCTID_IMAGE_TLS_DIRECTORY64 : STRUCTID_IMAGE_TLS_DIRECTORY32;
+//                                 break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG:
+//                                 _dataHeadersOptions.nID = (getMode() == MODE_64) ? STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64 : STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32;
+//                                 break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:
+//                                 _dataHeadersOptions.nID = STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR;
+//                                 _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                                 _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR);
+//                                 break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IAT:
+//                                 // Show as HEX chunk
+//                                 listResult.append(_dataHeaderHex(dataHeadersOptions, QString("IAT"), dataHeader.dsID, STRUCTID_UNKNOWN, nStructOffset, idd.Size));
+//                                 _dataHeadersOptions.nID = STRUCTID_UNKNOWN;
+//                                 break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT:
+//                                 _dataHeadersOptions.nID = STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR;
+//                                 _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                                 _dataHeadersOptions.nCount = idd.Size / sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
+//                                 break;
+//                             case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR: _dataHeadersOptions.nID = STRUCTID_IMAGE_COR20_HEADER; break;
+//                             default: _dataHeadersOptions.nID = STRUCTID_UNKNOWN; break;
+//                         }
+
+//                         if (_dataHeadersOptions.nID != STRUCTID_UNKNOWN) {
+//                             listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                         }
+//                     }
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DIRECTORY) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
+
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfNamedEntries), 2, "NumberOfNamedEntries", VT_WORD,
+//                                                             DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfIdEntries), 2, "NumberOfIdEntries", VT_WORD, DRF_COUNT,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+
+//                 listResult.append(dataHeader);
+
+//                 // if (dataHeadersOptions.bChildren) {
+//                 //     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                 //     _dataHeadersOptions.nLocation += sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
+//                 //     _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//                 //     _dataHeadersOptions.nID = STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY;
+//                 //     _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                 //     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                 //     _dataHeadersOptions.nCount = read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfNamedEntries)) +
+//                 //                                 read_uint16(nStartOffset + offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfIdEntries));
+//                 //     _dataHeadersOptions.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY) *
+//                 //                                 _dataHeadersOptions.nCount; // TODO: check size
+//                 //     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 // }
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_COR20_HEADER) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_COR20_HEADER);
+
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, cb), 4, "cb", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MajorRuntimeVersion), 2, "MajorRuntimeVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MinorRuntimeVersion), 2, "MinorRuntimeVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData.VirtualAddress), 4, "MetaData.VirtualAddress", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData.Size), 4, "MetaData.Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Flags), 4, "Flags", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, EntryPointToken), 4, "EntryPointToken", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources.VirtualAddress), 4, "Resources.VirtualAddress", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources.Size), 4, "Resources.Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature.VirtualAddress), 4,
+//                                                             "StrongNameSignature.VirtualAddress", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature.Size), 4, "StrongNameSignature.Size", VT_DWORD,
+//                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, CodeManagerTable.VirtualAddress), 4, "CodeManagerTable.VirtualAddress",
+//                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, CodeManagerTable.Size), 4, "CodeManagerTable.Size", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, VTableFixups.VirtualAddress), 4, "VTableFixups.VirtualAddress",
+//                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, VTableFixups.Size), 4, "VTableFixups.Size", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, ExportAddressTableJumps.VirtualAddress), 4,
+//                                                             "ExportAddressTableJumps.VirtualAddress", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, ExportAddressTableJumps.Size), 4, "ExportAddressTableJumps.Size",
+//                                                             VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, ManagedNativeHeader.VirtualAddress), 4,
+//                                                             "ManagedNativeHeader.VirtualAddress", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, ManagedNativeHeader.Size), 4, "ManagedNativeHeader.Size", VT_DWORD,
+//                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+
+//                 listResult.append(dataHeader);
+
+//                 if (dataHeadersOptions.bChildren) {
+//                     XPE_DEF::IMAGE_COR20_HEADER ich = _read_IMAGE_COR20_HEADER(nStartOffset);
+
+//                     if (isDataDirectoryValid(&(ich.MetaData), dataHeadersOptions.pMemoryMap)) {
+//                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.MetaData.VirtualAddress);
+
+//                         if (nStructOffset != -1) {
+//                             quint32 nVersionLength = read_uint32(nStructOffset + 12);
+
+//                             DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                             _dataHeadersOptions.nLocation = nStructOffset;
+//                             _dataHeadersOptions.dsID_parent = dataHeader.dsID;
+//                             _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                             _dataHeadersOptions.nCount = 1;
+//                             _dataHeadersOptions.nSize = 20 + nVersionLength;  // Header + version string + 2 words
+//                             // _dataHeadersOptions.nSize = ich.MetaData.Size;
+//                             _dataHeadersOptions.nID = STRUCTID_NET_METADATA;
+//                             listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+
+//                             quint16 nNumberOfStreams = read_uint16(nStructOffset + 18 + nVersionLength);
+
+//                             // Streams
+//                             qint64 nStreamOffset = nStructOffset + 20 + nVersionLength;
+//                             qint32 i = 0;
+
+//                             while ((i < nNumberOfStreams) && (nStreamOffset + 8 < nStructOffset + ich.MetaData.Size)) {
+//                                 QString sName = read_ansiString(nStreamOffset + 8, 32);
+//                                 qint32 j = sName.length();
+
+//                                 // Align
+//                                 j = (j + 4) & ~3;
+
+//                                 quint32 nOffset = read_uint32(nStreamOffset);    // TODO Check
+//                                 quint32 nSize = read_uint32(nStreamOffset + 4);  // TODO Check
+
+//                                 listResult.append(_dataHeaderHex(dataHeadersOptions, sName, dataHeader.dsID, STRUCTID_NET_METADATA_STREAM, nOffset, nSize));
+
+//                                 nStreamOffset += 8 + j;
+//                                 i++;
+//                             }
+//                         }
+//                     }
+
+//                     if (isDataDirectoryValid(&(ich.Resources), dataHeadersOptions.pMemoryMap)) {
+//                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.Resources.VirtualAddress);
+
+//                         if (nStructOffset != -1) {
+//                             listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_RESOURCES), dataHeader.dsID, STRUCTID_NET_RESOURCES,
+//                                                              nStructOffset, ich.Resources.Size));
+//                         }
+//                     }
+
+//                     if (isDataDirectoryValid(&(ich.StrongNameSignature), dataHeadersOptions.pMemoryMap)) {
+//                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.StrongNameSignature.VirtualAddress);
+
+//                         if (nStructOffset != -1) {
+//                             listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_STRONGNAMESIGNATURE), dataHeader.dsID,
+//                                                              STRUCTID_NET_STRONGNAMESIGNATURE, nStructOffset, ich.StrongNameSignature.Size));
+//                         }
+//                     }
+
+//                     if (isDataDirectoryValid(&(ich.CodeManagerTable), dataHeadersOptions.pMemoryMap)) {
+//                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.CodeManagerTable.VirtualAddress);
+
+//                         if (nStructOffset != -1) {
+//                             listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_CODEMANAGERTABLE), dataHeader.dsID,
+//                                                              STRUCTID_NET_CODEMANAGERTABLE, nStructOffset, ich.CodeManagerTable.Size));
+//                         }
+//                     }
+
+//                     if (isDataDirectoryValid(&(ich.VTableFixups), dataHeadersOptions.pMemoryMap)) {
+//                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.VTableFixups.VirtualAddress);
+
+//                         if (nStructOffset != -1) {
+//                             listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_VTABLEFIXUPS), dataHeader.dsID, STRUCTID_NET_VTABLEFIXUPS,
+//                                                              nStructOffset, ich.VTableFixups.Size));
+//                         }
+//                     }
+
+//                     if (isDataDirectoryValid(&(ich.ExportAddressTableJumps), dataHeadersOptions.pMemoryMap)) {
+//                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.ExportAddressTableJumps.VirtualAddress);
+
+//                         if (nStructOffset != -1) {
+//                             listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_EXPORTADDRESSTABLEJUMPS), dataHeader.dsID,
+//                                                              STRUCTID_NET_EXPORTADDRESSTABLEJUMPS, nStructOffset, ich.ExportAddressTableJumps.Size));
+//                         }
+//                     }
+
+//                     if (isDataDirectoryValid(&(ich.ManagedNativeHeader), dataHeadersOptions.pMemoryMap)) {
+//                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.ManagedNativeHeader.VirtualAddress);
+
+//                         if (nStructOffset != -1) {
+//                             listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_MANAGEDNATIVEHEADER), dataHeader.dsID,
+//                                                              STRUCTID_NET_MANAGEDNATIVEHEADER, nStructOffset, ich.ManagedNativeHeader.Size));
+//                         }
+//                     }
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_EXPORT_DIRECTORY) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_EXPORT_DIRECTORY);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name), 4, "Name", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Base), 4, "Base", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfFunctions), 4, "NumberOfFunctions", VT_DWORD, DRF_COUNT,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfNames), 4, "NumberOfNames", VT_DWORD, DRF_COUNT,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), 4, "AddressOfFunctions", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNames), 4, "AddressOfNames", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals), 4, "AddressOfNameOrdinals", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk), 4, "OriginalFirstThunk", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, ForwarderChain), 4, "ForwarderChain", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4, "Name", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, FirstThunk), 4, "FirstThunk", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, OffsetModuleName), 2, "OffsetModuleName", VT_WORD,
+//                                                             DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, NumberOfModuleForwarderRefs), 2,
+//                                                             "NumberOfModuleForwarderRefs", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DEBUG_DIRECTORY) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Type), 4, "Type", VT_DWORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getDebugTypesS(), VL_TYPE_LIST));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, SizeOfData), 4, "SizeOfData", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, AddressOfRawData), 4, "AddressOfRawData", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, PointerToRawData), 4, "PointerToRawData", VT_DWORD, DRF_OFFSET,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_TLS_DIRECTORY32) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, StartAddressOfRawData), 4, "StartAddressOfRawData", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, EndAddressOfRawData), 4, "EndAddressOfRawData", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, AddressOfIndex), 4, "AddressOfIndex", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, AddressOfCallBacks), 4, "AddressOfCallBacks", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, SizeOfZeroFill), 4, "SizeOfZeroFill", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY32, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_TLS_DIRECTORY64) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, StartAddressOfRawData), 8, "StartAddressOfRawData", VT_QWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, EndAddressOfRawData), 8, "EndAddressOfRawData", VT_QWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, AddressOfIndex), 8, "AddressOfIndex", VT_QWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, AddressOfCallBacks), 8, "AddressOfCallBacks", VT_QWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, SizeOfZeroFill), 4, "SizeOfZeroFill", VT_DWORD, DRF_SIZE,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_TLS_DIRECTORY64, Characteristics), 4, "Characteristics", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32);
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SecurityCookie), 4, "SecurityCookie", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardFlags), 4, "GuardFlags", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64);
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MinorVersion), 2, "MinorVersion", VT_WORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SecurityCookie), 8, "SecurityCookie", VT_QWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardFlags), 4, "GuardFlags", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, AllAttributes), 4, "AllAttributes", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, DllNameRVA), 4, "DllNameRVA", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ModuleHandleRVA), 4, "ModuleHandleRVA", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, "ImportAddressTableRVA", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportNameTableRVA), 4, "ImportNameTableRVA", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4, "BoundImportAddressTableRVA",
+//                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4, "UnloadInformationTableRVA",
+//                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY, Name), 4, "Name", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY, OffsetToData), 4, "OffsetToData", VT_DWORD, DRF_OFFSET,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RESOURCE_DATA_ENTRY) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, OffsetToData), 4, "OffsetToData", VT_DWORD, DRF_OFFSET,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, CodePage), 4, "CodePage", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Reserved), 4, "Reserved", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_BASE_RELOCATION) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, VirtualAddress), 4, "VirtualAddress", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, SizeOfBlock), 4, "SizeOfBlock", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY);
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, BeginAddress), 4, "BeginAddress", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, EndAddress), 4, "EndAddress", VT_DWORD, DRF_ADDRESS,
+//                                                             dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY, UnwindInfoAddress), 4, "UnwindInfoAddress", VT_DWORD,
+//                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                 listResult.append(dataHeader);
+//             } else if (dataHeadersOptions.nID == STRUCTID_NET_METADATA) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
+
+//                 // .NET Metadata Storage Signature Header
+//                 // quint32 nSignature = read_uint32(nStartOffset);
+//                 // quint16 nMajorVersion = read_uint16(nStartOffset + 4);
+//                 // quint16 nMinorVersion = read_uint16(nStartOffset + 6);
+//                 // quint32 nExtraData = read_uint32(nStartOffset + 8);
+//                 quint32 nVersionLength = read_uint32(nStartOffset + 12);
+
+//                 dataHeader.nSize = 16 + nVersionLength;  // Header + version string
+
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "Signature", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(4, 2, "MajorVersion", VT_WORD, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(6, 2, "MinorVersion", VT_WORD, DRF_VERSION, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(8, 4, "ExtraData", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(12, 4, "VersionLength", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(16, nVersionLength, "Version", VT_CHAR_ARRAY, DRF_VOLATILE, dataHeadersOptions.pMemoryMap->endian));
+//                 // Flags
+//                 dataHeader.listRecords.append(getDataRecordDV(16 + nVersionLength, 2, "Flags", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian,
+//                                                               XPE::getNetMetadataFlagsS(), VL_TYPE_FLAGS));
+//                 dataHeader.listRecords.append(getDataRecord(18 + nVersionLength, 2, "NumberOfStreams", VT_WORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));
+
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
+
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

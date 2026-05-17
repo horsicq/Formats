@@ -662,17 +662,17 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
     return nResult;
 }
 
-QList<XBinary::DATA_HEADER> XFormats::getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions, bool bIsImage,
-                                                     XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XFormats::getDataHeaders(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_HEADERS_OPTIONS &dataHeadersOptions, bool bIsImage,
+//                                                      XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+// {
+//     QList<XBinary::DATA_HEADER> listResult;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
-    listResult = pBinary->getDataHeaders(dataHeadersOptions, pPdStruct);
-    delete pBinary;
+//     XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+//     listResult = pBinary->getDataHeaders(dataHeadersOptions, pPdStruct);
+//     delete pBinary;
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QString &sTag, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
 {
@@ -884,18 +884,18 @@ QList<XBinary::ARCHIVERECORD> XFormats::getArchiveRecords(XBinary::FT fileType, 
     return listResult;
 }
 
-qint32 XFormats::getDataRecordValues(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions,
-                                     QList<XBinary::DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, bool bIsImage, XADDR nModuleAddress,
-                                     XBinary::PDSTRUCT *pPdStruct)
-{
-    qint32 nResult = 0;
+// qint32 XFormats::getDataRecordValues(XBinary::FT fileType, QIODevice *pDevice, const XBinary::DATA_RECORDS_OPTIONS &dataRecordsOptions,
+//                                      QList<XBinary::DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles, bool bIsImage, XADDR nModuleAddress,
+//                                      XBinary::PDSTRUCT *pPdStruct)
+// {
+//     qint32 nResult = 0;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
-    nResult = pBinary->getDataRecordValues(dataRecordsOptions, pListDataRecords, pListTitles, pPdStruct);
-    delete pBinary;
+//     XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+//     nResult = pBinary->getDataRecordValues(dataRecordsOptions, pListDataRecords, pListTitles, pPdStruct);
+//     delete pBinary;
 
-    return nResult;
-}
+//     return nResult;
+// }
 
 QString XFormats::getFileFormatExtsString(XBinary::FT fileType)
 {

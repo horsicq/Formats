@@ -1189,20 +1189,20 @@ public:
         DHMODE_HEX
     };
 
-    struct DATA_HEADER {
-        DSID dsID;
-        DSID dsID_parent;
-        QString sName;
-        LT locType;
-        XADDR nLocation;
-        qint64 nSize;
-        qint32 nCount;
-        DHMODE dhMode;
-        QList<DATA_RECORD> listRecords;
-    };
+    // struct DATA_HEADER {
+    //     DSID dsID;
+    //     DSID dsID_parent;
+    //     QString sName;
+    //     LT locType;
+    //     XADDR nLocation;
+    //     qint64 nSize;
+    //     qint32 nCount;
+    //     DHMODE dhMode;
+    //     QList<DATA_RECORD> listRecords;
+    // };
 
-    static DATA_HEADER _searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders);
-    static DATA_HEADER _searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders);
+    // static DATA_HEADER _searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders);
+    // static DATA_HEADER _searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders);
 
     DATA_RECORD getDataRecord(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian);
     DATA_RECORD getDataRecordDV(qint64 nRelOffset, qint64 nSize, const QString &sName, VT valType, quint32 nFlags, ENDIAN endian, QMap<quint64, QString> mapValues,
@@ -1212,22 +1212,22 @@ public:
     virtual QString structIDToFtString(quint32 nID);
     virtual quint32 ftStringToStructID(const QString &sFtString);
 
-    struct DATA_HEADERS_OPTIONS {
-        _MEMORY_MAP *pMemoryMap;
-        DSID dsID_parent;
-        FT fileType;
-        quint32 nID;
-        LT locType;
-        XADDR nLocation;
-        bool bChildren;
-        DHMODE dhMode;
-        qint64 nSize;
-        qint32 nCount;
-    };
+    // struct DATA_HEADERS_OPTIONS {
+    //     _MEMORY_MAP *pMemoryMap;
+    //     DSID dsID_parent;
+    //     FT fileType;
+    //     quint32 nID;
+    //     LT locType;
+    //     XADDR nLocation;
+    //     bool bChildren;
+    //     DHMODE dhMode;
+    //     qint64 nSize;
+    //     qint32 nCount;
+    // };
 
-    DSID _addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct);
+    // DSID _addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct);
 
-    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
+    // virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 
     QList<XFHEADER> _getXFHeaders(PDSTRUCT *pPdStruct = nullptr);
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
@@ -1237,13 +1237,13 @@ public:
     static QString xfHeaderToTag(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentTag);
     static QString xfHeaderToString(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentString);
 
-    DATA_HEADER _initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName);
-    DATA_HEADER _dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize);
+    // DATA_HEADER _initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName);
+    // DATA_HEADER _dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize);
 
-    struct DATA_RECORDS_OPTIONS {
-        _MEMORY_MAP *pMemoryMap;
-        DATA_HEADER dataHeaderFirst;
-    };
+    // struct DATA_RECORDS_OPTIONS {
+    //     _MEMORY_MAP *pMemoryMap;
+    //     DATA_HEADER dataHeaderFirst;
+    // };
 
     struct DATA_RECORD_ROW {
         LT locType;
@@ -1252,21 +1252,21 @@ public:
         QList<QVariant> listValues;
     };
 
-    qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles,
-                               PDSTRUCT *pPdStruct);
+    // qint32 getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles,
+    //                            PDSTRUCT *pPdStruct);
 
-    static QList<QString> getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, const DATA_RECORD_ROW &dataRecordRow, PDSTRUCT *pPdStruct);
+    // static QList<QString> getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, const DATA_RECORD_ROW &dataRecordRow, PDSTRUCT *pPdStruct);
 
-    virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
+    // virtual QList<QString> getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions);
 
     struct TABLE_LIST {
         QList<OFFSETSIZE> listOffsetsSizes;
     };
 
-    virtual bool readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void **ppUserData, PDSTRUCT *pPdStruct);
-    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                                void *pUserData, PDSTRUCT *pPdStruct);
-    virtual void readTableFinalize(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct);
+    // virtual bool readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void **ppUserData, PDSTRUCT *pPdStruct);
+    // virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+    //                             void *pUserData, PDSTRUCT *pPdStruct);
+    // virtual void readTableFinalize(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct);
 
     bool _isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, quint32 nFlag);
 

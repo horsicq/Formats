@@ -295,53 +295,53 @@ quint32 XIcon::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XICON_STRUCTID, sizeof(_TABLE_XICON_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-QList<XBinary::DATA_HEADER> XIcon::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XIcon::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = getFileType();
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = getFileType();
 
-        _dataHeadersOptions.nID = STRUCTID_ICONDIR;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_ICONDIR) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XIcon::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = sizeof(ICONDIR);
-                dataHeader.listRecords.append(getDataRecord(0, 2, "Reserved", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(2, 2, "Type", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(4, 2, "Count", VT_UINT16, DRF_COUNT, ENDIAN_LITTLE));
-                listResult.append(dataHeader);
+//         _dataHeadersOptions.nID = STRUCTID_ICONDIR;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_ICONDIR) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XIcon::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = sizeof(ICONDIR);
+//                 dataHeader.listRecords.append(getDataRecord(0, 2, "Reserved", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(2, 2, "Type", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(4, 2, "Count", VT_UINT16, DRF_COUNT, ENDIAN_LITTLE));
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    ICONDIR dir = readICONDIR();
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                    _dataHeadersOptions.nID = STRUCTID_ICONDIRENTRY;
-                    _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + sizeof(ICONDIR);
-                    _dataHeadersOptions.locType = dataHeadersOptions.locType;
-                    _dataHeadersOptions.nCount = dir.idCount;
-                    _dataHeadersOptions.nSize = sizeof(ICONDIRENTRY) * dir.idCount;
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_ICONDIRENTRY) {
-                // Describe the table of entries; row reading can be added later if needed
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XIcon::structIDToString(dataHeadersOptions.nID));
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 if (dataHeadersOptions.bChildren) {
+//                     ICONDIR dir = readICONDIR();
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                     _dataHeadersOptions.nID = STRUCTID_ICONDIRENTRY;
+//                     _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + sizeof(ICONDIR);
+//                     _dataHeadersOptions.locType = dataHeadersOptions.locType;
+//                     _dataHeadersOptions.nCount = dir.idCount;
+//                     _dataHeadersOptions.nSize = sizeof(ICONDIRENTRY) * dir.idCount;
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_ICONDIRENTRY) {
+//                 // Describe the table of entries; row reading can be added later if needed
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XIcon::structIDToString(dataHeadersOptions.nID));
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

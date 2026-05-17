@@ -223,68 +223,68 @@ XBMP::BMPFILEHEADER XBMP::getFileHeader()
     return header;
 }
 
-QList<XBinary::DATA_HEADER> XBMP::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XBMP::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = FT_BMP;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = FT_BMP;
 
-        _dataHeadersOptions.nID = STRUCTID_BMPFILEHEADER;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_BMPFILEHEADER) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XBMP::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 14;  // BITMAPFILEHEADER
-                dataHeader.listRecords.append(getDataRecord(0, 2, "bfType", VT_CHAR_ARRAY, DRF_UNKNOWN, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(2, 4, "bfSize", VT_UINT32, DRF_SIZE, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(6, 2, "bfReserved1", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(8, 2, "bfReserved2", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(10, 4, "bfOffBits", VT_UINT32, DRF_OFFSET, ENDIAN_LITTLE));
-                listResult.append(dataHeader);
+//         _dataHeadersOptions.nID = STRUCTID_BMPFILEHEADER;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_BMPFILEHEADER) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XBMP::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = 14;  // BITMAPFILEHEADER
+//                 dataHeader.listRecords.append(getDataRecord(0, 2, "bfType", VT_CHAR_ARRAY, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(2, 4, "bfSize", VT_UINT32, DRF_SIZE, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(6, 2, "bfReserved1", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(8, 2, "bfReserved2", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(10, 4, "bfOffBits", VT_UINT32, DRF_OFFSET, ENDIAN_LITTLE));
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.nID = STRUCTID_BMPINFOHEADER;
-                    _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + 14;
-                    _dataHeadersOptions.locType = dataHeadersOptions.locType;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_BMPINFOHEADER) {
-                // The first field contains the header size and defines the variant
-                quint32 biSize = read_uint32(nStartOffset, false);
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XBMP::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = biSize;
-                dataHeader.listRecords.append(getDataRecord(0, 4, "biSize", VT_UINT32, DRF_SIZE, ENDIAN_LITTLE));
-                if (biSize >= 40) {
-                    dataHeader.listRecords.append(getDataRecord(4, 4, "biWidth", VT_INT32, DRF_UNKNOWN, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(8, 4, "biHeight", VT_INT32, DRF_UNKNOWN, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(12, 2, "biPlanes", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(14, 2, "biBitCount", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(16, 4, "biCompression", VT_UINT32, DRF_UNKNOWN, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(20, 4, "biSizeImage", VT_UINT32, DRF_SIZE, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(24, 4, "biXPelsPerMeter", VT_INT32, DRF_UNKNOWN, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(28, 4, "biYPelsPerMeter", VT_INT32, DRF_UNKNOWN, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(32, 4, "biClrUsed", VT_UINT32, DRF_UNKNOWN, ENDIAN_LITTLE));
-                    dataHeader.listRecords.append(getDataRecord(36, 4, "biClrImportant", VT_UINT32, DRF_UNKNOWN, ENDIAN_LITTLE));
-                }
-                // For BI_BITFIELDS (if biSize >= 52/56/108/124), masks follow; we keep header generic here
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 if (dataHeadersOptions.bChildren) {
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.nID = STRUCTID_BMPINFOHEADER;
+//                     _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + 14;
+//                     _dataHeadersOptions.locType = dataHeadersOptions.locType;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_BMPINFOHEADER) {
+//                 // The first field contains the header size and defines the variant
+//                 quint32 biSize = read_uint32(nStartOffset, false);
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XBMP::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = biSize;
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "biSize", VT_UINT32, DRF_SIZE, ENDIAN_LITTLE));
+//                 if (biSize >= 40) {
+//                     dataHeader.listRecords.append(getDataRecord(4, 4, "biWidth", VT_INT32, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(8, 4, "biHeight", VT_INT32, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(12, 2, "biPlanes", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(14, 2, "biBitCount", VT_UINT16, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(16, 4, "biCompression", VT_UINT32, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(20, 4, "biSizeImage", VT_UINT32, DRF_SIZE, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(24, 4, "biXPelsPerMeter", VT_INT32, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(28, 4, "biYPelsPerMeter", VT_INT32, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(32, 4, "biClrUsed", VT_UINT32, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                     dataHeader.listRecords.append(getDataRecord(36, 4, "biClrImportant", VT_UINT32, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 }
+//                 // For BI_BITFIELDS (if biSize >= 52/56/108/124), masks follow; we keep header generic here
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

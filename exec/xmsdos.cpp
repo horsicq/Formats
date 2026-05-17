@@ -909,85 +909,85 @@ QList<XBinary::XFRECORD> XMSDOS::getXFRecords(FT fileType, quint32 nStructID, co
     return listResult;
 }
 
-QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XMSDOS::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<XBinary::DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-        _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADER;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//         _dataHeadersOptions.nID = STRUCTID_IMAGE_DOS_HEADER;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if ((dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) || (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX)) {
-                XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMSDOS::structIDToString(dataHeadersOptions.nID));
+//         if (nStartOffset != -1) {
+//             if ((dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) || (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX)) {
+//                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XMSDOS::structIDToString(dataHeadersOptions.nID));
 
-                if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) {
-                    dataHeader.nSize = sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
-                } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX) {
-                    dataHeader.nSize = sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
-                }
+//                 if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADER) {
+//                     dataHeader.nSize = sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
+//                 } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX) {
+//                     dataHeader.nSize = sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
+//                 }
 
-                dataHeader.listRecords.append(getDataRecordDV(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_magic), 2, "e_magic", VT_WORD, DRF_UNKNOWN,
-                                                              dataHeadersOptions.pMemoryMap->endian, XMSDOS::getImageMagicsS(), VL_TYPE_LIST));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cblp), 2, "e_cblp", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cp), 2, "e_cp", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_crlc), 2, "e_crlc", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cparhdr), 2, "e_cparhdr", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_minalloc), 2, "e_minalloc", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_maxalloc), 2, "e_maxalloc", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ss), 2, "e_ss", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_sp), 2, "e_sp", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_csum), 2, "e_csum", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ip), 2, "e_ip", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cs), 2, "e_cs", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_lfarlc), 2, "e_lfarlc", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ovno), 2, "e_ovno", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_magic), 2, "e_magic", VT_WORD, DRF_UNKNOWN,
+//                                                               dataHeadersOptions.pMemoryMap->endian, XMSDOS::getImageMagicsS(), VL_TYPE_LIST));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cblp), 2, "e_cblp", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cp), 2, "e_cp", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_crlc), 2, "e_crlc", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cparhdr), 2, "e_cparhdr", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_minalloc), 2, "e_minalloc", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_maxalloc), 2, "e_maxalloc", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ss), 2, "e_ss", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_sp), 2, "e_sp", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_csum), 2, "e_csum", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ip), 2, "e_ip", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cs), 2, "e_cs", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_lfarlc), 2, "e_lfarlc", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ovno), 2, "e_ovno", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
-                if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX) {
-                    for (qint32 i = 0; i < 4; i++) {
-                        dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + i * sizeof(quint16), 2, QString("e_res_%1").arg(i),
-                                                                    VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                    }
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oemid), 2, "e_oemid", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oeminfo), 2, "e_oeminfo", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                    for (qint32 i = 0; i < 10; i++) {
-                        dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + i * sizeof(quint16), 2,
-                                                                    QString("e_res2_%1").arg(i), VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                    }
-                    dataHeader.listRecords.append(
-                        getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew), 4, "e_lfanew", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                }
+//                 if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX) {
+//                     for (qint32 i = 0; i < 4; i++) {
+//                         dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + i * sizeof(quint16), 2, QString("e_res_%1").arg(i),
+//                                                                     VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     }
+//                     dataHeader.listRecords.append(
+//                         getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oemid), 2, "e_oemid", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     dataHeader.listRecords.append(
+//                         getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oeminfo), 2, "e_oeminfo", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     for (qint32 i = 0; i < 10; i++) {
+//                         dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + i * sizeof(quint16), 2,
+//                                                                     QString("e_res2_%1").arg(i), VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     }
+//                     dataHeader.listRecords.append(
+//                         getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew), 4, "e_lfanew", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 }
 
-                listResult.append(dataHeader);
-            }
+//                 listResult.append(dataHeader);
+//             }
 
-            if (dataHeadersOptions.bChildren) {
-            }
-        }
-    }
+//             if (dataHeadersOptions.bChildren) {
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }

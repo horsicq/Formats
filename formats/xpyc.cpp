@@ -905,113 +905,113 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     return listResult;
 }
 
-QList<XBinary::DATA_HEADER> XPYC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XPYC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        // Initialize with default headers
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         // Initialize with default headers
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
 
-        // Start with header
-        _dataHeadersOptions.nID = STRUCTID_HEADER;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         // Start with header
+//         _dataHeadersOptions.nID = STRUCTID_HEADER;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_HEADER) {
-                INFO info = getInternalInfo(pPdStruct);
-                qint32 nMajor = 0;
-                qint32 nMinor = 0;
-                _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
+//                 INFO info = getInternalInfo(pPdStruct);
+//                 qint32 nMajor = 0;
+//                 qint32 nMinor = 0;
+//                 _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
 
-                bool bNewLayout = ((nMajor > 3) || ((nMajor == 3) && (nMinor >= 7)));
+//                 bool bNewLayout = ((nMajor > 3) || ((nMajor == 3) && (nMinor >= 7)));
 
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPYC::structIDToString(dataHeadersOptions.nID));
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPYC::structIDToString(dataHeadersOptions.nID));
 
-                // Calculate header size
-                dataHeader.nSize = 4;  // Magic + Marker
-                if (bNewLayout) {
-                    dataHeader.nSize += 4;  // Flags
-                    if (info.bHashBased) {
-                        dataHeader.nSize += 8 + 4;  // Hash + source size
-                    } else {
-                        dataHeader.nSize += 4 + 4;  // Timestamp + source size
-                    }
-                } else {
-                    dataHeader.nSize += 8;  // Timestamp + source size
-                }
+//                 // Calculate header size
+//                 dataHeader.nSize = 4;  // Magic + Marker
+//                 if (bNewLayout) {
+//                     dataHeader.nSize += 4;  // Flags
+//                     if (info.bHashBased) {
+//                         dataHeader.nSize += 8 + 4;  // Hash + source size
+//                     } else {
+//                         dataHeader.nSize += 4 + 4;  // Timestamp + source size
+//                     }
+//                 } else {
+//                     dataHeader.nSize += 8;  // Timestamp + source size
+//                 }
 
-                // Add all header fields
-                dataHeader.listRecords.append(getDataRecord(nStartOffset + 0, 2, "Magic Value", VT_UINT16, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(nStartOffset + 2, 2, "Magic Marker", VT_UINT16, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 // Add all header fields
+//                 dataHeader.listRecords.append(getDataRecord(nStartOffset + 0, 2, "Magic Value", VT_UINT16, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(nStartOffset + 2, 2, "Magic Marker", VT_UINT16, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
-                qint64 nOffset = 4;
-                if (bNewLayout) {
-                    dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Flags", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                    nOffset += 4;
+//                 qint64 nOffset = 4;
+//                 if (bNewLayout) {
+//                     dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Flags", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     nOffset += 4;
 
-                    if (info.bHashBased) {
-                        dataHeader.listRecords.append(
-                            getDataRecord(nStartOffset + nOffset, 8, "Hash", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                        nOffset += 8;
-                        dataHeader.listRecords.append(
-                            getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                    } else {
-                        dataHeader.listRecords.append(
-                            getDataRecord(nStartOffset + nOffset, 4, "Timestamp", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                        nOffset += 4;
-                        dataHeader.listRecords.append(
-                            getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                    }
-                } else {
-                    dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Timestamp", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                    nOffset += 4;
-                    dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-                }
+//                     if (info.bHashBased) {
+//                         dataHeader.listRecords.append(
+//                             getDataRecord(nStartOffset + nOffset, 8, "Hash", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                         nOffset += 8;
+//                         dataHeader.listRecords.append(
+//                             getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     } else {
+//                         dataHeader.listRecords.append(
+//                             getDataRecord(nStartOffset + nOffset, 4, "Timestamp", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                         nOffset += 4;
+//                         dataHeader.listRecords.append(
+//                             getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     }
+//                 } else {
+//                     dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Timestamp", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     nOffset += 4;
+//                     dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                 }
 
-                listResult.append(dataHeader);
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    // Add marshalled code object section
-                    qint64 nHeaderSize = dataHeader.nSize;
-                    qint64 nFormatSize = getFileFormatSize(pPdStruct);
+//                 if (dataHeadersOptions.bChildren) {
+//                     // Add marshalled code object section
+//                     qint64 nHeaderSize = dataHeader.nSize;
+//                     qint64 nFormatSize = getFileFormatSize(pPdStruct);
 
-                    if (nHeaderSize < nFormatSize) {
-                        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-                        _dataHeadersOptions.nID = STRUCTID_CODEOBJECT;
-                        _dataHeadersOptions.nLocation = nHeaderSize;
-                        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//                     if (nHeaderSize < nFormatSize) {
+//                         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//                         _dataHeadersOptions.nID = STRUCTID_CODEOBJECT;
+//                         _dataHeadersOptions.nLocation = nHeaderSize;
+//                         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-                        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                    }
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_CODEOBJECT) {
-                qint64 nFormatSize = getFileFormatSize(pPdStruct);
+//                         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                     }
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_CODEOBJECT) {
+//                 qint64 nFormatSize = getFileFormatSize(pPdStruct);
 
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPYC::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = nFormatSize - nStartOffset;
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XPYC::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = nFormatSize - nStartOffset;
 
-                // Marshalled code object - binary data
-                dataHeader.listRecords.append(
-                    getDataRecord(nStartOffset, dataHeader.nSize, "Marshalled Code Object", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 // Marshalled code object - binary data
+//                 dataHeader.listRecords.append(
+//                     getDataRecord(nStartOffset, dataHeader.nSize, "Marshalled Code Object", VT_BYTE_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QString XPYC::_magicToVersion(quint16 nMagicValue)
 {

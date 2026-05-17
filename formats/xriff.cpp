@@ -206,44 +206,44 @@ QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
     return list;
 }
 
-QList<XBinary::DATA_HEADER> XRiff::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(pPdStruct)
-    QList<DATA_HEADER> list;
+// QList<XBinary::DATA_HEADER> XRiff::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     Q_UNUSED(pPdStruct)
+//     QList<DATA_HEADER> list;
 
-    if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_HEADER)) {
-        DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
-        opt.nID = STRUCTID_HEADER;
-        opt.dhMode = DHMODE_HEADER;
-        DATA_HEADER h = _initDataHeader(opt, tr("Header"));
-        h.locType = LT_OFFSET;
-        h.nLocation = 0;
-        h.nSize = 12;
-        h.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
-        h.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, getEndian()));
-        h.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
-        list.append(h);
-    }
+//     if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_HEADER)) {
+//         DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
+//         opt.nID = STRUCTID_HEADER;
+//         opt.dhMode = DHMODE_HEADER;
+//         DATA_HEADER h = _initDataHeader(opt, tr("Header"));
+//         h.locType = LT_OFFSET;
+//         h.nLocation = 0;
+//         h.nSize = 12;
+//         h.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+//         h.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, getEndian()));
+//         h.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+//         list.append(h);
+//     }
 
-    if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_CHUNK)) {
-        // Present a single table row for the outer chunk
-        DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
-        opt.nID = STRUCTID_CHUNK;
-        opt.dhMode = DHMODE_TABLE;
-        DATA_HEADER t = _initDataHeader(opt, tr("Chunks"));
-        t.locType = LT_OFFSET;
-        t.nLocation = 0;
-        bool bBE = (getEndian() == ENDIAN_BIG);
-        quint32 nSize = read_uint32(4, bBE);
-        t.nSize = qMin<qint64>(getSize(), (qint64)nSize + 8);
-        t.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
-        t.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, getEndian()));
-        t.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
-        list.append(t);
-    }
+//     if (!(dataHeadersOptions.nID) || (dataHeadersOptions.nID == STRUCTID_CHUNK)) {
+//         // Present a single table row for the outer chunk
+//         DATA_HEADERS_OPTIONS opt = dataHeadersOptions;
+//         opt.nID = STRUCTID_CHUNK;
+//         opt.dhMode = DHMODE_TABLE;
+//         DATA_HEADER t = _initDataHeader(opt, tr("Chunks"));
+//         t.locType = LT_OFFSET;
+//         t.nLocation = 0;
+//         bool bBE = (getEndian() == ENDIAN_BIG);
+//         quint32 nSize = read_uint32(4, bBE);
+//         t.nSize = qMin<qint64>(getSize(), (qint64)nSize + 8);
+//         t.listRecords.append(getDataRecord(0, 4, "Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+//         t.listRecords.append(getDataRecord(4, 4, "Size", VT_UINT32, DRF_SIZE, getEndian()));
+//         t.listRecords.append(getDataRecord(8, 4, "Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+//         list.append(t);
+//     }
 
-    return list;
-}
+//     return list;
+// }
 
 QString XRiff::structIDToString(quint32 nID)
 {

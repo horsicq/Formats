@@ -753,37 +753,37 @@ quint32 XBinary::getFPART_crc32(const FPART &fpart)
     return crc;
 }
 
-XBinary::DATA_HEADER XBinary::_searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders)
-{
-    XBinary::DATA_HEADER result = {};
+// XBinary::DATA_HEADER XBinary::_searchDataHeaderById(FT fileType, quint32 nID, const QList<DATA_HEADER> &listDataHeaders)
+// {
+//     XBinary::DATA_HEADER result = {};
 
-    qint32 nNumberOfRecords = listDataHeaders.count();
+//     qint32 nNumberOfRecords = listDataHeaders.count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if ((listDataHeaders.at(i).dsID.fileType == fileType) && (listDataHeaders.at(i).dsID.nID == nID)) {
-            result = listDataHeaders.at(i);
-            break;
-        }
-    }
+//     for (qint32 i = 0; i < nNumberOfRecords; i++) {
+//         if ((listDataHeaders.at(i).dsID.fileType == fileType) && (listDataHeaders.at(i).dsID.nID == nID)) {
+//             result = listDataHeaders.at(i);
+//             break;
+//         }
+//     }
 
-    return result;
-}
+//     return result;
+// }
 
-XBinary::DATA_HEADER XBinary::_searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders)
-{
-    XBinary::DATA_HEADER result = {};
+// XBinary::DATA_HEADER XBinary::_searchDataHeaderByGuid(const QString &sGUID, const QList<DATA_HEADER> &listDataHeaders)
+// {
+//     XBinary::DATA_HEADER result = {};
 
-    qint32 nNumberOfRecords = listDataHeaders.count();
+//     qint32 nNumberOfRecords = listDataHeaders.count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (listDataHeaders.at(i).dsID.sGUID == sGUID) {
-            result = listDataHeaders.at(i);
-            break;
-        }
-    }
+//     for (qint32 i = 0; i < nNumberOfRecords; i++) {
+//         if (listDataHeaders.at(i).dsID.sGUID == sGUID) {
+//             result = listDataHeaders.at(i);
+//             break;
+//         }
+//     }
 
-    return result;
-}
+//     return result;
+// }
 
 XBinary::FPART XBinary::findParentFPart(const QList<FPART> &listHRegions, const FPART &hRegion)
 {
@@ -846,364 +846,364 @@ QList<XBinary::XFHEADER> XBinary::_getXFHeaders(PDSTRUCT *pPdStruct)
     return getXFHeaders(xfStruct, pPdStruct);
 }
 
-XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset,
-                                             qint64 nSize)
-{
-    XBinary::DATA_HEADER result = _initDataHeader(dataHeadersOptions, sName);
-    result.dsID_parent = dsID_parent;
-    result.dsID.nID = nID;
-    result.nLocation = nOffset;
-    result.nSize = nSize;
-    result.locType = LT_OFFSET;
-    result.dhMode = DHMODE_HEX;
-    result.nCount = 1;  // Hex view is always one record
+// XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset,
+//                                              qint64 nSize)
+// {
+//     XBinary::DATA_HEADER result = _initDataHeader(dataHeadersOptions, sName);
+//     result.dsID_parent = dsID_parent;
+//     result.dsID.nID = nID;
+//     result.nLocation = nOffset;
+//     result.nSize = nSize;
+//     result.locType = LT_OFFSET;
+//     result.dhMode = DHMODE_HEX;
+//     result.nCount = 1;  // Hex view is always one record
 
-    return result;
-}
+//     return result;
+// }
 
-XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName)
-{
-    DATA_HEADER result = {};
+// XBinary::DATA_HEADER XBinary::_initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName)
+// {
+//     DATA_HEADER result = {};
 
-    result.dsID_parent = dataHeadersOptions.dsID_parent;
-    result.dsID.sGUID = generateUUID();
-    result.dsID.fileType = dataHeadersOptions.fileType;
-    result.dsID.nID = dataHeadersOptions.nID;
-    result.locType = dataHeadersOptions.locType;
-    result.nLocation = dataHeadersOptions.nLocation;
-    result.sName = sName;
-    result.dhMode = dataHeadersOptions.dhMode;
-    result.nSize = dataHeadersOptions.nSize;
-    result.nCount = dataHeadersOptions.nCount;
+//     result.dsID_parent = dataHeadersOptions.dsID_parent;
+//     result.dsID.sGUID = generateUUID();
+//     result.dsID.fileType = dataHeadersOptions.fileType;
+//     result.dsID.nID = dataHeadersOptions.nID;
+//     result.locType = dataHeadersOptions.locType;
+//     result.nLocation = dataHeadersOptions.nLocation;
+//     result.sName = sName;
+//     result.dhMode = dataHeadersOptions.dhMode;
+//     result.nSize = dataHeadersOptions.nSize;
+//     result.nCount = dataHeadersOptions.nCount;
 
-    if (result.nCount == 0) {
-        result.nCount = 1;
-    }
+//     if (result.nCount == 0) {
+//         result.nCount = 1;
+//     }
 
-    if (result.dsID.fileType == FT_UNKNOWN) {
-        result.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
-    }
+//     if (result.dsID.fileType == FT_UNKNOWN) {
+//         result.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//     }
 
-    return result;
-}
+//     return result;
+// }
 
-XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct)
-{
-    DATA_HEADER dhInfo = {};
-    dhInfo.dsID_parent.fileType = FT_UNKNOWN;
-    dhInfo.dsID_parent.nID = 0;
-    dhInfo.dsID_parent.sGUID = generateUUID();
-    dhInfo.dsID.fileType = getFileType();
-    dhInfo.dsID.nID = 0;
-    dhInfo.dsID.sGUID = generateUUID();
-    dhInfo.sName = QObject::tr("Info");
-    dhInfo.locType = LT_UNKNOWN;
-    dhInfo.nLocation = 0;
-    dhInfo.nSize = -1;
+// XBinary::DSID XBinary::_addDefaultHeaders(QList<DATA_HEADER> *pListHeaders, PDSTRUCT *pPdStruct)
+// {
+//     DATA_HEADER dhInfo = {};
+//     dhInfo.dsID_parent.fileType = FT_UNKNOWN;
+//     dhInfo.dsID_parent.nID = 0;
+//     dhInfo.dsID_parent.sGUID = generateUUID();
+//     dhInfo.dsID.fileType = getFileType();
+//     dhInfo.dsID.nID = 0;
+//     dhInfo.dsID.sGUID = generateUUID();
+//     dhInfo.sName = QObject::tr("Info");
+//     dhInfo.locType = LT_UNKNOWN;
+//     dhInfo.nLocation = 0;
+//     dhInfo.nSize = -1;
 
-    pListHeaders->append(dhInfo);
+//     pListHeaders->append(dhInfo);
 
-    if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-        DATA_HEADER dhGeneric = {};
-        dhGeneric.dsID_parent = dhInfo.dsID;
-        dhGeneric.dsID.fileType = FT_BINARY;
-        dhGeneric.locType = LT_UNKNOWN;
-        dhGeneric.nLocation = 0;
-        dhGeneric.nSize = -1;
+//     if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//         DATA_HEADER dhGeneric = {};
+//         dhGeneric.dsID_parent = dhInfo.dsID;
+//         dhGeneric.dsID.fileType = FT_BINARY;
+//         dhGeneric.locType = LT_UNKNOWN;
+//         dhGeneric.nLocation = 0;
+//         dhGeneric.nSize = -1;
 
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_NFDSCAN;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_DIESCAN;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_YARASCAN;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_VIRUSTOTALSCAN;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_VISUALIZATION;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_HEX;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (isExecutable() && XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_DISASM;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (isArchive() && XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_ARCHIVE;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_HASH;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_STRINGS;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_SIGNATURES;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_REGIONS;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_MEMORYMAP;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_SYMBOLS;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_ENTROPY;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_EXTRACTOR;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (XBinary::isPdStructNotCanceled(pPdStruct)) {
-            dhGeneric.dsID.nID = STRUCTID_SEARCH;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-        if (getFileParts(FILEPART_OVERLAY, 1, pPdStruct).count()) {
-            dhGeneric.dsID.nID = STRUCTID_OVERLAY;
-            dhGeneric.dsID.sGUID = generateUUID();
-            dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
-            pListHeaders->append(dhGeneric);
-        }
-    }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_NFDSCAN;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_DIESCAN;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_YARASCAN;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_VIRUSTOTALSCAN;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_VISUALIZATION;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_HEX;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (isExecutable() && XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_DISASM;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (isArchive() && XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_ARCHIVE;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_HASH;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_STRINGS;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_SIGNATURES;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_REGIONS;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_MEMORYMAP;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_SYMBOLS;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_ENTROPY;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_EXTRACTOR;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (XBinary::isPdStructNotCanceled(pPdStruct)) {
+//             dhGeneric.dsID.nID = STRUCTID_SEARCH;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//         if (getFileParts(FILEPART_OVERLAY, 1, pPdStruct).count()) {
+//             dhGeneric.dsID.nID = STRUCTID_OVERLAY;
+//             dhGeneric.dsID.sGUID = generateUUID();
+//             dhGeneric.sName = XBinary::structIDToString(dhGeneric.dsID.nID);
+//             pListHeaders->append(dhGeneric);
+//         }
+//     }
 
-    return dhInfo.dsID;
-}
+//     return dhInfo.dsID;
+// }
 
-qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles,
-                                    PDSTRUCT *pPdStruct)
-{
-    qint32 nResult = 0;
+// qint32 XBinary::getDataRecordValues(const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords, QList<QString> *pListTitles,
+//                                     PDSTRUCT *pPdStruct)
+// {
+//     qint32 nResult = 0;
 
-    if (pListTitles) {
-        pListTitles->clear();
-    }
+//     if (pListTitles) {
+//         pListTitles->clear();
+//     }
 
-    if (dataRecordsOptions.dataHeaderFirst.dhMode == DHMODE_HEADER) {
-        DATA_RECORD_ROW dataRecordRow = {};
-        dataRecordRow.locType = dataRecordsOptions.dataHeaderFirst.locType;
-        dataRecordRow.nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
+//     if (dataRecordsOptions.dataHeaderFirst.dhMode == DHMODE_HEADER) {
+//         DATA_RECORD_ROW dataRecordRow = {};
+//         dataRecordRow.locType = dataRecordsOptions.dataHeaderFirst.locType;
+//         dataRecordRow.nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
 
-        DATA_HEADER dataHeader = {};
+//         DATA_HEADER dataHeader = {};
 
-        if (_isFlagPresentInRecords(&(dataRecordsOptions.dataHeaderFirst.listRecords), DRF_VOLATILE)) {
-            DATA_HEADERS_OPTIONS dataHeadersOptions = {};
-            dataHeadersOptions.pMemoryMap = dataRecordsOptions.pMemoryMap;
-            dataHeadersOptions.dsID_parent = dataRecordsOptions.dataHeaderFirst.dsID_parent;
-            dataHeadersOptions.fileType = dataRecordsOptions.dataHeaderFirst.dsID.fileType;
-            dataHeadersOptions.nID = dataRecordsOptions.dataHeaderFirst.dsID.nID;
-            dataHeadersOptions.locType = dataRecordsOptions.dataHeaderFirst.locType;
-            dataHeadersOptions.nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
-            dataHeadersOptions.bChildren = false;
-            dataHeadersOptions.dhMode = DHMODE_HEADER;
+//         if (_isFlagPresentInRecords(&(dataRecordsOptions.dataHeaderFirst.listRecords), DRF_VOLATILE)) {
+//             DATA_HEADERS_OPTIONS dataHeadersOptions = {};
+//             dataHeadersOptions.pMemoryMap = dataRecordsOptions.pMemoryMap;
+//             dataHeadersOptions.dsID_parent = dataRecordsOptions.dataHeaderFirst.dsID_parent;
+//             dataHeadersOptions.fileType = dataRecordsOptions.dataHeaderFirst.dsID.fileType;
+//             dataHeadersOptions.nID = dataRecordsOptions.dataHeaderFirst.dsID.nID;
+//             dataHeadersOptions.locType = dataRecordsOptions.dataHeaderFirst.locType;
+//             dataHeadersOptions.nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
+//             dataHeadersOptions.bChildren = false;
+//             dataHeadersOptions.dhMode = DHMODE_HEADER;
 
-            QList<DATA_HEADER> listDataHeaders = getDataHeaders(dataHeadersOptions, pPdStruct);
+//             QList<DATA_HEADER> listDataHeaders = getDataHeaders(dataHeadersOptions, pPdStruct);
 
-            if (listDataHeaders.count()) {
-                dataHeader = listDataHeaders.at(0);
-            }
-        } else {
-            dataHeader = dataRecordsOptions.dataHeaderFirst;
-        }
+//             if (listDataHeaders.count()) {
+//                 dataHeader = listDataHeaders.at(0);
+//             }
+//         } else {
+//             dataHeader = dataRecordsOptions.dataHeaderFirst;
+//         }
 
-        qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataHeader.locType, dataHeader.nLocation);
-        qint32 nNumberOfRecords = dataHeader.listRecords.count();
+//         qint64 nStartOffset = locationToOffset(dataRecordsOptions.pMemoryMap, dataHeader.locType, dataHeader.nLocation);
+//         qint32 nNumberOfRecords = dataHeader.listRecords.count();
 
-        qint32 nMax = 0;
+//         qint32 nMax = 0;
 
-        for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
-            DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
+//         for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
+//             DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
-            QVariant variant =
-                read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian == XBinary::ENDIAN_BIG, pPdStruct);
+//             QVariant variant =
+//                 read_value(dataRecord.valType, nStartOffset + dataRecord.nRelOffset, dataRecord.nSize, dataRecord.endian == XBinary::ENDIAN_BIG, pPdStruct);
 
-            dataRecordRow.listValues.append(variant);
+//             dataRecordRow.listValues.append(variant);
 
-            if (pListTitles) {
-                pListTitles->append(dataRecord.sName);
-            }
+//             if (pListTitles) {
+//                 pListTitles->append(dataRecord.sName);
+//             }
 
-            if (dataRecord.nRelOffset + dataRecord.nSize > nMax) {
-                nMax = dataRecord.nRelOffset + dataRecord.nSize;
-            }
-        }
+//             if (dataRecord.nRelOffset + dataRecord.nSize > nMax) {
+//                 nMax = dataRecord.nRelOffset + dataRecord.nSize;
+//             }
+//         }
 
-        dataRecordRow.nSize = nMax;
+//         dataRecordRow.nSize = nMax;
 
-        pListDataRecords->append(dataRecordRow);
+//         pListDataRecords->append(dataRecordRow);
 
-        nResult = nMax;
-    } else if (dataRecordsOptions.dataHeaderFirst.dhMode == DHMODE_TABLE) {
-        qint32 nCount = dataRecordsOptions.dataHeaderFirst.nCount;
-        XADDR nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
+//         nResult = nMax;
+//     } else if (dataRecordsOptions.dataHeaderFirst.dhMode == DHMODE_TABLE) {
+//         qint32 nCount = dataRecordsOptions.dataHeaderFirst.nCount;
+//         XADDR nLocation = dataRecordsOptions.dataHeaderFirst.nLocation;
 
-        if (pListTitles) {
-            pListTitles->clear();
-            pListTitles->append(getTableTitles(dataRecordsOptions));
-        }
+//         if (pListTitles) {
+//             pListTitles->clear();
+//             pListTitles->append(getTableTitles(dataRecordsOptions));
+//         }
 
-        void *pUserData = nullptr;
-        if (readTableInit(dataRecordsOptions, &pUserData, pPdStruct)) {
-            for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-                QList<DATA_RECORD_ROW> listDataRecordRows;
+//         void *pUserData = nullptr;
+//         if (readTableInit(dataRecordsOptions, &pUserData, pPdStruct)) {
+//             for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+//                 QList<DATA_RECORD_ROW> listDataRecordRows;
 
-                qint32 nResultRead =
-                    readTableRow(i, dataRecordsOptions.dataHeaderFirst.locType, nLocation, dataRecordsOptions, &listDataRecordRows, pUserData, pPdStruct);
+//                 qint32 nResultRead =
+//                     readTableRow(i, dataRecordsOptions.dataHeaderFirst.locType, nLocation, dataRecordsOptions, &listDataRecordRows, pUserData, pPdStruct);
 
-                pListDataRecords->append(listDataRecordRows);
+//                 pListDataRecords->append(listDataRecordRows);
 
-                nLocation += nResultRead;
-            }
+//                 nLocation += nResultRead;
+//             }
 
-            readTableFinalize(dataRecordsOptions, pUserData, pPdStruct);
-        }
+//             readTableFinalize(dataRecordsOptions, pUserData, pPdStruct);
+//         }
 
-        nResult = nLocation - dataRecordsOptions.dataHeaderFirst.nLocation;
-    }
+//         nResult = nLocation - dataRecordsOptions.dataHeaderFirst.nLocation;
+//     }
 
-    return nResult;
-}
+//     return nResult;
+// }
 
-QList<QString> XBinary::getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, const DATA_RECORD_ROW &dataRecordRow, PDSTRUCT *pPdStruct)
-{
-    QList<QString> listComments;
+// QList<QString> XBinary::getDataRecordComments(const DATA_RECORDS_OPTIONS &dataRecordsOptions, const DATA_RECORD_ROW &dataRecordRow, PDSTRUCT *pPdStruct)
+// {
+//     QList<QString> listComments;
 
-    qint32 nNumberOfRecords = dataRecordsOptions.dataHeaderFirst.listRecords.count();
+//     qint32 nNumberOfRecords = dataRecordsOptions.dataHeaderFirst.listRecords.count();
 
-    for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
-        DATA_RECORD dataRecord = dataRecordsOptions.dataHeaderFirst.listRecords.at(j);
+//     for (qint32 j = 0; (j < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); j++) {
+//         DATA_RECORD dataRecord = dataRecordsOptions.dataHeaderFirst.listRecords.at(j);
 
-        QString sComment;
+//         QString sComment;
 
-        if (dataRecord.nFlags & DRF_SIZE) {
-            sComment = appendText(bytesCountToString(dataRecordRow.listValues.at(j).toULongLong(), 1024), sComment, ", ");
-        }
+//         if (dataRecord.nFlags & DRF_SIZE) {
+//             sComment = appendText(bytesCountToString(dataRecordRow.listValues.at(j).toULongLong(), 1024), sComment, ", ");
+//         }
 
-        if (dataRecord.nFlags & DRF_COUNT) {
-            sComment = appendText(QString::number(dataRecordRow.listValues.at(j).toULongLong()), sComment, ", ");
-        }
+//         if (dataRecord.nFlags & DRF_COUNT) {
+//             sComment = appendText(QString::number(dataRecordRow.listValues.at(j).toULongLong()), sComment, ", ");
+//         }
 
-        QString sFlags;
-        if (dataRecord.listDataValueSets.count()) {
-            qint32 nNumberOfDataValueSets = dataRecord.listDataValueSets.count();
+//         QString sFlags;
+//         if (dataRecord.listDataValueSets.count()) {
+//             qint32 nNumberOfDataValueSets = dataRecord.listDataValueSets.count();
 
-            for (qint32 k = 0; (k < nNumberOfDataValueSets) && XBinary::isPdStructNotCanceled(pPdStruct); k++) {
-                DATAVALUESET dataValueSet = dataRecord.listDataValueSets.at(k);
+//             for (qint32 k = 0; (k < nNumberOfDataValueSets) && XBinary::isPdStructNotCanceled(pPdStruct); k++) {
+//                 DATAVALUESET dataValueSet = dataRecord.listDataValueSets.at(k);
 
-                sFlags = appendText(
-                    sFlags, valueToFlagsString(dataRecordRow.listValues.at(j).toULongLong() & dataValueSet.nMask, dataValueSet.mapValues, dataValueSet.vlType), "|");
-            }
+//                 sFlags = appendText(
+//                     sFlags, valueToFlagsString(dataRecordRow.listValues.at(j).toULongLong() & dataValueSet.nMask, dataValueSet.mapValues, dataValueSet.vlType), "|");
+//             }
 
-            sComment = appendText(sComment, sFlags, ", ");
-        }
+//             sComment = appendText(sComment, sFlags, ", ");
+//         }
 
-        listComments.append(sComment);
-    }
+//         listComments.append(sComment);
+//     }
 
-    return listComments;
-}
+//     return listComments;
+// }
 
-QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions)
-{
-    QList<QString> listTitles;
+// QList<QString> XBinary::getTableTitles(const DATA_RECORDS_OPTIONS &dataRecordsOptions)
+// {
+//     QList<QString> listTitles;
 
-    qint32 nNumberOfRecords = dataRecordsOptions.dataHeaderFirst.listRecords.count();
+//     qint32 nNumberOfRecords = dataRecordsOptions.dataHeaderFirst.listRecords.count();
 
-    for (qint32 j = 0; j < nNumberOfRecords; j++) {
-        DATA_RECORD dataRecord = dataRecordsOptions.dataHeaderFirst.listRecords.at(j);
+//     for (qint32 j = 0; j < nNumberOfRecords; j++) {
+//         DATA_RECORD dataRecord = dataRecordsOptions.dataHeaderFirst.listRecords.at(j);
 
-        listTitles.append(dataRecord.sName);
-    }
+//         listTitles.append(dataRecord.sName);
+//     }
 
-    return listTitles;
-}
+//     return listTitles;
+// }
 
-bool XBinary::readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void **ppUserData, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(dataRecordsOptions)
-    Q_UNUSED(ppUserData)
-    Q_UNUSED(pPdStruct)
+// bool XBinary::readTableInit(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void **ppUserData, PDSTRUCT *pPdStruct)
+// {
+//     Q_UNUSED(dataRecordsOptions)
+//     Q_UNUSED(ppUserData)
+//     Q_UNUSED(pPdStruct)
 
-    // Default implementation does nothing
-    return true;
-}
+//     // Default implementation does nothing
+//     return true;
+// }
 
-qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
-                             void *pUserData, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(nRow)
-    Q_UNUSED(pUserData)
+// qint32 XBinary::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<DATA_RECORD_ROW> *pListDataRecords,
+//                              void *pUserData, PDSTRUCT *pPdStruct)
+// {
+//     Q_UNUSED(nRow)
+//     Q_UNUSED(pUserData)
 
-    DATA_RECORDS_OPTIONS _dataRecordsOptions = dataRecordsOptions;
-    _dataRecordsOptions.dataHeaderFirst.locType = locType;
-    _dataRecordsOptions.dataHeaderFirst.nLocation = nLocation;
-    _dataRecordsOptions.dataHeaderFirst.dhMode = DHMODE_HEADER;
+//     DATA_RECORDS_OPTIONS _dataRecordsOptions = dataRecordsOptions;
+//     _dataRecordsOptions.dataHeaderFirst.locType = locType;
+//     _dataRecordsOptions.dataHeaderFirst.nLocation = nLocation;
+//     _dataRecordsOptions.dataHeaderFirst.dhMode = DHMODE_HEADER;
 
-    return getDataRecordValues(_dataRecordsOptions, pListDataRecords, nullptr, pPdStruct);
-}
+//     return getDataRecordValues(_dataRecordsOptions, pListDataRecords, nullptr, pPdStruct);
+// }
 
-void XBinary::readTableFinalize(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct)
-{
-    Q_UNUSED(dataRecordsOptions)
-    Q_UNUSED(pUserData)
-    Q_UNUSED(pPdStruct)
+// void XBinary::readTableFinalize(const DATA_RECORDS_OPTIONS &dataRecordsOptions, void *pUserData, PDSTRUCT *pPdStruct)
+// {
+//     Q_UNUSED(dataRecordsOptions)
+//     Q_UNUSED(pUserData)
+//     Q_UNUSED(pPdStruct)
 
-    // Default implementation does nothing
-}
+//     // Default implementation does nothing
+// }
 
 bool XBinary::_isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, quint32 nFlag)
 {
@@ -1255,16 +1255,16 @@ XBinary::DATA_RECORD XBinary::getDataRecord(qint64 nRelOffset, qint64 nSize, con
     return dataRecord;
 }
 
-QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<XBinary::DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XBinary::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<XBinary::DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == 0) {
-        _addDefaultHeaders(&listResult, pPdStruct);
-    }
+//     if (dataHeadersOptions.nID == 0) {
+//         _addDefaultHeaders(&listResult, pPdStruct);
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::XFHEADER> XBinary::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
 {
@@ -11668,56 +11668,56 @@ void XBinary::dumpMemoryMap()
 #endif
 }
 
-void XBinary::dumpHeaders()
-{
-#ifdef QT_DEBUG
-    XBinary::_MEMORY_MAP memoryMap = getMemoryMap();
+// void XBinary::dumpHeaders()
+// {
+// #ifdef QT_DEBUG
+//     XBinary::_MEMORY_MAP memoryMap = getMemoryMap();
 
-    XBinary::DATA_HEADERS_OPTIONS dataHeaderOptions = {};
-    dataHeaderOptions.locType = XBinary::LT_OFFSET;
-    dataHeaderOptions.nLocation = 0;
-    dataHeaderOptions.pMemoryMap = &memoryMap;
-    dataHeaderOptions.nID = 0;
+//     XBinary::DATA_HEADERS_OPTIONS dataHeaderOptions = {};
+//     dataHeaderOptions.locType = XBinary::LT_OFFSET;
+//     dataHeaderOptions.nLocation = 0;
+//     dataHeaderOptions.pMemoryMap = &memoryMap;
+//     dataHeaderOptions.nID = 0;
 
-    QList<XBinary::DATA_HEADER> listHeaders = getDataHeaders(dataHeaderOptions, nullptr);
+//     QList<XBinary::DATA_HEADER> listHeaders = getDataHeaders(dataHeaderOptions, nullptr);
 
-    qint32 nNumberOfHeaders = listHeaders.count();
+//     qint32 nNumberOfHeaders = listHeaders.count();
 
-    for (qint32 i = 0; i < nNumberOfHeaders; i++) {
-        XBinary::DATA_HEADER dataHeader = listHeaders.at(i);
+//     for (qint32 i = 0; i < nNumberOfHeaders; i++) {
+//         XBinary::DATA_HEADER dataHeader = listHeaders.at(i);
 
-        if (dataHeader.dsID.fileType == getFileType()) {
-            qDebug("%s: %X", structIDToString(dataHeader.dsID.nID).toLatin1().data(), locationToOffset(&memoryMap, dataHeader.locType, dataHeader.nLocation));
+//         if (dataHeader.dsID.fileType == getFileType()) {
+//             qDebug("%s: %X", structIDToString(dataHeader.dsID.nID).toLatin1().data(), locationToOffset(&memoryMap, dataHeader.locType, dataHeader.nLocation));
 
-            QList<XBinary::DATA_RECORD_ROW> listDataRecordsRow;
+//             QList<XBinary::DATA_RECORD_ROW> listDataRecordsRow;
 
-            XBinary::DATA_RECORDS_OPTIONS dataRecordsOptions = {};
-            dataRecordsOptions.pMemoryMap = &memoryMap;
-            dataRecordsOptions.dataHeaderFirst = dataHeader;
+//             XBinary::DATA_RECORDS_OPTIONS dataRecordsOptions = {};
+//             dataRecordsOptions.pMemoryMap = &memoryMap;
+//             dataRecordsOptions.dataHeaderFirst = dataHeader;
 
-            getDataRecordValues(dataRecordsOptions, &listDataRecordsRow, nullptr, nullptr);
-            QList<QString> listComments;
+//             getDataRecordValues(dataRecordsOptions, &listDataRecordsRow, nullptr, nullptr);
+//             QList<QString> listComments;
 
-            if (listDataRecordsRow.count() > 0) {
-                XBinary::DATA_RECORD_ROW dataRecordRow = listDataRecordsRow.at(0);
-                listComments = getDataRecordComments(dataRecordsOptions, dataRecordRow, nullptr);
-            }
+//             if (listDataRecordsRow.count() > 0) {
+//                 XBinary::DATA_RECORD_ROW dataRecordRow = listDataRecordsRow.at(0);
+//                 listComments = getDataRecordComments(dataRecordsOptions, dataRecordRow, nullptr);
+//             }
 
-            qint32 nNumberOfRecords = dataHeader.listRecords.count();
+//             qint32 nNumberOfRecords = dataHeader.listRecords.count();
 
-            for (qint32 j = 0; j < nNumberOfRecords; j++) {
-                XBinary::DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
+//             for (qint32 j = 0; j < nNumberOfRecords; j++) {
+//                 XBinary::DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
-                qDebug("%X: %X %s %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType, dataRecord.nSize).toLatin1().data(),
-                       dataRecord.sName.toLatin1().data(), XBinary::getValueString(listDataRecordsRow.at(0).listValues.at(j), dataRecord.valType, true).toLatin1().data(),
-                       listComments.at(j).toLatin1().data());
-            }
-        } else if (dataHeader.dsID.fileType == FT_BINARY) {
-            qDebug("%s: %X", XBinary::structIDToString(dataHeader.dsID.nID).toLatin1().data(), 0);
-        }
-    }
-#endif
-}
+//                 qDebug("%X: %X %s %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType, dataRecord.nSize).toLatin1().data(),
+//                        dataRecord.sName.toLatin1().data(), XBinary::getValueString(listDataRecordsRow.at(0).listValues.at(j), dataRecord.valType, true).toLatin1().data(),
+//                        listComments.at(j).toLatin1().data());
+//             }
+//         } else if (dataHeader.dsID.fileType == FT_BINARY) {
+//             qDebug("%s: %X", XBinary::structIDToString(dataHeader.dsID.nID).toLatin1().data(), 0);
+//         }
+//     }
+// #endif
+// }
 
 XBinary::FPART XBinary::getFPART(FILEPART filePart, const QString &sOriginalName, qint64 nFileOffset, qint64 nFileSize, XADDR nVirtualAddress, qint64 nVirtualSize)
 {

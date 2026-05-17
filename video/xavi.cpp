@@ -131,40 +131,40 @@ XBinary::_MEMORY_MAP XAVI::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     return _getMemoryMap(FILEPART_DATA | FILEPART_OVERLAY, pPdStruct);
 }
 
-QList<XBinary::DATA_HEADER> XAVI::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XAVI::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
-        _dataHeadersOptions.nID = STRUCTID_HEADER;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = dataHeadersOptions.pMemoryMap->fileType;
+//         _dataHeadersOptions.nID = STRUCTID_HEADER;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
 
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
 
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_HEADER) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XAVI::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = 12;
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XAVI::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = 12;
 
-                dataHeader.listRecords.append(getDataRecord(0, 4, "RIFF Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(4, 4, "File Size", VT_UINT32, DRF_SIZE, ENDIAN_LITTLE));
-                dataHeader.listRecords.append(getDataRecord(8, 4, "AVI Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(0, 4, "RIFF Tag", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(4, 4, "File Size", VT_UINT32, DRF_SIZE, ENDIAN_LITTLE));
+//                 dataHeader.listRecords.append(getDataRecord(8, 4, "AVI Form", VT_ANSI, DRF_UNKNOWN, ENDIAN_LITTLE));
 
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {

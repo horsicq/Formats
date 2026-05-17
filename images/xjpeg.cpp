@@ -362,48 +362,48 @@ quint32 XJpeg::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XJPEG_STRUCTID, jpegStructIdCount());
 }
 
-QList<XBinary::DATA_HEADER> XJpeg::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
-{
-    QList<DATA_HEADER> listResult;
+// QList<XBinary::DATA_HEADER> XJpeg::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+// {
+//     QList<DATA_HEADER> listResult;
 
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-        _dataHeadersOptions.fileType = getFileType();
+//     if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
+//         DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//         _dataHeadersOptions.bChildren = true;
+//         _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
+//         _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
+//         _dataHeadersOptions.fileType = getFileType();
 
-        _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
-        if (nStartOffset != -1) {
-            if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJpeg::structIDToString(dataHeadersOptions.nID));
-                dataHeader.nSize = JPEG_SIGNATURE_SIZE;
-                dataHeader.listRecords.append(getDataRecord(0, JPEG_SIGNATURE_SIZE, "SOI", VT_UINT16, DRF_UNKNOWN, ENDIAN_BIG));
-                listResult.append(dataHeader);
+//         _dataHeadersOptions.nID = STRUCTID_SIGNATURE;
+//         _dataHeadersOptions.nLocation = 0;
+//         _dataHeadersOptions.locType = XBinary::LT_OFFSET;
+//         listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//     } else {
+//         qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
+//         if (nStartOffset != -1) {
+//             if (dataHeadersOptions.nID == STRUCTID_SIGNATURE) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJpeg::structIDToString(dataHeadersOptions.nID));
+//                 dataHeader.nSize = JPEG_SIGNATURE_SIZE;
+//                 dataHeader.listRecords.append(getDataRecord(0, JPEG_SIGNATURE_SIZE, "SOI", VT_UINT16, DRF_UNKNOWN, ENDIAN_BIG));
+//                 listResult.append(dataHeader);
 
-                if (dataHeadersOptions.bChildren) {
-                    DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-                    _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
-                    _dataHeadersOptions.nID = STRUCTID_CHUNK;
-                    _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + JPEG_SIGNATURE_SIZE;
-                    _dataHeadersOptions.locType = dataHeadersOptions.locType;
-                    _dataHeadersOptions.nSize = getSize() - JPEG_SIGNATURE_SIZE;
-                    listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-                }
-            } else if (dataHeadersOptions.nID == STRUCTID_CHUNK) {
-                DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJpeg::structIDToString(dataHeadersOptions.nID));
-                listResult.append(dataHeader);
-            }
-        }
-    }
+//                 if (dataHeadersOptions.bChildren) {
+//                     DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
+//                     _dataHeadersOptions.dhMode = XBinary::DHMODE_TABLE;
+//                     _dataHeadersOptions.nID = STRUCTID_CHUNK;
+//                     _dataHeadersOptions.nLocation = dataHeadersOptions.nLocation + JPEG_SIGNATURE_SIZE;
+//                     _dataHeadersOptions.locType = dataHeadersOptions.locType;
+//                     _dataHeadersOptions.nSize = getSize() - JPEG_SIGNATURE_SIZE;
+//                     listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
+//                 }
+//             } else if (dataHeadersOptions.nID == STRUCTID_CHUNK) {
+//                 DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, XJpeg::structIDToString(dataHeadersOptions.nID));
+//                 listResult.append(dataHeader);
+//             }
+//         }
+//     }
 
-    return listResult;
-}
+//     return listResult;
+// }
 
 QList<XBinary::FPART> XJpeg::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
