@@ -75,17 +75,17 @@ public:
     TEXT_TYPE detectTextType(PDSTRUCT *pPdStruct = nullptr);
     LINE_ENDING detectLineEnding(PDSTRUCT *pPdStruct = nullptr);
 
-    QString getText(qint64 nOffset = 0, qint64 nSize = -1);
+    QString getText(qint64 nOffset = 0, qint64 nSize = -1,PDSTRUCT *pPdStruct = nullptr);
     QString getTextByLines(qint64 nStartLine, qint64 nLineCount = 1);
     QStringList getLines(qint64 nStartLine = 0, qint64 nLineCount = -1);
 
     qint64 getLineCount();
-    qint64 getCharacterCount();
+    qint64 getCharacterCount(PDSTRUCT *pPdStruct = nullptr);
     qint64 getWordCount();
 
     bool hasBOM();
     qint64 getBOMSize();
-    QString getEncodingName();
+    QString getEncodingName(PDSTRUCT *pPdStruct = nullptr);
 
     static QString textTypeToString(TEXT_TYPE textType);
     static QString lineEndingToString(LINE_ENDING lineEnding);

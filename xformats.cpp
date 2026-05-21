@@ -919,6 +919,22 @@ bool XFormats::isArchive(XBinary::FT fileType)
     return bResult;
 }
 
+bool XFormats::isArchive(const QString &sFileName)
+{
+    bool bResult = false;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if (file.open(QIODevice::ReadOnly)) {
+        bResult = isArchive(XFormats::getPrefFileType(&file, true));
+
+        file.close();
+    }
+
+    return bResult;
+}
+
 bool XFormats::isExecutable(XBinary::FT fileType)
 {
     bool bResult = false;

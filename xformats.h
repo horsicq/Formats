@@ -175,6 +175,7 @@ public:
 
     static QString getFileFormatExtsString(XBinary::FT fileType);
     static bool isArchive(XBinary::FT fileType);
+    static bool isArchive(const QString &sFileName);
     static bool isExecutable(XBinary::FT fileType);
     static QString getXFHeaderStructName(const XBinary::XFHEADER &header);
 

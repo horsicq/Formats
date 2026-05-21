@@ -106,7 +106,8 @@ XBinary::_MEMORY_MAP XText::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 XBinary::FT XText::getFileType()
 {
-    TEXT_TYPE textType = detectTextType();
+    PDSTRUCT pdStruct = createPdStruct();
+    TEXT_TYPE textType = detectTextType(&pdStruct);
 
     switch (textType) {
         case TEXT_TYPE_UTF8:
@@ -137,7 +138,8 @@ qint64 XText::getFileFormatSize(PDSTRUCT *pPdStruct)
 
 QString XText::getVersion()
 {
-    TEXT_INFO textInfo = getTextInfo();
+    PDSTRUCT pdStruct = createPdStruct(); // TODO
+    TEXT_INFO textInfo = getTextInfo(&pdStruct);
     return textTypeToString(textInfo.textType);
 }
 
@@ -147,11 +149,11 @@ XText::TEXT_INFO XText::getTextInfo(PDSTRUCT *pPdStruct)
 
     result.textType = detectTextType(pPdStruct);
     result.lineEnding = detectLineEnding(pPdStruct);
-    result.sEncoding = getEncodingName();
+    result.sEncoding = getEncodingName(pPdStruct);
     result.bHasBOM = hasBOM();
     result.nBOMSize = getBOMSize();
     result.nLineCount = getLineCount();
-    result.nCharacterCount = getCharacterCount();
+    result.nCharacterCount = getCharacterCount(pPdStruct);
 
     // Calculate word count from a sample of text
     QString sampleText = getText(result.nBOMSize, (std::min)(qint64(32768), getSize() - result.nBOMSize));
@@ -201,14 +203,14 @@ XText::LINE_ENDING XText::detectLineEnding(PDSTRUCT *pPdStruct)
     return _detectLineEndingInData(baData);
 }
 
-QString XText::getText(qint64 nOffset, qint64 nSize)
+QString XText::getText(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     if (nSize == -1) {
         nSize = getSize() - nOffset;
     }
 
     QByteArray baData = read_array(nOffset, nSize);
-    TEXT_TYPE textType = detectTextType();
+    TEXT_TYPE textType = detectTextType(pPdStruct);
 
     switch (textType) {
         case TEXT_TYPE_UTF8:
@@ -259,9 +261,9 @@ qint64 XText::getLineCount()
     return _countLines(baData);
 }
 
-qint64 XText::getCharacterCount()
+qint64 XText::getCharacterCount(PDSTRUCT *pPdStruct)
 {
-    TEXT_TYPE textType = detectTextType();
+    TEXT_TYPE textType = detectTextType(pPdStruct);
     qint64 nBOMSize = getBOMSize();
 
     switch (textType) {
@@ -301,9 +303,9 @@ qint64 XText::getBOMSize()
     }
 }
 
-QString XText::getEncodingName()
+QString XText::getEncodingName(PDSTRUCT *pPdStruct)
 {
-    TEXT_TYPE textType = detectTextType();
+    TEXT_TYPE textType = detectTextType(pPdStruct);
     return textTypeToString(textType);
 }
 
@@ -336,7 +338,8 @@ QString XText::lineEndingToString(LINE_ENDING lineEnding)
 
 QString XText::getMIMEString()
 {
-    TEXT_TYPE textType = detectTextType();
+    PDSTRUCT pdStruct = createPdStruct();
+    TEXT_TYPE textType = detectTextType(&pdStruct);
 
     switch (textType) {
         case TEXT_TYPE_UTF8:
