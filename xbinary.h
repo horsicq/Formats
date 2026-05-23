@@ -987,7 +987,7 @@ public:
         XFRECORD_FLAG_COUNT = 0x00080000,
         XFRECORD_FLAG_RELATIVE_ADDRESS_STRING = 0x00100000,
         XFRECORD_FLAG_OFFSET_MUTF8STRING = 0x00200000,  // offset points to ULEB128-length-prefixed MUTF-8 string
-        XFRECORD_FLAG_STRING_POOL_IDX = 0x00400000,    // index into a string pool (nStringPoolOffset, nStringPoolSize)
+        XFRECORD_FLAG_STRING_POOL_IDX = 0x00400000,     // index into a string pool (nStringPoolOffset, nStringPoolSize)
     };
 
     struct XFRECORD {
@@ -1238,7 +1238,8 @@ public:
     static QString xfHeaderToString(const XFHEADER &xfHeader, const QString &sStructName, const QString &sParentString);
 
     // DATA_HEADER _initDataHeader(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName);
-    // DATA_HEADER _dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64 nSize);
+    // DATA_HEADER _dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset, qint64
+    // nSize);
 
     // struct DATA_RECORDS_OPTIONS {
     //     _MEMORY_MAP *pMemoryMap;

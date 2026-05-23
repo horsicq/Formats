@@ -1591,20 +1591,20 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 stResult.insert(xandroid.getFileType());  // FT_ANDROIDXML or FT_ANDROIDASRC
             } else
 #endif
-            // if (XDER::isValid(pDevice, pPdStruct)) {
-            //     stResult.insert(XBinary::FT_DOCUMENT);
-            //     stResult.insert(XBinary::FT_DER);
-            // } else
+                // if (XDER::isValid(pDevice, pPdStruct)) {
+                //     stResult.insert(XBinary::FT_DOCUMENT);
+                //     stResult.insert(XBinary::FT_DER);
+                // } else
 
-            if (XJavaClass::isValid(pDevice, pPdStruct)) {
-                stResult.insert(XBinary::FT_JAVACLASS);
-            } else if (XPYC::isValid(pDevice, pPdStruct)) {
-                stResult.insert(XBinary::FT_PYC);
-            } else if (XTTF::isValid(pDevice, pPdStruct)) {
-                stResult.insert(XBinary::FT_TTF);
-            } else if (XDJVU::isValid(pDevice, pPdStruct)) {
-                stResult.insert(XBinary::FT_DJVU);
-            }
+                if (XJavaClass::isValid(pDevice, pPdStruct)) {
+                    stResult.insert(XBinary::FT_JAVACLASS);
+                } else if (XPYC::isValid(pDevice, pPdStruct)) {
+                    stResult.insert(XBinary::FT_PYC);
+                } else if (XTTF::isValid(pDevice, pPdStruct)) {
+                    stResult.insert(XBinary::FT_TTF);
+                } else if (XDJVU::isValid(pDevice, pPdStruct)) {
+                    stResult.insert(XBinary::FT_DJVU);
+                }
         }
 
         if (bExtra) {

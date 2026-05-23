@@ -296,7 +296,10 @@ QString XFModel::commentForField(qint32 nFieldIndex, const QVariant &varValue) c
                 QString sTmp = m_pXBinary->read_utf8String(nStrOff);
                 bool bValid = !sTmp.isEmpty();
                 for (QChar c : sTmp) {
-                    if (c.unicode() < 0x20 || c.unicode() > 0x7E) { bValid = false; break; }
+                    if (c.unicode() < 0x20 || c.unicode() > 0x7E) {
+                        bValid = false;
+                        break;
+                    }
                 }
                 if (bValid) listComments.append(sTmp);
             }

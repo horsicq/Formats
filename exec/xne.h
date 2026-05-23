@@ -31,8 +31,8 @@ class XNE : public XMSDOS {
 public:
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
-        STRUCTID_IMAGE_DOS_HEADER,        // Reuse from base via call
-        STRUCTID_IMAGE_DOS_HEADEREX,      // Reuse from base via call
+        STRUCTID_IMAGE_DOS_HEADER,    // Reuse from base via call
+        STRUCTID_IMAGE_DOS_HEADEREX,  // Reuse from base via call
         STRUCTID_IMAGE_OS2_HEADER,
         STRUCTID_ENTRY_TABLE,
         STRUCTID_SEGMENT_TABLE,

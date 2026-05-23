@@ -1271,7 +1271,8 @@ quint32 XNE::ftStringToStructID(const QString &sFtString)
 //                     if (_isOffsetValid(nBase + offRes) && (offResNames > offRes)) {
 //                         qint64 nResSize = (qint64)offResNames - (qint64)offRes;
 //                         if (nResSize > 0) {
-//                             listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_RESOURCE_TABLE), dataHeader.dsID, STRUCTID_RESOURCE_TABLE,
+//                             listResult.append(_dataHeaderHex(dataHeadersOptions, XNE::structIDToString(STRUCTID_RESOURCE_TABLE), dataHeader.dsID,
+//                             STRUCTID_RESOURCE_TABLE,
 //                                                              nBase + offRes, nResSize));
 //                         }
 //                     }

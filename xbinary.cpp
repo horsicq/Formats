@@ -846,7 +846,8 @@ QList<XBinary::XFHEADER> XBinary::_getXFHeaders(PDSTRUCT *pPdStruct)
     return getXFHeaders(xfStruct, pPdStruct);
 }
 
-// XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64 nOffset,
+// XBinary::DATA_HEADER XBinary::_dataHeaderHex(const DATA_HEADERS_OPTIONS &dataHeadersOptions, const QString &sName, const DSID &dsID_parent, quint32 nID, qint64
+// nOffset,
 //                                              qint64 nSize)
 // {
 //     XBinary::DATA_HEADER result = _initDataHeader(dataHeadersOptions, sName);
@@ -11708,9 +11709,10 @@ void XBinary::dumpMemoryMap()
 //             for (qint32 j = 0; j < nNumberOfRecords; j++) {
 //                 XBinary::DATA_RECORD dataRecord = dataHeader.listRecords.at(j);
 
-//                 qDebug("%X: %X %s %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType, dataRecord.nSize).toLatin1().data(),
-//                        dataRecord.sName.toLatin1().data(), XBinary::getValueString(listDataRecordsRow.at(0).listValues.at(j), dataRecord.valType, true).toLatin1().data(),
-//                        listComments.at(j).toLatin1().data());
+//                 qDebug("%X: %X %s %s %s %s", dataRecord.nRelOffset, dataRecord.nSize, XBinary::valueTypeToString(dataRecord.valType,
+//                 dataRecord.nSize).toLatin1().data(),
+//                        dataRecord.sName.toLatin1().data(), XBinary::getValueString(listDataRecordsRow.at(0).listValues.at(j), dataRecord.valType,
+//                        true).toLatin1().data(), listComments.at(j).toLatin1().data());
 //             }
 //         } else if (dataHeader.dsID.fileType == FT_BINARY) {
 //             qDebug("%s: %X", XBinary::structIDToString(dataHeader.dsID.nID).toLatin1().data(), 0);
@@ -13695,7 +13697,7 @@ XBinary::ARCH XBinary::fileFormatInfoToArch(const XBinary::FILEFORMATINFO *pFile
 {
     XBinary::ARCH result = XBinary::ARCH_UNKNOWN;
 
-    if(pFileFormatInfo) {
+    if (pFileFormatInfo) {
         XBinary::DM disasmMode = XBinary::getDisasmMode(pFileFormatInfo->sArch, (pFileFormatInfo->endian == XBinary::ENDIAN_BIG), pFileFormatInfo->mode);
 
         switch (disasmMode) {
@@ -13844,8 +13846,8 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
         pStFileTypes->contains(XBinary::FT_MACHO) || pStFileTypes->contains(XBinary::FT_MACHO32) || pStFileTypes->contains(XBinary::FT_MACHO64) ||
         pStFileTypes->contains(XBinary::FT_DEX) || pStFileTypes->contains(XBinary::FT_ZIP) || pStFileTypes->contains(XBinary::FT_GZIP) ||
         pStFileTypes->contains(XBinary::FT_ZLIB) || pStFileTypes->contains(XBinary::FT_LHA) || pStFileTypes->contains(XBinary::FT_ARJ) ||
-        pStFileTypes->contains(XBinary::FT_LZ4) || pStFileTypes->contains(XBinary::FT_LZMA) ||
-        pStFileTypes->contains(XBinary::FT_AMIGAHUNK) || pStFileTypes->contains(XBinary::FT_ATARIST)) {
+        pStFileTypes->contains(XBinary::FT_LZ4) || pStFileTypes->contains(XBinary::FT_LZMA) || pStFileTypes->contains(XBinary::FT_AMIGAHUNK) ||
+        pStFileTypes->contains(XBinary::FT_ATARIST)) {
         XBinary::removeFileTypes(pStFileTypes);
     }
 }

@@ -4677,12 +4677,9 @@ XBinary *XELF::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 }
 
 XBinary::XCONVERT _TABLE_XELF_STRUCTID[] = {
-    {XELF::STRUCTID_UNKNOWN,   "Unknown",    QObject::tr("Unknown")},
-    {XELF::STRUCTID_ELF_EHDR32, "ELF_EHDR32", QString("ELF_EHDR32")},
-    {XELF::STRUCTID_ELF_EHDR64, "ELF_EHDR64", QString("ELF_EHDR64")},
-    {XELF::STRUCTID_ELF_PHDR32, "ELF_PHDR32", QString("ELF_PHDR32")},
-    {XELF::STRUCTID_ELF_PHDR64, "ELF_PHDR64", QString("ELF_PHDR64")},
-    {XELF::STRUCTID_ELF_SHDR32, "ELF_SHDR32", QString("ELF_SHDR32")},
+    {XELF::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},      {XELF::STRUCTID_ELF_EHDR32, "ELF_EHDR32", QString("ELF_EHDR32")},
+    {XELF::STRUCTID_ELF_EHDR64, "ELF_EHDR64", QString("ELF_EHDR64")}, {XELF::STRUCTID_ELF_PHDR32, "ELF_PHDR32", QString("ELF_PHDR32")},
+    {XELF::STRUCTID_ELF_PHDR64, "ELF_PHDR64", QString("ELF_PHDR64")}, {XELF::STRUCTID_ELF_SHDR32, "ELF_SHDR32", QString("ELF_SHDR32")},
     {XELF::STRUCTID_ELF_SHDR64, "ELF_SHDR64", QString("ELF_SHDR64")},
 };
 
@@ -4704,75 +4701,75 @@ QList<XBinary::XFRECORD> XELF::getXFRecords(FT fileType, quint32 nStructID, cons
     QList<XBinary::XFRECORD> listResult;
 
     if (nStructID == STRUCTID_ELF_EHDR32) {
-        listResult.append({"e_ident",     (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_ident),     16, XFRECORD_FLAG_NONE,    VT_CHAR_ARRAY});
-        listResult.append({"e_type",      (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_type),       2,  XFRECORD_FLAG_NONE,    VT_UINT16});
-        listResult.append({"e_machine",   (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_machine),    2,  XFRECORD_FLAG_NONE,    VT_UINT16});
-        listResult.append({"e_version",   (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_version),    4,  XFRECORD_FLAG_NONE,    VT_UINT32});
-        listResult.append({"e_entry",     (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_entry),      4,  XFRECORD_FLAG_ADDRESS, VT_UINT32});
-        listResult.append({"e_phoff",     (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_phoff),      4,  XFRECORD_FLAG_OFFSET,  VT_UINT32});
-        listResult.append({"e_shoff",     (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_shoff),      4,  XFRECORD_FLAG_OFFSET,  VT_UINT32});
-        listResult.append({"e_flags",     (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_flags),      4,  XFRECORD_FLAG_NONE,    VT_UINT32});
-        listResult.append({"e_ehsize",    (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_ehsize),     2,  XFRECORD_FLAG_SIZE,    VT_UINT16});
-        listResult.append({"e_phentsize", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_phentsize),  2,  XFRECORD_FLAG_SIZE,    VT_UINT16});
-        listResult.append({"e_phnum",     (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_phnum),      2,  XFRECORD_FLAG_COUNT,   VT_UINT16});
-        listResult.append({"e_shentsize", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_shentsize),  2,  XFRECORD_FLAG_SIZE,    VT_UINT16});
-        listResult.append({"e_shnum",     (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_shnum),      2,  XFRECORD_FLAG_COUNT,   VT_UINT16});
-        listResult.append({"e_shstrndx",  (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_shstrndx),   2,  XFRECORD_FLAG_NONE,    VT_UINT16});
+        listResult.append({"e_ident", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_ident), 16, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"e_type", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_type), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_machine", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_machine), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_version", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_version), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"e_entry", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_entry), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"e_phoff", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_phoff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"e_shoff", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_shoff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"e_flags", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"e_ehsize", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_ehsize), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_phentsize", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_phentsize), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_phnum", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_phnum), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"e_shentsize", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_shentsize), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_shnum", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_shnum), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"e_shstrndx", (qint32)offsetof(XELF_DEF::Elf32_Ehdr, e_shstrndx), 2, XFRECORD_FLAG_NONE, VT_UINT16});
     } else if (nStructID == STRUCTID_ELF_EHDR64) {
-        listResult.append({"e_ident",     (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_ident),     16, XFRECORD_FLAG_NONE,    VT_CHAR_ARRAY});
-        listResult.append({"e_type",      (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_type),       2,  XFRECORD_FLAG_NONE,    VT_UINT16});
-        listResult.append({"e_machine",   (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_machine),    2,  XFRECORD_FLAG_NONE,    VT_UINT16});
-        listResult.append({"e_version",   (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_version),    4,  XFRECORD_FLAG_NONE,    VT_UINT32});
-        listResult.append({"e_entry",     (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_entry),      8,  XFRECORD_FLAG_ADDRESS, VT_UINT64});
-        listResult.append({"e_phoff",     (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_phoff),      8,  XFRECORD_FLAG_OFFSET,  VT_UINT64});
-        listResult.append({"e_shoff",     (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_shoff),      8,  XFRECORD_FLAG_OFFSET,  VT_UINT64});
-        listResult.append({"e_flags",     (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_flags),      4,  XFRECORD_FLAG_NONE,    VT_UINT32});
-        listResult.append({"e_ehsize",    (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_ehsize),     2,  XFRECORD_FLAG_SIZE,    VT_UINT16});
-        listResult.append({"e_phentsize", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_phentsize),  2,  XFRECORD_FLAG_SIZE,    VT_UINT16});
-        listResult.append({"e_phnum",     (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_phnum),      2,  XFRECORD_FLAG_COUNT,   VT_UINT16});
-        listResult.append({"e_shentsize", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_shentsize),  2,  XFRECORD_FLAG_SIZE,    VT_UINT16});
-        listResult.append({"e_shnum",     (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_shnum),      2,  XFRECORD_FLAG_COUNT,   VT_UINT16});
-        listResult.append({"e_shstrndx",  (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_shstrndx),   2,  XFRECORD_FLAG_NONE,    VT_UINT16});
+        listResult.append({"e_ident", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_ident), 16, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"e_type", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_type), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_machine", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_machine), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"e_version", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_version), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"e_entry", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_entry), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"e_phoff", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_phoff), 8, XFRECORD_FLAG_OFFSET, VT_UINT64});
+        listResult.append({"e_shoff", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_shoff), 8, XFRECORD_FLAG_OFFSET, VT_UINT64});
+        listResult.append({"e_flags", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"e_ehsize", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_ehsize), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_phentsize", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_phentsize), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_phnum", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_phnum), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"e_shentsize", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_shentsize), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_shnum", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_shnum), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"e_shstrndx", (qint32)offsetof(XELF_DEF::Elf64_Ehdr, e_shstrndx), 2, XFRECORD_FLAG_NONE, VT_UINT16});
     } else if (nStructID == STRUCTID_ELF_PHDR32) {
-        listResult.append({"p_type",   (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_type),   4, XFRECORD_FLAG_NONE,   VT_UINT32});
+        listResult.append({"p_type", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_type), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"p_offset", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_offset), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
-        listResult.append({"p_vaddr",  (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_vaddr),  4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
-        listResult.append({"p_paddr",  (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_paddr),  4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
-        listResult.append({"p_filesz", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_filesz), 4, XFRECORD_FLAG_SIZE,   VT_UINT32});
-        listResult.append({"p_memsz",  (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_memsz),  4, XFRECORD_FLAG_SIZE,   VT_UINT32});
-        listResult.append({"p_flags",  (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_flags),  4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"p_align",  (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_align),  4, XFRECORD_FLAG_SIZE,   VT_UINT32});
+        listResult.append({"p_vaddr", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_vaddr), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"p_paddr", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_paddr), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"p_filesz", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_filesz), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"p_memsz", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_memsz), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"p_flags", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"p_align", (qint32)offsetof(XELF_DEF::Elf32_Phdr, p_align), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
     } else if (nStructID == STRUCTID_ELF_PHDR64) {
-        listResult.append({"p_type",   (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_type),   4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"p_flags",  (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_flags),  4, XFRECORD_FLAG_NONE,   VT_UINT32});
+        listResult.append({"p_type", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_type), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"p_flags", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"p_offset", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_offset), 8, XFRECORD_FLAG_OFFSET, VT_UINT64});
-        listResult.append({"p_vaddr",  (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_vaddr),  8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
-        listResult.append({"p_paddr",  (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_paddr),  8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
-        listResult.append({"p_filesz", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_filesz), 8, XFRECORD_FLAG_SIZE,   VT_UINT64});
-        listResult.append({"p_memsz",  (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_memsz),  8, XFRECORD_FLAG_SIZE,   VT_UINT64});
-        listResult.append({"p_align",  (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_align),  8, XFRECORD_FLAG_SIZE,   VT_UINT64});
+        listResult.append({"p_vaddr", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_vaddr), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"p_paddr", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_paddr), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"p_filesz", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_filesz), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"p_memsz", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_memsz), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"p_align", (qint32)offsetof(XELF_DEF::Elf64_Phdr, p_align), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
     } else if (nStructID == STRUCTID_ELF_SHDR32) {
-        listResult.append({"sh_name",      (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_name),      4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_type",      (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_type),      4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_flags",     (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_flags),     4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_addr",      (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_addr),      4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
-        listResult.append({"sh_offset",    (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_offset),    4, XFRECORD_FLAG_OFFSET, VT_UINT32});
-        listResult.append({"sh_size",      (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_size),      4, XFRECORD_FLAG_SIZE,   VT_UINT32});
-        listResult.append({"sh_link",      (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_link),      4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_info",      (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_info),      4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_addralign", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_addralign), 4, XFRECORD_FLAG_SIZE,   VT_UINT32});
-        listResult.append({"sh_entsize",   (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_entsize),   4, XFRECORD_FLAG_SIZE,   VT_UINT32});
+        listResult.append({"sh_name", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_name), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_type", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_type), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_flags", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_addr", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_addr), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"sh_offset", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_offset), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"sh_size", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"sh_link", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_link), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_info", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_info), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_addralign", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_addralign), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"sh_entsize", (qint32)offsetof(XELF_DEF::Elf32_Shdr, sh_entsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
     } else if (nStructID == STRUCTID_ELF_SHDR64) {
-        listResult.append({"sh_name",      (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_name),      4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_type",      (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_type),      4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_flags",     (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_flags),     8, XFRECORD_FLAG_NONE,   VT_UINT64});
-        listResult.append({"sh_addr",      (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_addr),      8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
-        listResult.append({"sh_offset",    (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_offset),    8, XFRECORD_FLAG_OFFSET, VT_UINT64});
-        listResult.append({"sh_size",      (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_size),      8, XFRECORD_FLAG_SIZE,   VT_UINT64});
-        listResult.append({"sh_link",      (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_link),      4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_info",      (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_info),      4, XFRECORD_FLAG_NONE,   VT_UINT32});
-        listResult.append({"sh_addralign", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_addralign), 8, XFRECORD_FLAG_SIZE,   VT_UINT64});
-        listResult.append({"sh_entsize",   (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_entsize),   8, XFRECORD_FLAG_SIZE,   VT_UINT64});
+        listResult.append({"sh_name", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_name), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_type", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_type), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_flags", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_flags), 8, XFRECORD_FLAG_NONE, VT_UINT64});
+        listResult.append({"sh_addr", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_addr), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"sh_offset", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_offset), 8, XFRECORD_FLAG_OFFSET, VT_UINT64});
+        listResult.append({"sh_size", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_size), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"sh_link", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_link), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_info", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_info), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sh_addralign", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_addralign), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"sh_entsize", (qint32)offsetof(XELF_DEF::Elf64_Shdr, sh_entsize), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
     }
 
     return listResult;
@@ -4796,7 +4793,7 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
         quint32 nStrIdx = getSectionStringTable();
         if (nStrIdx < (quint32)listShdrs.count()) {
             qint64 nStrtabOffset = (qint64)listShdrs.at(nStrIdx).sh_offset;
-            qint64 nStrtabSize   = (qint64)listShdrs.at(nStrIdx).sh_size;
+            qint64 nStrtabSize = (qint64)listShdrs.at(nStrIdx).sh_size;
             for (const auto &shdr : listShdrs) {
                 names.append(getStringFromIndex(nStrtabOffset, nStrtabSize, shdr.sh_name));
             }
@@ -4843,13 +4840,13 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
         xfHeader.xLoc = xfStruct.xLoc;
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, xfStruct.xLoc);
-        xfHeader.listDataSt.append({1, 0, XFDATASTYPE_LIST, _TABLE_XELF_Types,    sizeof(_TABLE_XELF_Types)    / sizeof(XBinary::XIDSTRING)});
+        xfHeader.listDataSt.append({1, 0, XFDATASTYPE_LIST, _TABLE_XELF_Types, sizeof(_TABLE_XELF_Types) / sizeof(XBinary::XIDSTRING)});
         xfHeader.listDataSt.append({2, 0, XFDATASTYPE_LIST, _TABLE_XELF_Machines, sizeof(_TABLE_XELF_Machines) / sizeof(XBinary::XIDSTRING)});
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
         listResult.append(xfHeader);
     } else if ((nStructID == STRUCTID_ELF_PHDR32) || (nStructID == STRUCTID_ELF_PHDR64)) {
         qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
-        qint32 nRows   = xfStruct.nCount > 0 ? xfStruct.nCount : (qint32)(bIs64 ? getHdr64_phnum() : getHdr32_phnum());
+        qint32 nRows = xfStruct.nCount > 0 ? xfStruct.nCount : (qint32)(bIs64 ? getHdr64_phnum() : getHdr32_phnum());
         qint64 nRowSize = bIs64 ? (qint64)sizeof(XELF_DEF::Elf64_Phdr) : (qint64)sizeof(XELF_DEF::Elf32_Phdr);
 
         if ((nOffset != -1) && (nRows > 0)) {
@@ -4866,8 +4863,8 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
             listResult.append(xfTable);
         }
     } else if ((nStructID == STRUCTID_ELF_SHDR32) || (nStructID == STRUCTID_ELF_SHDR64)) {
-        qint64 nOffset  = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
-        qint32 nRows    = xfStruct.nCount > 0 ? xfStruct.nCount : (qint32)getNumberOfSections();
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nRows = xfStruct.nCount > 0 ? xfStruct.nCount : (qint32)getNumberOfSections();
         qint64 nRowSize = bIs64 ? (qint64)sizeof(XELF_DEF::Elf64_Shdr) : (qint64)sizeof(XELF_DEF::Elf32_Shdr);
 
         if ((nOffset != -1) && (nRows > 0)) {

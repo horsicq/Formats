@@ -1519,9 +1519,9 @@ quint32 XLE::ftStringToStructID(const QString &sFtString)
 //             // Minimal key fields
 //             dh.listRecords.append(
 //                 getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_magic), 2, "e32_magic", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//             dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_cpu), 2, "e32_cpu", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//             dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_os), 2, "e32_os", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//             dh.listRecords.append(
+//             dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_cpu), 2, "e32_cpu", VT_WORD, DRF_UNKNOWN,
+//             dataHeadersOptions.pMemoryMap->endian)); dh.listRecords.append(getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_os), 2, "e32_os", VT_WORD,
+//             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian)); dh.listRecords.append(
 //                 getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objtab), 4, "e32_objtab", VT_DWORD, DRF_OFFSET, dataHeadersOptions.pMemoryMap->endian));
 //             dh.listRecords.append(
 //                 getDataRecord(offsetof(XLE_DEF::IMAGE_VXD_HEADER, e32_objcnt), 4, "e32_objcnt", VT_DWORD, DRF_COUNT, dataHeadersOptions.pMemoryMap->endian));

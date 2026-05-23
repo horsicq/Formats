@@ -75,7 +75,7 @@ public:
     TEXT_TYPE detectTextType(PDSTRUCT *pPdStruct = nullptr);
     LINE_ENDING detectLineEnding(PDSTRUCT *pPdStruct = nullptr);
 
-    QString getText(qint64 nOffset = 0, qint64 nSize = -1,PDSTRUCT *pPdStruct = nullptr);
+    QString getText(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
     QString getTextByLines(qint64 nStartLine, qint64 nLineCount = 1);
     QStringList getLines(qint64 nStartLine = 0, qint64 nLineCount = -1);
 

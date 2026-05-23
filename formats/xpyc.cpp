@@ -973,9 +973,9 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
 //                             getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 //                     }
 //                 } else {
-//                     dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Timestamp", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                     nOffset += 4;
-//                     dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Source Size", VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Timestamp", VT_UINT32, DRF_UNKNOWN,
+//                     dataHeadersOptions.pMemoryMap->endian)); nOffset += 4; dataHeader.listRecords.append(getDataRecord(nStartOffset + nOffset, 4, "Source Size",
+//                     VT_UINT32, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 //                 }
 
 //                 listResult.append(dataHeader);

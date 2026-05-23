@@ -138,7 +138,7 @@ qint64 XText::getFileFormatSize(PDSTRUCT *pPdStruct)
 
 QString XText::getVersion()
 {
-    PDSTRUCT pdStruct = createPdStruct(); // TODO
+    PDSTRUCT pdStruct = createPdStruct();  // TODO
     TEXT_INFO textInfo = getTextInfo(&pdStruct);
     return textTypeToString(textInfo.textType);
 }

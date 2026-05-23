@@ -361,7 +361,10 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
                                 QString sTmp = m_pXBinary->read_utf8String(nStringOffset);
                                 bool bValid = !sTmp.isEmpty();
                                 for (QChar c : sTmp) {
-                                    if (c.unicode() < 0x20 || c.unicode() > 0x7E) { bValid = false; break; }
+                                    if (c.unicode() < 0x20 || c.unicode() > 0x7E) {
+                                        bValid = false;
+                                        break;
+                                    }
                                 }
                                 if (bValid) result = sTmp;
                             }

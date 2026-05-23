@@ -264,8 +264,7 @@ void XMSDOS::set_e_ovno(quint16 nValue)
 
 void XMSDOS::set_e_res(qint32 nPosition, quint16 nValue)
 {
-    if ((nPosition >= 0) && (nPosition < 4))
-    {
+    if ((nPosition >= 0) && (nPosition < 4)) {
         write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + sizeof(quint16) * nPosition, nValue);
     }
 }
@@ -282,8 +281,7 @@ void XMSDOS::set_e_oeminfo(quint16 nValue)
 
 void XMSDOS::set_e_res2(qint32 nPosition, quint16 nValue)
 {
-    if ((nPosition >= 0) && (nPosition < 10))
-    {
+    if ((nPosition >= 0) && (nPosition < 10)) {
         write_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + sizeof(quint16) * nPosition, nValue);
     }
 }
@@ -367,8 +365,7 @@ quint16 XMSDOS::get_e_res(qint32 nPosition)
 {
     quint16 nResult = 0;
 
-    if ((nPosition >= 0) && (nPosition < 4))
-    {
+    if ((nPosition >= 0) && (nPosition < 4)) {
         nResult = read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + sizeof(quint16) * nPosition);
     }
 
@@ -389,8 +386,7 @@ quint16 XMSDOS::get_e_res2(qint32 nPosition)
 {
     quint16 nResult = 0;
 
-    if ((nPosition >= 0) && (nPosition < 10))
-    {
+    if ((nPosition >= 0) && (nPosition < 10)) {
         nResult = read_uint16(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + sizeof(quint16) * nPosition);
     }
 
@@ -855,9 +851,9 @@ QList<XBinary::XFHEADER> XMSDOS::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT
         xfHeader.xLoc = headerLoc;
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, headerLoc);
-        xfHeader.nSize = (xfStruct.nSize > 0) ? xfStruct.nSize
-                                              : ((nStructID == STRUCTID_IMAGE_DOS_HEADEREX) ? sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)
-                                                                                             : sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
+        xfHeader.nSize = (xfStruct.nSize > 0)
+                             ? xfStruct.nSize
+                             : ((nStructID == STRUCTID_IMAGE_DOS_HEADEREX) ? sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX) : sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
         // Field 0 = e_magic
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMSDOS_ImageMagics, sizeof(_TABLE_XMSDOS_ImageMagics) / sizeof(XBinary::XIDSTRING)});
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
@@ -966,19 +962,22 @@ QList<XBinary::XFRECORD> XMSDOS::getXFRecords(FT fileType, quint32 nStructID, co
 
 //                 if (dataHeadersOptions.nID == STRUCTID_IMAGE_DOS_HEADEREX) {
 //                     for (qint32 i = 0; i < 4; i++) {
-//                         dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + i * sizeof(quint16), 2, QString("e_res_%1").arg(i),
+//                         dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res) + i * sizeof(quint16), 2,
+//                         QString("e_res_%1").arg(i),
 //                                                                     VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                     }
 //                     dataHeader.listRecords.append(
 //                         getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oemid), 2, "e_oemid", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                     dataHeader.listRecords.append(
-//                         getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oeminfo), 2, "e_oeminfo", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                         getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_oeminfo), 2, "e_oeminfo", VT_WORD, DRF_UNKNOWN,
+//                         dataHeadersOptions.pMemoryMap->endian));
 //                     for (qint32 i = 0; i < 10; i++) {
 //                         dataHeader.listRecords.append(getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_res2) + i * sizeof(quint16), 2,
 //                                                                     QString("e_res2_%1").arg(i), VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                     }
 //                     dataHeader.listRecords.append(
-//                         getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew), 4, "e_lfanew", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                         getDataRecord(offsetof(XMSDOS_DEF::IMAGE_DOS_HEADEREX, e_lfanew), 4, "e_lfanew", VT_DWORD, DRF_UNKNOWN,
+//                         dataHeadersOptions.pMemoryMap->endian));
 //                 }
 
 //                 listResult.append(dataHeader);

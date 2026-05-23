@@ -401,8 +401,8 @@ quint32 XXM::ftStringToStructID(const QString &sFtString)
 
 //             if (dataHeadersOptions.nID == STRUCTID_HEADER) {
 //                 dataHeader.nSize = sizeof(HEADER);
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, id_text), 17, "id_text", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(HEADER, id_text), 17, "id_text", VT_CHAR_ARRAY, DRF_UNKNOWN,
+//                 dataHeadersOptions.pMemoryMap->endian)); dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(HEADER, module_name), 20, "module_name", VT_CHAR_ARRAY, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(HEADER, ctrl_byte_1a), 1, "ctrl_byte_1a", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
@@ -471,7 +471,8 @@ quint32 XXM::ftStringToStructID(const QString &sFtString)
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_start_point), 1, "panning_loop_start_point", VT_BYTE,
 //                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_end_point), 1, "panning_loop_end_point", VT_BYTE, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, panning_loop_end_point), 1, "panning_loop_end_point", VT_BYTE,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_type), 1, "volume_type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
@@ -486,7 +487,8 @@ quint32 XXM::ftStringToStructID(const QString &sFtString)
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, vibrato_rate), 1, "vibrato_rate", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_fadeout), 2, "volume_fadeout", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, volume_fadeout), 2, "volume_fadeout", VT_WORD, DRF_UNKNOWN,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(INSTRUMENT_EXTRA_HEADER, reserved), 2, "reserved", VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //             } else if (dataHeadersOptions.nID == STRUCTID_SAMPLE_HEADER) {
@@ -497,13 +499,14 @@ quint32 XXM::ftStringToStructID(const QString &sFtString)
 //                     getDataRecord(offsetof(SAMPLE_HEADER, loop_start), 4, "loop_start", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(SAMPLE_HEADER, loop_length), 4, "loop_length", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, volume), 1, "volume", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, volume), 1, "volume", VT_BYTE, DRF_UNKNOWN,
+//                 dataHeadersOptions.pMemoryMap->endian)); dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(SAMPLE_HEADER, finetune), 1, "finetune", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, type), 1, "type", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, panning), 1, "panning", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(SAMPLE_HEADER, relative_note_number), 1, "relative_note_number", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(SAMPLE_HEADER, panning), 1, "panning", VT_BYTE, DRF_UNKNOWN,
+//                 dataHeadersOptions.pMemoryMap->endian)); dataHeader.listRecords.append(
+//                     getDataRecord(offsetof(SAMPLE_HEADER, relative_note_number), 1, "relative_note_number", VT_BYTE, DRF_UNKNOWN,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(SAMPLE_HEADER, reserved), 1, "reserved", VT_BYTE, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(

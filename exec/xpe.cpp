@@ -9382,19 +9382,21 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
         listResult.append({"MajorVersion", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MajorVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
         listResult.append({"MinorVersion", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, MinorVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
-        listResult.append({"Name", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name), 4, XFRECORD_FLAG_RELATIVE_ADDRESS | XFRECORD_FLAG_RELATIVE_ADDRESS_STRING, VT_UINT32});
+        listResult.append(
+            {"Name", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Name), 4, XFRECORD_FLAG_RELATIVE_ADDRESS | XFRECORD_FLAG_RELATIVE_ADDRESS_STRING, VT_UINT32});
         listResult.append({"Base", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, Base), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"NumberOfFunctions", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfFunctions), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
         listResult.append({"NumberOfNames", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfNames), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
         listResult.append({"AddressOfFunctions", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"AddressOfNames", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNames), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
-        listResult.append({"AddressOfNameOrdinals", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append(
+            {"AddressOfNameOrdinals", (qint32)offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNameOrdinals), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
     } else if (nStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) {
         listResult.append({"OriginalFirstThunk", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, OriginalFirstThunk), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
         listResult.append({"ForwarderChain", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, ForwarderChain), 4, XFRECORD_FLAG_NONE, VT_UINT32});
-        listResult.append({"Name", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4,
-                           XFRECORD_FLAG_RELATIVE_ADDRESS | XFRECORD_FLAG_RELATIVE_ADDRESS_STRING, VT_UINT32});
+        listResult.append(
+            {"Name", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4, XFRECORD_FLAG_RELATIVE_ADDRESS | XFRECORD_FLAG_RELATIVE_ADDRESS_STRING, VT_UINT32});
         listResult.append({"FirstThunk", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, FirstThunk), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
     } else if (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) {
         listResult.append({"Characteristics", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Characteristics), 4, XFRECORD_FLAG_NONE, VT_UINT32});
@@ -9426,12 +9428,16 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         listResult.append({"MinorVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MinorVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
         listResult.append({"GlobalFlagsClear", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GlobalFlagsClear), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"GlobalFlagsSet", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GlobalFlagsSet), 4, XFRECORD_FLAG_NONE, VT_UINT32});
-        listResult.append({"CriticalSectionDefaultTimeout", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CriticalSectionDefaultTimeout), 4, XFRECORD_FLAG_NONE, VT_UINT32});
-        listResult.append({"DeCommitFreeBlockThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DeCommitFreeBlockThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
-        listResult.append({"DeCommitTotalFreeThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DeCommitTotalFreeThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"CriticalSectionDefaultTimeout", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CriticalSectionDefaultTimeout), 4,
+                           XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append(
+            {"DeCommitFreeBlockThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DeCommitFreeBlockThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append(
+            {"DeCommitTotalFreeThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, DeCommitTotalFreeThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"LockPrefixTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, LockPrefixTable), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
         listResult.append({"MaximumAllocationSize", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MaximumAllocationSize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
-        listResult.append({"VirtualMemoryThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, VirtualMemoryThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append(
+            {"VirtualMemoryThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, VirtualMemoryThreshold), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"ProcessAffinityMask", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, ProcessAffinityMask), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"ProcessHeapFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, ProcessHeapFlags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"CSDVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, CSDVersion), 2, XFRECORD_FLAG_NONE, VT_UINT16});
@@ -9440,8 +9446,10 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         listResult.append({"SecurityCookie", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SecurityCookie), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
         listResult.append({"SEHandlerTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SEHandlerTable), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
         listResult.append({"SEHandlerCount", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, SEHandlerCount), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
-        listResult.append({"GuardCFCheckFunctionPointer", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFCheckFunctionPointer), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
-        listResult.append({"GuardCFFunctionTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFFunctionTable), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"GuardCFCheckFunctionPointer", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFCheckFunctionPointer), 4,
+                           XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append(
+            {"GuardCFFunctionTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFFunctionTable), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
         listResult.append({"GuardCFFunctionCount", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardCFFunctionCount), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
         listResult.append({"GuardFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, GuardFlags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
     } else if (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) {
@@ -9451,12 +9459,16 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         listResult.append({"MinorVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MinorVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
         listResult.append({"GlobalFlagsClear", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GlobalFlagsClear), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"GlobalFlagsSet", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GlobalFlagsSet), 4, XFRECORD_FLAG_NONE, VT_UINT32});
-        listResult.append({"CriticalSectionDefaultTimeout", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CriticalSectionDefaultTimeout), 4, XFRECORD_FLAG_NONE, VT_UINT32});
-        listResult.append({"DeCommitFreeBlockThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DeCommitFreeBlockThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
-        listResult.append({"DeCommitTotalFreeThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DeCommitTotalFreeThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"CriticalSectionDefaultTimeout", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CriticalSectionDefaultTimeout), 4,
+                           XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append(
+            {"DeCommitFreeBlockThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DeCommitFreeBlockThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append(
+            {"DeCommitTotalFreeThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, DeCommitTotalFreeThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
         listResult.append({"LockPrefixTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, LockPrefixTable), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
         listResult.append({"MaximumAllocationSize", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MaximumAllocationSize), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
-        listResult.append({"VirtualMemoryThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, VirtualMemoryThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append(
+            {"VirtualMemoryThreshold", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, VirtualMemoryThreshold), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
         listResult.append({"ProcessAffinityMask", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, ProcessAffinityMask), 8, XFRECORD_FLAG_NONE, VT_UINT64});
         listResult.append({"ProcessHeapFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, ProcessHeapFlags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"CSDVersion", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, CSDVersion), 2, XFRECORD_FLAG_NONE, VT_UINT16});
@@ -9465,8 +9477,10 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         listResult.append({"SecurityCookie", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SecurityCookie), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
         listResult.append({"SEHandlerTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SEHandlerTable), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
         listResult.append({"SEHandlerCount", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, SEHandlerCount), 8, XFRECORD_FLAG_COUNT, VT_UINT64});
-        listResult.append({"GuardCFCheckFunctionPointer", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFCheckFunctionPointer), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
-        listResult.append({"GuardCFFunctionTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFFunctionTable), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"GuardCFCheckFunctionPointer", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFCheckFunctionPointer), 8,
+                           XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append(
+            {"GuardCFFunctionTable", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFFunctionTable), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
         listResult.append({"GuardCFFunctionCount", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardCFFunctionCount), 8, XFRECORD_FLAG_COUNT, VT_UINT64});
         listResult.append({"GuardFlags", (qint32)offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, GuardFlags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
     } else if (nStructID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) {
@@ -9476,28 +9490,40 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
     } else if (nStructID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) {
         listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
         listResult.append({"OffsetModuleName", (qint32)offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, OffsetModuleName), 2, XFRECORD_FLAG_OFFSET, VT_UINT16});
-        listResult.append({"NumberOfModuleForwarderRefs", (qint32)offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, NumberOfModuleForwarderRefs), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append(
+            {"NumberOfModuleForwarderRefs", (qint32)offsetof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR, NumberOfModuleForwarderRefs), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
     } else if (nStructID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR) {
         listResult.append({"AllAttributes", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, AllAttributes), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"DllNameRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, DllNameRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"ModuleHandleRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ModuleHandleRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
-        listResult.append({"ImportAddressTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
-        listResult.append({"ImportNameTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportNameTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
-        listResult.append({"BoundImportAddressTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
-        listResult.append({"UnloadInformationTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append(
+            {"ImportAddressTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append(
+            {"ImportNameTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportNameTableRVA), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"BoundImportAddressTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4,
+                           XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"UnloadInformationTableRVA", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4,
+                           XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
     } else if (nStructID == STRUCTID_IMAGE_COR20_HEADER) {
         listResult.append({"cb", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, cb), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"MajorRuntimeVersion", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MajorRuntimeVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
         listResult.append({"MinorRuntimeVersion", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MinorRuntimeVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
-        listResult.append({"MetaData.VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
-        listResult.append({"MetaData.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"MetaData.VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress),
+                           4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append(
+            {"MetaData.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
         listResult.append({"Flags", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, Flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"EntryPointToken", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, EntryPointToken), 4, XFRECORD_FLAG_NONE, VT_UINT32});
-        listResult.append({"Resources.VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
-        listResult.append({"Resources.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
-        listResult.append({"StrongNameSignature.VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
-        listResult.append({"StrongNameSignature.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"Resources.VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress),
+                           4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"Resources.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size), 4,
+                           XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"StrongNameSignature.VirtualAddress",
+                           (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, VirtualAddress), 4,
+                           XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"StrongNameSignature.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
+                           4, XFRECORD_FLAG_SIZE, VT_UINT32});
     } else {
         listResult = XMSDOS::getXFRecords(fileType, nStructID, xLoc);
     }
@@ -9761,9 +9787,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                     qint32 nChildRows = 1;
 
                     switch (i) {
-                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT:
-                            nChildStructID = STRUCTID_IMAGE_EXPORT_DIRECTORY;
-                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT: nChildStructID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
                             nChildStructID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR;
                             bChildIsTable = true;
@@ -9781,9 +9805,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                             bChildIsTable = true;
                             nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY));
                             break;
-                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS:
-                            nChildStructID = bIs64 ? STRUCTID_IMAGE_TLS_DIRECTORY64 : STRUCTID_IMAGE_TLS_DIRECTORY32;
-                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS: nChildStructID = bIs64 ? STRUCTID_IMAGE_TLS_DIRECTORY64 : STRUCTID_IMAGE_TLS_DIRECTORY32; break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG:
                             nChildStructID = bIs64 ? STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64 : STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32;
                             break;
@@ -9797,9 +9819,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                             bChildIsTable = true;
                             nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR));
                             break;
-                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR:
-                            nChildStructID = STRUCTID_IMAGE_COR20_HEADER;
-                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR: nChildStructID = STRUCTID_IMAGE_COR20_HEADER; break;
                         default: break;
                     }
 
@@ -9908,30 +9928,39 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                     qint32 nChildRows = 1;
 
                     switch (i) {
-                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT:   nChildStructID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT: nChildStructID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
-                            nChildStructID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR; bChildIsTable = true;
-                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)); break;
+                            nChildStructID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR;
+                            bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
+                            break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION:
                             if (getMode() == MODE_64) {
-                                nChildStructID = STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY; bChildIsTable = true;
+                                nChildStructID = STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY;
+                                bChildIsTable = true;
                                 nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_RUNTIME_FUNCTION_ENTRY));
-                            } break;
+                            }
+                            break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DEBUG:
-                            nChildStructID = STRUCTID_IMAGE_DEBUG_DIRECTORY; bChildIsTable = true;
-                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY)); break;
-                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS:
-                            nChildStructID = bIs64 ? STRUCTID_IMAGE_TLS_DIRECTORY64 : STRUCTID_IMAGE_TLS_DIRECTORY32; break;
+                            nChildStructID = STRUCTID_IMAGE_DEBUG_DIRECTORY;
+                            bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY));
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_TLS: nChildStructID = bIs64 ? STRUCTID_IMAGE_TLS_DIRECTORY64 : STRUCTID_IMAGE_TLS_DIRECTORY32; break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG:
-                            nChildStructID = bIs64 ? STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64 : STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32; break;
+                            nChildStructID = bIs64 ? STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64 : STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32;
+                            break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:
-                            nChildStructID = STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR; bChildIsTable = true;
-                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR)); break;
+                            nChildStructID = STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR;
+                            bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::IMAGE_BOUND_IMPORT_DESCRIPTOR));
+                            break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT:
-                            nChildStructID = STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR; bChildIsTable = true;
-                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR)); break;
-                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR:
-                            nChildStructID = STRUCTID_IMAGE_COR20_HEADER; break;
+                            nChildStructID = STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR;
+                            bChildIsTable = true;
+                            nChildRows = (qint32)(idd.Size / sizeof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR));
+                            break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR: nChildStructID = STRUCTID_IMAGE_COR20_HEADER; break;
                         default: break;
                     }
 
@@ -9968,11 +9997,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 }
             }
         }
-    } else if ((nStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) ||
-               (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY32) ||
-               (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY64) ||
-               (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) ||
-               (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) ||
+    } else if ((nStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) || (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY32) || (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY64) ||
+               (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) || (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) ||
                (nStructID == STRUCTID_IMAGE_COR20_HEADER)) {
         qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
 
@@ -10011,11 +10037,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 _appendExportFunctionNames(listResult, xfStruct, nOffset, xfHeader.sTag);
             }
         }
-    } else if ((nStructID == STRUCTID_IMAGE_EXPORT_FUNCTION) ||
-               (nStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) ||
-               (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) ||
-               (nStructID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) ||
-               (nStructID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) ||
+    } else if ((nStructID == STRUCTID_IMAGE_EXPORT_FUNCTION) || (nStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) || (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) ||
+               (nStructID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) || (nStructID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) ||
                (nStructID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR)) {
         qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
         qint32 nRows = xfStruct.nCount;
@@ -10163,8 +10186,10 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSections), 2, "NumberOfSections", VT_WORD, DRF_COUNT,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, PointerToSymbolTable), 4, "PointerToSymbolTable", VT_DWORD, DRF_UNKNOWN,
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                     dataHeadersOptions.pMemoryMap->endian));
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, PointerToSymbolTable), 4, "PointerToSymbolTable", VT_DWORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_FILE_HEADER, NumberOfSymbols), 4, "NumberOfSymbols", VT_DWORD, DRF_COUNT,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
@@ -10193,24 +10218,30 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 
 //                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Magic), 2, "Magic", VT_WORD, DRF_UNKNOWN,
 //                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), VL_TYPE_LIST));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfCode), 4, "SizeOfCode", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfInitializedData), 4, "SizeOfInitializedData", VT_DWORD,
 //                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfUninitializedData), 4, "SizeOfUninitializedData", VT_DWORD,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfUninitializedData), 4, "SizeOfUninitializedData",
+//                 VT_DWORD,
 //                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, AddressOfEntryPoint), 4, "AddressOfEntryPoint", VT_DWORD,
 //                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfCode), 4, "BaseOfCode", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfCode), 4, "BaseOfCode", VT_DWORD, DRF_ADDRESS,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfData), 4, "BaseOfData", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, BaseOfData), 4, "BaseOfData", VT_DWORD, DRF_ADDRESS,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, ImageBase), 4, "ImageBase", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, ImageBase), 4, "ImageBase", VT_DWORD, DRF_ADDRESS,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SectionAlignment), 4, "SectionAlignment", VT_DWORD, DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, FileAlignment), 4, "FileAlignment", VT_DWORD, DRF_UNKNOWN,
@@ -10219,18 +10250,22 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                                                             VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorOperatingSystemVersion), 2, "MinorOperatingSystemVersion",
 //                                                             VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorImageVersion), 2, "MajorImageVersion", VT_WORD, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorImageVersion), 2, "MajorImageVersion", VT_WORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorImageVersion), 2, "MinorImageVersion", VT_WORD, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorImageVersion), 2, "MinorImageVersion", VT_WORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MajorSubsystemVersion), 2, "MajorSubsystemVersion", VT_WORD,
 //                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, MinorSubsystemVersion), 2, "MinorSubsystemVersion", VT_WORD,
 //                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Win32VersionValue), 4, "Win32VersionValue", VT_DWORD, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, Win32VersionValue), 4, "Win32VersionValue", VT_DWORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfImage), 4, "SizeOfImage", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfImage), 4, "SizeOfImage", VT_DWORD, DRF_SIZE,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfHeaders), 4, "SizeOfHeaders", VT_DWORD, DRF_SIZE,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
@@ -10240,7 +10275,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, DllCharacteristics), 2, "DllCharacteristics", VT_WORD,
 //                                                               DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderDllCharacteristicsS(),
 //                                                               VL_TYPE_FLAGS));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackReserve), 4, "SizeOfStackReserve", VT_DWORD, DRF_SIZE,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackReserve), 4, "SizeOfStackReserve", VT_DWORD,
+//                 DRF_SIZE,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER32, SizeOfStackCommit), 4, "SizeOfStackCommit", VT_DWORD, DRF_SIZE,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
@@ -10273,22 +10309,27 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 
 //                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Magic), 2, "Magic", VT_WORD, DRF_UNKNOWN,
 //                                                               dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderMagicS(), VL_TYPE_LIST));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorLinkerVersion), 1, "MajorLinkerVersion", VT_BYTE,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorLinkerVersion), 1, "MinorLinkerVersion", VT_BYTE,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfCode), 4, "SizeOfCode", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfInitializedData), 4, "SizeOfInitializedData", VT_DWORD,
 //                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfUninitializedData), 4, "SizeOfUninitializedData", VT_DWORD,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfUninitializedData), 4, "SizeOfUninitializedData",
+//                 VT_DWORD,
 //                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, AddressOfEntryPoint), 4, "AddressOfEntryPoint", VT_DWORD,
 //                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, BaseOfCode), 4, "BaseOfCode", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, BaseOfCode), 4, "BaseOfCode", VT_DWORD, DRF_ADDRESS,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, ImageBase), 8, "ImageBase", VT_QWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, ImageBase), 8, "ImageBase", VT_QWORD, DRF_ADDRESS,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SectionAlignment), 4, "SectionAlignment", VT_DWORD, DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, FileAlignment), 4, "FileAlignment", VT_DWORD, DRF_UNKNOWN,
@@ -10297,18 +10338,22 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                                                             VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorOperatingSystemVersion), 2, "MinorOperatingSystemVersion",
 //                                                             VT_WORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorImageVersion), 2, "MajorImageVersion", VT_WORD, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorImageVersion), 2, "MajorImageVersion", VT_WORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorImageVersion), 2, "MinorImageVersion", VT_WORD, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorImageVersion), 2, "MinorImageVersion", VT_WORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MajorSubsystemVersion), 2, "MajorSubsystemVersion", VT_WORD,
 //                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, MinorSubsystemVersion), 2, "MinorSubsystemVersion", VT_WORD,
 //                                                             DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Win32VersionValue), 4, "Win32VersionValue", VT_DWORD, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, Win32VersionValue), 4, "Win32VersionValue", VT_DWORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfImage), 4, "SizeOfImage", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfImage), 4, "SizeOfImage", VT_DWORD, DRF_SIZE,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfHeaders), 4, "SizeOfHeaders", VT_DWORD, DRF_SIZE,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
@@ -10318,7 +10363,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.listRecords.append(getDataRecordDV(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, DllCharacteristics), 2, "DllCharacteristics", VT_WORD,
 //                                                               DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian, XPE::getImageOptionalHeaderDllCharacteristicsS(),
 //                                                               VL_TYPE_FLAGS));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackReserve), 8, "SizeOfStackReserve", VT_QWORD, DRF_SIZE,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackReserve), 8, "SizeOfStackReserve", VT_QWORD,
+//                 DRF_SIZE,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_OPTIONAL_HEADER64, SizeOfStackCommit), 8, "SizeOfStackCommit", VT_QWORD, DRF_SIZE,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
@@ -10354,7 +10400,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData), 4, "SizeOfRawData", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, SizeOfRawData), 4, "SizeOfRawData", VT_DWORD, DRF_SIZE,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRawData), 4, "PointerToRawData", VT_DWORD, DRF_OFFSET,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_SECTION_HEADER, PointerToRelocations), 4, "PointerToRelocations", VT_DWORD,
@@ -10508,7 +10555,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData.VirtualAddress), 4, "MetaData.VirtualAddress", VT_DWORD,
 //                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData.Size), 4, "MetaData.Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, MetaData.Size), 4, "MetaData.Size", VT_DWORD, DRF_SIZE,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Flags), 4, "Flags", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, EntryPointToken), 4, "EntryPointToken", VT_DWORD, DRF_UNKNOWN,
@@ -10516,14 +10564,17 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources.VirtualAddress), 4, "Resources.VirtualAddress", VT_DWORD,
 //                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources.Size), 4, "Resources.Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, Resources.Size), 4, "Resources.Size", VT_DWORD, DRF_SIZE,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature.VirtualAddress), 4,
 //                                                             "StrongNameSignature.VirtualAddress", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature.Size), 4, "StrongNameSignature.Size", VT_DWORD,
 //                                                             DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, CodeManagerTable.VirtualAddress), 4, "CodeManagerTable.VirtualAddress",
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, CodeManagerTable.VirtualAddress), 4,
+//                 "CodeManagerTable.VirtualAddress",
 //                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, CodeManagerTable.Size), 4, "CodeManagerTable.Size", VT_DWORD, DRF_SIZE,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, CodeManagerTable.Size), 4, "CodeManagerTable.Size", VT_DWORD,
+//                 DRF_SIZE,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_COR20_HEADER, VTableFixups.VirtualAddress), 4, "VTableFixups.VirtualAddress",
 //                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
@@ -10614,7 +10665,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                         qint64 nStructOffset = relAddressToOffset(dataHeadersOptions.pMemoryMap, ich.VTableFixups.VirtualAddress);
 
 //                         if (nStructOffset != -1) {
-//                             listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_VTABLEFIXUPS), dataHeader.dsID, STRUCTID_NET_VTABLEFIXUPS,
+//                             listResult.append(_dataHeaderHex(dataHeadersOptions, structIDToString(STRUCTID_NET_VTABLEFIXUPS), dataHeader.dsID,
+//                             STRUCTID_NET_VTABLEFIXUPS,
 //                                                              nStructOffset, ich.VTableFixups.Size));
 //                         }
 //                     }
@@ -10656,7 +10708,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, NumberOfNames), 4, "NumberOfNames", VT_DWORD, DRF_COUNT,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), 4, "AddressOfFunctions", VT_DWORD, DRF_ADDRESS,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfFunctions), 4, "AddressOfFunctions", VT_DWORD,
+//                 DRF_ADDRESS,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::IMAGE_EXPORT_DIRECTORY, AddressOfNames), 4, "AddressOfNames", VT_DWORD, DRF_ADDRESS,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
@@ -10675,7 +10728,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4, "Name", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, FirstThunk), 4, "FirstThunk", VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, FirstThunk), 4, "FirstThunk", VT_DWORD, DRF_ADDRESS,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 listResult.append(dataHeader);
 //             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) {
 //                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
@@ -10744,7 +10798,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32);
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY32, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
@@ -10760,7 +10815,8 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.nSize = sizeof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64);
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD, DRF_UNKNOWN,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, TimeDateStamp), 4, "TimeDateStamp", VT_DWORD,
+//                 DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_LOAD_CONFIG_DIRECTORY64, MajorVersion), 2, "MajorVersion", VT_WORD, DRF_UNKNOWN,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
@@ -10778,13 +10834,16 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                                                             dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, DllNameRVA), 4, "DllNameRVA", VT_DWORD, DRF_ADDRESS,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ModuleHandleRVA), 4, "ModuleHandleRVA", VT_DWORD, DRF_ADDRESS,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ModuleHandleRVA), 4, "ModuleHandleRVA", VT_DWORD,
+//                 DRF_ADDRESS,
 //                                                             dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, "ImportAddressTableRVA", VT_DWORD,
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportAddressTableRVA), 4, "ImportAddressTableRVA",
+//                 VT_DWORD,
 //                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, ImportNameTableRVA), 4, "ImportNameTableRVA", VT_DWORD,
 //                                                             DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
-//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4, "BoundImportAddressTableRVA",
+//                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, BoundImportAddressTableRVA), 4,
+//                 "BoundImportAddressTableRVA",
 //                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(getDataRecord(offsetof(XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR, UnloadInformationTableRVA), 4, "UnloadInformationTableRVA",
 //                                                             VT_DWORD, DRF_ADDRESS, dataHeadersOptions.pMemoryMap->endian));
@@ -10807,9 +10866,11 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 //                 dataHeader.listRecords.append(
 //                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Size), 4, "Size", VT_DWORD, DRF_SIZE, dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, CodePage), 4, "CodePage", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, CodePage), 4, "CodePage", VT_DWORD, DRF_UNKNOWN,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 dataHeader.listRecords.append(
-//                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Reserved), 4, "Reserved", VT_DWORD, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
+//                     getDataRecord(offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Reserved), 4, "Reserved", VT_DWORD, DRF_UNKNOWN,
+//                     dataHeadersOptions.pMemoryMap->endian));
 //                 listResult.append(dataHeader);
 //             } else if (dataHeadersOptions.nID == STRUCTID_IMAGE_BASE_RELOCATION) {
 //                 XBinary::DATA_HEADER dataHeader = _initDataHeader(dataHeadersOptions, structIDToString(dataHeadersOptions.nID));
