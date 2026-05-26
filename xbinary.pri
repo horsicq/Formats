@@ -7,11 +7,13 @@ HEADERS += \
     $$PWD/subdevice.h \
     $$PWD/xbinary.h \
     $$PWD/xbinary_def.h \
+    $$PWD/xhandler.h \
     $$PWD/xiodevice.h
 
 SOURCES += \
     $$PWD/subdevice.cpp \
     $$PWD/xbinary.cpp \
+    $$PWD/xhandler.cpp \
     $$PWD/xiodevice.cpp
 
 DISTFILES += \
