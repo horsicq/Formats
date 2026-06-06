@@ -19,7 +19,6 @@
  * SOFTWARE.
  */
 #include "xpe.h"
-#include <algorithm>
 #include "xcliassembly.h"
 
 XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
@@ -149,7 +148,7 @@ static qint32 _getXFRecordsSize(const QList<XBinary::XFRECORD> &listRecords)
     qint32 nResult = 0;
 
     for (const XBinary::XFRECORD &record : listRecords) {
-        nResult = (std::max)(nResult, record.nOffset + record.nSize);
+        nResult = qMax(nResult, record.nOffset + record.nSize);
     }
 
     return nResult;
@@ -1352,7 +1351,7 @@ QList<XPE_DEF::IMAGE_DATA_DIRECTORY> XPE::getDirectories()
     QList<XPE_DEF::IMAGE_DATA_DIRECTORY> listResult;
 
     qint32 nNumberNumberOfRvaAndSizes = getOptionalHeader_NumberOfRvaAndSizes();
-    nNumberNumberOfRvaAndSizes = (std::min)(nNumberNumberOfRvaAndSizes, 16);
+    nNumberNumberOfRvaAndSizes = qMin(nNumberNumberOfRvaAndSizes, 16);
 
     qint64 nDirectoriesOffset = getOptionalHeaderOffset();
 
@@ -1376,7 +1375,7 @@ QList<XPE_DEF::IMAGE_DATA_DIRECTORY> XPE::getDirectories()
 void XPE::setDirectories(QList<XPE_DEF::IMAGE_DATA_DIRECTORY> *pListDirectories)
 {
     qint32 nNumberOfRvaAndSizes = getOptionalHeader_NumberOfRvaAndSizes();
-    nNumberOfRvaAndSizes = (std::min)(nNumberOfRvaAndSizes, 16);
+    nNumberOfRvaAndSizes = qMin(nNumberOfRvaAndSizes, 16);
 
     qint64 nDirectoriesOffset = getOptionalHeaderOffset();
 
@@ -1597,7 +1596,7 @@ QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_H
         SECTION_RECORD record = {};
 
         record.sName = QString((char *)pListSectionHeaders->at(i).Name);
-        record.sName.resize((std::min)(record.sName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+        record.sName.resize(qMin(record.sName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
 
         record.sName = convertSectionName(record.sName, &osStringTable);
 
@@ -2581,8 +2580,8 @@ XPE_DEF::IMAGE_DATA_DIRECTORY XPE::getIAT(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPd
         qint64 nMax = 0;
 
         for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
-            nMin = (std::min)(listImportRecords.at(i).nRVA, nMin);
-            nMax = (std::max)(listImportRecords.at(i).nRVA, nMax);
+            nMin = qMin(listImportRecords.at(i).nRVA, nMin);
+            nMax = qMax(listImportRecords.at(i).nRVA, nMax);
         }
 
         result.VirtualAddress = nMin;
@@ -3559,7 +3558,7 @@ QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords(QList
                     }
 
                     if (nStringSize) {
-                        nStringSize = (std::min)((quint16)((nDataSize - nCurrentOffset) / 2), nStringSize);
+                        nStringSize = qMin((quint16)((nDataSize - nCurrentOffset) / 2), nStringSize);
 
                         QString sString = read_unicodeString(nCurrentOffset, nStringSize);
 
@@ -3613,7 +3612,7 @@ QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListResourceRecor
     RESOURCE_RECORD rh = getResourceRecord(XPE_DEF::S_RT_MANIFEST, -1, pListResourceRecords);
 
     if (rh.nOffset != -1) {
-        rh.nSize = (std::min)(rh.nSize, qint64(4000));
+        rh.nSize = qMin(rh.nSize, qint64(4000));
         sResult = read_ansiString(rh.nOffset, rh.nSize);
     }
 
@@ -9727,7 +9726,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
             // DATA_DIRECTORY table child
             qint64 nOptionalHeaderOffset = locToOffset(xfStruct.pMemoryMap, ohLoc);
             quint32 nNumberOfRvaAndSizes = getOptionalHeader_NumberOfRvaAndSizes();
-            qint32 nDataDirCount = (std::min)((quint32)16, nNumberOfRvaAndSizes);
+            qint32 nDataDirCount = qMin((quint32)16, nNumberOfRvaAndSizes);
 
             if (nDataDirCount > 0) {
                 qint64 nDataDirOffset = 0;
@@ -9881,7 +9880,7 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
     } else if (nStructID == STRUCTID_IMAGE_DATA_DIRECTORY) {
         qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
         quint32 nNumberOfRvaAndSizes = getOptionalHeader_NumberOfRvaAndSizes();
-        qint32 nRows = xfStruct.nCount > 0 ? xfStruct.nCount : (qint32)(std::min)((quint32)16, nNumberOfRvaAndSizes);
+        qint32 nRows = xfStruct.nCount > 0 ? xfStruct.nCount : (qint32)qMin((quint32)16, nNumberOfRvaAndSizes);
 
         if ((nOffset != -1) && (nRows > 0)) {
             XFHEADER xfDataDirTable = {};
@@ -10940,7 +10939,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
     XADDR nModuleAddress = getModuleAddress();
     qint64 nTotalSize = getSize();
     qint64 nMaxOffset = 0;
-    qint32 nNumberOfSections = (std::min)((qint32)getFileHeader_NumberOfSections(), XPE_DEF::S_MAX_SECTIONCOUNT);
+    qint32 nNumberOfSections = qMin((qint32)getFileHeader_NumberOfSections(), XPE_DEF::S_MAX_SECTIONCOUNT);
     qint64 nFileAlignment = getOptionalHeader_FileAlignment();
     qint64 nSectionAlignment = getOptionalHeader_SectionAlignment();
     // qint64 nBaseAddress=getOptionalHeader_ImageBase();
@@ -10988,7 +10987,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             listResult.append(record);
         }
 
-        nMaxOffset = (std::max)(nMaxOffset, record.nFileOffset + record.nFileSize);
+        nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
     }
 
     if (bCalcAdress || (nFileParts & FILEPART_SECTION) || (nFileParts & FILEPART_OVERLAY)) {
@@ -11017,14 +11016,14 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
             if (nFileParts & FILEPART_SECTION) {
                 QString _sSectionName = QString((char *)section.Name);
-                _sSectionName.resize((std::min)(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+                _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
                 _sSectionName = convertSectionName(_sSectionName, &osStringTable);
                 record.mapProperties.insert(FPART_PROP_ORIGINALNAME, _sSectionName);
                 record.sName = QString("%1 (%2) [\"%3\"]").arg(tr("Section")).arg(QString::number(i + 1)).arg(_sSectionName);
                 listResult.append(record);
             }
 
-            nMaxOffset = (std::max)(nMaxOffset, record.nFileOffset + record.nFileSize);
+            nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
         }
     }
 
@@ -12980,11 +12979,11 @@ qint32 XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
 
     QList<XPE_DEF::IMAGE_SECTION_HEADER> listSections = getSectionHeaders();
     qint32 nNumberOfSections = listSections.count();
-    nNumberOfSections = (std::min)(nNumberOfSections, 2);
+    nNumberOfSections = qMin(nNumberOfSections, 2);
 
     for (qint32 i = 0; i < nNumberOfSections; i++) {
         QString sSectionName = QString((char *)listSections.at(i).Name);
-        sSectionName.resize((std::min)(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+        sSectionName.resize(qMin(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics = listSections.at(i).Characteristics;
         nSectionCharacteristics &= 0xFF0000FF;
 
@@ -13033,7 +13032,7 @@ qint32 XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
         // 0xc0600040 MinGW
         // 0xc0300040 MinGW
         QString sSectionName = QString((char *)listSections.at(i).Name);
-        sSectionName.resize((std::min)(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+        sSectionName.resize(qMin(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics = listSections.at(i).Characteristics;
         nSectionCharacteristics &= 0xFF0000FF;
 
@@ -13081,7 +13080,7 @@ qint32 XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
         // 0x40600040 MinGW
         // 0x40300040 MinGW
         QString sSectionName = QString((char *)listSections.at(i).Name);
-        sSectionName.resize((std::min)(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
+        sSectionName.resize(qMin(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics = listSections.at(i).Characteristics;
         nSectionCharacteristics &= 0xFF0000FF;
 
@@ -13426,7 +13425,7 @@ qint64 XPE::_fixHeadersSize()
 //             if (nResult == -1) {
 //                 nResult = memoryMap.listRecords.at(i).nOffset;
 //             } else {
-//                 nResult = (std::min)(nResult, memoryMap.listRecords.at(i).nOffset);
+//                 nResult = qMin(nResult, memoryMap.listRecords.at(i).nOffset);
 //             }
 //         }
 //     }
@@ -13466,7 +13465,7 @@ quint16 XPE::_checkSum(qint64 nStartValue, qint64 nDataSize, PDSTRUCT *pPdStruct
     char *pOffset;
 
     while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {
-        nTemp = (std::min)((qint64)BUFFER_SIZE, nDataSize);
+        nTemp = qMin((qint64)BUFFER_SIZE, nDataSize);
 
         if (!read_array(nStartValue, pBuffer, nTemp)) {
             delete[] pBuffer;
@@ -13533,7 +13532,7 @@ XPE::RESOURCES_ID_NAME XPE::getResourcesIDName(qint64 nResourceOffset, quint32 n
         result.nID = 0;
         quint16 nStringLength = read_uint16(nResourceOffset + nValue);
 
-        nStringLength = (std::min)((quint16)1024, nStringLength);
+        nStringLength = qMin((quint16)1024, nStringLength);
 
         QByteArray baName = read_array(nResourceOffset + nValue + 2, nStringLength * 2);
         result.sName = QString::fromUtf16((quint16 *)(baName.data()), nStringLength);
@@ -13593,7 +13592,7 @@ QList<qint64> XPE::getRelocsAsRVAList()
 
             qint32 nNumberOfBlocks = (ibr.SizeOfBlock - sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)) / sizeof(quint16);
 
-            nNumberOfBlocks = (std::min)(nNumberOfBlocks, (int)0xFFFF);
+            nNumberOfBlocks = qMin(nNumberOfBlocks, (int)0xFFFF);
 
             for (qint32 i = 0; i < nNumberOfBlocks; i++) {
                 quint16 nRecord = read_uint16(nRelocsOffset);
@@ -13745,7 +13744,7 @@ bool XPE::addRelocsSection(QIODevice *pDevice, bool bIsImage, QList<XADDR> *pLis
 
             ish.Characteristics = 0x42000040;
             QString sSectionName = ".reloc";
-            XBinary::_copyMemory((char *)&ish.Name, sSectionName.toLatin1().data(), (std::min)(XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME, sSectionName.length()));
+            XBinary::_copyMemory((char *)&ish.Name, sSectionName.toLatin1().data(), qMin(XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME, sSectionName.length()));
 
             bResult = addSection(pDevice, bIsImage, &ish, baRelocs.data(), baRelocs.size(), pPdStruct);
 
