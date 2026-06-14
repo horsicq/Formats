@@ -2329,51 +2329,9 @@ QSet<XBinary::FT> XBinary::stringToFileTypes(const QString &sString)
     return stResult;
 }
 
-QString XBinary::convertFileName(const QString &sFileName)  // TODO Check
+QString XBinary::convertFileName(const QString &sFileName)
 {
     QString sResult = sFileName;
-#ifdef Q_OS_MAC  // Old Qt(4.X)
-    //    if(sFileName.startsWith("/.file/id="))
-    //    {
-    //        CFStringRef relCFStringRef =
-    //            CFStringCreateWithCString(
-    //                kCFAllocatorDefault,
-    //                sFileName.toUtf8().constData(),
-    //                kCFStringEncodingUTF8
-    //            );
-    //    CFURLRef relCFURL =
-    //        CFURLCreateWithFileSystemPath(
-    //            kCFAllocatorDefault,
-    //            relCFStringRef,
-    //            kCFURLPOSIXPathStyle,
-    //            false // isDirectory
-    //        );
-    //    CFErrorRef error=0;
-    //    CFURLRef absCFURL =
-    //    CFURLCreateFilePathURL(
-    //            kCFAllocatorDefault,
-    //            relCFURL,
-    //            &error
-    //        );
-    //    if(!error)
-    //    {
-    //        static const CFIndex maxAbsPathCStrBufLen=4096;
-    //        char absPathCStr[maxAbsPathCStrBufLen];
-    //        if(CFURLGetFileSystemRepresentation(
-    //                absCFURL,
-    //                true, // resolveAgainstBase
-    //                reinterpret_cast<UInt8 *>(&absPathCStr[0] ),
-    //                maxAbsPathCStrBufLen
-    //            ))
-    //            {
-    //            sFileName=QString(absPathCStr);
-    //            }
-    //        }
-    //        CFRelease(absCFURL);
-    //        CFRelease(relCFURL);
-    //        CFRelease(relCFStringRef);
-    //    }
-#endif
 
     QFileInfo fiLink(sFileName);
 
