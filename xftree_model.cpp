@@ -141,11 +141,13 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole) {
         if (nColumn == COLUMN_NAME) {
             if (m_pXBinary) {
-                result = XFormats::getXFHeaderStructName(pItem->xfHeader);
+                QString sText = XFormats::getXFHeaderStructName(pItem->xfHeader);
+                result = sText;
+                // TODO if table number of records
             } else {
                 result = QString::number(pItem->xfHeader.structID);
             }
-        } else if (nColumn == COLUMN_TYPE) {
+        } /*else if (nColumn == COLUMN_TYPE) {
             if (pItem->xfHeader.xfType == XBinary::XFTYPE_HEADER) {
                 result = QString("HEADER");
             } else if (pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
@@ -161,12 +163,12 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
             } else if (pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
                 result = QString("rows: %1").arg(pItem->xfHeader.listRowLocations.count());
             }
-        }
-    } else if (role == Qt::TextAlignmentRole) {
+        }*/
+    } /*else if (role == Qt::TextAlignmentRole) {
         if (nColumn == COLUMN_OFFSET) {
             result = static_cast<int>(Qt::AlignRight | Qt::AlignVCenter);
         }
-    }
+    }*/
 
     return result;
 }
@@ -178,13 +180,13 @@ QVariant XFTreeModel::headerData(int section, Qt::Orientation orientation, int r
     if ((orientation == Qt::Horizontal) && (role == Qt::DisplayRole)) {
         if (section == COLUMN_NAME) {
             result = tr("Name");
-        } else if (section == COLUMN_TYPE) {
+        } /*else if (section == COLUMN_TYPE) {
             result = tr("Type");
         } else if (section == COLUMN_OFFSET) {
             result = tr("Offset");
         } else if (section == COLUMN_INFO) {
             result = tr("Info");
-        }
+        }*/
     }
 
     return result;

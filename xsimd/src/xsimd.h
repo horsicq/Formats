@@ -27,13 +27,14 @@ extern "C" {
 
 /* Library version */
 #define XSIMD_VERSION_MAJOR 0
-#define XSIMD_VERSION_MINOR 1
+#define XSIMD_VERSION_MINOR 2
 #define XSIMD_VERSION_PATCH 0
 
 /* SIMD feature detection result codes */
 #define XSIMD_FEATURE_NONE 0x00
 #define XSIMD_FEATURE_SSE2 0x01
 #define XSIMD_FEATURE_AVX2 0x04
+#define XSIMD_FEATURE_CUDA 0x08
 
 /* Search result type */
 typedef long long xsimd_int64;
@@ -126,6 +127,24 @@ void xsimd_set_sse2(int bState);
  * @param bState 1 to enable, 0 to disable
  */
 void xsimd_set_avx2(int bState);
+
+/**
+ * Check if CUDA is enabled
+ * @return 1 if CUDA is enabled, 0 otherwise
+ */
+int xsimd_is_cuda_enabled(void);
+
+/**
+ * Check if CUDA is present (detected on system)
+ * @return 1 if CUDA is available, 0 otherwise
+ */
+int xsimd_is_cuda_present(void);
+
+/**
+ * Set CUDA feature state
+ * @param bState 1 to enable, 0 to disable
+ */
+void xsimd_set_cuda(int bState);
 
 /**
  * Find first occurrence of a single byte in buffer (optimized with SIMD)

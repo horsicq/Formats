@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef XSIMD_CUDA
+#include "xsimd_cuda.h"
+#endif
+
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
 #define XSIMD_X86
 #include <immintrin.h>
@@ -35,7 +39,7 @@ static xsimd_uint32 g_nFeatures = XSIMD_FEATURE_NONE;
 static xsimd_uint32 g_nEnabledFeatures = XSIMD_FEATURE_NONE;
 
 #ifdef XSIMD_X86
-static void xsimd_detect_features(void)
+static void xsimd_detect_cpu_features(void)
 {
     int nInfo[4];
     
@@ -78,11 +82,17 @@ int xsimd_init(void)
     if (g_bInitialized) {
         return 0;
     }
-    
+
 #ifdef XSIMD_X86
-    xsimd_detect_features();
+    xsimd_detect_cpu_features();
 #endif
-    
+
+#ifdef XSIMD_CUDA
+    if (_xsimd_cuda_detect()) {
+        g_nFeatures |= XSIMD_FEATURE_CUDA;
+    }
+#endif
+
     /* Enable all detected features by default */
     g_nEnabledFeatures = g_nFeatures;
     
@@ -181,11 +191,37 @@ void xsimd_set_avx2(int bState)
     }
 }
 
+int xsimd_is_cuda_enabled(void)
+{
+    return (g_nEnabledFeatures & XSIMD_FEATURE_CUDA) != 0;
+}
+
+int xsimd_is_cuda_present(void)
+{
+    return (g_nFeatures & XSIMD_FEATURE_CUDA) != 0;
+}
+
+void xsimd_set_cuda(int bState)
+{
+    if (bState) {
+        xsimd_enable_features(XSIMD_FEATURE_CUDA);
+    } else {
+        xsimd_disable_features(XSIMD_FEATURE_CUDA);
+    }
+}
+
 xsimd_int64 xsimd_find_byte(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64 nOffset)
 {
     const unsigned char* pData = (const unsigned char*)pBuffer;
     xsimd_int64 i = 0;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_find_byte_CUDA(pData, nSize, nByte, nOffset);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
@@ -227,7 +263,23 @@ xsimd_int64 xsimd_find_pattern_bmh(const void* pBuffer, xsimd_int64 nBufferSize,
     const xsimd_int64 nLimit = nBufferSize - nPatternSize;
     const char nLastChar = pNeedle[nPatternSize - 1];
     xsimd_int64 i = 0;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nBufferSize >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult;
+        if (nPatternSize == 1)
+            nCudaResult = _xsimd_find_pattern_bmh_1byte_CUDA(pHay, nBufferSize, pNeedle[0], nOffset);
+        else if (nPatternSize == 2) {
+            xsimd_uint16 p16; memcpy(&p16, pNeedle, 2);
+            nCudaResult = _xsimd_find_pattern_bmh_2byte_CUDA(pHay, nBufferSize, p16, nOffset);
+        } else if (nPatternSize == 3)
+            nCudaResult = _xsimd_find_pattern_bmh_3byte_CUDA(pHay, nBufferSize, pNeedle, nOffset);
+        else
+            nCudaResult = _xsimd_find_pattern_bmh_CUDA(pHay, nBufferSize, pNeedle, nPatternSize, nOffset, nLimit, nLastChar, &i);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* Special handling for 1-byte patterns using SIMD */
     if (nPatternSize == 1 && (g_nEnabledFeatures & XSIMD_FEATURE_AVX2)) {
@@ -295,7 +347,14 @@ xsimd_int64 xsimd_find_ansi(const void* pBuffer, xsimd_int64 nBufferSize,
     const unsigned char* pData = (const unsigned char*)pBuffer;
     const xsimd_int64 nLimit = nBufferSize - (nMinLength - 1);
     xsimd_int64 j = 0;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nBufferSize >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_find_ansi_CUDA(pData, nBufferSize, nMinLength, nOffset);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nBufferSize >= 32) {
@@ -365,7 +424,17 @@ xsimd_int64 xsimd_find_notnull(const void* pBuffer, xsimd_int64 nBufferSize,
         if (runLen >= nMinLength) return nOffset + runStart;
         return -1;
     }
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nBufferSize >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_find_notnull_CUDA(pData, nBufferSize, nMinLength, nOffset, j, runStart);
+        if (nCudaResult != XSIMD_CUDA_FAIL) {
+            if (nCudaResult == -1) return -1;
+            if (nCudaResult < -1) return -nCudaResult - 2;
+        }
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nBufferSize >= 32) {
@@ -425,7 +494,14 @@ xsimd_int64 xsimd_find_not_ansi(const void* pBuffer, xsimd_int64 nBufferSize,
     const unsigned char* pData = (const unsigned char*)pBuffer;
     const xsimd_int64 nLimit = nBufferSize - (nMinLength - 1);
     xsimd_int64 j = 0;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nBufferSize >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_find_not_ansi_CUDA(pData, nBufferSize, nMinLength, nOffset);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nBufferSize >= 32) {
@@ -461,7 +537,14 @@ xsimd_int64 xsimd_find_not_ansi(const void* pBuffer, xsimd_int64 nBufferSize,
 int xsimd_is_not_null(const void* pBuffer, xsimd_int64 nSize)
 {
     const char* ptr = (const char*)pBuffer;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        int nCudaResult = _xsimd_is_not_null_CUDA(ptr, nSize);
+        if (nCudaResult >= 0) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
@@ -502,7 +585,14 @@ int xsimd_is_not_null(const void* pBuffer, xsimd_int64 nSize)
 int xsimd_is_ansi(const void* pBuffer, xsimd_int64 nSize)
 {
     const char* ptr = (const char*)pBuffer;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        int nCudaResult = _xsimd_is_ansi_CUDA(ptr, nSize);
+        if (nCudaResult >= 0) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
@@ -544,7 +634,14 @@ int xsimd_is_ansi(const void* pBuffer, xsimd_int64 nSize)
 int xsimd_is_not_ansi(const void* pBuffer, xsimd_int64 nSize)
 {
     const char* ptr = (const char*)pBuffer;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        int nCudaResult = _xsimd_is_not_ansi_CUDA(ptr, nSize);
+        if (nCudaResult >= 0) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
@@ -590,7 +687,14 @@ int xsimd_compare_memory(const void* pBuffer1, const void* pBuffer2, xsimd_int64
 {
     const char* ptr1 = (const char*)pBuffer1;
     const char* ptr2 = (const char*)pBuffer2;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        int nCudaResult = _xsimd_compare_memory_CUDA(ptr1, ptr2, nSize);
+        if (nCudaResult >= 0) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2: Process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
@@ -641,6 +745,15 @@ int xsimd_compare_sigbytes(const void* pSigBytes, xsimd_int64 nSigBytesSize, con
         return 0;
     }
     
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nPatternLength >= 8 && nDataSize >= 32) {
+        int nCudaResult = _xsimd_compare_sigbytes_CUDA((const xsimd_uint8*)pSigBytes, nSigBytesSize,
+                                                        (const xsimd_uint8*)pData, nDataSize,
+                                                        (const xsimd_uint8*)pAlphaNumTable);
+        if (nCudaResult >= 0) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* Use SIMD if pattern is large enough */
     if (nPatternLength >= 8) {
@@ -683,6 +796,15 @@ xsimd_int64 xsimd_find_sigbytes(const void* pData, xsimd_int64 nDataSize, const 
         return -1;
     }
     
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nDataSize >= XSIMD_CUDA_MIN_SIZE && nPatternLength >= 4) {
+        xsimd_int64 nCudaResult = _xsimd_find_sigbytes_CUDA((const xsimd_uint8*)pData, nDataSize,
+                                                             (const xsimd_uint8*)pSigBytes, nSigBytesSize,
+                                                             (const xsimd_uint8*)pAlphaNumTable);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* Use SIMD if pattern is large enough (>= 4 bytes) */
     if (nPatternLength >= 4) {
@@ -727,9 +849,16 @@ xsimd_int64 xsimd_find_not_ansi_and_null(const void* pBuffer, xsimd_int64 nBuffe
         ansiTable[i] = (i >= 0x20 && i <= 0x7E) ? 1 : 0;
     }
     
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && hayLen >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_find_not_ansi_and_null_CUDA(hay, hayLen, nOffset, m, limit, ansiTable, &j);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     xsimd_int64 nResult;
-    
+
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && hayLen >= 32) {
         nResult = _xsimd_find_not_ansi_and_null_AVX2(hay, hayLen, nOffset, m, limit, ansiTable, &j);
         if (nResult != -1) {
@@ -775,9 +904,16 @@ int xsimd_is_not_ansi_and_null(const void* pBuffer, xsimd_int64 nSize)
     if (!pBuffer || nSize <= 0) {
         return 0;
     }
-    
+
     const char* ptr = (const char*)pBuffer;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        int nCudaResult = _xsimd_is_not_ansi_and_null_CUDA(ptr, nSize);
+        if (nCudaResult >= 0) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2 optimization: process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
@@ -830,9 +966,16 @@ xsimd_int64 xsimd_find_ansi_number(const void* pBuffer, xsimd_int64 nBufferSize,
     const xsimd_int64 limit = hayLen - (m - 1);
     xsimd_int64 j = 0;
     
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && hayLen >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_find_ansi_number_CUDA(hay, hayLen, nOffset, m, limit, &j);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     xsimd_int64 nResult;
-    
+
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && hayLen >= 32) {
         nResult = _xsimd_find_ansi_number_AVX2(hay, hayLen, nOffset, m, limit, &j);
         if (nResult != -1) {
@@ -878,9 +1021,16 @@ int xsimd_is_ansi_number(const void* pBuffer, xsimd_int64 nSize)
     if (!pBuffer || nSize <= 0) {
         return 0;
     }
-    
+
     const char* ptr = (const char*)pBuffer;
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        int nCudaResult = _xsimd_is_ansi_number_CUDA(ptr, nSize);
+        if (nCudaResult >= 0) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     /* AVX2 optimization: process 32 bytes at a time */
     if ((g_nEnabledFeatures & XSIMD_FEATURE_AVX2) && nSize >= 32) {
@@ -1001,7 +1151,14 @@ xsimd_int64 xsimd_find_first_non_ansi(const void* pBuffer, xsimd_int64 nSize)
     if (!g_bInitialized) {
         xsimd_init();
     }
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && (nSize - i) >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_find_first_non_ansi_CUDA(pData, i, nSize);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
         xsimd_int64 result = _xsimd_find_first_non_ansi_AVX2(pData, i, nSize);
@@ -1037,10 +1194,17 @@ xsimd_int64 xsimd_find_null_byte(const void* pBuffer, xsimd_int64 nSize)
     if (!g_bInitialized) {
         xsimd_init();
     }
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_find_null_byte_CUDA(pData, nSize, &i);
+        if (nCudaResult != XSIMD_CUDA_FAIL) return nCudaResult;
+    }
+#endif
+
 #ifdef XSIMD_X86
     xsimd_int64 nResult;
-    
+
     if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
         nResult = _xsimd_find_null_byte_AVX2(pData, nSize, &i);
         if (nResult != -1) {
@@ -1073,15 +1237,24 @@ xsimd_int64 xsimd_count_unicode_prefix(const void* pBuffer, xsimd_int64 nSize)
     if (!g_bInitialized) {
         xsimd_init();
     }
-    
+
     /* Must be even size for 16-bit characters */
     if (nSize % 2 != 0) {
         return 0;
     }
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        xsimd_int64 nCudaResult = _xsimd_count_unicode_prefix_CUDA(pData, nChars, &i);
+        if (nCudaResult != XSIMD_CUDA_FAIL) {
+            return (nCudaResult == -1) ? nSize : nCudaResult;
+        }
+    }
+#endif
+
 #ifdef XSIMD_X86
     xsimd_int64 nResult;
-    
+
     if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
         nResult = _xsimd_count_unicode_prefix_AVX2(pData, nChars, &i);
         if (nResult != -1) {
@@ -1123,7 +1296,14 @@ xsimd_int64 xsimd_count_char(const void* pBuffer, xsimd_int64 nSize, xsimd_uint8
     if (!g_bInitialized) {
         xsimd_init();
     }
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        _xsimd_count_char_CUDA(pData, nSize, nByte, &i, &nCount);
+        if (i == nSize) return nCount;
+    }
+#endif
+
 #ifdef XSIMD_X86
     if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
         _xsimd_count_char_AVX2(pData, nSize, nByte, &i, &nCount);
@@ -1163,10 +1343,17 @@ xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void*
     if (!g_bInitialized) {
         xsimd_init();
     }
-    
+
     /* Initialize mask to zero */
     memset(pMaskData, 0, (nSize + 7) / 8);
-    
+
+#ifdef XSIMD_CUDA
+    if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {
+        _xsimd_create_ansi_mask_CUDA(pData, nSize, pMaskData, &i, &nAnsiCount);
+        if (i == nSize) return nAnsiCount;
+    }
+#endif
+
 #ifdef XSIMD_X86
     if (g_nEnabledFeatures & XSIMD_FEATURE_AVX2) {
         _xsimd_create_ansi_mask_AVX2(pData, nSize, pMaskData, &i, &nAnsiCount);

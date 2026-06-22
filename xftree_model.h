@@ -31,9 +31,9 @@ class XFTreeModel : public QAbstractItemModel {
 public:
     enum COLUMN {
         COLUMN_NAME = 0,
-        COLUMN_TYPE,
-        COLUMN_OFFSET,
-        COLUMN_INFO,
+        // COLUMN_TYPE,
+        // COLUMN_OFFSET,
+        // COLUMN_INFO,
         __COLUMN_SIZE
     };
 
