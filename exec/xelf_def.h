@@ -84,6 +84,9 @@ const quint8 S_EV_CURRENT = 1;    /* Current version */
 const quint8 S_EI_OSABI = 7;      /* Operating system/ABI identification */
 const quint8 S_EI_ABIVERSION = 8; /* ABI version */
 const quint8 S_SHN_UNDEF = 0;
+const quint16 S_SHN_ABS = 0xFFF1;
+const quint16 S_SHN_COMMON = 0xFFF2;
+const quint16 S_SHN_XINDEX = 0xFFFF;
 
 const quint16 S_ET_NONE = 0;
 const quint16 S_ET_REL = 1;
@@ -112,7 +115,13 @@ const quint32 S_PT_DYNAMIC = 2;
 const quint32 S_PT_INTERP = 3;
 const quint32 S_PT_NOTE = 4;
 
+const quint32 S_SHT_NULL = 0;
+const quint32 S_SHT_SYMTAB = 2;
+const quint32 S_SHT_RELA = 4;
+const quint32 S_SHT_DYNAMIC = 6;
 const quint32 S_SHT_NOTE = 7;
+const quint32 S_SHT_REL = 9;
+const quint32 S_SHT_DYNSYM = 11;
 
 const quint32 S_ELFOSABI_HPUX = 1;
 const quint32 S_ELFOSABI_NETBSD = 2;
@@ -265,6 +274,21 @@ struct Elf_Phdr {
     quint64 p_filesz; /* file size */
     quint64 p_memsz;  /* memory size */
     quint64 p_align;  /* memory & file alignment */
+};
+
+struct Elf32_Dyn {
+    qint32 d_tag;
+    quint32 d_un;
+};
+
+struct Elf64_Dyn {
+    qint64 d_tag;
+    quint64 d_un;
+};
+
+struct Elf_Dyn {
+    qint64 d_tag;
+    quint64 d_un;
 };
 
 struct Elf32_Sym {

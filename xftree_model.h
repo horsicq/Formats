@@ -23,7 +23,7 @@
 #define XFTREE_MODEL_H
 
 #include <QAbstractItemModel>
-#include "xbinary.h"
+#include "xformats.h"
 
 class XFTreeModel : public QAbstractItemModel {
     Q_OBJECT
@@ -47,7 +47,7 @@ public:
     explicit XFTreeModel(QObject *pParent = nullptr);
     ~XFTreeModel() override;
 
-    void setData(XBinary *pXBinary, const QList<XBinary::XFHEADER> &listHeaders);
+    void setData(const XFormats::INDATA &inData, const QList<XBinary::XFHEADER> &listHeaders);
 
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &child) const override;
@@ -89,7 +89,7 @@ private:
     static QString svQuote(const QString &s, QChar cSep);
 
     TREEITEM *m_pRootItem;
-    XBinary *m_pXBinary;
+    XFormats::INDATA m_inData;
 };
 
 #endif  // XFTREE_MODEL_H

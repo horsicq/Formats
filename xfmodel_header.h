@@ -31,9 +31,11 @@ public:
     explicit XFModel_header(QObject *pParent = nullptr);
     virtual ~XFModel_header() override;
 
-    virtual void setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader) override;
+    virtual void setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader) override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    QVariant getFieldValue(qint32 nRow) const;
 
 private:
     QList<QVariant> m_listHeaderValues;

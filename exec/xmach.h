@@ -215,6 +215,8 @@ public:
         STRUCTID_load_command,
         STRUCTID_segment_command,
         STRUCTID_segment_command_64,
+        STRUCTID_section,
+        STRUCTID_section_64,
     };
 
     XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -284,6 +286,8 @@ public:
     static QMap<quint64, QString> getBuildToolS();
     static QMap<quint64, QString> getDyldChainedImport();
     static QMap<quint64, QString> getDyldChainedImportS();
+
+    static XBinary::XIDSTRING *getHeaderCpuTypesTablePtr(qint32 *pSize);
 
     static QString getSDKVersionFromFoundation(quint32 nFoundationVersion, XBinary::OSNAME osName);
     static XBinary::OSNAME getExactOSName(XBinary::OSNAME osName, const QString &sVersion);

@@ -31,17 +31,21 @@ XFModel_table::~XFModel_table()
 {
 }
 
-void XFModel_table::setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader)
+void XFModel_table::setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader)
 {
-    XFModel::setData(pXBinary, xfHeader);
+    XFModel::setData(inData, xfHeader);
 
     beginResetModel();
 
     m_listColumnFields.clear();
     m_listRowFields.clear();
     m_listTableRowValues.clear();
+    m_listRowPresStrings.clear();
 
-    if (m_pXBinary) {
+    QIODevice *pDevice = XFormats::createDevice(m_inData);
+    XBinary *pBinary = XFormats::createClass(m_inData.fileType, pDevice, m_inData.bIsImage, m_inData.nModuleAddress);
+
+    if (pBinary) {
         qint32 nRowCount = m_xfHeader.listRowLocations.count();
 
         for (qint32 i = 0; i < nRowCount; i++) {
@@ -49,16 +53,53 @@ void XFModel_table::setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader
             rowLoc.locType = XBinary::LT_OFFSET;
             rowLoc.nLocation = m_xfHeader.listRowLocations.at(i);
 
-            QList<XBinary::XFRECORD> listFields = m_pXBinary->getXFRecords(m_xfHeader.fileType, m_xfHeader.structID, rowLoc);
-            QList<QVariant> listRowValues = m_pXBinary->getXFRecordValues(listFields, rowLoc);
+            QList<XBinary::XFRECORD> listFields = pBinary->getXFRecords(m_inData.fileType, (quint32)m_xfHeader.structID, rowLoc);
+            QList<QVariant> listRowValues = pBinary->getXFRecordValues(listFields, rowLoc);
             m_listRowFields.append(listFields);
             m_listTableRowValues.append(listRowValues);
 
             if (i == 0) {
                 m_listColumnFields = listFields;
             }
+
+            QVector<QString> rowPresStrings(listFields.count());
+            for (qint32 f = 0; f < listFields.count(); f++) {
+                const XBinary::XFRECORD &rec = listFields.at(f);
+                quint64 nValue = (f < listRowValues.count()) ? listRowValues.at(f).toULongLong() : 0;
+
+                if (rec.nFlags & XBinary::XFRECORD_FLAG_RELATIVE_ADDRESS_STRING) {
+                    if (nValue) {
+                        qint64 nStringOffset = pBinary->relAddressToOffset((qint64)nValue);
+                        if (nStringOffset != -1) {
+                            QString sTmp = pBinary->read_utf8String(nStringOffset);
+                            bool bValid = !sTmp.isEmpty();
+                            for (QChar c : sTmp) {
+                                if (c.unicode() < 0x20 || c.unicode() > 0x7E) {
+                                    bValid = false;
+                                    break;
+                                }
+                            }
+                            if (bValid) {
+                                rowPresStrings[f] = sTmp;
+                            }
+                        }
+                    }
+                } else if (rec.nFlags & XBinary::XFRECORD_FLAG_OFFSET_MUTF8STRING) {
+                    qint64 nStrOff = (qint64)nValue;
+                    XBinary::PACKED_UINT pu = pBinary->read_uleb128(nStrOff, 5);
+                    if (pu.bIsValid) {
+                        rowPresStrings[f] = pBinary->read_utf8String(nStrOff + pu.nByteSize);
+                    }
+                }
+                // PT_STRING_POOL_IDX: nStringPoolOffset/nStringPoolSize not yet defined in XFRECORD
+            }
+            m_listRowPresStrings.append(rowPresStrings);
         }
+
+        delete pBinary;
     }
+
+    XFormats::removeDevice(pDevice, m_inData);
 
     _rebuildColumnMap();
 
@@ -232,6 +273,12 @@ void XFModel_table::_rebuildColumnMap()
         m_listColumnMap.append(entry);
     }
 
+    for (qint32 i = 0; i < m_xfHeader.listExtraColumns.count(); i++) {
+        entry.columnEntryType = CET_EXTRA;
+        entry.nIndex = i;
+        m_listColumnMap.append(entry);
+    }
+
     // Offset column (optional)
     if (m_bShowOffset) {
         entry.columnEntryType = CET_OFFSET;
@@ -270,6 +317,10 @@ QVariant XFModel_table::headerData(int section, Qt::Orientation orientation, int
                 result = QString("#");
             } else if (entry.columnEntryType == CET_NAME) {
                 result = tr("Name");
+            } else if (entry.columnEntryType == CET_EXTRA) {
+                if ((entry.nIndex >= 0) && (entry.nIndex < m_xfHeader.listExtraColumns.count())) {
+                    result = m_xfHeader.listExtraColumns.at(entry.nIndex).sName;
+                }
             } else if (entry.columnEntryType == CET_OFFSET) {
                 result = tr("Offset");
             } else if (entry.columnEntryType == CET_FIELD) {
@@ -280,7 +331,14 @@ QVariant XFModel_table::headerData(int section, Qt::Orientation orientation, int
                 if ((entry.nIndex >= 0) && (entry.nIndex < m_listPresentationColumns.count())) {
                     qint32 nFieldIndex = m_listPresentationColumns.at(entry.nIndex).nFieldIndex;
                     if ((nFieldIndex >= 0) && (nFieldIndex < m_listColumnFields.count())) {
-                        result = QString("[%1]").arg(m_listColumnFields.at(nFieldIndex).sName);
+                        QString sName = m_listColumnFields.at(nFieldIndex).sName;
+                        qint32 nDataStIndex = m_listPresentationColumns.at(entry.nIndex).nDataStIndex;
+
+                        if ((nDataStIndex >= 0) && (nDataStIndex < m_xfHeader.listDataSt.count()) && (!m_xfHeader.listDataSt.at(nDataStIndex).sName.isEmpty())) {
+                            sName = m_xfHeader.listDataSt.at(nDataStIndex).sName;
+                        }
+
+                        result = QString("[%1]").arg(sName);
                     }
                 }
             }
@@ -314,6 +372,14 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
             } else if (entry.columnEntryType == CET_NAME) {
                 if (nRow < m_xfHeader.listRowNames.count()) {
                     result = m_xfHeader.listRowNames.at(nRow);
+                }
+            } else if (entry.columnEntryType == CET_EXTRA) {
+                if ((entry.nIndex >= 0) && (entry.nIndex < m_xfHeader.listExtraColumns.count())) {
+                    XBinary::XFCOLUMN xfColumn = m_xfHeader.listExtraColumns.at(entry.nIndex);
+
+                    if (nRow < xfColumn.listValues.count()) {
+                        result = xfColumn.listValues.at(nRow);
+                    }
                 }
             } else if (entry.columnEntryType == CET_OFFSET) {
                 if (nRow < m_xfHeader.listRowLocations.count()) {
@@ -350,43 +416,14 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
                             xfDataSt = m_xfHeader.listDataSt.at(nDataStIndex);
                         }
 
-                        if (presCol.presentationType == PT_REL_ADDRESS_STRING) {
-                            qint64 nStringOffset = -1;
-
-                            if ((m_pXBinary != nullptr) && nValue) {
-                                nStringOffset = m_pXBinary->relAddressToOffset((qint64)nValue);
-                            }
-
-                            if (nStringOffset != -1) {
-                                QString sTmp = m_pXBinary->read_utf8String(nStringOffset);
-                                bool bValid = !sTmp.isEmpty();
-                                for (QChar c : sTmp) {
-                                    if (c.unicode() < 0x20 || c.unicode() > 0x7E) {
-                                        bValid = false;
-                                        break;
-                                    }
+                        if (presCol.presentationType == PT_REL_ADDRESS_STRING ||
+                            presCol.presentationType == PT_OFFSET_MUTF8STRING ||
+                            presCol.presentationType == PT_STRING_POOL_IDX) {
+                            if ((nRow < m_listRowPresStrings.count()) && (nFieldIndex < m_listRowPresStrings.at(nRow).count())) {
+                                const QString &s = m_listRowPresStrings.at(nRow).at(nFieldIndex);
+                                if (!s.isEmpty()) {
+                                    result = s;
                                 }
-                                if (bValid) result = sTmp;
-                            }
-                        } else if (presCol.presentationType == PT_OFFSET_MUTF8STRING) {
-                            if (m_pXBinary != nullptr) {
-                                qint64 nStrOff = (qint64)nValue;
-                                XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrOff, 5);
-                                if (pu.bIsValid) {
-                                    result = m_pXBinary->read_utf8String(nStrOff + pu.nByteSize);
-                                }
-                            }
-                        } else if (presCol.presentationType == PT_STRING_POOL_IDX) {
-                            if (m_pXBinary != nullptr && (nFieldIndex < m_listRowFields.at(nRow).count())) {
-                                // XBinary::XFRECORD fieldRec = m_listRowFields.at(nRow).at(nFieldIndex);
-                                // qint32 nIdx = (qint32)nValue;
-                                // if (nIdx >= 0 && nIdx < fieldRec.nStringPoolSize) {
-                                //     quint32 nStrDataOff = m_pXBinary->read_uint32(fieldRec.nStringPoolOffset + (qint64)nIdx * 4);
-                                //     XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrDataOff, 5);
-                                //     if (pu.bIsValid) {
-                                //         result = m_pXBinary->read_utf8String(nStrDataOff + pu.nByteSize);
-                                //     }
-                                // }
                             }
                         } else {
                             result = presentationToString(presCol.presentationType, nValue, xfRecord, xfDataSt);

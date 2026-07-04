@@ -123,9 +123,30 @@ public:
         MODE_UNPACKDEVICETOFOLDER,
     };
 
+    enum INDATA_MODE {
+        INDATA_MODE_UNKNOWN = 0,
+        INDATA_MODE_FILE,
+        INDATA_MODE_DEVICE,
+    };
+
+    struct INDATA {
+        INDATA_MODE inDataMode = INDATA_MODE_UNKNOWN;
+        QString sFileName;
+        QIODevice *pDevice;
+        XBinary::FT fileType = XBinary::FT_UNKNOWN;
+        bool bIsImage = false;
+        XADDR nModuleAddress = -1;
+    };
+
     explicit XFormats(QObject *pParent = nullptr);
 
-    static XBinary *getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static INDATA createINDATA(XBinary::FT fileType, const QString &sFileName, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static INDATA createINDATA(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+
+    static QIODevice *createDevice(const INDATA &indate, bool bIsReadOnly = true);
+    static void removeDevice(QIODevice *pDevice, const INDATA &indate);
+
+    static XBinary *createClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
     static bool isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
 
@@ -151,6 +172,7 @@ public:
     static QSet<XBinary::FT> getFileTypes(const QString &sFileName, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
     static XBinary::FT getPrefFileType(QIODevice *pDevice, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static XBinary::FT getPrefFileType(const QString &sFileName, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static XBinary::FILEFORMATINFO getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                      XBinary::PDSTRUCT *pPdStruct = nullptr, qint64 nOffset = 0, qint64 nSize = -1);

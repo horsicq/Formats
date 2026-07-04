@@ -420,7 +420,11 @@ bool XText::_isValidUTF16(const QByteArray &data, bool bBigEndian, qint64 nMaxCh
 {
     qint64 nCheck = (std::min)(nMaxCheck, qint64(data.size()));
 
+    if (nCheck < 2) return false;
     if (nCheck % 2 != 0) return false;
+
+    qint32 nCodeUnitCount = 0;
+    qint32 nPrintableCount = 0;
 
     for (qint64 i = 0; i < nCheck - 1; i += 2) {
         quint16 codeUnit;
@@ -444,13 +448,31 @@ bool XText::_isValidUTF16(const QByteArray &data, bool bBigEndian, qint64 nMaxCh
 
             if (lowSurrogate < 0xDC00 || lowSurrogate > 0xDFFF) return false;
             i += 2;  // Skip the low surrogate in next iteration
+            nCodeUnitCount++;
+            nPrintableCount++;
+            continue;
         } else if (codeUnit >= 0xDC00 && codeUnit <= 0xDFFF) {
             // Unexpected low surrogate
             return false;
         }
+
+        nCodeUnitCount++;
+
+        if ((codeUnit >= 32 && codeUnit <= 126) || codeUnit == 9 || codeUnit == 10 || codeUnit == 13 || codeUnit >= 0x80) {
+            // Printable ASCII, common whitespace, or non-Latin text
+            nPrintableCount++;
+        } else if (codeUnit == 0) {
+            // Embedded NUL code units are not expected in text content
+            // (binary formats padded with zeroed fields would otherwise
+            // be misdetected as valid UTF-16, e.g. Mach-O FAT headers)
+            return false;
+        }
     }
 
-    return true;
+    if (nCodeUnitCount == 0) return false;
+
+    // Consider it text if at least 90% of code units are printable
+    return (nPrintableCount * 100 / nCodeUnitCount) >= 90;
 }
 
 bool XText::_isPrintableASCII(const QByteArray &data, qint64 nMaxCheck)

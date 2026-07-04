@@ -52,6 +52,8 @@ public:
         STRUCTID_IMAGE_EXPORT_DIRECTORY,
         STRUCTID_IMAGE_EXPORT_FUNCTION,
         STRUCTID_IMAGE_IMPORT_DESCRIPTOR,
+        STRUCTID_IMAGE_THUNK_DATA32,
+        STRUCTID_IMAGE_THUNK_DATA64,
         STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR,
         STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR,
         STRUCTID_IMAGE_DEBUG_DIRECTORY,
@@ -1391,7 +1393,9 @@ private:
     // qint64 _getMinSectionOffset();  // TODO move to XBinary
     void _fixFileOffsets(qint64 nDelta);
     quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, const QString &sPrefix, qint32 nLevel);
+    void _decorateImportThunkTable(XFHEADER *pXfHeader, const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
     void _appendExportFunctionNames(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nExportDirOffset, const QString &sParentTag);
+    void _appendImportThunks(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, const QString &sParentTag, PDSTRUCT *pPdStruct);
 };
 
 #endif  // XPE_H

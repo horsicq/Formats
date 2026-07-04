@@ -29,19 +29,34 @@ XFModel_header::~XFModel_header()
 {
 }
 
-void XFModel_header::setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader)
+void XFModel_header::setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader)
 {
-    XFModel::setData(pXBinary, xfHeader);
+    XFModel::setData(inData, xfHeader);
 
     beginResetModel();
 
     m_listHeaderValues.clear();
 
-    if (m_pXBinary) {
-        m_listHeaderValues = m_pXBinary->getXFRecordValues(m_xfHeader.listFields, m_xfHeader.xLoc);
+    QIODevice *pDevice = XFormats::createDevice(m_inData);
+    XBinary *pBinary = XFormats::createClass(m_inData.fileType, pDevice, m_inData.bIsImage, m_inData.nModuleAddress);
+
+    if (pBinary) {
+        m_listHeaderValues = pBinary->getXFRecordValues(m_xfHeader.listFields, m_xfHeader.xLoc);
+        delete pBinary;
     }
 
+    XFormats::removeDevice(pDevice, m_inData);
+
     endResetModel();
+}
+
+QVariant XFModel_header::getFieldValue(qint32 nRow) const
+{
+    if ((nRow >= 0) && (nRow < m_listHeaderValues.count())) {
+        return m_listHeaderValues.at(nRow);
+    }
+
+    return QVariant();
 }
 
 int XFModel_header::rowCount(const QModelIndex &parent) const

@@ -33,7 +33,68 @@ XFormats::XFormats(QObject *pParent) : XThreadObject(pParent)
     m_pPdStruct = nullptr;
 }
 
-XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+QIODevice *XFormats::createDevice(const INDATA &indate, bool bIsReadOnly)
+{
+    QIODevice *pResult = nullptr;
+
+    if (indate.inDataMode == INDATA_MODE_FILE) {
+        QFile *pFile = new QFile();
+        pFile->setFileName(indate.sFileName);
+
+        QFile::OpenMode fileMode = QIODevice::ReadOnly;
+
+        if (bIsReadOnly) {
+            fileMode = QIODevice::ReadOnly;
+        }
+
+        if (!pFile->open(fileMode)) {
+            delete pFile;
+            pFile = nullptr;
+        }
+
+        pResult = pFile;
+    } else if (indate.inDataMode == INDATA_MODE_DEVICE) {
+        pResult = indate.pDevice;
+    }
+
+    return pResult;
+}
+
+void XFormats::removeDevice(QIODevice *pDevice, const INDATA &indate)
+{
+    if (indate.inDataMode == INDATA_MODE_FILE) {
+        if (pDevice) {
+            pDevice->close();
+            delete pDevice;
+        }
+    }
+}
+
+XFormats::INDATA XFormats::createINDATA(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+{
+    XFormats::INDATA result = {};
+    result.inDataMode = INDATA_MODE_DEVICE;
+    result.fileType = fileType;
+    result.pDevice = pDevice;
+    result.bIsImage = bIsImage;
+    result.nModuleAddress = nModuleAddress;
+
+    return result;
+}
+
+XFormats::INDATA XFormats::createINDATA(XBinary::FT fileType, const QString &sFileName, bool bIsImage, XADDR nModuleAddress)
+{
+    XFormats::INDATA result = {};
+    result.inDataMode = INDATA_MODE_FILE;
+    result.fileType = fileType;
+    result.sFileName = sFileName;
+    result.bIsImage = bIsImage;
+    result.nModuleAddress = nModuleAddress;
+
+    return result;
+}
+
+XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
     if (XBinary::checkFileType(XBinary::FT_BINARY, fileType)) return new XBinary(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_COM, fileType)) return new XCOM(pDevice, bIsImage, nModuleAddress);
@@ -136,7 +197,7 @@ XBinary *XFormats::getClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsIm
 #endif
     else {
 #ifdef QT_DEBUG
-        qDebug() << "XFormats::getClass: Unknown file type" << XBinary::fileTypeIdToString(fileType);
+        qDebug() << "XFormats::createClass: Unknown file type" << XBinary::fileTypeIdToString(fileType);
 #endif
         XBinary *pBinary = new XBinary(pDevice, bIsImage, nModuleAddress);
 
@@ -148,7 +209,7 @@ bool XFormats::isValid(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, 
 {
     bool bResult = false;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     bResult = pBinary->isValid(pPdStruct);
     delete pBinary;
 
@@ -160,7 +221,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(XBinary::FT fileType, XBinary::MAPMO
 {
     XBinary::_MEMORY_MAP result = {};
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     result = pBinary->getMemoryMap(mapMode, pPdStruct);
     delete pBinary;
 
@@ -187,7 +248,7 @@ QList<XBinary::MAPMODE> XFormats::getMapModesList(XBinary::FT fileType)
 {
     QList<XBinary::MAPMODE> listResult = {};
 
-    XBinary *pBinary = XFormats::getClass(fileType, nullptr);
+    XBinary *pBinary = XFormats::createClass(fileType, nullptr);
     listResult = pBinary->getMapModesList();
     delete pBinary;
 
@@ -294,7 +355,7 @@ XADDR XFormats::getEntryPointAddress(XBinary::FT fileType, QIODevice *pDevice, b
     // TODO pMemoryMap !!!
     XADDR nResult = 0;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     nResult = pBinary->getEntryPointAddress();
     delete pBinary;
 
@@ -305,7 +366,7 @@ qint64 XFormats::getEntryPointOffset(XBinary::FT fileType, QIODevice *pDevice, b
 {
     qint64 nResult = 0;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     nResult = pBinary->_getEntryPointOffset();
     delete pBinary;
 
@@ -316,7 +377,7 @@ bool XFormats::isBigEndian(XBinary::FT fileType, QIODevice *pDevice, bool bIsIma
 {
     bool bResult = false;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     bResult = pBinary->isBigEndian();
     delete pBinary;
 
@@ -328,7 +389,7 @@ QList<XBinary::FPART> XFormats::getHighlights(XBinary::FT fileType, QIODevice *p
 {
     QList<XBinary::FPART> listResult;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     listResult = pBinary->getHighlights(hlType, pPdStruct);
     delete pBinary;
 
@@ -339,7 +400,7 @@ bool XFormats::isSigned(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage,
 {
     bool bResult = false;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     bResult = pBinary->isSigned();
     delete pBinary;
 
@@ -350,7 +411,7 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(XBinary::FT fileType, QIODevice 
 {
     XBinary::OFFSETSIZE osResult = {};
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     osResult = pBinary->getSignOffsetSize();
     delete pBinary;
 
@@ -393,7 +454,7 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
 {
     QList<XBinary::SYMBOL_RECORD> listResult;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap();
     listResult = pBinary->getSymbolRecords(&memoryMap, symBolType);
     delete pBinary;
@@ -606,6 +667,22 @@ XBinary::FT XFormats::getPrefFileType(QIODevice *pDevice, bool bExtra, XBinary::
     return XBinary::_getPrefFileType(&stFileTypes);
 }
 
+XBinary::FT XFormats::getPrefFileType(const QString &sFileName, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
+{
+    XBinary::FT fileType = XBinary::FT_UNKNOWN;
+
+    QFile file;
+    file.setFileName(sFileName);
+
+    if (file.open(QIODevice::ReadOnly)) {
+        fileType = getPrefFileType(&file, bExtra, pPdStruct);
+
+        file.close();
+    }
+
+    return fileType;
+}
+
 XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct,
                                                     qint64 nOffset, qint64 nSize)
 {
@@ -622,7 +699,7 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
         _pDevice = pDevice;
     }
 
-    XBinary *pBinary = XFormats::getClass(fileType, _pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, _pDevice, bIsImage, nModuleAddress);
     result = pBinary->getFileFormatInfo(pPdStruct);
     delete pBinary;
 
@@ -650,7 +727,7 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
         _pDevice = pDevice;
     }
 
-    XBinary *pBinary = XFormats::getClass(fileType, _pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, _pDevice, bIsImage, nModuleAddress);
     nResult = pBinary->getFileFormatSize(pPdStruct);
     delete pBinary;
 
@@ -667,7 +744,7 @@ qint64 XFormats::getFileFormatSize(XBinary::FT fileType, QIODevice *pDevice, boo
 // {
 //     QList<XBinary::DATA_HEADER> listResult;
 
-//     XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+//     XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
 //     listResult = pBinary->getDataHeaders(dataHeadersOptions, pPdStruct);
 //     delete pBinary;
 
@@ -728,7 +805,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
         qint64 nOffset = sOffset.toLongLong(&bOk, 16);
 
         if ((fileType != XBinary::FT_UNKNOWN) && bOk) {
-            XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+            XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
 
             if (pBinary) {
                 quint32 nStructID = pBinary->ftStringToStructID(sStructFt);
@@ -865,7 +942,7 @@ QList<XBinary::FPART> XFormats::getFileParts(XBinary::FT fileType, QIODevice *pD
 {
     QList<XBinary::FPART> listResult;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     listResult = pBinary->getFileParts(nFileParts, nLimit, pPdStruct);
     delete pBinary;
 
@@ -877,7 +954,7 @@ QList<XBinary::ARCHIVERECORD> XFormats::getArchiveRecords(XBinary::FT fileType, 
 {
     QList<XBinary::ARCHIVERECORD> listResult;
 
-    XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
     listResult = pBinary->getArchiveRecords(nLimit, pPdStruct);
     delete pBinary;
 
@@ -890,7 +967,7 @@ QList<XBinary::ARCHIVERECORD> XFormats::getArchiveRecords(XBinary::FT fileType, 
 // {
 //     qint32 nResult = 0;
 
-//     XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+//     XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
 //     nResult = pBinary->getDataRecordValues(dataRecordsOptions, pListDataRecords, pListTitles, pPdStruct);
 //     delete pBinary;
 
@@ -901,7 +978,7 @@ QString XFormats::getFileFormatExtsString(XBinary::FT fileType)
 {
     QString sResult;
 
-    XBinary *pBinary = XFormats::getClass(fileType, nullptr);
+    XBinary *pBinary = XFormats::createClass(fileType, nullptr);
     sResult = pBinary->getFileFormatExtsString();
     delete pBinary;
 
@@ -912,7 +989,7 @@ bool XFormats::isArchive(XBinary::FT fileType)
 {
     bool bResult = false;
 
-    XBinary *pBinary = XFormats::getClass(fileType, nullptr);
+    XBinary *pBinary = XFormats::createClass(fileType, nullptr);
     bResult = pBinary->isArchive();
     delete pBinary;
 
@@ -939,7 +1016,7 @@ bool XFormats::isExecutable(XBinary::FT fileType)
 {
     bool bResult = false;
 
-    XBinary *pBinary = XFormats::getClass(fileType, nullptr);
+    XBinary *pBinary = XFormats::createClass(fileType, nullptr);
     bResult = pBinary->isExecutable();
     delete pBinary;
 
@@ -950,7 +1027,7 @@ QString XFormats::getXFHeaderStructName(const XBinary::XFHEADER &header)
 {
     QString sResult;
 
-    XBinary *pBinary = XFormats::getClass(header.fileType, nullptr);
+    XBinary *pBinary = XFormats::createClass(header.fileType, nullptr);
 
     if (pBinary) {
         sResult = pBinary->structIDToString(header.structID);
@@ -1051,7 +1128,7 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
     bool bParent = false;
 
     if (!bParent) {
-        XBinary *pBinary = XFormats::getClass(fileType, pDevice, bIsImage, nModuleAddress);
+        XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
 
         XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
 
@@ -1688,7 +1765,7 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
     }
 
     if (bDirectory) {
-        XBinary *pBinary = getClass(fileType, pDevice);
+        XBinary *pBinary = createClass(fileType, pDevice);
 
         if (pBinary) {
             QMap<XBinary::UNPACK_PROP, QVariant> mapProperties;
@@ -1822,7 +1899,7 @@ bool XFormats::packFolderToDevice(XBinary::FT fileType, QIODevice *pDevice, cons
     bool bResult = false;
 
     if (XBinary::isDirectoryExists(sFolderName)) {
-        XBinary *pBinary = getClass(fileType, pDevice);
+        XBinary *pBinary = createClass(fileType, pDevice);
 
         if (pBinary) {
             bResult = pBinary->packFolderToDevice(pDevice, mapProperties, sFolderName, pPdStruct);
@@ -2164,7 +2241,7 @@ QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bI
     }
 
     XBinary::FT fileType = getPrefFileType(pDevice, true, pPdStruct);
-    XBinary *pBinary = getClass(fileType, pDevice, bIsImage, nModuleAddress);
+    XBinary *pBinary = createClass(fileType, pDevice, bIsImage, nModuleAddress);
 
     if (pBinary) {
         XBinary::FILEFORMATINFO info = pBinary->getFileFormatInfo(pPdStruct);

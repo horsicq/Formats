@@ -988,6 +988,8 @@ public:
         XFRECORD_FLAG_RELATIVE_ADDRESS_STRING = 0x00100000,
         XFRECORD_FLAG_OFFSET_MUTF8STRING = 0x00200000,  // offset points to ULEB128-length-prefixed MUTF-8 string
         XFRECORD_FLAG_STRING_POOL_IDX = 0x00400000,     // index into a string pool (nStringPoolOffset, nStringPoolSize)
+        XFRECORD_FLAG_LE = 0x20000000,
+        XFRECORD_FLAG_BE = 0x40000000,
     };
 
     struct XFRECORD {
@@ -1028,6 +1030,12 @@ public:
         XFDATASTTYPE xfDataStType;
         XBinary::XIDSTRING *pRecords;
         qint32 nRecordsSize;
+        QString sName;
+    };
+
+    struct XFCOLUMN {
+        QString sName;
+        QList<QString> listValues;
     };
 
     struct XFHEADER {
@@ -1043,6 +1051,7 @@ public:
         QList<XFDATAST> listDataSt;     // For XFTYPE_HEADER, for fixed XFTYPE_TABLE
         QList<XADDR> listRowLocations;  // For XFTYPE_TABLE
         QList<QString> listRowNames;    // For XFTYPE_TABLE, optional names for rows
+        QList<XFCOLUMN> listExtraColumns;
     };
 
     struct XFSTRUCT {
@@ -2498,6 +2507,22 @@ public:
 
     static QString getArchiveRecordComment(const ARCHIVERECORD &record);
     static QString getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties);
+
+
+    struct XFSS_OPTIONS {
+        qint32 nLimit;
+        qint32 nMinLenght;
+        qint32 nMaxLenght;
+        bool bACSII;
+        bool bANSI;
+        bool bUTF8;
+        bool bUTF16;
+        bool bUTF32;
+        quint32 nCodepage;
+        ENDIAN endian;
+    };
+
+    QVector<MS_RECORD> multiSearch_strings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const XFSS_OPTIONS &ssOptions, PDSTRUCT *pPdStruct = nullptr);
 
 private:
     static QString qcharToHex(QChar cSymbol);

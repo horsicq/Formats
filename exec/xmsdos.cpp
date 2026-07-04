@@ -841,7 +841,7 @@ QList<XBinary::XFHEADER> XMSDOS::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT
 
         _xfStruct.xLoc = offsetToLoc(0);
 
-        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        listResult.append(XMSDOS::getXFHeaders(_xfStruct, pPdStruct));
     } else if ((nStructID == STRUCTID_IMAGE_DOS_HEADER) || (nStructID == STRUCTID_IMAGE_DOS_HEADEREX)) {
         XLOC headerLoc = xfStruct.xLoc;
 
@@ -850,7 +850,7 @@ QList<XBinary::XFHEADER> XMSDOS::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT
         xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
         xfHeader.xLoc = headerLoc;
         xfHeader.xfType = XFTYPE_HEADER;
-        xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, headerLoc);
+        xfHeader.listFields = XMSDOS::getXFRecords(xfStruct.fileType, nStructID, headerLoc);
         xfHeader.nSize = (xfStruct.nSize > 0)
                              ? xfStruct.nSize
                              : ((nStructID == STRUCTID_IMAGE_DOS_HEADEREX) ? sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX) : sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));

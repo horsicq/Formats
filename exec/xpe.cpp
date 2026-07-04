@@ -35,6 +35,8 @@ XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_IMAGE_EXPORT_DIRECTORY, "IMAGE_EXPORT_DIRECTORY", QString("IMAGE_EXPORT_DIRECTORY")},
     {XPE::STRUCTID_IMAGE_EXPORT_FUNCTION, "IMAGE_EXPORT_FUNCTION", QString("IMAGE_EXPORT_FUNCTION")},
     {XPE::STRUCTID_IMAGE_IMPORT_DESCRIPTOR, "IMAGE_IMPORT_DESCRIPTOR", QString("IMAGE_IMPORT_DESCRIPTOR")},
+    {XPE::STRUCTID_IMAGE_THUNK_DATA32, "IMAGE_THUNK_DATA32", QString("IMAGE_THUNK_DATA32")},
+    {XPE::STRUCTID_IMAGE_THUNK_DATA64, "IMAGE_THUNK_DATA64", QString("IMAGE_THUNK_DATA64")},
     {XPE::STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR, "IMAGE_DELAYLOAD_DESCRIPTOR", QString("IMAGE_DELAYLOAD_DESCRIPTOR")},
     {XPE::STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR, "IMAGE_BOUND_IMPORT_DESCRIPTOR", QString("IMAGE_BOUND_IMPORT_DESCRIPTOR")},
     {XPE::STRUCTID_IMAGE_DEBUG_DIRECTORY, "IMAGE_DEBUG_DIRECTORY", QString("IMAGE_DEBUG_DIRECTORY")},
@@ -3064,7 +3066,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
 
             char *pDataOffset = baImport.data();
             char *pIAT = pDataOffset;
-            auto *pIID = (XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *)(pDataOffset + nIATSize);
+            XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *pIID = (XPE_DEF::IMAGE_IMPORT_DESCRIPTOR *)(pDataOffset + nIATSize);
             char *pOIAT = pDataOffset + nIATSize + nImportTableSize;
 
             char *pAnsiBase = pDataOffset + nIATSize + nImportTableSize + nIATSize;
@@ -3087,16 +3089,16 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
 
                 strCopy(pAnsiData, baName.constData(), remaining);
 
-                size_t written = baName.size() + 1;
-                pAnsiData += written;
-                nAnsiOffset += written;
+                quint32 nWritten = (quint32)(baName.size() + 1);
+                pAnsiData += nWritten;
+                nAnsiOffset += nWritten;
 
                 pIID++;
 
                 qint32 nNumberOfPositions = pListImportHeaders->at(i).listPositions.count();
 
                 for (qint32 j = 0; j < nNumberOfPositions; j++) {
-                    const auto &pos = pListImportHeaders->at(i).listPositions.at(j);
+                    const IMPORT_POSITION &pos = pListImportHeaders->at(i).listPositions.at(j);
 
                     if (!pos.sName.isEmpty()) {
                         *((quint32 *)pOIAT) = pAnsiData - pDataOffset;
@@ -3116,9 +3118,9 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
                         QByteArray baFunc = pos.sName.toLatin1();
                         strCopy(pAnsiData, baFunc.constData(), remaining);
 
-                        written = baFunc.size() + 1;
-                        pAnsiData += written;
-                        nAnsiOffset += written;
+                        nWritten = (quint32)(baFunc.size() + 1);
+                        pAnsiData += nWritten;
+                        nAnsiOffset += nWritten;
 
                     } else {
                         if (nAddressSize == 4) {
@@ -9398,6 +9400,10 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         listResult.append(
             {"Name", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, Name), 4, XFRECORD_FLAG_RELATIVE_ADDRESS | XFRECORD_FLAG_RELATIVE_ADDRESS_STRING, VT_UINT32});
         listResult.append({"FirstThunk", (qint32)offsetof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR, FirstThunk), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_THUNK_DATA32) {
+        listResult.append({"AddressOfData", 0, 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_THUNK_DATA64) {
+        listResult.append({"AddressOfData", 0, 8, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT64});
     } else if (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) {
         listResult.append({"Characteristics", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, Characteristics), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::S_IMAGE_DEBUG_DIRECTORY, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
@@ -9567,6 +9573,161 @@ void XPE::_appendExportFunctionNames(QList<XFHEADER> &listResult, const XFSTRUCT
     }
     xfNamesTable.sTag = xfHeaderToTag(xfNamesTable, structIDToString(STRUCTID_IMAGE_EXPORT_FUNCTION), sParentTag);
     listResult.append(xfNamesTable);
+}
+
+void XPE::_decorateImportThunkTable(XFHEADER *pXfHeader, const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    if ((pXfHeader == nullptr) || (xfStruct.pMemoryMap == nullptr) || pXfHeader->listRowLocations.isEmpty()) {
+        return;
+    }
+
+    QList<IMPORT_HEADER> listImports = getImports(xfStruct.pMemoryMap, pPdStruct);
+
+    if (listImports.isEmpty()) {
+        return;
+    }
+
+    QList<QString> listRowNames;
+
+    XBinary::XFCOLUMN xfDllColumn = {};
+    xfDllColumn.sName = QString("DLL");
+
+    XBinary::XFCOLUMN xfHintColumn = {};
+    xfHintColumn.sName = QString("Hint");
+
+    XBinary::XFCOLUMN xfOrdinalColumn = {};
+    xfOrdinalColumn.sName = QString("Ordinal");
+
+    bool bHasImportInfo = false;
+
+    for (qint32 nRow = 0; nRow < pXfHeader->listRowLocations.count(); nRow++) {
+        qint64 nThunkOffset = pXfHeader->listRowLocations.at(nRow);
+        QString sDll;
+        QString sHint;
+        QString sOrdinal;
+        QString sFunction;
+
+        for (qint32 i = 0; (i < listImports.count()) && sFunction.isEmpty(); i++) {
+            const IMPORT_HEADER &importHeader = listImports.at(i);
+
+            for (qint32 j = 0; j < importHeader.listPositions.count(); j++) {
+                const IMPORT_POSITION &importPosition = importHeader.listPositions.at(j);
+
+                if (importPosition.nThunkOffset == nThunkOffset) {
+                    sDll = importHeader.sName;
+                    sFunction = importPosition.sFunction;
+
+                    if (sFunction.isEmpty()) {
+                        sFunction = importPosition.sName;
+                    }
+
+                    if (sFunction.isEmpty() && (importPosition.nOrdinal != 0)) {
+                        sFunction = QString::number(importPosition.nOrdinal);
+                    }
+
+                    if (importPosition.nOrdinal == 0) {
+                        sHint = QString::number(importPosition.nHint);
+                    } else {
+                        sOrdinal = QString::number(importPosition.nOrdinal);
+                    }
+
+                    bHasImportInfo = true;
+                    break;
+                }
+            }
+        }
+
+        listRowNames.append(sFunction);
+        xfDllColumn.listValues.append(sDll);
+        xfHintColumn.listValues.append(sHint);
+        xfOrdinalColumn.listValues.append(sOrdinal);
+    }
+
+    if (bHasImportInfo) {
+        pXfHeader->listRowNames = listRowNames;
+        pXfHeader->listExtraColumns.append(xfDllColumn);
+        pXfHeader->listExtraColumns.append(xfHintColumn);
+        pXfHeader->listExtraColumns.append(xfOrdinalColumn);
+    }
+}
+
+void XPE::_appendImportThunks(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, const QString &sParentTag, PDSTRUCT *pPdStruct)
+{
+    if (xfStruct.pMemoryMap == nullptr) {
+        return;
+    }
+
+    QList<IMPORT_HEADER> listImports = getImports(xfStruct.pMemoryMap, pPdStruct);
+
+    bool bIs64 = is64(xfStruct.pMemoryMap);
+    quint32 nThunkStructID = bIs64 ? STRUCTID_IMAGE_THUNK_DATA64 : STRUCTID_IMAGE_THUNK_DATA32;
+    qint32 nThunkSize = bIs64 ? 8 : 4;
+
+    for (qint32 i = 0; i < listImports.count(); i++) {
+        const IMPORT_HEADER &importHeader = listImports.at(i);
+
+        if (importHeader.listPositions.isEmpty()) {
+            continue;
+        }
+
+        XFHEADER xfThunksTable = {};
+        xfThunksTable.sParentTag = sParentTag;
+        xfThunksTable.fileType = xfStruct.fileType;
+        xfThunksTable.structID = static_cast<XBinary::STRUCTID>(nThunkStructID);
+        xfThunksTable.xfType = XFTYPE_TABLE;
+        xfThunksTable.nSize = nThunkSize;
+
+        XBinary::XFCOLUMN xfDllColumn = {};
+        xfDllColumn.sName = QString("DLL");
+
+        XBinary::XFCOLUMN xfHintColumn = {};
+        xfHintColumn.sName = QString("Hint");
+
+        XBinary::XFCOLUMN xfOrdinalColumn = {};
+        xfOrdinalColumn.sName = QString("Ordinal");
+
+        for (qint32 j = 0; j < importHeader.listPositions.count(); j++) {
+            const IMPORT_POSITION &importPosition = importHeader.listPositions.at(j);
+
+            if ((importPosition.nThunkOffset == -1) || (!checkOffsetSize(importPosition.nThunkOffset, nThunkSize))) {
+                continue;
+            }
+
+            QString sFunction = importPosition.sFunction;
+
+            if (sFunction.isEmpty()) {
+                sFunction = importPosition.sName;
+            }
+
+            if (sFunction.isEmpty() && (importPosition.nOrdinal != 0)) {
+                sFunction = QString::number(importPosition.nOrdinal);
+            }
+
+            xfThunksTable.listRowLocations.append(importPosition.nThunkOffset);
+            xfThunksTable.listRowNames.append(sFunction);
+            xfDllColumn.listValues.append(importHeader.sName);
+
+            if (importPosition.nOrdinal == 0) {
+                xfHintColumn.listValues.append(QString::number(importPosition.nHint));
+                xfOrdinalColumn.listValues.append(QString());
+            } else {
+                xfHintColumn.listValues.append(QString());
+                xfOrdinalColumn.listValues.append(QString::number(importPosition.nOrdinal));
+            }
+        }
+
+        if (xfThunksTable.listRowLocations.isEmpty()) {
+            continue;
+        }
+
+        xfThunksTable.xLoc = offsetToLoc(xfThunksTable.listRowLocations.at(0));
+        xfThunksTable.listFields = getXFRecords(xfStruct.fileType, nThunkStructID, xfThunksTable.xLoc);
+        xfThunksTable.listExtraColumns.append(xfDllColumn);
+        xfThunksTable.listExtraColumns.append(xfHintColumn);
+        xfThunksTable.listExtraColumns.append(xfOrdinalColumn);
+        xfThunksTable.sTag = xfHeaderToTag(xfThunksTable, structIDToString(nThunkStructID), sParentTag);
+        listResult.append(xfThunksTable);
+    }
 }
 
 QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
@@ -9852,6 +10013,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
 
                     if (nChildStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) {
                         _appendExportFunctionNames(listResult, xfStruct, nChildOffset, xfChild.sTag);
+                    } else if (nChildStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) {
+                        _appendImportThunks(listResult, xfStruct, xfChild.sTag, pPdStruct);
                     }
                 }
             }
@@ -9993,6 +10156,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
 
                     if (nChildStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) {
                         _appendExportFunctionNames(listResult, xfStruct, nChildOffset, xfChild.sTag);
+                    } else if (nChildStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) {
+                        _appendImportThunks(listResult, xfStruct, xfChild.sTag, pPdStruct);
                     }
                 }
             }
@@ -10037,7 +10202,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 _appendExportFunctionNames(listResult, xfStruct, nOffset, xfHeader.sTag);
             }
         }
-    } else if ((nStructID == STRUCTID_IMAGE_EXPORT_FUNCTION) || (nStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) || (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) ||
+    } else if ((nStructID == STRUCTID_IMAGE_EXPORT_FUNCTION) || (nStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) || (nStructID == STRUCTID_IMAGE_THUNK_DATA32) ||
+               (nStructID == STRUCTID_IMAGE_THUNK_DATA64) || (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) ||
                (nStructID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) || (nStructID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) ||
                (nStructID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR)) {
         qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
@@ -10056,6 +10222,9 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 for (qint32 i = 0; i < nRows; i++) {
                     xfTable.listRowLocations.append(nOffset + i * nStructSize);
                 }
+            }
+            if ((nStructID == STRUCTID_IMAGE_THUNK_DATA32) || (nStructID == STRUCTID_IMAGE_THUNK_DATA64)) {
+                _decorateImportThunkTable(&xfTable, xfStruct, pPdStruct);
             }
             xfTable.sTag = xfHeaderToTag(xfTable, structIDToString(nStructID), xfTable.sParentTag);
             listResult.append(xfTable);

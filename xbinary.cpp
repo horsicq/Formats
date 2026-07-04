@@ -1316,32 +1316,41 @@ QList<QVariant> XBinary::getXFRecordValues(const QList<XFRECORD> &listXFRecords,
 
     qint64 nBaseOffset = xLoc.nLocation;
     qint32 nCount = listXFRecords.count();
+    bool bIsBigEndian = isBigEndian();
 
     for (qint32 i = 0; i < nCount; i++) {
         XFRECORD xfRecord = listXFRecords.at(i);
         qint64 nOffset = nBaseOffset + xfRecord.nOffset;
         QVariant varValue;
 
+        bool _bIsBigEndian = bIsBigEndian;
+
+        if (xfRecord.nFlags & XFRECORD_FLAG_LE) {
+            _bIsBigEndian = false;
+        } else if (xfRecord.nFlags & XFRECORD_FLAG_BE) {
+            _bIsBigEndian = true;
+        }
+
         if (xfRecord.valueType == VT_UINT8) {
             varValue = read_uint8(nOffset);
         } else if (xfRecord.valueType == VT_INT8) {
             varValue = read_int8(nOffset);
         } else if (xfRecord.valueType == VT_UINT16) {
-            varValue = read_uint16(nOffset);
+            varValue = read_uint16(nOffset, _bIsBigEndian);
         } else if (xfRecord.valueType == VT_INT16) {
-            varValue = read_int16(nOffset);
+            varValue = read_int16(nOffset, _bIsBigEndian);
         } else if (xfRecord.valueType == VT_UINT32) {
-            varValue = read_uint32(nOffset);
+            varValue = read_uint32(nOffset, _bIsBigEndian);
         } else if (xfRecord.valueType == VT_INT32) {
-            varValue = read_int32(nOffset);
+            varValue = read_int32(nOffset, bIsBigEndian);
         } else if (xfRecord.valueType == VT_UINT64) {
-            varValue = read_uint64(nOffset);
+            varValue = read_uint64(nOffset, _bIsBigEndian);
         } else if (xfRecord.valueType == VT_INT64) {
-            varValue = read_int64(nOffset);
+            varValue = read_int64(nOffset, _bIsBigEndian);
         } else if (xfRecord.valueType == VT_FLOAT) {
-            varValue = read_float(nOffset);
+            varValue = read_float(nOffset, _bIsBigEndian);
         } else if (xfRecord.valueType == VT_DOUBLE) {
-            varValue = read_double(nOffset);
+            varValue = read_double(nOffset, bIsBigEndian);
         } else if (xfRecord.valueType == VT_BYTE_ARRAY) {
             varValue = read_array(nOffset, xfRecord.nSize);
         } else if (xfRecord.valueType == VT_CHAR_ARRAY) {
@@ -16896,4 +16905,524 @@ QString XBinary::getHandleMethods(const QMap<FPART_PROP, QVariant> &mapPropertie
     }
 
     return sResult;
+}
+
+struct _XFStringRun {
+    qint64 nRunBytes;
+    qint64 nRecordBytes;
+    qint32 nChars;
+};
+
+static bool _isXFPrintableByte(quint8 nByte)
+{
+    return ((nByte >= 0x20) && (nByte < 0x80));
+}
+
+static bool _isXFAnsiByte(quint8 nByte)
+{
+    return (nByte >= 0x20);
+}
+
+static bool _isXFPrintableUnicode(quint32 nCode)
+{
+    if ((nCode < 0x20) || (nCode > 0x10FFFF)) {
+        return false;
+    }
+
+    if ((nCode >= 0xD800) && (nCode <= 0xDFFF)) {
+        return false;
+    }
+
+    if (((nCode & 0xFFFF) == 0xFFFE) || ((nCode & 0xFFFF) == 0xFFFF)) {
+        return false;
+    }
+
+    return true;
+}
+
+static quint16 _readXFUInt16(const char *pData, bool bIsBigEndian)
+{
+    const quint8 *p = (const quint8 *)pData;
+
+    if (bIsBigEndian) {
+        return (quint16)(((quint16)p[0] << 8) | p[1]);
+    }
+
+    return (quint16)(((quint16)p[1] << 8) | p[0]);
+}
+
+static quint32 _readXFUInt32(const char *pData, bool bIsBigEndian)
+{
+    const quint8 *p = (const quint8 *)pData;
+
+    if (bIsBigEndian) {
+        return ((quint32)p[0] << 24) | ((quint32)p[1] << 16) | ((quint32)p[2] << 8) | p[3];
+    }
+
+    return ((quint32)p[3] << 24) | ((quint32)p[2] << 16) | ((quint32)p[1] << 8) | p[0];
+}
+
+static qint32 _getXFUtf8Width(const char *pData, qint64 nSize)
+{
+    const quint8 *p = (const quint8 *)pData;
+    quint32 nCode = 0;
+
+    if (nSize <= 0) {
+        return 0;
+    }
+
+    if (p[0] < 0x80) {
+        return _isXFPrintableUnicode(p[0]) ? 1 : 0;
+    }
+
+    if (((p[0] & 0xE0) == 0xC0) && (nSize >= 2) && ((p[1] & 0xC0) == 0x80)) {
+        nCode = ((quint32)(p[0] & 0x1F) << 6) | (p[1] & 0x3F);
+
+        return ((nCode >= 0x80) && _isXFPrintableUnicode(nCode)) ? 2 : 0;
+    }
+
+    if (((p[0] & 0xF0) == 0xE0) && (nSize >= 3) && ((p[1] & 0xC0) == 0x80) && ((p[2] & 0xC0) == 0x80)) {
+        nCode = ((quint32)(p[0] & 0x0F) << 12) | ((quint32)(p[1] & 0x3F) << 6) | (p[2] & 0x3F);
+
+        return ((nCode >= 0x800) && _isXFPrintableUnicode(nCode)) ? 3 : 0;
+    }
+
+    if (((p[0] & 0xF8) == 0xF0) && (nSize >= 4) && ((p[1] & 0xC0) == 0x80) && ((p[2] & 0xC0) == 0x80) && ((p[3] & 0xC0) == 0x80)) {
+        nCode = ((quint32)(p[0] & 0x07) << 18) | ((quint32)(p[1] & 0x3F) << 12) | ((quint32)(p[2] & 0x3F) << 6) | (p[3] & 0x3F);
+
+        return ((nCode >= 0x10000) && _isXFPrintableUnicode(nCode)) ? 4 : 0;
+    }
+
+    return 0;
+}
+
+static _XFStringRun _countXFAsciiRun(const char *pData, qint64 nSize, qint32 nMaxChars)
+{
+    _XFStringRun result = {};
+
+#ifdef USE_XSIMD
+    result.nRunBytes = xsimd_count_ansi_prefix(pData, nSize);
+#else
+    while ((result.nRunBytes < nSize) && _isXFPrintableByte((quint8)pData[result.nRunBytes])) {
+        result.nRunBytes++;
+    }
+#endif
+
+    result.nChars = (result.nRunBytes > 0x7FFFFFFF) ? 0x7FFFFFFF : (qint32)result.nRunBytes;
+    result.nRecordBytes = qMin(result.nRunBytes, (qint64)nMaxChars);
+
+    return result;
+}
+
+static _XFStringRun _countXFAnsiRun(const char *pData, qint64 nSize, qint32 nMaxChars)
+{
+    _XFStringRun result = {};
+
+    while (result.nRunBytes < nSize) {
+        quint8 nByte = (quint8)pData[result.nRunBytes];
+
+        if (_isXFPrintableByte(nByte)) {
+#ifdef USE_XSIMD
+            qint64 nAsciiRun = xsimd_count_ansi_prefix(pData + result.nRunBytes, nSize - result.nRunBytes);
+
+            if (nAsciiRun > 0) {
+                result.nRunBytes += nAsciiRun;
+                continue;
+            }
+#endif
+            result.nRunBytes++;
+        } else if (_isXFAnsiByte(nByte)) {
+            result.nRunBytes++;
+        } else {
+            break;
+        }
+    }
+
+    result.nChars = (result.nRunBytes > 0x7FFFFFFF) ? 0x7FFFFFFF : (qint32)result.nRunBytes;
+    result.nRecordBytes = qMin(result.nRunBytes, (qint64)nMaxChars);
+
+    return result;
+}
+
+static _XFStringRun _countXFUtf8Run(const char *pData, qint64 nSize, qint32 nMaxChars)
+{
+    _XFStringRun result = {};
+
+    while (result.nRunBytes < nSize) {
+        quint8 nByte = (quint8)pData[result.nRunBytes];
+
+        if (_isXFPrintableByte(nByte)) {
+#ifdef USE_XSIMD
+            qint64 nAsciiRun = xsimd_count_ansi_prefix(pData + result.nRunBytes, nSize - result.nRunBytes);
+
+            if (nAsciiRun > 0) {
+                if ((result.nRecordBytes == 0) && (result.nChars < nMaxChars) && (result.nChars + nAsciiRun >= nMaxChars)) {
+                    result.nRecordBytes = result.nRunBytes + (nMaxChars - result.nChars);
+                }
+
+                result.nRunBytes += nAsciiRun;
+                result.nChars = (result.nChars + nAsciiRun > 0x7FFFFFFF) ? 0x7FFFFFFF : (qint32)(result.nChars + nAsciiRun);
+                continue;
+            }
+#endif
+        }
+
+        qint32 nWidth = _getXFUtf8Width(pData + result.nRunBytes, nSize - result.nRunBytes);
+
+        if (nWidth == 0) {
+            break;
+        }
+
+        if ((result.nRecordBytes == 0) && (result.nChars == (nMaxChars - 1))) {
+            result.nRecordBytes = result.nRunBytes + nWidth;
+        }
+
+        result.nRunBytes += nWidth;
+        result.nChars++;
+    }
+
+    if (result.nRecordBytes == 0) {
+        result.nRecordBytes = result.nRunBytes;
+    }
+
+    return result;
+}
+
+static _XFStringRun _countXFUtf16Run(const char *pData, qint64 nSize, qint32 nMaxChars, bool bIsBigEndian)
+{
+    _XFStringRun result = {};
+    qint64 nEvenSize = (nSize / 2) * 2;
+
+    while (result.nRunBytes + 1 < nEvenSize) {
+#ifdef USE_XSIMD
+        if (!bIsBigEndian) {
+            qint64 nSimdBytes = xsimd_count_unicode_prefix(pData + result.nRunBytes, nEvenSize - result.nRunBytes);
+
+            if (nSimdBytes > 0) {
+                qint64 nSimdChars = nSimdBytes / 2;
+
+                if ((result.nRecordBytes == 0) && (result.nChars < nMaxChars) && (result.nChars + nSimdChars >= nMaxChars)) {
+                    result.nRecordBytes = result.nRunBytes + ((qint64)(nMaxChars - result.nChars) * 2);
+                }
+
+                result.nRunBytes += nSimdBytes;
+                result.nChars = (result.nChars + nSimdChars > 0x7FFFFFFF) ? 0x7FFFFFFF : (qint32)(result.nChars + nSimdChars);
+                continue;
+            }
+        }
+#endif
+
+        quint16 nCode = _readXFUInt16(pData + result.nRunBytes, bIsBigEndian);
+
+        if (!_isXFPrintableUnicode(nCode)) {
+            break;
+        }
+
+        if ((result.nRecordBytes == 0) && (result.nChars == (nMaxChars - 1))) {
+            result.nRecordBytes = result.nRunBytes + 2;
+        }
+
+        result.nRunBytes += 2;
+        result.nChars++;
+    }
+
+    if (result.nRecordBytes == 0) {
+        result.nRecordBytes = result.nRunBytes;
+    }
+
+    return result;
+}
+
+static _XFStringRun _countXFUtf32Run(const char *pData, qint64 nSize, qint32 nMaxChars, bool bIsBigEndian)
+{
+    _XFStringRun result = {};
+    qint64 nEvenSize = (nSize / 4) * 4;
+
+    while (result.nRunBytes + 3 < nEvenSize) {
+        quint32 nCode = _readXFUInt32(pData + result.nRunBytes, bIsBigEndian);
+
+        if (!_isXFPrintableUnicode(nCode)) {
+            break;
+        }
+
+        if ((result.nRecordBytes == 0) && (result.nChars == (nMaxChars - 1))) {
+            result.nRecordBytes = result.nRunBytes + 4;
+        }
+
+        result.nRunBytes += 4;
+        result.nChars++;
+    }
+
+    if (result.nRecordBytes == 0) {
+        result.nRecordBytes = result.nRunBytes;
+    }
+
+    return result;
+}
+
+static void _appendXFStringRecord(QVector<XBinary::MS_RECORD> *pListResult, XBinary::_MEMORY_MAP *pMemoryMap, qint64 nStringOffset, qint64 nStringSize,
+                                  XBinary::VT valueType, quint16 nInfo)
+{
+    XBinary::MS_RECORD record = {};
+    record.nValueType = valueType;
+    record.nSize = (quint16)qMin(nStringSize, (qint64)0xFFFF);
+    record.nInfo = nInfo;
+    record.nRegionIndex = -1;
+    record.nRelOffset = nStringOffset;
+
+    if (pMemoryMap) {
+        record.nRegionIndex = XBinary::getMemoryIndexByOffset(pMemoryMap, nStringOffset);
+
+        if (record.nRegionIndex != -1) {
+            record.nRelOffset = nStringOffset - pMemoryMap->listRecords.at(record.nRegionIndex).nOffset;
+        }
+    }
+
+    pListResult->append(record);
+}
+
+static void _scanXFByteStrings(QVector<XBinary::MS_RECORD> *pListResult, XBinary::_MEMORY_MAP *pMemoryMap, const char *pBuffer, qint64 nBufferOffset,
+                               qint64 nBufferSize, qint64 nEmitStart, qint64 nEmitEnd, qint32 nMinChars, qint32 nMaxChars, qint32 nLimit, XBinary::VT valueType,
+                               bool bAnsi)
+{
+    qint64 i = 0;
+
+    while ((i < nBufferSize) && (pListResult->count() < nLimit)) {
+        _XFStringRun run = bAnsi ? _countXFAnsiRun(pBuffer + i, nBufferSize - i, nMaxChars) : _countXFAsciiRun(pBuffer + i, nBufferSize - i, nMaxChars);
+
+        if (run.nRunBytes == 0) {
+            i++;
+            continue;
+        }
+
+        qint64 nStringOffset = nBufferOffset + i;
+
+        if ((run.nChars >= nMinChars) && (nStringOffset >= nEmitStart) && (nStringOffset < nEmitEnd)) {
+            _appendXFStringRecord(pListResult, pMemoryMap, nStringOffset, run.nRecordBytes, valueType, 0);
+        }
+
+        i += run.nRunBytes;
+    }
+}
+
+static void _scanXFUtf8Strings(QVector<XBinary::MS_RECORD> *pListResult, XBinary::_MEMORY_MAP *pMemoryMap, const char *pBuffer, qint64 nBufferOffset,
+                               qint64 nBufferSize, qint64 nEmitStart, qint64 nEmitEnd, qint32 nMinChars, qint32 nMaxChars, qint32 nLimit)
+{
+    qint64 i = 0;
+
+    while ((i < nBufferSize) && (pListResult->count() < nLimit)) {
+        _XFStringRun run = _countXFUtf8Run(pBuffer + i, nBufferSize - i, nMaxChars);
+
+        if (run.nRunBytes == 0) {
+            i++;
+            continue;
+        }
+
+        qint64 nStringOffset = nBufferOffset + i;
+
+        if ((run.nChars >= nMinChars) && (nStringOffset >= nEmitStart) && (nStringOffset < nEmitEnd)) {
+            _appendXFStringRecord(pListResult, pMemoryMap, nStringOffset, run.nRecordBytes, XBinary::VT_UTF8, 0);
+        }
+
+        i += run.nRunBytes;
+    }
+}
+
+static void _scanXFUtf16Strings(QVector<XBinary::MS_RECORD> *pListResult, XBinary::_MEMORY_MAP *pMemoryMap, const char *pBuffer, qint64 nBufferOffset,
+                                qint64 nBufferSize, qint64 nEmitStart, qint64 nEmitEnd, qint32 nMinChars, qint32 nMaxChars, qint32 nLimit, bool bIsBigEndian)
+{
+    qint64 i = 0;
+
+    while ((i + 1 < nBufferSize) && (pListResult->count() < nLimit)) {
+        _XFStringRun run = _countXFUtf16Run(pBuffer + i, nBufferSize - i, nMaxChars, bIsBigEndian);
+
+        if (run.nRunBytes == 0) {
+            i++;
+            continue;
+        }
+
+        qint64 nStringOffset = nBufferOffset + i;
+
+        if ((run.nChars >= nMinChars) && (nStringOffset >= nEmitStart) && (nStringOffset < nEmitEnd)) {
+            _appendXFStringRecord(pListResult, pMemoryMap, nStringOffset, run.nRecordBytes, XBinary::VT_U, (quint16)(bIsBigEndian ? XBinary::ENDIAN_BIG : XBinary::ENDIAN_LITTLE));
+        }
+
+        i += run.nRunBytes;
+    }
+}
+
+static void _scanXFUtf32Strings(QVector<XBinary::MS_RECORD> *pListResult, XBinary::_MEMORY_MAP *pMemoryMap, const char *pBuffer, qint64 nBufferOffset,
+                                qint64 nBufferSize, qint64 nEmitStart, qint64 nEmitEnd, qint32 nMinChars, qint32 nMaxChars, qint32 nLimit, bool bIsBigEndian)
+{
+    qint64 i = 0;
+
+    while ((i + 3 < nBufferSize) && (pListResult->count() < nLimit)) {
+        _XFStringRun run = _countXFUtf32Run(pBuffer + i, nBufferSize - i, nMaxChars, bIsBigEndian);
+
+        if (run.nRunBytes == 0) {
+            i++;
+            continue;
+        }
+
+        qint64 nStringOffset = nBufferOffset + i;
+
+        if ((run.nChars >= nMinChars) && (nStringOffset >= nEmitStart) && (nStringOffset < nEmitEnd)) {
+            _appendXFStringRecord(pListResult, pMemoryMap, nStringOffset, run.nRecordBytes, XBinary::VT_U, (quint16)(bIsBigEndian ? XBinary::ENDIAN_BIG : XBinary::ENDIAN_LITTLE));
+        }
+
+        i += run.nRunBytes;
+    }
+}
+
+QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const XFSS_OPTIONS &ssOptions, PDSTRUCT *pPdStruct)
+{
+    QVector<XBinary::MS_RECORD> listResult;
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+
+    nOffset = osRegion.nOffset;
+    nSize = osRegion.nSize;
+
+    if ((nOffset == -1) || (nSize <= 0)) {
+        return listResult;
+    }
+
+    _MEMORY_MAP memoryMap = {};
+
+    if (!pMemoryMap) {
+        memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+        pMemoryMap = &memoryMap;
+    }
+
+    qint32 nMinChars = ssOptions.nMinLenght;
+    qint32 nMaxChars = ssOptions.nMaxLenght;
+    qint32 nLimit = ssOptions.nLimit;
+
+    if (nMinChars <= 0) {
+        nMinChars = 1;
+    }
+
+    if (nMaxChars <= 0) {
+        nMaxChars = 128;
+    }
+
+    if (nMaxChars < nMinChars) {
+        nMaxChars = nMinChars;
+    }
+
+    if (nLimit <= 0) {
+        nLimit = 0x7FFFFFFF;
+    }
+
+    const bool bSearchAscii = ssOptions.bACSII;
+    const bool bSearchAnsi = ssOptions.bANSI;
+    const bool bSearchUtf8 = ssOptions.bUTF8;
+    const bool bSearchUtf16 = ssOptions.bUTF16;
+    const bool bSearchUtf32 = ssOptions.bUTF32;
+
+    if (!(bSearchAscii || bSearchAnsi || bSearchUtf8 || bSearchUtf16 || bSearchUtf32)) {
+        return listResult;
+    }
+
+    qint32 nBufferSize = qMax((qint32)0x10000, getBufferSize(pPdStruct));
+    qint64 nLookBehind = bSearchUtf32 ? 3 : (bSearchUtf16 ? 1 : 0);
+    qint64 nLookAhead = qMin((qint64)nMaxChars * 4 + 4, (qint64)0x40000);
+
+    if (nLookAhead < 0) {
+        nLookAhead = 0x10000;
+    }
+
+    char *pBuffer = new char[nBufferSize + nLookAhead + nLookBehind];
+    bool bReadError = false;
+    qint32 nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+
+    XBinary::setPdStructInit(pPdStruct, nFreeIndex, nSize);
+
+    qint64 nCurrentOffset = nOffset;
+    qint64 nRemainingSize = nSize;
+    qint64 nEndOffset = nOffset + nSize;
+
+    while ((nRemainingSize > 0) && (listResult.count() < nLimit) && isPdStructNotCanceled(pPdStruct)) {
+        qint64 nMainSize = qMin((qint64)nBufferSize, nRemainingSize);
+        qint64 nReadOffset = qMax(nOffset, nCurrentOffset - nLookBehind);
+        qint64 nPrefixSize = nCurrentOffset - nReadOffset;
+        qint64 nReadSize = nPrefixSize + nMainSize + qMin(nLookAhead, nEndOffset - (nCurrentOffset + nMainSize));
+
+        if (read_array_process(nReadOffset, pBuffer, nReadSize, pPdStruct) != nReadSize) {
+            bReadError = true;
+            break;
+        }
+
+        qint64 nEmitStart = nCurrentOffset;
+        qint64 nEmitEnd = nCurrentOffset + nMainSize;
+
+        if (bSearchAscii && (listResult.count() < nLimit)) {
+            _scanXFByteStrings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, VT_A, false);
+        }
+
+        if (bSearchAnsi && (listResult.count() < nLimit)) {
+            _scanXFByteStrings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, VT_A, true);
+        }
+
+        if (bSearchUtf8 && (listResult.count() < nLimit)) {
+            _scanXFUtf8Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit);
+        }
+
+        if (bSearchUtf16 && (listResult.count() < nLimit)) {
+            if (ssOptions.endian == ENDIAN_BIG) {
+                _scanXFUtf16Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, true);
+            } else if (ssOptions.endian == ENDIAN_LITTLE) {
+                _scanXFUtf16Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, false);
+            } else {
+                _scanXFUtf16Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, false);
+
+                if (listResult.count() < nLimit) {
+                    _scanXFUtf16Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, true);
+                }
+            }
+        }
+
+        if (bSearchUtf32 && (listResult.count() < nLimit)) {
+            if (ssOptions.endian == ENDIAN_BIG) {
+                _scanXFUtf32Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, true);
+            } else if (ssOptions.endian == ENDIAN_LITTLE) {
+                _scanXFUtf32Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, false);
+            } else {
+                _scanXFUtf32Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, false);
+
+                if (listResult.count() < nLimit) {
+                    _scanXFUtf32Strings(&listResult, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, true);
+                }
+            }
+        }
+
+        nCurrentOffset += nMainSize;
+        nRemainingSize -= nMainSize;
+
+        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nCurrentOffset - nOffset);
+    }
+
+    delete[] pBuffer;
+
+    if (bReadError) {
+        setPdStructErrorString(pPdStruct, tr("Read error"));
+    } else if (listResult.count() >= nLimit) {
+        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(listResult.count())));
+    }
+
+    std::sort(listResult.begin(), listResult.end(), compareMS_RECORD);
+
+    if (listResult.count() > nLimit) {
+        listResult.resize(nLimit);
+    }
+
+    XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+
+    return listResult;
 }

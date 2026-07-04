@@ -26,7 +26,6 @@
 XFTreeModel::XFTreeModel(QObject *pParent) : QAbstractItemModel(pParent)
 {
     m_pRootItem = nullptr;
-    m_pXBinary = nullptr;
 }
 
 XFTreeModel::~XFTreeModel()
@@ -34,13 +33,13 @@ XFTreeModel::~XFTreeModel()
     clear();
 }
 
-void XFTreeModel::setData(XBinary *pXBinary, const QList<XBinary::XFHEADER> &listHeaders)
+void XFTreeModel::setData(const XFormats::INDATA &inData, const QList<XBinary::XFHEADER> &listHeaders)
 {
     beginResetModel();
 
     clear();
 
-    m_pXBinary = pXBinary;
+    m_inData= inData;
 
     m_pRootItem = new TREEITEM();
     m_pRootItem->pParent = nullptr;
@@ -140,7 +139,7 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         if (nColumn == COLUMN_NAME) {
-            if (m_pXBinary) {
+            if (m_inData.fileType != XBinary::FT_UNKNOWN) {
                 QString sText = XFormats::getXFHeaderStructName(pItem->xfHeader);
                 result = sText;
                 // TODO if table number of records
@@ -275,7 +274,7 @@ QString XFTreeModel::treeToString(XFTreeModel *pModel, const QString &sTitle)
 
     TREEITEM *pRoot = pModel->m_pRootItem;
     for (TREEITEM *pChild : pRoot->listChildren) {
-        appendTreeLines(&listLines, pModel->m_pXBinary, pChild, "");
+        appendTreeLines(&listLines, nullptr, pChild, "");
     }
 
     return listLines.join("\n");
@@ -294,10 +293,10 @@ void XFTreeModel::printToConsole(XFTreeModel *pModel, const QString &sTitle)
 
 void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sPrefix)
 {
-    QString sStructName;
-    if (pXBinary) {
-        sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
-    } else {
+    Q_UNUSED(pXBinary)
+
+    QString sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
+    if (sStructName.isEmpty()) {
         sStructName = QString::number(pItem->xfHeader.structID);
     }
 
@@ -314,10 +313,10 @@ void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TR
 
 QString XFTreeModel::getItemName(XBinary *pXBinary, TREEITEM *pItem)
 {
-    QString sStructName;
-    if (pXBinary) {
-        sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
-    } else {
+    Q_UNUSED(pXBinary)
+
+    QString sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
+    if (sStructName.isEmpty()) {
         sStructName = QString::number(pItem->xfHeader.structID);
     }
     return QString(sStructName).toUpper().remove(" ").remove("-");
@@ -325,10 +324,10 @@ QString XFTreeModel::getItemName(XBinary *pXBinary, TREEITEM *pItem)
 
 QString XFTreeModel::getItemString(XBinary *pXBinary, TREEITEM *pItem)
 {
-    QString sStructName;
-    if (pXBinary) {
-        sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
-    } else {
+    Q_UNUSED(pXBinary)
+
+    QString sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
+    if (sStructName.isEmpty()) {
         sStructName = QString::number(pItem->xfHeader.structID);
     }
     return XBinary::xfHeaderToString(pItem->xfHeader, sStructName, pItem->xfHeader.sParentTag);
@@ -476,7 +475,7 @@ QString XFTreeModel::toFormattedString()
 
     if (m_pRootItem) {
         for (TREEITEM *pChild : m_pRootItem->listChildren) {
-            _toFormattedString(&sResult, m_pXBinary, pChild, 1);
+            _toFormattedString(&sResult, nullptr, pChild, 1);
         }
     }
 
@@ -503,7 +502,7 @@ QString XFTreeModel::toXML() const
     listLines.append("<tree>");
 
     for (TREEITEM *pChild : m_pRootItem->listChildren) {
-        appendXMLLines(&listLines, m_pXBinary, pChild, "  ");
+        appendXMLLines(&listLines, nullptr, pChild, "  ");
     }
 
     listLines.append("</tree>");
@@ -519,7 +518,7 @@ QString XFTreeModel::toJSON() const
 
     qint32 nCount = m_pRootItem->listChildren.count();
     for (qint32 i = 0; i < nCount; i++) {
-        appendJSONLines(&listLines, m_pXBinary, m_pRootItem->listChildren.at(i), "  ", i == nCount - 1);
+        appendJSONLines(&listLines, nullptr, m_pRootItem->listChildren.at(i), "  ", i == nCount - 1);
     }
 
     listLines.append("]");
@@ -534,7 +533,7 @@ QString XFTreeModel::toCSV() const
     listLines.append("Name,Type,String,FileType,Offset,Size,Rows");
 
     for (TREEITEM *pChild : m_pRootItem->listChildren) {
-        appendSVLines(&listLines, m_pXBinary, pChild, ',');
+        appendSVLines(&listLines, nullptr, pChild, ',');
     }
 
     return listLines.join("\n");
@@ -548,7 +547,7 @@ QString XFTreeModel::toTSV() const
     listLines.append("Name\tType\tString\tFileType\tOffset\tSize\tRows");
 
     for (TREEITEM *pChild : m_pRootItem->listChildren) {
-        appendSVLines(&listLines, m_pXBinary, pChild, '\t');
+        appendSVLines(&listLines, nullptr, pChild, '\t');
     }
 
     return listLines.join("\n");

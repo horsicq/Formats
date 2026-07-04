@@ -81,6 +81,14 @@ public:
         STRUCTID_ELF_PHDR64,
         STRUCTID_ELF_SHDR32,
         STRUCTID_ELF_SHDR64,
+        STRUCTID_ELF_DYN32,
+        STRUCTID_ELF_DYN64,
+        STRUCTID_ELF_SYM32,
+        STRUCTID_ELF_SYM64,
+        STRUCTID_ELF_REL32,
+        STRUCTID_ELF_REL64,
+        STRUCTID_ELF_RELA32,
+        STRUCTID_ELF_RELA64,
     };
 
     XELF(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);

@@ -26,18 +26,18 @@
 
 XFModel::XFModel(QObject *pParent) : XModel(pParent)
 {
-    m_pXBinary = nullptr;
+    // m_pXBinary = nullptr;
 }
 
 XFModel::~XFModel()
 {
 }
 
-void XFModel::setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader)
+void XFModel::setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader)
 {
     beginResetModel();
 
-    m_pXBinary = pXBinary;
+    m_inData = inData;
     m_xfHeader = xfHeader;
 
     endResetModel();
@@ -157,7 +157,19 @@ QString XFModel::presentationToString(PRESENTATION_TYPE presentationType, quint6
     QString sResult;
 
     if (presentationType == PT_DATAST_LIST) {
-        sResult = XBinary::XIDSTRING_idToString(nValue, xfDataSt.pRecords, xfDataSt.nRecordsSize);
+        quint64 nMaskedValue = nValue;
+
+        if (xfDataSt.nMask) {
+            quint64 nMask = xfDataSt.nMask;
+            nMaskedValue &= nMask;
+
+            while ((nMask & 1) == 0) {
+                nMaskedValue >>= 1;
+                nMask >>= 1;
+            }
+        }
+
+        sResult = XBinary::XIDSTRING_idToString(nMaskedValue, xfDataSt.pRecords, xfDataSt.nRecordsSize);
     } else if (presentationType == PT_DATAST_FLAGS) {
         quint64 nMaskedValue = nValue & xfDataSt.nMask;
         QStringList listFlagStrings;
@@ -290,28 +302,28 @@ QString XFModel::commentForField(qint32 nFieldIndex, const QVariant &varValue) c
             listComments.append(presentationToString(PT_SIZE, nValue, xfRecord, xfDataStEmpty));
         }
 
-        if ((xfRecord.nFlags & XBinary::XFRECORD_FLAG_RELATIVE_ADDRESS_STRING) && m_pXBinary) {
-            qint64 nStrOff = m_pXBinary->relAddressToOffset((qint64)nValue);
-            if (nStrOff != -1) {
-                QString sTmp = m_pXBinary->read_utf8String(nStrOff);
-                bool bValid = !sTmp.isEmpty();
-                for (QChar c : sTmp) {
-                    if (c.unicode() < 0x20 || c.unicode() > 0x7E) {
-                        bValid = false;
-                        break;
-                    }
-                }
-                if (bValid) listComments.append(sTmp);
-            }
-        }
+        // if ((xfRecord.nFlags & XBinary::XFRECORD_FLAG_RELATIVE_ADDRESS_STRING) && m_pXBinary) {
+        //     qint64 nStrOff = m_pXBinary->relAddressToOffset((qint64)nValue);
+        //     if (nStrOff != -1) {
+        //         QString sTmp = m_pXBinary->read_utf8String(nStrOff);
+        //         bool bValid = !sTmp.isEmpty();
+        //         for (QChar c : sTmp) {
+        //             if (c.unicode() < 0x20 || c.unicode() > 0x7E) {
+        //                 bValid = false;
+        //                 break;
+        //             }
+        //         }
+        //         if (bValid) listComments.append(sTmp);
+        //     }
+        // }
 
-        if ((xfRecord.nFlags & XBinary::XFRECORD_FLAG_OFFSET_MUTF8STRING) && m_pXBinary) {
-            qint64 nStrOff = (qint64)nValue;
-            XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrOff, 5);
-            if (pu.bIsValid) {
-                listComments.append(m_pXBinary->read_utf8String(nStrOff + pu.nByteSize));
-            }
-        }
+        // if ((xfRecord.nFlags & XBinary::XFRECORD_FLAG_OFFSET_MUTF8STRING) && m_pXBinary) {
+        //     qint64 nStrOff = (qint64)nValue;
+        //     XBinary::PACKED_UINT pu = m_pXBinary->read_uleb128(nStrOff, 5);
+        //     if (pu.bIsValid) {
+        //         listComments.append(m_pXBinary->read_utf8String(nStrOff + pu.nByteSize));
+        //     }
+        // }
     }
 
     return listComments.join("; ");
@@ -408,13 +420,13 @@ QList<qint32> XFModel::calculateColumnWidths(const QAbstractItemModel *pModel)
         }
     }
 
-    // Minimum width of 2, maximum of 60
+    // Keep console tables bounded, but do not clip common C++/ELF symbol names.
     for (qint32 i = 0; i < listWidths.count(); i++) {
         if (listWidths[i] < 2) {
             listWidths[i] = 2;
         }
-        if (listWidths[i] > 60) {
-            listWidths[i] = 60;
+        if (listWidths[i] > 120) {
+            listWidths[i] = 120;
         }
     }
 

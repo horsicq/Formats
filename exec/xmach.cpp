@@ -21,24 +21,6 @@
 #include "xmach.h"
 
 namespace {
-template <typename T, int N>
-qint32 xmachCountOf(T (&)[N])
-{
-    return N;
-}
-
-template <int N>
-QMap<quint64, QString> xmachCreateMap(XBinary::XIDSTRING (&records)[N])
-{
-    return XBinary::XIDSTRING_createMap(records, xmachCountOf(records));
-}
-
-template <int N>
-QMap<quint64, QString> xmachCreateMapPrefix(XBinary::XIDSTRING (&records)[N], const QString &sPrefix)
-{
-    return XBinary::XIDSTRING_createMapPrefix(records, xmachCountOf(records), sPrefix);
-}
-
 const XMACH::COMMAND_RECORD *xmachFindCommandRecord(quint32 nCommandID, qint32 nIndex, const QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     const XMACH::COMMAND_RECORD *pResult = nullptr;
@@ -73,6 +55,8 @@ XBinary::XCONVERT _TABLE_XMACH_STRUCTID[] = {
     {XMACH::STRUCTID_load_command, "load_command", QString("load_command")},
     {XMACH::STRUCTID_segment_command, "segment", QString("segment")},
     {XMACH::STRUCTID_segment_command_64, "segment_64", QString("segment_64")},
+    {XMACH::STRUCTID_section, "section", QString("section")},
+    {XMACH::STRUCTID_section_64, "section_64", QString("section_64")},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_HeaderMagics[] = {
@@ -243,6 +227,19 @@ XBinary::XIDSTRING _TABLE_XMACH_SectionAttributesSys[] = {
     {0x00000400, "SOME_INSTRUCTIONS"},
 };
 
+XBinary::XIDSTRING _TABLE_XMACH_SectionAttributes[] = {
+    {0x00000100, "LOC_RELOC"},
+    {0x00000200, "EXT_RELOC"},
+    {0x00000400, "SOME_INSTRUCTIONS"},
+    {0x02000000, "DEBUG"},
+    {0x04000000, "SELF_MODIFYING_CODE"},
+    {0x08000000, "LIVE_SUPPORT"},
+    {0x10000000, "NO_DEAD_STRIP"},
+    {0x20000000, "STRIP_STATIC_SYMS"},
+    {0x40000000, "NO_TOC"},
+    {0x80000000, "PURE_INSTRUCTIONS"},
+};
+
 XBinary::XIDSTRING _TABLE_XMACH_DICEKinds[] = {
     {0x00000001, "DATA"}, {0x00000002, "JUMP_TABLE8"}, {0x00000003, "JUMP_TABLE16"}, {0x00000004, "JUMP_TABLE32"}, {0x00000005, "ABS_JUMP_TABLE32"},
 };
@@ -276,6 +273,130 @@ XBinary::XIDSTRING _TABLE_XMACH_DyldChainedImports[] = {
     {1, "IMPORT"},
     {2, "IMPORT_ADDEND"},
     {3, "IMPORT_ADDEND64"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesVAX[] = {
+    {0, "VAX_ALL"},
+    {1, "VAX780"},
+    {2, "VAX785"},
+    {3, "VAX750"},
+    {4, "VAX730"},
+    {5, "UVAXI"},
+    {6, "UVAXII"},
+    {7, "VAX8200"},
+    {8, "VAX8500"},
+    {9, "VAX8600"},
+    {10, "VAX8650"},
+    {11, "VAX8800"},
+    {12, "UVAXIII"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesROMP[] = {
+    {0, "RT_ALL"},
+    {1, "RT_PC"},
+    {2, "RT_APC"},
+    {3, "RT_135"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesNS32[] = {
+    {0, "MMAX_ALL"},
+    {1, "MMAX_DPC"},
+    {2, "SQT"},
+    {3, "MMAX_APC_FPU"},
+    {4, "MMAX_APC_FPA"},
+    {5, "MMAX_XPC"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesI386[] = {
+    {3, "386_ALL"},
+    {0x80000003, "X86_64_ALL"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesMIPS[] = {
+    {0, "MIPS_ALL"},
+    {1, "MIPS_R2300"},
+    {2, "MIPS_R2600"},
+    {3, "MIPS_R2800"},
+    {4, "MIPS_R2000a"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesMC680x0[] = {
+    {1, "MC68030"},
+    {2, "MC68040"},
+    {3, "MC68030_ONLY"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesHPPA[] = {
+    {0, "HPPA_7100"},
+    {1, "HPPA_7100LC"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesARM[] = {
+    {0, "ARM_ALL"},
+    {1, "ARM_A500_ARCH"},
+    {2, "ARM_A500"},
+    {3, "ARM_A440"},
+    {4, "ARM_M4"},
+    {5, "ARM_V4T"},
+    {6, "ARM_V6"},
+    {7, "ARM_V5TEJ"},
+    {8, "ARM_XSCALE"},
+    {9, "ARM_V7"},
+    {10, "ARM_V7F"},
+    {11, "ARM_V7S"},
+    {12, "ARM_V7K"},
+    {14, "ARM_V6M"},
+    {15, "ARM_V7M"},
+    {16, "ARM_V7EM"},
+    {0x80000002, "ARM64E"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesMC88000[] = {
+    {0, "MC88000_ALL"},
+    {1, "MC88100"},
+    {2, "MC88110"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesMC98000[] = {
+    {0, "MC98000_ALL"},
+    {1, "MC98601"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesI860[] = {
+    {0, "I860_ALL"},
+    {1, "I860_860"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesRS6000[] = {
+    {0, "RS6000_ALL"},
+    {1, "RS6000"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesSPARC[] = {
+    {0, "SPARC_ALL"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesPOWERPC[] = {
+    {0, "POWERPC_ALL"},
+    {1, "POWERPC_601"},
+    {2, "POWERPC_602"},
+    {3, "POWERPC_603"},
+    {4, "POWERPC_603e"},
+    {5, "POWERPC_603ev"},
+    {6, "POWERPC_604"},
+    {7, "POWERPC_604e"},
+    {8, "POWERPC_620"},
+    {9, "POWERPC_750"},
+    {10, "POWERPC_7400"},
+    {11, "POWERPC_7450"},
+    {100, "POWERPC_970"},
+};
+
+XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesVEO[] = {
+    {1, "VEO_1"},
+    {2, "VEO_2"},
+    {3, "VEO_3"},
+    {4, "VEO_4"},
 };
 
 // Xcode Toolchain Version History Table (1.0-2.x, Before iOS Support)
@@ -836,14 +957,57 @@ XMACH::~XMACH()
 
 bool XMACH::isValid(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-
     bool bResult = false;
 
     quint32 nMagic = read_uint32(0);
 
     if ((nMagic == XMACH_DEF::S_MH_MAGIC) || (nMagic == XMACH_DEF::S_MH_CIGAM) || (nMagic == XMACH_DEF::S_MH_MAGIC_64) || (nMagic == XMACH_DEF::S_MH_CIGAM_64)) {
-        bResult = true;
+        bool bIs64 = ((nMagic == XMACH_DEF::S_MH_MAGIC_64) || (nMagic == XMACH_DEF::S_MH_CIGAM_64));
+        bool bIsBigEndian = ((nMagic == XMACH_DEF::S_MH_CIGAM) || (nMagic == XMACH_DEF::S_MH_CIGAM_64));
+        qint64 nHeaderSize = bIs64 ? sizeof(XMACH_DEF::mach_header_64) : sizeof(XMACH_DEF::mach_header);
+        qint64 nFileSize = getSize();
+
+        if (checkOffsetSize(0, nHeaderSize)) {
+            quint32 nFileType = read_uint32(offsetof(XMACH_DEF::mach_header, filetype), bIsBigEndian);
+            bool bFileTypeValid = false;
+            qint32 nNumberOfFileTypes = sizeof(_TABLE_XMACH_HeaderFileTypes) / sizeof(XBinary::XIDSTRING);
+
+            for (qint32 i = 0; i < nNumberOfFileTypes; i++) {
+                if (_TABLE_XMACH_HeaderFileTypes[i].nID == nFileType) {
+                    bFileTypeValid = true;
+                    break;
+                }
+            }
+
+            if (bFileTypeValid) {
+                quint32 nNumberOfCommands = read_uint32(offsetof(XMACH_DEF::mach_header, ncmds), bIsBigEndian);
+                quint32 nSizeOfCommands = read_uint32(offsetof(XMACH_DEF::mach_header, sizeofcmds), bIsBigEndian);
+
+                if ((nNumberOfCommands <= 0xFFFF) && ((qint64)nSizeOfCommands <= (nFileSize - nHeaderSize)) && checkOffsetSize(nHeaderSize, nSizeOfCommands)) {
+                    qint64 nOffset = nHeaderSize;
+                    qint64 nCommandsSize = 0;
+                    qint32 nParsedCommands = 0;
+
+                    for (qint32 i = 0; (i < (qint32)nNumberOfCommands) && isPdStructNotCanceled(pPdStruct); i++) {
+                        if ((nCommandsSize + (qint64)sizeof(XMACH_DEF::load_command)) > nSizeOfCommands) {
+                            break;
+                        }
+
+                        quint32 nCommandSize = read_uint32(nOffset + offsetof(XMACH_DEF::load_command, cmdsize), bIsBigEndian);
+
+                        if ((nCommandSize < sizeof(XMACH_DEF::load_command)) || ((nCommandsSize + nCommandSize) > nSizeOfCommands)) {
+                            break;
+                        }
+
+                        nOffset += nCommandSize;
+                        nCommandsSize += nCommandSize;
+                        nParsedCommands++;
+                    }
+
+                    bResult = ((quint32)nParsedCommands == nNumberOfCommands) && (nCommandsSize == nSizeOfCommands);
+                }
+            }
+        }
     }
 
     return bResult;
@@ -853,7 +1017,7 @@ bool XMACH::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDS
 {
     XMACH xmach(pDevice, bIsImage, nModuleAddress);
 
-    return xmach.isValid();
+    return xmach.isValid(pPdStruct);
 }
 
 bool XMACH::isExecutable()
@@ -1038,342 +1202,214 @@ XMACH_DEF::mach_header_64 XMACH::_read_mach_header_64(qint64 nOffset)
 
 QMap<quint64, QString> XMACH::getHeaderMagics()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_HeaderMagics, "MH_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_HeaderMagics, sizeof(_TABLE_XMACH_HeaderMagics) / sizeof(XBinary::XIDSTRING), "MH_");
 }
 
 QMap<quint64, QString> XMACH::getHeaderMagicsS()
 {
-    return xmachCreateMap(_TABLE_XMACH_HeaderMagics);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_HeaderMagics, sizeof(_TABLE_XMACH_HeaderMagics) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuTypes()
 {
     // https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
     // https://github.com/apple-oss-distributions
-    return xmachCreateMapPrefix(_TABLE_XMACH_HeaderCpuTypes, "CPU_TYPE_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_HeaderCpuTypes, sizeof(_TABLE_XMACH_HeaderCpuTypes) / sizeof(XBinary::XIDSTRING), "CPU_TYPE_");
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuTypesS()
 {
-    return xmachCreateMap(_TABLE_XMACH_HeaderCpuTypes);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_HeaderCpuTypes, sizeof(_TABLE_XMACH_HeaderCpuTypes) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuSubTypes(quint32 nCpuType)
 {
-    QMap<quint64, QString> mapResult;
+    if (nCpuType == XMACH_DEF::S_CPU_TYPE_VAX)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesVAX, sizeof(_TABLE_XMACH_CpuSubTypesVAX) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_ROMP)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesROMP, sizeof(_TABLE_XMACH_CpuSubTypesROMP) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_NS32032) || (nCpuType == XMACH_DEF::S_CPU_TYPE_NS32332) || (nCpuType == XMACH_DEF::S_CPU_TYPE_NS32532))
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesNS32, sizeof(_TABLE_XMACH_CpuSubTypesNS32) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_I386) || (nCpuType == XMACH_DEF::S_CPU_TYPE_X86_64))
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesI386, sizeof(_TABLE_XMACH_CpuSubTypesI386) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MIPS)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesMIPS, sizeof(_TABLE_XMACH_CpuSubTypesMIPS) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC680x0)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesMC680x0, sizeof(_TABLE_XMACH_CpuSubTypesMC680x0) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_HPPA)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesHPPA, sizeof(_TABLE_XMACH_CpuSubTypesHPPA) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_ARM) || (nCpuType == XMACH_DEF::S_CPU_TYPE_ARM64))
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesARM, sizeof(_TABLE_XMACH_CpuSubTypesARM) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC88000)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesMC88000, sizeof(_TABLE_XMACH_CpuSubTypesMC88000) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC98000)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesMC98000, sizeof(_TABLE_XMACH_CpuSubTypesMC98000) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_I860)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesI860, sizeof(_TABLE_XMACH_CpuSubTypesI860) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_RS6000)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesRS6000, sizeof(_TABLE_XMACH_CpuSubTypesRS6000) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_SPARC)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesSPARC, sizeof(_TABLE_XMACH_CpuSubTypesSPARC) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_POWERPC) || (nCpuType == XMACH_DEF::S_CPU_TYPE_POWERPC64))
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesPOWERPC, sizeof(_TABLE_XMACH_CpuSubTypesPOWERPC) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_VEO)
+        return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_CpuSubTypesVEO, sizeof(_TABLE_XMACH_CpuSubTypesVEO) / sizeof(XBinary::XIDSTRING), "CPU_SUBTYPE_");
 
-    if (nCpuType == XMACH_DEF::S_CPU_TYPE_VAX) {
-        mapResult.insert(0, "CPU_SUBTYPE_VAX_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_VAX780");
-        mapResult.insert(2, "CPU_SUBTYPE_VAX785");
-        mapResult.insert(3, "CPU_SUBTYPE_VAX750");
-        mapResult.insert(4, "CPU_SUBTYPE_VAX730");
-        mapResult.insert(5, "CPU_SUBTYPE_UVAXI");
-        mapResult.insert(6, "CPU_SUBTYPE_UVAXII");
-        mapResult.insert(7, "CPU_SUBTYPE_VAX8200");
-        mapResult.insert(8, "CPU_SUBTYPE_VAX8500");
-        mapResult.insert(9, "CPU_SUBTYPE_VAX8600");
-        mapResult.insert(10, "CPU_SUBTYPE_VAX8650");
-        mapResult.insert(11, "CPU_SUBTYPE_VAX8800");
-        mapResult.insert(12, "CPU_SUBTYPE_UVAXIII");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_ROMP) {
-        mapResult.insert(0, "CPU_SUBTYPE_RT_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_RT_PC");
-        mapResult.insert(2, "CPU_SUBTYPE_RT_APC");
-        mapResult.insert(3, "CPU_SUBTYPE_RT_135");
-    } else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_NS32032) || (nCpuType == XMACH_DEF::S_CPU_TYPE_NS32332) || (nCpuType == XMACH_DEF::S_CPU_TYPE_NS32532)) {
-        mapResult.insert(0, "CPU_SUBTYPE_MMAX_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_MMAX_DPC");
-        mapResult.insert(2, "CPU_SUBTYPE_SQT");
-        mapResult.insert(3, "CPU_SUBTYPE_MMAX_APC_FPU");
-        mapResult.insert(4, "CPU_SUBTYPE_MMAX_APC_FPA");
-        mapResult.insert(5, "CPU_SUBTYPE_MMAX_XPC");
-    } else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_I386) || (nCpuType == XMACH_DEF::S_CPU_TYPE_X86_64)) {
-        mapResult.insert(3, "CPU_SUBTYPE_386_ALL");
-        mapResult.insert(0x80000003, "CPU_SUBTYPE_X86_64_ALL");
-        // TODO
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MIPS) {
-        mapResult.insert(0, "CPU_SUBTYPE_MIPS_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_MIPS_R2300");
-        mapResult.insert(2, "CPU_SUBTYPE_MIPS_R2600");
-        mapResult.insert(3, "CPU_SUBTYPE_MIPS_R2800");
-        mapResult.insert(4, "CPU_SUBTYPE_MIPS_R2000a");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC680x0) {
-        mapResult.insert(1, "CPU_SUBTYPE_MC68030");
-        mapResult.insert(2, "CPU_SUBTYPE_MC68040");
-        mapResult.insert(3, "CPU_SUBTYPE_MC68030_ONLY");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_HPPA) {
-        mapResult.insert(0, "CPU_SUBTYPE_HPPA_7100");
-        mapResult.insert(1, "CPU_SUBTYPE_HPPA_7100LC");
-    } else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_ARM) || (nCpuType == XMACH_DEF::S_CPU_TYPE_ARM64)) {
-        mapResult.insert(0, "CPU_SUBTYPE_ARM_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_ARM_A500_ARCH");
-        mapResult.insert(2, "CPU_SUBTYPE_ARM_A500");
-        mapResult.insert(3, "CPU_SUBTYPE_ARM_A440");
-        mapResult.insert(4, "CPU_SUBTYPE_ARM_M4");
-        mapResult.insert(5, "CPU_SUBTYPE_ARM_V4T");
-        mapResult.insert(6, "CPU_SUBTYPE_ARM_V6");
-        mapResult.insert(7, "CPU_SUBTYPE_ARM_V5TEJ");
-        mapResult.insert(8, "CPU_SUBTYPE_ARM_XSCALE");
-        mapResult.insert(9, "CPU_SUBTYPE_ARM_V7");
-        mapResult.insert(10, "CPU_SUBTYPE_ARM_V7F");
-        mapResult.insert(11, "CPU_SUBTYPE_ARM_V7S");
-        mapResult.insert(12, "CPU_SUBTYPE_ARM_V7K");
-        mapResult.insert(14, "CPU_SUBTYPE_ARM_V6M");
-        mapResult.insert(15, "CPU_SUBTYPE_ARM_V7M");
-        mapResult.insert(16, "CPU_SUBTYPE_ARM_V7EM");
-        mapResult.insert(0x80000002, "CPU_SUBTYPE_ARM64E");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC88000) {
-        mapResult.insert(0, "CPU_SUBTYPE_MC88000_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_MC88100");
-        mapResult.insert(2, "CPU_SUBTYPE_MC88110");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC98000) {
-        mapResult.insert(0, "CPU_SUBTYPE_MC98000_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_MC98601");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_I860) {
-        mapResult.insert(0, "CPU_SUBTYPE_I860_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_I860_860");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_RS6000) {
-        mapResult.insert(0, "CPU_SUBTYPE_RS6000_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_RS6000");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_SPARC) {
-        mapResult.insert(0, "CPU_SUBTYPE_SPARC_ALL");
-    } else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_POWERPC) || (nCpuType == XMACH_DEF::S_CPU_TYPE_POWERPC64)) {
-        mapResult.insert(0, "CPU_SUBTYPE_POWERPC_ALL");
-        mapResult.insert(1, "CPU_SUBTYPE_POWERPC_601");
-        mapResult.insert(2, "CPU_SUBTYPE_POWERPC_602");
-        mapResult.insert(3, "CPU_SUBTYPE_POWERPC_603");
-        mapResult.insert(4, "CPU_SUBTYPE_POWERPC_603e");
-        mapResult.insert(5, "CPU_SUBTYPE_POWERPC_603ev");
-        mapResult.insert(6, "CPU_SUBTYPE_POWERPC_604");
-        mapResult.insert(7, "CPU_SUBTYPE_POWERPC_604e");
-        mapResult.insert(8, "CPU_SUBTYPE_POWERPC_620");
-        mapResult.insert(9, "CPU_SUBTYPE_POWERPC_750");
-        mapResult.insert(10, "CPU_SUBTYPE_POWERPC_7400");
-        mapResult.insert(11, "CPU_SUBTYPE_POWERPC_7450");
-        mapResult.insert(100, "CPU_SUBTYPE_POWERPC_970");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_VEO) {
-        mapResult.insert(1, "CPU_SUBTYPE_VEO_1");
-        mapResult.insert(2, "CPU_SUBTYPE_VEO_2");
-        mapResult.insert(3, "CPU_SUBTYPE_VEO_3");
-        mapResult.insert(4, "CPU_SUBTYPE_VEO_4");
-    }
-
-    return mapResult;
+    return {};
 }
 
 QMap<quint64, QString> XMACH::getHeaderCpuSubTypesS(quint32 nCpuType)
 {
-    QMap<quint64, QString> mapResult;
+    if (nCpuType == XMACH_DEF::S_CPU_TYPE_VAX)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesVAX, sizeof(_TABLE_XMACH_CpuSubTypesVAX) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_ROMP)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesROMP, sizeof(_TABLE_XMACH_CpuSubTypesROMP) / sizeof(XBinary::XIDSTRING));
+    else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_NS32032) || (nCpuType == XMACH_DEF::S_CPU_TYPE_NS32332) || (nCpuType == XMACH_DEF::S_CPU_TYPE_NS32532))
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesNS32, sizeof(_TABLE_XMACH_CpuSubTypesNS32) / sizeof(XBinary::XIDSTRING));
+    else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_I386) || (nCpuType == XMACH_DEF::S_CPU_TYPE_X86_64))
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesI386, sizeof(_TABLE_XMACH_CpuSubTypesI386) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MIPS)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesMIPS, sizeof(_TABLE_XMACH_CpuSubTypesMIPS) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC680x0)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesMC680x0, sizeof(_TABLE_XMACH_CpuSubTypesMC680x0) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_HPPA)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesHPPA, sizeof(_TABLE_XMACH_CpuSubTypesHPPA) / sizeof(XBinary::XIDSTRING));
+    else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_ARM) || (nCpuType == XMACH_DEF::S_CPU_TYPE_ARM64))
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesARM, sizeof(_TABLE_XMACH_CpuSubTypesARM) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC88000)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesMC88000, sizeof(_TABLE_XMACH_CpuSubTypesMC88000) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC98000)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesMC98000, sizeof(_TABLE_XMACH_CpuSubTypesMC98000) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_I860)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesI860, sizeof(_TABLE_XMACH_CpuSubTypesI860) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_RS6000)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesRS6000, sizeof(_TABLE_XMACH_CpuSubTypesRS6000) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_SPARC)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesSPARC, sizeof(_TABLE_XMACH_CpuSubTypesSPARC) / sizeof(XBinary::XIDSTRING));
+    else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_POWERPC) || (nCpuType == XMACH_DEF::S_CPU_TYPE_POWERPC64))
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesPOWERPC, sizeof(_TABLE_XMACH_CpuSubTypesPOWERPC) / sizeof(XBinary::XIDSTRING));
+    else if (nCpuType == XMACH_DEF::S_CPU_TYPE_VEO)
+        return XBinary::XIDSTRING_createMap(_TABLE_XMACH_CpuSubTypesVEO, sizeof(_TABLE_XMACH_CpuSubTypesVEO) / sizeof(XBinary::XIDSTRING));
 
-    if (nCpuType == XMACH_DEF::S_CPU_TYPE_VAX) {
-        mapResult.insert(0, "VAX_ALL");
-        mapResult.insert(1, "VAX780");
-        mapResult.insert(2, "VAX785");
-        mapResult.insert(3, "VAX750");
-        mapResult.insert(4, "VAX730");
-        mapResult.insert(5, "UVAXI");
-        mapResult.insert(6, "UVAXII");
-        mapResult.insert(7, "VAX8200");
-        mapResult.insert(8, "VAX8500");
-        mapResult.insert(9, "VAX8600");
-        mapResult.insert(10, "VAX8650");
-        mapResult.insert(11, "VAX8800");
-        mapResult.insert(12, "UVAXIII");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_ROMP) {
-        mapResult.insert(0, "RT_ALL");
-        mapResult.insert(1, "RT_PC");
-        mapResult.insert(2, "RT_APC");
-        mapResult.insert(3, "RT_135");
-    } else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_NS32032) || (nCpuType == XMACH_DEF::S_CPU_TYPE_NS32332) || (nCpuType == XMACH_DEF::S_CPU_TYPE_NS32532)) {
-        mapResult.insert(0, "MMAX_ALL");
-        mapResult.insert(1, "MMAX_DPC");
-        mapResult.insert(2, "SQT");
-        mapResult.insert(3, "MMAX_APC_FPU");
-        mapResult.insert(4, "MMAX_APC_FPA");
-        mapResult.insert(5, "MMAX_XPC");
-    } else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_I386) || (nCpuType == XMACH_DEF::S_CPU_TYPE_X86_64)) {
-        mapResult.insert(3, "386_ALL");
-        mapResult.insert(0x80000003, "X86_64_ALL");
-        // TODO
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MIPS) {
-        mapResult.insert(0, "MIPS_ALL");
-        mapResult.insert(1, "MIPS_R2300");
-        mapResult.insert(2, "MIPS_R2600");
-        mapResult.insert(3, "MIPS_R2800");
-        mapResult.insert(4, "MIPS_R2000a");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC680x0) {
-        mapResult.insert(1, "MC68030");
-        mapResult.insert(2, "MC68040");
-        mapResult.insert(3, "MC68030_ONLY");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_HPPA) {
-        mapResult.insert(0, "HPPA_7100");
-        mapResult.insert(1, "HPPA_7100LC");
-    } else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_ARM) || (nCpuType == XMACH_DEF::S_CPU_TYPE_ARM64)) {
-        mapResult.insert(0, "ARM_ALL");
-        mapResult.insert(1, "ARM_A500_ARCH");
-        mapResult.insert(2, "ARM_A500");
-        mapResult.insert(3, "ARM_A440");
-        mapResult.insert(4, "ARM_M4");
-        mapResult.insert(5, "ARM_V4T");
-        mapResult.insert(6, "ARM_V6");
-        mapResult.insert(7, "ARM_V5TEJ");
-        mapResult.insert(8, "ARM_XSCALE");
-        mapResult.insert(9, "ARM_V7");
-        mapResult.insert(10, "ARM_V7F");
-        mapResult.insert(11, "ARM_V7S");
-        mapResult.insert(12, "ARM_V7K");
-        mapResult.insert(14, "ARM_V6M");
-        mapResult.insert(15, "ARM_V7M");
-        mapResult.insert(16, "ARM_V7EM");
-        mapResult.insert(0x80000002, "ARM64E");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC88000) {
-        mapResult.insert(0, "MC88000_ALL");
-        mapResult.insert(1, "MC88100");
-        mapResult.insert(2, "MC88110");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_MC98000) {
-        mapResult.insert(0, "MC98000_ALL");
-        mapResult.insert(1, "MC98601");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_I860) {
-        mapResult.insert(0, "I860_ALL");
-        mapResult.insert(1, "I860_860");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_RS6000) {
-        mapResult.insert(0, "RS6000_ALL");
-        mapResult.insert(1, "RS6000");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_SPARC) {
-        mapResult.insert(0, "SPARC_ALL");
-    } else if ((nCpuType == XMACH_DEF::S_CPU_TYPE_POWERPC) || (nCpuType == XMACH_DEF::S_CPU_TYPE_POWERPC64)) {
-        mapResult.insert(0, "POWERPC_ALL");
-        mapResult.insert(1, "POWERPC_601");
-        mapResult.insert(2, "POWERPC_602");
-        mapResult.insert(3, "POWERPC_603");
-        mapResult.insert(4, "POWERPC_603e");
-        mapResult.insert(5, "POWERPC_603ev");
-        mapResult.insert(6, "POWERPC_604");
-        mapResult.insert(7, "POWERPC_604e");
-        mapResult.insert(8, "POWERPC_620");
-        mapResult.insert(9, "POWERPC_750");
-        mapResult.insert(10, "POWERPC_7400");
-        mapResult.insert(11, "POWERPC_7450");
-        mapResult.insert(100, "POWERPC_970");
-    } else if (nCpuType == XMACH_DEF::S_CPU_TYPE_VEO) {
-        mapResult.insert(1, "VEO_1");
-        mapResult.insert(2, "VEO_2");
-        mapResult.insert(3, "VEO_3");
-        mapResult.insert(4, "VEO_4");
-    }
-
-    return mapResult;
+    return {};
 }
 
 QMap<quint64, QString> XMACH::getHeaderFileTypes()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_HeaderFileTypes, "MH_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_HeaderFileTypes, sizeof(_TABLE_XMACH_HeaderFileTypes) / sizeof(XBinary::XIDSTRING), "MH_");
 }
 
 QMap<quint64, QString> XMACH::getHeaderFileTypesS()
 {
-    return xmachCreateMap(_TABLE_XMACH_HeaderFileTypes);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_HeaderFileTypes, sizeof(_TABLE_XMACH_HeaderFileTypes) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getHeaderFlags()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_HeaderFlags, "MH_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_HeaderFlags, sizeof(_TABLE_XMACH_HeaderFlags) / sizeof(XBinary::XIDSTRING), "MH_");
 }
 
 QMap<quint64, QString> XMACH::getHeaderFlagsS()
 {
-    return xmachCreateMap(_TABLE_XMACH_HeaderFlags);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_HeaderFlags, sizeof(_TABLE_XMACH_HeaderFlags) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getLoadCommandTypes()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_LoadCommandTypes, "LC_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_LoadCommandTypes, sizeof(_TABLE_XMACH_LoadCommandTypes) / sizeof(XBinary::XIDSTRING), "LC_");
 }
 
 QMap<quint64, QString> XMACH::getLoadCommandTypesS()
 {
-    return xmachCreateMap(_TABLE_XMACH_LoadCommandTypes);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_LoadCommandTypes, sizeof(_TABLE_XMACH_LoadCommandTypes) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getVMProtections()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_VMProtections, "VM_PROT_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_VMProtections, sizeof(_TABLE_XMACH_VMProtections) / sizeof(XBinary::XIDSTRING), "VM_PROT_");
 }
 
 QMap<quint64, QString> XMACH::getVMProtectionsS()
 {
-    return xmachCreateMap(_TABLE_XMACH_VMProtections);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_VMProtections, sizeof(_TABLE_XMACH_VMProtections) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getSectionFlagsTypes()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_SectionFlagsTypes, "S_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_SectionFlagsTypes, sizeof(_TABLE_XMACH_SectionFlagsTypes) / sizeof(XBinary::XIDSTRING), "S_");
 }
 
 QMap<quint64, QString> XMACH::getSectionFlagsTypesS()
 {
-    return xmachCreateMap(_TABLE_XMACH_SectionFlagsTypes);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_SectionFlagsTypes, sizeof(_TABLE_XMACH_SectionFlagsTypes) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getSectionAttributesUsr()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_SectionAttributesUsr, "S_ATTR_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_SectionAttributesUsr, sizeof(_TABLE_XMACH_SectionAttributesUsr) / sizeof(XBinary::XIDSTRING), "S_ATTR_");
 }
 
 QMap<quint64, QString> XMACH::getSectionAttributesUsrS()
 {
-    return xmachCreateMap(_TABLE_XMACH_SectionAttributesUsr);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_SectionAttributesUsr, sizeof(_TABLE_XMACH_SectionAttributesUsr) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getSectionAttributesSys()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_SectionAttributesSys, "S_ATTR_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_SectionAttributesSys, sizeof(_TABLE_XMACH_SectionAttributesSys) / sizeof(XBinary::XIDSTRING), "S_ATTR_");
 }
 
 QMap<quint64, QString> XMACH::getSectionAttributesSysS()
 {
-    return xmachCreateMap(_TABLE_XMACH_SectionAttributesSys);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_SectionAttributesSys, sizeof(_TABLE_XMACH_SectionAttributesSys) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getDICEKinds()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_DICEKinds, "DICE_KIND_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_DICEKinds, sizeof(_TABLE_XMACH_DICEKinds) / sizeof(XBinary::XIDSTRING), "DICE_KIND_");
 }
 
 QMap<quint64, QString> XMACH::getDICEKindsS()
 {
-    return xmachCreateMap(_TABLE_XMACH_DICEKinds);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_DICEKinds, sizeof(_TABLE_XMACH_DICEKinds) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getPlatform()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_Platforms, "PLATFORM_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_Platforms, sizeof(_TABLE_XMACH_Platforms) / sizeof(XBinary::XIDSTRING), "PLATFORM_");
 }
 
 QMap<quint64, QString> XMACH::getPlatformS()
 {
-    return xmachCreateMap(_TABLE_XMACH_Platforms);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_Platforms, sizeof(_TABLE_XMACH_Platforms) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getBuildTool()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_BuildTools, "TOOL_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_BuildTools, sizeof(_TABLE_XMACH_BuildTools) / sizeof(XBinary::XIDSTRING), "TOOL_");
 }
 
 QMap<quint64, QString> XMACH::getBuildToolS()
 {
-    return xmachCreateMap(_TABLE_XMACH_BuildTools);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_BuildTools, sizeof(_TABLE_XMACH_BuildTools) / sizeof(XBinary::XIDSTRING));
 }
 
 QMap<quint64, QString> XMACH::getDyldChainedImport()
 {
-    return xmachCreateMapPrefix(_TABLE_XMACH_DyldChainedImports, "DYLD_CHAINED_");
+    return XBinary::XIDSTRING_createMapPrefix(_TABLE_XMACH_DyldChainedImports, sizeof(_TABLE_XMACH_DyldChainedImports) / sizeof(XBinary::XIDSTRING), "DYLD_CHAINED_");
 }
 
 QMap<quint64, QString> XMACH::getDyldChainedImportS()
 {
-    return xmachCreateMap(_TABLE_XMACH_DyldChainedImports);
+    return XBinary::XIDSTRING_createMap(_TABLE_XMACH_DyldChainedImports, sizeof(_TABLE_XMACH_DyldChainedImports) / sizeof(XBinary::XIDSTRING));
+}
+
+XBinary::XIDSTRING *XMACH::getHeaderCpuTypesTablePtr(qint32 *pSize)
+{
+    if (pSize) {
+        *pSize = sizeof(_TABLE_XMACH_HeaderCpuTypes) / sizeof(XBinary::XIDSTRING);
+    }
+    return _TABLE_XMACH_HeaderCpuTypes;
 }
 
 XMACH::COMMAND_RECORD XMACH::_readLoadCommand(qint64 nOffset, bool bIsBigEndian)
@@ -5298,6 +5334,31 @@ QList<XBinary::XFRECORD> XMACH::getXFRecords(FT fileType, quint32 nStructID, con
         listResult.append({"initprot", (qint32)offsetof(XMACH_DEF::segment_command_64, initprot), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"nsects", (qint32)offsetof(XMACH_DEF::segment_command_64, nsects), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
         listResult.append({"flags", (qint32)offsetof(XMACH_DEF::segment_command_64, flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_section) {
+        listResult.append({"sectname", (qint32)offsetof(XMACH_DEF::section, sectname), 16, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"segname", (qint32)offsetof(XMACH_DEF::section, segname), 16, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"addr", (qint32)offsetof(XMACH_DEF::section, addr), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+        listResult.append({"size", (qint32)offsetof(XMACH_DEF::section, size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"offset", (qint32)offsetof(XMACH_DEF::section, offset), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"align", (qint32)offsetof(XMACH_DEF::section, align), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"reloff", (qint32)offsetof(XMACH_DEF::section, reloff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"nreloc", (qint32)offsetof(XMACH_DEF::section, nreloc), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"flags", (qint32)offsetof(XMACH_DEF::section, flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"reserved1", (qint32)offsetof(XMACH_DEF::section, reserved1), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"reserved2", (qint32)offsetof(XMACH_DEF::section, reserved2), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_section_64) {
+        listResult.append({"sectname", (qint32)offsetof(XMACH_DEF::section_64, sectname), 16, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"segname", (qint32)offsetof(XMACH_DEF::section_64, segname), 16, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"addr", (qint32)offsetof(XMACH_DEF::section_64, addr), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+        listResult.append({"size", (qint32)offsetof(XMACH_DEF::section_64, size), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+        listResult.append({"offset", (qint32)offsetof(XMACH_DEF::section_64, offset), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"align", (qint32)offsetof(XMACH_DEF::section_64, align), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"reloff", (qint32)offsetof(XMACH_DEF::section_64, reloff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"nreloc", (qint32)offsetof(XMACH_DEF::section_64, nreloc), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"flags", (qint32)offsetof(XMACH_DEF::section_64, flags), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"reserved1", (qint32)offsetof(XMACH_DEF::section_64, reserved1), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"reserved2", (qint32)offsetof(XMACH_DEF::section_64, reserved2), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"reserved3", (qint32)offsetof(XMACH_DEF::section_64, reserved3), 4, XFRECORD_FLAG_NONE, VT_UINT32});
     }
 
     return listResult;
@@ -5420,6 +5481,9 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
     } else if ((nStructID == STRUCTID_segment_command) || (nStructID == STRUCTID_segment_command_64)) {
         bool bIs64 = (nStructID == STRUCTID_segment_command_64);
         qint64 nStructSize = bIs64 ? sizeof(XMACH_DEF::segment_command_64) : sizeof(XMACH_DEF::segment_command);
+        qint32 nSectionStructID = bIs64 ? STRUCTID_section_64 : STRUCTID_section;
+        qint32 nSectionSize = bIs64 ? sizeof(XMACH_DEF::section_64) : sizeof(XMACH_DEF::section);
+        bool bIsBigEndian = (xfStruct.pMemoryMap->endian == ENDIAN_BIG);
 
         XFHEADER xfHeader = {};
         xfHeader.sParentTag = xfStruct.sParent;
@@ -5435,6 +5499,92 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
 
         listResult.append(xfHeader);
+        if (xfStruct.bIsParent) {
+            qint64 nSegmentOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+            if (nSegmentOffset != -1) {
+                quint32 nCmdSize = read_uint32(nSegmentOffset + offsetof(XMACH_DEF::segment_command, cmdsize), bIsBigEndian);
+                quint32 nNumberOfSections = 0;
+
+                if (bIs64) {
+                    nNumberOfSections = read_uint32(nSegmentOffset + offsetof(XMACH_DEF::segment_command_64, nsects), bIsBigEndian);
+                } else {
+                    nNumberOfSections = read_uint32(nSegmentOffset + offsetof(XMACH_DEF::segment_command, nsects), bIsBigEndian);
+                }
+
+                if (nCmdSize < (quint32)nStructSize) {
+                    nNumberOfSections = 0;
+                } else {
+                    quint32 nMaxSections = (nCmdSize - (quint32)nStructSize) / (quint32)nSectionSize;
+
+                    if (nNumberOfSections > nMaxSections) {
+                        nNumberOfSections = nMaxSections;
+                    }
+                }
+
+                qint64 nSectionOffset = nSegmentOffset + nStructSize;
+
+                if ((nNumberOfSections > 0) && checkOffsetSize(nSectionOffset, (qint64)nNumberOfSections * nSectionSize)) {
+                    XFHEADER xfSectionTable = {};
+                    xfSectionTable.sParentTag = xfHeader.sTag;
+                    xfSectionTable.fileType = xfStruct.fileType;
+                    xfSectionTable.structID = static_cast<XBinary::STRUCTID>(nSectionStructID);
+                    xfSectionTable.xLoc = offsetToLoc(nSectionOffset);
+                    xfSectionTable.nSize = nSectionSize;
+                    xfSectionTable.xfType = XFTYPE_TABLE;
+                    xfSectionTable.listFields = getXFRecords(xfStruct.fileType, nSectionStructID, xfSectionTable.xLoc);
+                    xfSectionTable.listDataSt.append({8, XMACH_DEF::S_SECTION_TYPE, XFDATASTYPE_LIST, _TABLE_XMACH_SectionFlagsTypes,
+                                                      sizeof(_TABLE_XMACH_SectionFlagsTypes) / sizeof(XBinary::XIDSTRING), QString("type")});
+                    xfSectionTable.listDataSt.append({8, XMACH_DEF::S_SECTION_ATTRIBUTES_SYS | XMACH_DEF::S_SECTION_ATTRIBUTES_USR, XFDATASTYPE_FLAGS,
+                                                      _TABLE_XMACH_SectionAttributes, sizeof(_TABLE_XMACH_SectionAttributes) / sizeof(XBinary::XIDSTRING),
+                                                      QString("attributes")});
+
+                    for (qint32 i = 0; i < (qint32)nNumberOfSections; i++) {
+                        qint64 nRowOffset = nSectionOffset + i * nSectionSize;
+                        xfSectionTable.listRowLocations.append(nRowOffset);
+                        xfSectionTable.listRowNames.append(read_ansiString(nRowOffset, 16));
+                    }
+
+                    xfSectionTable.sTag = xfHeaderToTag(xfSectionTable, structIDToString(nSectionStructID), xfSectionTable.sParentTag);
+                    listResult.append(xfSectionTable);
+                }
+            }
+        }
+    } else if ((nStructID == STRUCTID_section) || (nStructID == STRUCTID_section_64)) {
+        bool bIs64 = (nStructID == STRUCTID_section_64);
+        qint32 nSectionSize = bIs64 ? sizeof(XMACH_DEF::section_64) : sizeof(XMACH_DEF::section);
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nRows = xfStruct.nCount;
+
+        if ((nOffset != -1) && (nRows > 0)) {
+            XFHEADER xfSectionTable = {};
+            xfSectionTable.sParentTag = xfStruct.sParent;
+            xfSectionTable.fileType = xfStruct.fileType;
+            xfSectionTable.structID = static_cast<XBinary::STRUCTID>(nStructID);
+            xfSectionTable.xLoc = xfStruct.xLoc;
+            xfSectionTable.nSize = nSectionSize;
+            xfSectionTable.xfType = XFTYPE_TABLE;
+            xfSectionTable.listFields = getXFRecords(xfStruct.fileType, nStructID, xfStruct.xLoc);
+            xfSectionTable.listDataSt.append({8, XMACH_DEF::S_SECTION_TYPE, XFDATASTYPE_LIST, _TABLE_XMACH_SectionFlagsTypes,
+                                              sizeof(_TABLE_XMACH_SectionFlagsTypes) / sizeof(XBinary::XIDSTRING), QString("type")});
+            xfSectionTable.listDataSt.append({8, XMACH_DEF::S_SECTION_ATTRIBUTES_SYS | XMACH_DEF::S_SECTION_ATTRIBUTES_USR, XFDATASTYPE_FLAGS,
+                                              _TABLE_XMACH_SectionAttributes, sizeof(_TABLE_XMACH_SectionAttributes) / sizeof(XBinary::XIDSTRING),
+                                              QString("attributes")});
+
+            for (qint32 i = 0; i < nRows; i++) {
+                qint64 nRowOffset = nOffset + i * nSectionSize;
+
+                if (!checkOffsetSize(nRowOffset, nSectionSize)) {
+                    break;
+                }
+
+                xfSectionTable.listRowLocations.append(nRowOffset);
+                xfSectionTable.listRowNames.append(read_ansiString(nRowOffset, 16));
+            }
+
+            xfSectionTable.sTag = xfHeaderToTag(xfSectionTable, structIDToString(nStructID), xfSectionTable.sParentTag);
+            listResult.append(xfSectionTable);
+        }
     }
 
     return listResult;

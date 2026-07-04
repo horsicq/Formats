@@ -31,7 +31,7 @@ public:
     explicit XFModel_table(QObject *pParent = nullptr);
     virtual ~XFModel_table() override;
 
-    virtual void setData(XBinary *pXBinary, const XBinary::XFHEADER &xfHeader) override;
+    virtual void setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader) override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -44,6 +44,7 @@ private:
     enum COLUMN_ENTRY_TYPE {
         CET_NUMBER = 0,
         CET_NAME,
+        CET_EXTRA,
         CET_OFFSET,
         CET_FIELD,
         CET_PRESENTATION
@@ -55,7 +56,7 @@ private:
     };
 
     struct PRESENTATION_COLUMN {
-        qint32 nFieldIndex;
+        qint32 nFieldIndex = -1;  // index of the source field in m_listColumnFields
         PRESENTATION_TYPE presentationType;
         qint32 nDataStIndex;  // only used for PT_DATAST_LIST / PT_DATAST_FLAGS
     };
@@ -67,6 +68,7 @@ private:
     QList<XBinary::XFRECORD> m_listColumnFields;
     QList<QList<XBinary::XFRECORD>> m_listRowFields;
     QList<QList<QVariant>> m_listTableRowValues;
+    QList<QVector<QString>> m_listRowPresStrings;  // [row][fieldIndex] for I/O-resolved presentation strings
     QList<PRESENTATION_COLUMN> m_listPresentationColumns;
     QList<COLUMN_ENTRY> m_listColumnMap;
 };
