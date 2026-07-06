@@ -25,6 +25,95 @@
 
 #include <algorithm>
 
+namespace {
+QString normalizeStructToken(const QString &sValue)
+{
+    return QString(sValue).toUpper().remove(" ").remove("-");
+}
+
+QString getCurrentStructSegment(const QString &sStruct)
+{
+    QString sResult = sStruct;
+
+    qint32 nHashIdx = sResult.lastIndexOf('#');
+    if (nHashIdx != -1) {
+        sResult = sResult.mid(nHashIdx + 1);
+    }
+
+    qint32 nParamIdx = sResult.indexOf('?');
+    if (nParamIdx != -1) {
+        sResult = sResult.left(nParamIdx);
+    }
+
+    qint32 nSpaceIdx = sResult.indexOf(' ');
+    qint32 nColonIdx = sResult.indexOf("::");
+    if ((nSpaceIdx != -1) && ((nColonIdx == -1) || (nSpaceIdx < nColonIdx))) {
+        sResult = sResult.mid(nSpaceIdx + 1);
+    }
+
+    QStringList listParts = sResult.split("::");
+
+    if (listParts.size() >= 4) {
+        sResult = listParts.at(2);
+    } else if (listParts.size() >= 2) {
+        sResult = listParts.last();
+    }
+
+    return sResult;
+}
+
+XBinary::XFTYPE getXFTypeFromStructString(const QString &sStruct)
+{
+    XBinary::XFTYPE result = XBinary::XFTYPE_UNKNOWN;
+
+    QString sFiltered = sStruct;
+    qint32 nHashIdx = sFiltered.lastIndexOf('#');
+    if (nHashIdx != -1) {
+        sFiltered = sFiltered.mid(nHashIdx + 1);
+    }
+
+    qint32 nParamIdx = sFiltered.indexOf('?');
+    if (nParamIdx != -1) {
+        const QString sParams = sFiltered.mid(nParamIdx + 1);
+        sFiltered = sFiltered.left(nParamIdx);
+
+        for (const QString &sParam : sParams.split('&')) {
+            qint32 nEqIdx = sParam.indexOf('=');
+            if (nEqIdx != -1) {
+                const QString sKey = normalizeStructToken(sParam.left(nEqIdx));
+                const QString sValue = normalizeStructToken(sParam.mid(nEqIdx + 1));
+
+                if (sKey == "TYPE") {
+                    if (sValue == "HEADER") {
+                        result = XBinary::XFTYPE_HEADER;
+                    } else if (sValue == "TABLE") {
+                        result = XBinary::XFTYPE_TABLE;
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+
+    if (result == XBinary::XFTYPE_UNKNOWN) {
+        QStringList listParts = sFiltered.split("::");
+
+        if (listParts.size() >= 4) {
+            const QString sType = normalizeStructToken(listParts.at(3));
+
+            if (sType == "HEADER") {
+                result = XBinary::XFTYPE_HEADER;
+            } else if (sType == "TABLE") {
+                result = XBinary::XFTYPE_TABLE;
+            }
+        }
+    }
+
+    return result;
+}
+}  // namespace
+
 XFormats::XFormats(QObject *pParent) : XThreadObject(pParent)
 {
     m_mode = MODE_UNKNOWN;
@@ -1035,6 +1124,18 @@ QString XFormats::getXFHeaderStructName(const XBinary::XFHEADER &header)
     }
 
     return sResult;
+}
+
+bool XFormats::isXFStruct(const QString &sStruct)
+{
+    XBinary::XFTYPE xfType = getXFTypeFromStructString(sStruct);
+
+    return ((xfType == XBinary::XFTYPE_TABLE) || (xfType == XBinary::XFTYPE_HEADER));
+}
+
+bool XFormats::isHFCommand(const QString &sStruct)
+{
+    return (normalizeStructToken(getCurrentStructSegment(sStruct)) == "COMMAND");
 }
 
 XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const QString &sStruct, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)

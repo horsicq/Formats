@@ -964,6 +964,20 @@ public:
         // TODO pascal strings(A/U)
     };
 
+    enum CODEPAGE {
+        CODEPAGE_ASCII = 0,
+        CODEPAGE_WINDOWS_874 = 874,
+        CODEPAGE_WINDOWS_1250 = 1250,
+        CODEPAGE_WINDOWS_1251 = 1251,
+        CODEPAGE_WINDOWS_1252 = 1252,
+        CODEPAGE_WINDOWS_1253 = 1253,
+        CODEPAGE_WINDOWS_1254 = 1254,
+        CODEPAGE_WINDOWS_1255 = 1255,
+        CODEPAGE_WINDOWS_1256 = 1256,
+        CODEPAGE_WINDOWS_1257 = 1257,
+        CODEPAGE_WINDOWS_1258 = 1258,
+    };
+
     enum XFRECORD_FLAG {
         XFRECORD_FLAG_NONE = 0,
         XFRECORD_FLAG_SIZE = 0x00000001,
@@ -2508,12 +2522,10 @@ public:
     static QString getArchiveRecordComment(const ARCHIVERECORD &record);
     static QString getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties);
 
-
     struct XFSS_OPTIONS {
         qint32 nLimit;
         qint32 nMinLenght;
         qint32 nMaxLenght;
-        bool bACSII;
         bool bANSI;
         bool bUTF8;
         bool bUTF16;

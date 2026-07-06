@@ -200,6 +200,8 @@ public:
     static bool isArchive(const QString &sFileName);
     static bool isExecutable(XBinary::FT fileType);
     static QString getXFHeaderStructName(const XBinary::XFHEADER &header);
+    static bool isXFStruct(const QString &sStruct);
+    static bool isHFCommand(const QString &sStruct);
 
     static QString toJSON(const QVector<XBinary::KeyValueItem> &listItems);
     static QString toXML(const QVector<XBinary::KeyValueItem> &listItems);
