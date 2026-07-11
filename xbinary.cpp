@@ -15632,15 +15632,7 @@ QString XBinary::_fromWCharArray(const wchar_t *pWString, qint32 size)
 {
     QString sResult;
 
-#if (QT_VERSION_MAJOR < 5)  // TODO Check
     sResult = QString::fromWCharArray(pWString, size);
-    // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Zc:wchar_t-")
-#else
-    sResult = QString::fromWCharArray(pWString, size);
-#endif
 
     return sResult;
 }
@@ -15649,15 +15641,7 @@ qint32 XBinary::_toWCharArray(const QString &sString, wchar_t *pWString)
 {
     qint32 nResult = 0;
 
-#if (QT_VERSION_MAJOR < 5)                     // TODO Check
-    nResult = sString.toWCharArray(pWString);  // TODO
-    // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Zc:wchar_t-")
-#else
     nResult = sString.toWCharArray(pWString);
-#endif
 
     return nResult;
 }
