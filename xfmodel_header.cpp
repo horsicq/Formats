@@ -29,7 +29,7 @@ XFModel_header::~XFModel_header()
 {
 }
 
-void XFModel_header::setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader)
+void XFModel_header::setData(const XBinary::INDATA &inData, const XBinary::XFHEADER &xfHeader)
 {
     XFModel::setData(inData, xfHeader);
 

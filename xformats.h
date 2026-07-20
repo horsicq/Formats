@@ -123,28 +123,20 @@ public:
         MODE_UNPACKDEVICETOFOLDER,
     };
 
-    enum INDATA_MODE {
-        INDATA_MODE_UNKNOWN = 0,
-        INDATA_MODE_FILE,
-        INDATA_MODE_DEVICE,
-    };
+    typedef XBinary::INDATA_MODE INDATA_MODE;
+    typedef XBinary::INDATA INDATA;
 
-    struct INDATA {
-        INDATA_MODE inDataMode = INDATA_MODE_UNKNOWN;
-        QString sFileName;
-        QIODevice *pDevice;
-        XBinary::FT fileType = XBinary::FT_UNKNOWN;
-        bool bIsImage = false;
-        XADDR nModuleAddress = -1;
-    };
+    static const INDATA_MODE INDATA_MODE_UNKNOWN = XBinary::INDATA_MODE_UNKNOWN;
+    static const INDATA_MODE INDATA_MODE_FILE = XBinary::INDATA_MODE_FILE;
+    static const INDATA_MODE INDATA_MODE_DEVICE = XBinary::INDATA_MODE_DEVICE;
 
     explicit XFormats(QObject *pParent = nullptr);
 
-    static INDATA createINDATA(XBinary::FT fileType, const QString &sFileName, bool bIsImage = false, XADDR nModuleAddress = -1);
-    static INDATA createINDATA(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static XBinary::INDATA createINDATA(XBinary::FT fileType, const QString &sFileName, bool bIsImage = false, XADDR nModuleAddress = -1);
+    static XBinary::INDATA createINDATA(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
-    static QIODevice *createDevice(const INDATA &indate, bool bIsReadOnly = true);
-    static void removeDevice(QIODevice *pDevice, const INDATA &indate);
+    static QIODevice *createDevice(const XBinary::INDATA &indate, bool bIsReadOnly = true);
+    static void removeDevice(QIODevice *pDevice, const XBinary::INDATA &indate);
 
     static XBinary *createClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1);
 
@@ -234,6 +226,7 @@ public:
                                            XBinary::TL_OPTION tlOption = XBinary::TL_OPTION_DEFAULT);
     static QVariant setComboBoxCurrent(QComboBox *pComboBox, QVariant varValue);
     static XBinary::ENDIAN setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian);
+    static XBinary::CODEPAGE setCodepageComboBox(QComboBox *pComboBox, XBinary::CODEPAGE codepage);
     static qint32 setBaseComboBox(QComboBox *pComboBox, qint32 nBase);
     static XBinary::MAPMODE getMapModesList(XBinary::FT fileType, QComboBox *pComboBox);
     static void setProgressBar(QProgressBar *pProgressBar, XBinary::PDRECORD pdRecord);

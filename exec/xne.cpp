@@ -874,6 +874,21 @@ qint64 XNE::getNotResindentNameTableOffset()
     return getImageOS2Header_nrestab();
 }
 
+bool XNE::isImportPresent()
+{
+    return (getImageOS2Header_cmod() != 0);
+}
+
+bool XNE::isExportPresent()
+{
+    return (getImageOS2Header_cbenttab() != 0);
+}
+
+bool XNE::isResourcesPresent()
+{
+    return (getImageOS2Header_cres() != 0);
+}
+
 QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
 {
     QList<XNE_DEF::NE_SEGMENT> listResult;

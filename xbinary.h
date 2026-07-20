@@ -171,6 +171,9 @@ public:
         STRUCTID_REGIONS,
         STRUCTID_MEMORYMAP,
         STRUCTID_SYMBOLS,
+        STRUCTID_IMPORT,
+        STRUCTID_EXPORT,
+        STRUCTID_RESOURCES,
         STRUCTID_ENTROPY,
         STRUCTID_EXTRACTOR,
         STRUCTID_SEARCH,
@@ -638,6 +641,21 @@ public:
         // TODO more
     };
 
+    enum INDATA_MODE {
+        INDATA_MODE_UNKNOWN = 0,
+        INDATA_MODE_FILE,
+        INDATA_MODE_DEVICE,
+    };
+
+    struct INDATA {
+        INDATA_MODE inDataMode = INDATA_MODE_UNKNOWN;
+        QString sFileName;
+        QIODevice *pDevice = nullptr;
+        FT fileType = FT_UNKNOWN;
+        bool bIsImage = false;
+        XADDR nModuleAddress = (XADDR)-1;
+    };
+
     enum MODE {
         MODE_UNKNOWN = 0,
         MODE_DATA,  // Raw data
@@ -897,6 +915,40 @@ public:
         QString sFunction;
     };
 
+    struct XIMPORT_STRUCT {
+        qint64 nOffset;
+        qint64 nSize;
+        XADDR nAddress;
+        QString sLibrary;
+        QString sFunction;
+        qint32 nOrdinal;
+    };
+
+    struct XEXPORT_STRUCT {
+        qint64 nOffset;
+        qint64 nSize;
+        XADDR nAddress;
+        QString sFunction;
+        qint32 nOrdinal;
+    };
+
+    struct XSYMBOL_STRUCT {
+        qint64 nOffset;
+        qint64 nSize;
+        XADDR nAddress;
+        QString sName;
+        SYMBOL_TYPE symbolType;
+    };
+
+    struct XRESOURCE_STRUCT {
+        qint64 nOffset;
+        qint64 nSize;
+        XADDR nAddress;
+        QString sName;
+        quint32 nType;
+        quint32 nID;
+    };
+
     enum HASH {
         HASH_MD4 = 0,
         HASH_MD5,
@@ -1029,7 +1081,8 @@ public:
     enum XFTYPE {
         XFTYPE_UNKNOWN = 0,
         XFTYPE_HEADER,
-        XFTYPE_TABLE
+        XFTYPE_TABLE,
+        XFTYPE_COMMAND
     };
 
     enum XFDATASTTYPE {
@@ -1086,6 +1139,7 @@ public:
         quint16 nValueType;
         quint16 nSize;
         quint16 nInfo;
+        QString sValue;
     };
 
     struct OPCODE {
@@ -1354,6 +1408,8 @@ public:
 
     static QString modeIdToString(MODE mode);
     static QString endianToString(ENDIAN endian);
+    static QString codepageIdToString(quint32 nCodepage);
+    static QList<XBinary::CODEPAGE> getCodepagesList();
 
     void setArch(const QString &sArch);
 
@@ -2049,6 +2105,16 @@ public:
 
     virtual bool isCommentPresent();
     virtual QString getComment();
+
+    virtual bool isExportPresent();
+    virtual bool isImportPresent();
+    virtual bool isResourcesPresent();
+    virtual bool isSymbolsPresent();
+
+    virtual QVector<XIMPORT_STRUCT> getImportStructs();
+    virtual QVector<XEXPORT_STRUCT> getExportStructs();
+    virtual QVector<XSYMBOL_STRUCT> getSymbolStructs();
+    virtual QVector<XRESOURCE_STRUCT> getResourceStructs();
 
     static QString getSignature(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
     QString getSignature(qint64 nOffset, qint64 nSize);

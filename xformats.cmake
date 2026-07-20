@@ -44,6 +44,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/subdevice.h
     ${CMAKE_CURRENT_LIST_DIR}/xformats.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xformats.h
+    ${CMAKE_CURRENT_LIST_DIR}/xsearchprocess.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/xsearchprocess.h
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.cpp
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.h
     ${CMAKE_CURRENT_LIST_DIR}/audio/xwav.cpp

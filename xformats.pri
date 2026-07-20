@@ -18,10 +18,12 @@ contains(QT_ARCH, x86_64)|contains(QT_ARCH, i386) {
 }
 
 HEADERS += \
-    $$PWD/xformats.h
+    $$PWD/xformats.h \
+    $$PWD/xsearchprocess.h
 
 SOURCES += \
-    $$PWD/xformats.cpp
+    $$PWD/xformats.cpp \
+    $$PWD/xsearchprocess.cpp
 
 !contains(XCONFIG, xbinary) {
     XCONFIG += xbinary

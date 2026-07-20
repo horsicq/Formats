@@ -31,7 +31,7 @@ XFModel_table::~XFModel_table()
 {
 }
 
-void XFModel_table::setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader)
+void XFModel_table::setData(const XBinary::INDATA &inData, const XBinary::XFHEADER &xfHeader)
 {
     XFModel::setData(inData, xfHeader);
 
@@ -368,7 +368,7 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole) {
         if ((nRow >= 0) && (nRow < m_listTableRowValues.count())) {
             if (entry.columnEntryType == CET_NUMBER) {
-                result = QString::number(nRow);
+                result = nRow;
             } else if (entry.columnEntryType == CET_NAME) {
                 if (nRow < m_xfHeader.listRowNames.count()) {
                     result = m_xfHeader.listRowNames.at(nRow);

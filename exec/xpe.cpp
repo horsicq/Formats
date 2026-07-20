@@ -14035,6 +14035,137 @@ bool XPE::isResourcesPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 }
 
+bool XPE::isSymbolsPresent()
+{
+    return (getFileHeader_PointerToSymbolTable() != 0) && (getFileHeader_NumberOfSymbols() != 0);
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XPE::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+
+    QList<IMPORT_HEADER> listImports = getImports();
+
+    qint32 nNumberOfHeaders = listImports.count();
+
+    for (qint32 i = 0; i < nNumberOfHeaders; i++) {
+        const IMPORT_HEADER &header = listImports.at(i);
+
+        qint32 nNumberOfPositions = header.listPositions.count();
+
+        for (qint32 j = 0; j < nNumberOfPositions; j++) {
+            const IMPORT_POSITION &position = header.listPositions.at(j);
+
+            XIMPORT_STRUCT record = {};
+            record.nOffset = position.nThunkOffset;
+            record.nSize = 0;
+            record.nAddress = position.nThunkValue;
+            record.sLibrary = header.sName;
+            record.sFunction = position.sFunction;
+            record.nOrdinal = (qint32)position.nOrdinal;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XPE::getExportStructs()
+{
+    QVector<XEXPORT_STRUCT> listResult;
+
+    EXPORT_HEADER exportHeader = getExport();
+
+    qint32 nNumberOfPositions = exportHeader.listPositions.count();
+
+    for (qint32 i = 0; i < nNumberOfPositions; i++) {
+        const EXPORT_POSITION &position = exportHeader.listPositions.at(i);
+
+        XEXPORT_STRUCT record = {};
+        record.nOffset = 0;
+        record.nSize = 0;
+        record.nAddress = position.nAddress;
+        record.sFunction = position.sFunctionName;
+        record.nOrdinal = position.nOrdinal;
+
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XPE::getSymbolStructs()
+{
+    QVector<XSYMBOL_STRUCT> listResult;
+
+    quint32 nSymbolTableOffset = getFileHeader_PointerToSymbolTable();
+    quint32 nNumberOfSymbols = getFileHeader_NumberOfSymbols();
+
+    const qint64 IMAGE_SYMBOL_SIZE = 18;
+    const quint32 MAX_SYMBOLS = 200000;  // Guard against corrupted NumberOfSymbols on untrusted files
+
+    if ((nSymbolTableOffset != 0) && (nNumberOfSymbols != 0) && (nNumberOfSymbols <= MAX_SYMBOLS)) {
+        qint64 nStringTableOffset = (qint64)nSymbolTableOffset + (qint64)nNumberOfSymbols * IMAGE_SYMBOL_SIZE;
+
+        quint32 nIndex = 0;
+
+        while (nIndex < nNumberOfSymbols) {
+            qint64 nEntryOffset = (qint64)nSymbolTableOffset + (qint64)nIndex * IMAGE_SYMBOL_SIZE;
+
+            quint32 nShortOrZero = read_uint32(nEntryOffset);
+            quint8 nNumberOfAuxSymbols = read_uint8(nEntryOffset + 17);
+
+            QString sName;
+
+            if (nShortOrZero != 0) {
+                sName = read_ansiString(nEntryOffset, 8);
+            } else {
+                quint32 nNameOffset = read_uint32(nEntryOffset + 4);
+                sName = read_ansiString(nStringTableOffset + nNameOffset);
+            }
+
+            XSYMBOL_STRUCT record = {};
+            record.nOffset = nEntryOffset;
+            record.nSize = IMAGE_SYMBOL_SIZE;
+            record.nAddress = read_uint32(nEntryOffset + 8);
+            record.sName = sName;
+            record.symbolType = SYMBOL_TYPE_LABEL;
+
+            listResult.append(record);
+
+            nIndex += (1 + nNumberOfAuxSymbols);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XRESOURCE_STRUCT> XPE::getResourceStructs()
+{
+    QVector<XRESOURCE_STRUCT> listResult;
+
+    QList<RESOURCE_RECORD> listResources = getResources(10000);
+
+    qint32 nNumberOfRecords = listResources.count();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        const RESOURCE_RECORD &resource = listResources.at(i);
+
+        XRESOURCE_STRUCT record = {};
+        record.nOffset = resource.nOffset;
+        record.nSize = resource.nSize;
+        record.nAddress = resource.nAddress;
+        record.nType = resource.irin[0].bIsName ? 0 : resource.irin[0].nID;
+        record.nID = resource.irin[1].bIsName ? 0 : resource.irin[1].nID;
+        record.sName = resource.irin[1].bIsName ? resource.irin[1].sName : resource.irin[0].sName;
+
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
 bool XPE::isRelocsPresent()
 {
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);

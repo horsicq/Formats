@@ -374,6 +374,15 @@ public:
     QList<QString> getLibraries();
     QList<QString> getLibraries(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 
+    virtual bool isImportPresent() override;
+    virtual bool isExportPresent() override;
+    virtual bool isSymbolsPresent() override;
+
+    virtual QVector<XIMPORT_STRUCT> getImportStructs() override;
+    virtual QVector<XEXPORT_STRUCT> getExportStructs() override;
+    virtual QVector<XSYMBOL_STRUCT> getSymbolStructs() override;
+    QVector<XSYMBOL_STRUCT> _getSymbolStructs();
+
     OS_STRING getRunPath();
     OS_STRING getRunPath(_MEMORY_MAP *pMemoryMap, QList<TAG_STRUCT> *pListTagStructs);
 

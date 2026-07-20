@@ -88,6 +88,8 @@ XBinary::XFTYPE getXFTypeFromStructString(const QString &sStruct)
                         result = XBinary::XFTYPE_HEADER;
                     } else if (sValue == "TABLE") {
                         result = XBinary::XFTYPE_TABLE;
+                    } else if (sValue == "COMMAND") {
+                        result = XBinary::XFTYPE_COMMAND;
                     }
 
                     break;
@@ -106,6 +108,8 @@ XBinary::XFTYPE getXFTypeFromStructString(const QString &sStruct)
                 result = XBinary::XFTYPE_HEADER;
             } else if (sType == "TABLE") {
                 result = XBinary::XFTYPE_TABLE;
+            } else if (sType == "COMMAND") {
+                result = XBinary::XFTYPE_COMMAND;
             }
         }
     }
@@ -122,11 +126,11 @@ XFormats::XFormats(QObject *pParent) : XThreadObject(pParent)
     m_pPdStruct = nullptr;
 }
 
-QIODevice *XFormats::createDevice(const INDATA &indate, bool bIsReadOnly)
+QIODevice *XFormats::createDevice(const XBinary::INDATA &indate, bool bIsReadOnly)
 {
     QIODevice *pResult = nullptr;
 
-    if (indate.inDataMode == INDATA_MODE_FILE) {
+    if (indate.inDataMode == XBinary::INDATA_MODE_FILE) {
         QFile *pFile = new QFile();
         pFile->setFileName(indate.sFileName);
 
@@ -142,16 +146,16 @@ QIODevice *XFormats::createDevice(const INDATA &indate, bool bIsReadOnly)
         }
 
         pResult = pFile;
-    } else if (indate.inDataMode == INDATA_MODE_DEVICE) {
+    } else if (indate.inDataMode == XBinary::INDATA_MODE_DEVICE) {
         pResult = indate.pDevice;
     }
 
     return pResult;
 }
 
-void XFormats::removeDevice(QIODevice *pDevice, const INDATA &indate)
+void XFormats::removeDevice(QIODevice *pDevice, const XBinary::INDATA &indate)
 {
-    if (indate.inDataMode == INDATA_MODE_FILE) {
+    if (indate.inDataMode == XBinary::INDATA_MODE_FILE) {
         if (pDevice) {
             pDevice->close();
             delete pDevice;
@@ -159,10 +163,10 @@ void XFormats::removeDevice(QIODevice *pDevice, const INDATA &indate)
     }
 }
 
-XFormats::INDATA XFormats::createINDATA(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+XBinary::INDATA XFormats::createINDATA(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
-    XFormats::INDATA result = {};
-    result.inDataMode = INDATA_MODE_DEVICE;
+    XBinary::INDATA result = {};
+    result.inDataMode = XBinary::INDATA_MODE_DEVICE;
     result.fileType = fileType;
     result.pDevice = pDevice;
     result.bIsImage = bIsImage;
@@ -171,10 +175,10 @@ XFormats::INDATA XFormats::createINDATA(XBinary::FT fileType, QIODevice *pDevice
     return result;
 }
 
-XFormats::INDATA XFormats::createINDATA(XBinary::FT fileType, const QString &sFileName, bool bIsImage, XADDR nModuleAddress)
+XBinary::INDATA XFormats::createINDATA(XBinary::FT fileType, const QString &sFileName, bool bIsImage, XADDR nModuleAddress)
 {
-    XFormats::INDATA result = {};
-    result.inDataMode = INDATA_MODE_FILE;
+    XBinary::INDATA result = {};
+    result.inDataMode = XBinary::INDATA_MODE_FILE;
     result.fileType = fileType;
     result.sFileName = sFileName;
     result.bIsImage = bIsImage;
@@ -904,6 +908,8 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                     xfType = XBinary::XFTYPE_HEADER;
                 } else if (sTypeName == "TABLE") {
                     xfType = XBinary::XFTYPE_TABLE;
+                } else if (sTypeName == "COMMAND") {
+                    xfType = XBinary::XFTYPE_COMMAND;
                 }
 
                 XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
@@ -969,6 +975,8 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                                 filterXfType = XBinary::XFTYPE_HEADER;
                             } else if (listFilterParts.at(3) == "TABLE") {
                                 filterXfType = XBinary::XFTYPE_TABLE;
+                            } else if (listFilterParts.at(3) == "COMMAND") {
+                                filterXfType = XBinary::XFTYPE_COMMAND;
                             }
                         }
 
@@ -1135,7 +1143,10 @@ bool XFormats::isXFStruct(const QString &sStruct)
 
 bool XFormats::isHFCommand(const QString &sStruct)
 {
-    return (normalizeStructToken(getCurrentStructSegment(sStruct)) == "COMMAND");
+    QString sCurrentStructSegment = getCurrentStructSegment(sStruct);
+
+    return (sCurrentStructSegment.startsWith("!") || (normalizeStructToken(sCurrentStructSegment) == "COMMAND") ||
+            (getXFTypeFromStructString(sStruct) == XBinary::XFTYPE_COMMAND));
 }
 
 XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const QString &sStruct, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
@@ -1180,6 +1191,8 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
                         xfType = XBinary::XFTYPE_HEADER;
                     } else if (sUpper == "TABLE") {
                         xfType = XBinary::XFTYPE_TABLE;
+                    } else if (sUpper == "COMMAND") {
+                        xfType = XBinary::XFTYPE_COMMAND;
                     }
                 } else if (sKey == "size") {
                     bool bOk = false;
@@ -2101,6 +2114,29 @@ XBinary::ENDIAN XFormats::setEndiannessComboBox(QComboBox *pComboBox, XBinary::E
     pComboBox->addItem(XBinary::endianToString(XBinary::ENDIAN_BIG), XBinary::ENDIAN_BIG);
 
     XBinary::ENDIAN result = (XBinary::ENDIAN)setComboBoxCurrent(pComboBox, endian).toUInt();
+
+    pComboBox->blockSignals(bBlocked1);
+
+    return result;
+}
+#endif
+#ifdef QT_GUI_LIB
+XBinary::CODEPAGE XFormats::setCodepageComboBox(QComboBox *pComboBox, XBinary::CODEPAGE codepage)
+{
+    const bool bBlocked1 = pComboBox->blockSignals(true);
+
+    pComboBox->clear();
+
+    QList<XBinary::CODEPAGE> listCodepages = XBinary::getCodepagesList();
+
+    qint32 nNumberOfRecords = listCodepages.size();
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        XBinary::CODEPAGE record = listCodepages.at(i);
+        pComboBox->addItem(XBinary::codepageIdToString(record), record);
+    }
+
+    XBinary::CODEPAGE result = (XBinary::CODEPAGE)setComboBoxCurrent(pComboBox, codepage).toUInt();
 
     pComboBox->blockSignals(bBlocked1);
 

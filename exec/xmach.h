@@ -309,6 +309,15 @@ public:
     bool isCommandPresent(quint32 nCommandID, qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRecords);
     bool isCommandPresent(quint32 nCommandID, QList<COMMAND_RECORD> *pListCommandRecords);
 
+    virtual bool isImportPresent() override;
+    virtual bool isExportPresent() override;
+    virtual bool isSymbolsPresent() override;
+
+    virtual QVector<XIMPORT_STRUCT> getImportStructs() override;
+    virtual QVector<XEXPORT_STRUCT> getExportStructs() override;
+    virtual QVector<XSYMBOL_STRUCT> getSymbolStructs() override;
+    QVector<XSYMBOL_STRUCT> _getSymbolStructs();
+
     quint32 getCommandId(qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRecords);
 
     QByteArray getCommandData(quint32 nCommandID, qint32 nIndex = 0);

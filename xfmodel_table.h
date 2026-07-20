@@ -31,7 +31,7 @@ public:
     explicit XFModel_table(QObject *pParent = nullptr);
     virtual ~XFModel_table() override;
 
-    virtual void setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader) override;
+    virtual void setData(const XBinary::INDATA &inData, const XBinary::XFHEADER &xfHeader) override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;

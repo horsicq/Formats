@@ -132,6 +132,10 @@ public:
     qint64 getImportedNamesTableOffset();
     qint64 getNotResindentNameTableOffset();
 
+    virtual bool isImportPresent() override;
+    virtual bool isExportPresent() override;
+    virtual bool isResourcesPresent() override;
+
     QList<XNE_DEF::NE_SEGMENT> getSegmentList();
     XNE_DEF::NE_SEGMENT _read_NE_SEGMENT(qint64 nOffset);
 

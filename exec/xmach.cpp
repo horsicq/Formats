@@ -1537,6 +1537,120 @@ bool XMACH::isCommandPresent(quint32 nCommandID, QList<XMACH::COMMAND_RECORD> *p
     return isCommandPresent(nCommandID, 0, pListCommandRecords);
 }
 
+bool XMACH::isImportPresent()
+{
+    return isCommandPresent(XMACH_DEF::S_LC_LOAD_DYLIB);
+}
+
+bool XMACH::isExportPresent()
+{
+    return (get_dyld_info_command().export_size != 0);
+}
+
+bool XMACH::isSymbolsPresent()
+{
+    return (get_symtab().nsyms != 0);
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XMACH::_getSymbolStructs()
+{
+    QVector<XSYMBOL_STRUCT> listResult;
+
+    QList<NLIST_RECORD> listNlist = getNlistRecords();
+    XBinary::OFFSETSIZE osStringTable = getStringTableOffsetSize();
+
+    const quint8 N_TYPE = 0x0e;
+    const quint8 N_EXT = 0x01;
+    const quint8 N_UNDF = 0x00;
+
+    qint32 nNumberOfSymbols = listNlist.count();
+
+    for (qint32 i = 0; i < nNumberOfSymbols; i++) {
+        const NLIST_RECORD &nlistRecord = listNlist.at(i);
+
+        quint32 nStrx = nlistRecord.bIs64 ? nlistRecord.s.nlist64.n_strx : nlistRecord.s.nlist32.n_strx;
+        quint8 nType = nlistRecord.bIs64 ? nlistRecord.s.nlist64.n_type : nlistRecord.s.nlist32.n_type;
+        quint64 nValue = nlistRecord.bIs64 ? nlistRecord.s.nlist64.n_value : nlistRecord.s.nlist32.n_value;
+
+        QString sName = getStringFromIndex(osStringTable.nOffset, osStringTable.nSize, nStrx);
+
+        XSYMBOL_STRUCT record = {};
+        record.nOffset = nlistRecord.nStructOffset;
+        record.nSize = nlistRecord.bIs64 ? (qint64)sizeof(XMACH_DEF::nlist_64) : (qint64)sizeof(XMACH_DEF::nlist);
+        record.nAddress = (XADDR)nValue;
+        record.sName = sName;
+
+        if ((nType & N_TYPE) == N_UNDF) {
+            record.symbolType = SYMBOL_TYPE_IMPORT;
+        } else if (nType & N_EXT) {
+            record.symbolType = SYMBOL_TYPE_EXPORT;
+        } else {
+            record.symbolType = SYMBOL_TYPE_LABEL;
+        }
+
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XMACH::getSymbolStructs()
+{
+    return _getSymbolStructs();
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XMACH::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+
+    QVector<XSYMBOL_STRUCT> listSymbols = _getSymbolStructs();
+
+    qint32 nNumberOfSymbols = listSymbols.count();
+
+    for (qint32 i = 0; i < nNumberOfSymbols; i++) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+
+        if ((symbol.symbolType == SYMBOL_TYPE_IMPORT) && (!symbol.sName.isEmpty())) {
+            XIMPORT_STRUCT record = {};
+            record.nOffset = symbol.nOffset;
+            record.nSize = symbol.nSize;
+            record.nAddress = symbol.nAddress;
+            record.sFunction = symbol.sName;
+            record.nOrdinal = -1;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XMACH::getExportStructs()
+{
+    QVector<XEXPORT_STRUCT> listResult;
+
+    QVector<XSYMBOL_STRUCT> listSymbols = _getSymbolStructs();
+
+    qint32 nNumberOfSymbols = listSymbols.count();
+
+    for (qint32 i = 0; i < nNumberOfSymbols; i++) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+
+        if ((symbol.symbolType == SYMBOL_TYPE_EXPORT) && (!symbol.sName.isEmpty())) {
+            XEXPORT_STRUCT record = {};
+            record.nOffset = symbol.nOffset;
+            record.nSize = symbol.nSize;
+            record.nAddress = symbol.nAddress;
+            record.sFunction = symbol.sName;
+            record.nOrdinal = -1;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
 quint32 XMACH::getCommandId(qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRecords)
 {
     quint32 nResult = 0;

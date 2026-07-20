@@ -33,7 +33,7 @@ XFModel::~XFModel()
 {
 }
 
-void XFModel::setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader)
+void XFModel::setData(const XBinary::INDATA &inData, const XBinary::XFHEADER &xfHeader)
 {
     beginResetModel();
 

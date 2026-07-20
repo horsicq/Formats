@@ -61,7 +61,7 @@ public:
     explicit XFModel(QObject *pParent);
     virtual ~XFModel() override;
 
-    virtual void setData(const XFormats::INDATA &inData, const XBinary::XFHEADER &xfHeader);
+    virtual void setData(const XBinary::INDATA &inData, const XBinary::XFHEADER &xfHeader);
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -97,7 +97,7 @@ protected:
     static QString formatRow(const QStringList &listValues, const QList<qint32> &listWidths, const QList<bool> &listAlignRight = QList<bool>());
     static QString separatorLine(const QList<qint32> &listWidths);
 
-    XFormats::INDATA m_inData;
+    XBinary::INDATA m_inData;
     XBinary::XFHEADER m_xfHeader;
 };
 

@@ -591,7 +591,7 @@ public:
 
     static QString sectionCharacteristicToString(quint32 nValue);  // TODO remove
 
-    bool isImportPresent();
+    virtual bool isImportPresent() override;
     bool isIATPresent();
 
     QList<IMPORT_RECORD> getImportRecords(PDSTRUCT *pPdStruct = nullptr);
@@ -747,7 +747,7 @@ public:
 
     XPE_DEF::S_IMAGE_DELAYLOAD_DESCRIPTOR _read_IMAGE_DELAYLOAD_DESCRIPTOR(qint64 nOffset);
 
-    bool isExportPresent();
+    virtual bool isExportPresent() override;
 
     EXPORT_HEADER getExport(bool bValidOnly = false, PDSTRUCT *pPdStruct = nullptr);
     EXPORT_HEADER getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly = false, PDSTRUCT *pPdStruct = nullptr);
@@ -822,15 +822,21 @@ public:
     bool addRelocsSection(const QString &sFileName, bool bIsImage, QList<XADDR> *pListRelocs, PDSTRUCT *pPdStruct);
     static QByteArray relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64);
 
-    bool isResourcesPresent();
+    virtual bool isResourcesPresent() override;
     bool isRelocsPresent();
     bool isDebugPresent();
     bool isTLSPresent();
     bool isSignPresent();
+    virtual bool isSymbolsPresent() override;
     bool isExceptionPresent();
     bool isLoadConfigPresent();
     bool isBoundImportPresent();
     bool isDelayImportPresent();
+
+    virtual QVector<XIMPORT_STRUCT> getImportStructs() override;
+    virtual QVector<XEXPORT_STRUCT> getExportStructs() override;
+    virtual QVector<XSYMBOL_STRUCT> getSymbolStructs() override;
+    virtual QVector<XRESOURCE_STRUCT> getResourceStructs() override;
 
     qint64 getTLSHeaderOffset();
     qint64 getTLSHeaderSize();

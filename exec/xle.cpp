@@ -1241,6 +1241,16 @@ QList<XLE_DEF::o32_map> XLE::getMapsLX()
     return listResult;
 }
 
+bool XLE::isImportPresent()
+{
+    return (getImageVxdHeader_impmodcnt() != 0);
+}
+
+bool XLE::isResourcesPresent()
+{
+    return (getImageVxdHeader_rsrccnt() != 0);
+}
+
 XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(mapMode)

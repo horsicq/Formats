@@ -2959,6 +2959,150 @@ QList<QString> XELF::getLibraries(_MEMORY_MAP *pMemoryMap, QList<XELF::TAG_STRUC
     return listResult;
 }
 
+bool XELF::isImportPresent()
+{
+    return (getLibraries().count() > 0);
+}
+
+bool XELF::isExportPresent()
+{
+    return (getType() == TYPE_DYN) && isSectionNamePresent(".dynsym");
+}
+
+bool XELF::isSymbolsPresent()
+{
+    return isSectionNamePresent(".symtab") || isSectionNamePresent(".dynsym");
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XELF::_getSymbolStructs()
+{
+    QVector<XSYMBOL_STRUCT> listResult;
+
+    QList<XELF_DEF::Elf_Shdr> listShdrs = getElf_ShdrList(-1);
+
+    qint32 nSymSection = -1;
+
+    for (qint32 i = 0; i < listShdrs.count(); i++) {
+        if (listShdrs.at(i).sh_type == XELF_DEF::S_SHT_SYMTAB) {
+            nSymSection = i;
+            break;
+        }
+    }
+
+    if (nSymSection == -1) {
+        for (qint32 i = 0; i < listShdrs.count(); i++) {
+            if (listShdrs.at(i).sh_type == XELF_DEF::S_SHT_DYNSYM) {
+                nSymSection = i;
+                break;
+            }
+        }
+    }
+
+    if (nSymSection != -1) {
+        const XELF_DEF::Elf_Shdr &symShdr = listShdrs.at(nSymSection);
+
+        qint64 nStringTableOffset = -1;
+        qint64 nStringTableSize = 0;
+
+        if (symShdr.sh_link < (quint32)listShdrs.count()) {
+            const XELF_DEF::Elf_Shdr &strShdr = listShdrs.at((qint32)symShdr.sh_link);
+            nStringTableOffset = (qint64)strShdr.sh_offset;
+            nStringTableSize = (qint64)strShdr.sh_size;
+        }
+
+        QList<XELF_DEF::Elf_Sym> listSymbols = getElf_SymList((qint64)symShdr.sh_offset, (qint64)symShdr.sh_size);
+
+        qint64 nEntrySize = is64() ? sizeof(XELF_DEF::Elf64_Sym) : sizeof(XELF_DEF::Elf32_Sym);
+
+        qint32 nNumberOfSymbols = listSymbols.count();
+
+        for (qint32 i = 0; i < nNumberOfSymbols; i++) {
+            const XELF_DEF::Elf_Sym &symbol = listSymbols.at(i);
+
+            QString sName;
+
+            if ((symbol.st_name != 0) && (nStringTableOffset >= 0)) {
+                sName = getStringFromIndex(nStringTableOffset, nStringTableSize, symbol.st_name);
+            }
+
+            XSYMBOL_STRUCT record = {};
+            record.nOffset = (qint64)symShdr.sh_offset + (qint64)i * nEntrySize;
+            record.nSize = (qint64)symbol.st_size;
+            record.nAddress = (XADDR)symbol.st_value;
+            record.sName = sName;
+
+            if (symbol.st_shndx == XELF_DEF::S_SHN_UNDEF) {
+                record.symbolType = SYMBOL_TYPE_IMPORT;
+            } else if (S_ELF32_ST_BIND(symbol.st_info) != 0) {  // not STB_LOCAL
+                record.symbolType = SYMBOL_TYPE_EXPORT;
+            } else {
+                record.symbolType = SYMBOL_TYPE_LABEL;
+            }
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XELF::getSymbolStructs()
+{
+    return _getSymbolStructs();
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XELF::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+
+    QVector<XSYMBOL_STRUCT> listSymbols = _getSymbolStructs();
+
+    qint32 nNumberOfSymbols = listSymbols.count();
+
+    for (qint32 i = 0; i < nNumberOfSymbols; i++) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+
+        if ((symbol.symbolType == SYMBOL_TYPE_IMPORT) && (!symbol.sName.isEmpty())) {
+            XIMPORT_STRUCT record = {};
+            record.nOffset = symbol.nOffset;
+            record.nSize = symbol.nSize;
+            record.nAddress = symbol.nAddress;
+            record.sFunction = symbol.sName;
+            record.nOrdinal = -1;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XELF::getExportStructs()
+{
+    QVector<XEXPORT_STRUCT> listResult;
+
+    QVector<XSYMBOL_STRUCT> listSymbols = _getSymbolStructs();
+
+    qint32 nNumberOfSymbols = listSymbols.count();
+
+    for (qint32 i = 0; i < nNumberOfSymbols; i++) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+
+        if ((symbol.symbolType == SYMBOL_TYPE_EXPORT) && (!symbol.sName.isEmpty())) {
+            XEXPORT_STRUCT record = {};
+            record.nOffset = symbol.nOffset;
+            record.nSize = symbol.nSize;
+            record.nAddress = symbol.nAddress;
+            record.sFunction = symbol.sName;
+            record.nOrdinal = -1;
+
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
 XBinary::OS_STRING XELF::getRunPath()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();

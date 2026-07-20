@@ -47,7 +47,7 @@ public:
     explicit XFTreeModel(QObject *pParent = nullptr);
     ~XFTreeModel() override;
 
-    void setData(const XFormats::INDATA &inData, const QList<XBinary::XFHEADER> &listHeaders);
+    void setData(const XBinary::INDATA &inData, const QList<XBinary::XFHEADER> &listHeaders, bool bExtraInfo = false);
 
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &child) const override;
@@ -71,7 +71,7 @@ public:
 
 private:
     void clear();
-    void buildTree(const QList<XBinary::XFHEADER> &listHeaders);
+    void buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bExtraInfo);
     static void appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sPrefix);
     static void _toFormattedString(QString *pString, XBinary *pXBinary, TREEITEM *pItem, qint32 nLevel);
     static void appendXMLLines(QStringList *pListLines, XBinary *pXBinary, TREEITEM *pItem, const QString &sIndent);
@@ -89,7 +89,7 @@ private:
     static QString svQuote(const QString &s, QChar cSep);
 
     TREEITEM *m_pRootItem;
-    XFormats::INDATA m_inData;
+    XBinary::INDATA m_inData;
 };
 
 #endif  // XFTREE_MODEL_H

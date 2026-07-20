@@ -23,6 +23,55 @@
 #include "xformats.h"
 #include <QDebug>
 
+namespace {
+QString getTreeItemStructName(const XBinary::XFHEADER &xfHeader)
+{
+    QString sResult;
+
+    if (xfHeader.sTag.startsWith("!")) {
+        sResult = xfHeader.sTag;
+    } else {
+        sResult = XFormats::getXFHeaderStructName(xfHeader);
+
+        if (sResult.isEmpty()) {
+            sResult = QString::number(xfHeader.structID);
+        }
+    }
+
+    return sResult;
+}
+
+QString getTreeItemString(const XBinary::XFHEADER &xfHeader)
+{
+    QString sResult;
+
+    if (xfHeader.sTag.startsWith("!")) {
+        sResult = xfHeader.sTag;
+    } else {
+        sResult = XBinary::xfHeaderToString(xfHeader, getTreeItemStructName(xfHeader), xfHeader.sParentTag);
+    }
+
+    return sResult;
+}
+
+XFTreeModel::TREEITEM *appendExtraTreeItem(XFTreeModel::TREEITEM *pRoot, XBinary::FT fileType, const QString &sTag, XBinary::STRUCTID structID)
+{
+    XFTreeModel::TREEITEM *pItem = new XFTreeModel::TREEITEM();
+    pItem->xfHeader = {};
+    pItem->xfHeader.sTag = sTag;
+    pItem->xfHeader.fileType = fileType;
+    pItem->xfHeader.structID = structID;
+    pItem->xfHeader.xLoc.locType = XBinary::LT_OFFSET;
+    pItem->xfHeader.xLoc.nLocation = 0;
+    pItem->xfHeader.xfType = XBinary::XFTYPE_COMMAND;
+    pItem->pParent = pRoot;
+    pItem->nRow = pRoot->listChildren.count();
+    pRoot->listChildren.append(pItem);
+
+    return pItem;
+}
+}  // namespace
+
 XFTreeModel::XFTreeModel(QObject *pParent) : QAbstractItemModel(pParent)
 {
     m_pRootItem = nullptr;
@@ -33,7 +82,7 @@ XFTreeModel::~XFTreeModel()
     clear();
 }
 
-void XFTreeModel::setData(const XFormats::INDATA &inData, const QList<XBinary::XFHEADER> &listHeaders)
+void XFTreeModel::setData(const XBinary::INDATA &inData, const QList<XBinary::XFHEADER> &listHeaders, bool bExtraInfo)
 {
     beginResetModel();
 
@@ -45,7 +94,7 @@ void XFTreeModel::setData(const XFormats::INDATA &inData, const QList<XBinary::X
     m_pRootItem->pParent = nullptr;
     m_pRootItem->nRow = 0;
 
-    buildTree(listHeaders);
+    buildTree(listHeaders, bExtraInfo);
 
     endResetModel();
 }
@@ -139,13 +188,40 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         if (nColumn == COLUMN_NAME) {
-            if (m_inData.fileType != XBinary::FT_UNKNOWN) {
-                QString sText = XFormats::getXFHeaderStructName(pItem->xfHeader);
-                result = sText;
-                // TODO if table number of records
+            if (pItem->xfHeader.sTag == "!VISUALIZATION") {
+                result = tr("Visualization");
+            } else if (pItem->xfHeader.sTag == "!HEX") {
+                result = tr("Hex");
+            } else if (pItem->xfHeader.sTag == "!DISASM") {
+                result = tr("Disasm");
+            } else if (pItem->xfHeader.sTag == "!NFDSCAN") {
+                result = tr("Nauz File Detector");
+            } else if (pItem->xfHeader.sTag == "!HASH") {
+                result = tr("Hash");
+            } else if (pItem->xfHeader.sTag == "!SIGNATURES") {
+                result = tr("Signatures");
+            } else if (pItem->xfHeader.sTag == "!MEMORYMAP") {
+                result = tr("Memory map");
+            } else if (pItem->xfHeader.sTag == "!ENTROPY") {
+                result = tr("Entropy");
+            } else if (pItem->xfHeader.sTag == "!EXTRACTOR") {
+                result = tr("Extractor");
+            } else if (pItem->xfHeader.sTag == "!SEARCH") {
+                result = tr("Search");
+            } else if (pItem->xfHeader.sTag == "!STRINGS") {
+                result = tr("Strings");
+            } else if (pItem->xfHeader.sTag == "!IMPORT") {
+                result = tr("Import");
+            } else if (pItem->xfHeader.sTag == "!EXPORT") {
+                result = tr("Export");
+            } else if (pItem->xfHeader.sTag == "!SYMBOLS") {
+                result = tr("Symbols");
+            } else if (pItem->xfHeader.sTag == "!RESOURCES") {
+                result = tr("Resources");
             } else {
-                result = QString::number(pItem->xfHeader.structID);
+                result = getTreeItemStructName(pItem->xfHeader);
             }
+            // TODO if table number of records
         } /*else if (nColumn == COLUMN_TYPE) {
             if (pItem->xfHeader.xfType == XBinary::XFTYPE_HEADER) {
                 result = QString("HEADER");
@@ -226,7 +302,7 @@ void XFTreeModel::clear()
     }
 }
 
-void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders)
+void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bExtraInfo)
 {
     QMap<QString, TREEITEM *> mapItems;
 
@@ -241,6 +317,42 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders)
         pItem->nRow = 0;
         listItems.append(pItem);
         mapItems.insert(pItem->xfHeader.sTag, pItem);
+    }
+
+    if (bExtraInfo) {
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!VISUALIZATION", XBinary::STRUCTID_VISUALIZATION);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HEX", XBinary::STRUCTID_HEX);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!DISASM", XBinary::STRUCTID_DISASM);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!NFDSCAN", XBinary::STRUCTID_NFDSCAN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HASH", XBinary::STRUCTID_HASH);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SIGNATURES", XBinary::STRUCTID_SIGNATURES);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!MEMORYMAP", XBinary::STRUCTID_MEMORYMAP);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!ENTROPY", XBinary::STRUCTID_ENTROPY);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXTRACTOR", XBinary::STRUCTID_EXTRACTOR);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SEARCH", XBinary::STRUCTID_SEARCH);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!STRINGS", XBinary::STRUCTID_STRINGS);
+
+        QIODevice *pDevice = XFormats::createDevice(m_inData);
+        XBinary *pBinary = XFormats::createClass(m_inData.fileType, pDevice, m_inData.bIsImage, m_inData.nModuleAddress);
+
+        if (pBinary) {
+            if (pBinary->isImportPresent()) {
+                appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!IMPORT", XBinary::STRUCTID_IMPORT);
+            }
+            if (pBinary->isExportPresent()) {
+                appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXPORT", XBinary::STRUCTID_EXPORT);
+            }
+            if (pBinary->isSymbolsPresent()) {
+                appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SYMBOLS", XBinary::STRUCTID_SYMBOLS);
+            }
+            if (pBinary->isResourcesPresent()) {
+                appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!RESOURCES", XBinary::STRUCTID_RESOURCES);
+            }
+
+            delete pBinary;
+        }
+
+        XFormats::removeDevice(pDevice, m_inData);
     }
 
     for (qint32 i = 0; i < nCount; i++) {
@@ -295,12 +407,8 @@ void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TR
 {
     Q_UNUSED(pXBinary)
 
-    QString sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
-    if (sStructName.isEmpty()) {
-        sStructName = QString::number(pItem->xfHeader.structID);
-    }
-
-    QString sString = "[" + XBinary::xfHeaderToString(pItem->xfHeader, sStructName, pItem->xfHeader.sParentTag) + "]";
+    QString sStructName = getTreeItemStructName(pItem->xfHeader);
+    QString sString = "[" + getTreeItemString(pItem->xfHeader) + "]";
 
     QString sLine = sPrefix + sStructName + sString;
 
@@ -315,10 +423,7 @@ QString XFTreeModel::getItemName(XBinary *pXBinary, TREEITEM *pItem)
 {
     Q_UNUSED(pXBinary)
 
-    QString sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
-    if (sStructName.isEmpty()) {
-        sStructName = QString::number(pItem->xfHeader.structID);
-    }
+    QString sStructName = getTreeItemStructName(pItem->xfHeader);
     return QString(sStructName).toUpper().remove(" ").remove("-");
 }
 
@@ -326,11 +431,7 @@ QString XFTreeModel::getItemString(XBinary *pXBinary, TREEITEM *pItem)
 {
     Q_UNUSED(pXBinary)
 
-    QString sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
-    if (sStructName.isEmpty()) {
-        sStructName = QString::number(pItem->xfHeader.structID);
-    }
-    return XBinary::xfHeaderToString(pItem->xfHeader, sStructName, pItem->xfHeader.sParentTag);
+    return getTreeItemString(pItem->xfHeader);
 }
 
 QString XFTreeModel::getItemType(TREEITEM *pItem)

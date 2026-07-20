@@ -122,6 +122,9 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_REGIONS, "regions", QObject::tr("Regions")},
     {XBinary::STRUCTID_MEMORYMAP, "memorymap", QObject::tr("Memory map")},
     {XBinary::STRUCTID_SYMBOLS, "symbols", QObject::tr("Symbols")},
+    {XBinary::STRUCTID_IMPORT, "import", QObject::tr("Import")},
+    {XBinary::STRUCTID_EXPORT, "export", QObject::tr("Export")},
+    {XBinary::STRUCTID_RESOURCES, "resources", QObject::tr("Resources")},
     {XBinary::STRUCTID_ENTROPY, "entropy", QObject::tr("Entropy")},
     {XBinary::STRUCTID_EXTRACTOR, "extractor", QObject::tr("Extractor")},
     {XBinary::STRUCTID_SEARCH, "search", QObject::tr("Search")},
@@ -374,6 +377,7 @@ XBinary::XCONVERT _TABLE_XBinary_XFTYPE[] = {
     {XBinary::XFTYPE_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XBinary::XFTYPE_HEADER, "Header", QObject::tr("Header")},
     {XBinary::XFTYPE_TABLE, "Table", QObject::tr("Table")},
+    {XBinary::XFTYPE_COMMAND, "Command", QObject::tr("Command")},
 };
 
 const double XBinary::D_ENTROPY_THRESHOLD = 6.5;
@@ -1391,6 +1395,8 @@ QString XBinary::xfHeaderToTag(const XFHEADER &xfHeader, const QString &sStructN
         sTypeName = "HEADER";
     } else if (xfHeader.xfType == XFTYPE_TABLE) {
         sTypeName = "TABLE";
+    } else if (xfHeader.xfType == XFTYPE_COMMAND) {
+        sTypeName = "COMMAND";
     } else {
         sTypeName = "UNKNOWN";
     }
@@ -1804,6 +1810,24 @@ QString XBinary::endianToString(ENDIAN endian)
     }
 
     return sResult;
+}
+
+QString XBinary::codepageIdToString(quint32 nCodepage)
+{
+    return XIDSTRING_idToString(nCodepage, _TABLE_XBinary_CODEPAGE, sizeof(_TABLE_XBinary_CODEPAGE) / sizeof(XBinary::XIDSTRING));
+}
+
+QList<XBinary::CODEPAGE> XBinary::getCodepagesList()
+{
+    QList<XBinary::CODEPAGE> listResult;
+
+    qint32 nNumberOfRecords = sizeof(_TABLE_XBinary_CODEPAGE) / sizeof(XBinary::XIDSTRING);
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        listResult.append((XBinary::CODEPAGE)_TABLE_XBinary_CODEPAGE[i].nID);
+    }
+
+    return listResult;
 }
 
 void XBinary::setArch(const QString &sArch)
@@ -5208,6 +5232,7 @@ bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *
     }
 
     if (bAdd) {
+        pRecord->sValue = sString;
         pList->append(*pRecord);
 
         bResult = true;
@@ -5236,6 +5261,7 @@ bool XBinary::_addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS
     }
 
     if (bAdd) {
+        pRecord->sValue = sString;
         pList->append(*pRecord);
         return true;
     }
@@ -11368,6 +11394,46 @@ QString XBinary::getComment()
     return QString();
 }
 
+bool XBinary::isExportPresent()
+{
+    return false;
+}
+
+bool XBinary::isImportPresent()
+{
+    return false;
+}
+
+bool XBinary::isResourcesPresent()
+{
+    return false;
+}
+
+bool XBinary::isSymbolsPresent()
+{
+    return false;
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XBinary::getImportStructs()
+{
+    return QVector<XIMPORT_STRUCT>();
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XBinary::getExportStructs()
+{
+    return QVector<XEXPORT_STRUCT>();
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XBinary::getSymbolStructs()
+{
+    return QVector<XSYMBOL_STRUCT>();
+}
+
+QVector<XBinary::XRESOURCE_STRUCT> XBinary::getResourceStructs()
+{
+    return QVector<XRESOURCE_STRUCT>();
+}
+
 QString XBinary::getSignature(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
 {
     XBinary binary(pDevice);
@@ -15632,7 +15698,15 @@ QString XBinary::_fromWCharArray(const wchar_t *pWString, qint32 size)
 {
     QString sResult;
 
+#if (QT_VERSION_MAJOR < 5)  // TODO Check
     sResult = QString::fromWCharArray(pWString, size);
+    // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Zc:wchar_t-")
+#else
+    sResult = QString::fromWCharArray(pWString, size);
+#endif
 
     return sResult;
 }
@@ -15641,7 +15715,15 @@ qint32 XBinary::_toWCharArray(const QString &sString, wchar_t *pWString)
 {
     qint32 nResult = 0;
 
+#if (QT_VERSION_MAJOR < 5)                     // TODO Check
+    nResult = sString.toWCharArray(pWString);  // TODO
+    // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:wchar_t-")
+    // set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Zc:wchar_t-")
+#else
     nResult = sString.toWCharArray(pWString);
+#endif
 
     return nResult;
 }
