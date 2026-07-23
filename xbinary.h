@@ -1156,11 +1156,6 @@ public:
         QByteArray baOriginal;
     };
 
-    //    struct XUINT128 {
-    //        quint64 low;
-    //        quint64 high;
-    //    };
-
     struct XVARIANT {
         VT varType;
         bool bIsBigEndian;
