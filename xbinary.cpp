@@ -11311,6 +11311,13 @@ bool XBinary::isLittleEndian()
     return (getEndian() == ENDIAN_LITTLE);
 }
 
+bool XBinary::is8()
+{
+    MODE mode = getMode();
+
+    return ((mode == MODE_8));
+}
+
 bool XBinary::is16()
 {
     MODE mode = getMode();
@@ -11340,6 +11347,11 @@ bool XBinary::isBigEndian(XBinary::_MEMORY_MAP *pMemoryMap)
 bool XBinary::isLittleEndian(_MEMORY_MAP *pMemoryMap)
 {
     return (pMemoryMap->endian == ENDIAN_LITTLE);
+}
+
+bool XBinary::is8(XBinary::_MEMORY_MAP *pMemoryMap)
+{
+    return (pMemoryMap->mode == MODE_8);
 }
 
 bool XBinary::is16(XBinary::_MEMORY_MAP *pMemoryMap)
