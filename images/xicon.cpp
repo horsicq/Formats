@@ -295,6 +295,105 @@ quint32 XIcon::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XICON_STRUCTID, sizeof(_TABLE_XICON_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XIcon::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_ICONDIR;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_ICONDIR) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_ICONDIR);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = sizeof(ICONDIR);
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_ICONDIR, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_ICONDIR), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_ICONDIRENTRY;
+            _xfStruct.xLoc = offsetToLoc(sizeof(ICONDIR));
+            _xfStruct.nCount = readICONDIR().idCount;
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_ICONDIRENTRY) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nCount = xfStruct.nCount;
+        qint64 nFileSize = getSize();
+
+        if (nOffset == -1) {
+            nOffset = sizeof(ICONDIR);
+        }
+        if (nCount == 0) {
+            nCount = readICONDIR().idCount;
+        }
+
+        if (nCount > 0) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_ICONDIRENTRY);
+            xfHeader.xLoc = offsetToLoc(nOffset);
+            xfHeader.xfType = XFTYPE_TABLE;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_ICONDIRENTRY, xfHeader.xLoc);
+
+            qint64 nCurrentOffset = nOffset;
+            for (qint32 i = 0; i < nCount; i++) {
+                if ((nCurrentOffset + (qint64)sizeof(ICONDIRENTRY)) > nFileSize) {
+                    break;
+                }
+                xfHeader.listRowLocations.append(nCurrentOffset);
+                nCurrentOffset += sizeof(ICONDIRENTRY);
+            }
+
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_ICONDIRENTRY), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XIcon::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    if (nStructID == STRUCTID_ICONDIR) {
+        listResult.append({"idReserved", (qint32)offsetof(ICONDIR, idReserved), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"idType", (qint32)offsetof(ICONDIR, idType), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"idCount", (qint32)offsetof(ICONDIR, idCount), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+    } else if (nStructID == STRUCTID_ICONDIRENTRY) {
+        listResult.append({"bWidth", (qint32)offsetof(ICONDIRENTRY, bWidth), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"bHeight", (qint32)offsetof(ICONDIRENTRY, bHeight), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"bColorCount", (qint32)offsetof(ICONDIRENTRY, bColorCount), 1, XFRECORD_FLAG_COUNT, VT_UINT8});
+        listResult.append({"bReserved", (qint32)offsetof(ICONDIRENTRY, bReserved), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"wPlanes", (qint32)offsetof(ICONDIRENTRY, wPlanes), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"wBitCount", (qint32)offsetof(ICONDIRENTRY, wBitCount), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"dwBytesInRes", (qint32)offsetof(ICONDIRENTRY, dwBytesInRes), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"dwImageOffset", (qint32)offsetof(ICONDIRENTRY, dwImageOffset), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XIcon::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

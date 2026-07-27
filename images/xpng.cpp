@@ -586,6 +586,141 @@ quint32 XPNG::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XPNG_STRUCTID, sizeof(_TABLE_XPNG_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XPNG::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_SIGNATURE;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_SIGNATURE) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_SIGNATURE);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 8;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_SIGNATURE, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_SIGNATURE), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+
+            _xfStruct.nStructID = STRUCTID_IHDR;
+            _xfStruct.xLoc = offsetToLoc(16);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+
+            _xfStruct.nStructID = STRUCTID_CHUNK;
+            _xfStruct.xLoc = offsetToLoc(8);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_IHDR) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(16);  // Signature(8) + Length(4) + Type(4)
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IHDR);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 13;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IHDR, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_IHDR), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+    } else if (nStructID == STRUCTID_CHUNK) {
+        qint64 nStartOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        if (nStartOffset == -1) {
+            nStartOffset = 8;
+        }
+
+        qint64 nFileSize = getSize();
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_CHUNK);
+        xfHeader.xLoc = offsetToLoc(nStartOffset);
+        xfHeader.xfType = XFTYPE_TABLE;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_CHUNK, xfHeader.xLoc);
+
+        qint64 nCurrentOffset = nStartOffset;
+
+        while (((nCurrentOffset + 12) <= nFileSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            quint32 nDataSize = read_uint32(nCurrentOffset, true);  // Big-endian
+
+            xfHeader.listRowLocations.append(nCurrentOffset);
+
+            QString sType = read_ansiString(nCurrentOffset + 4, 4);
+
+            nCurrentOffset += 12 + nDataSize;  // Length + Type + Data + CRC
+
+            if (sType == "IEND") {
+                break;
+            }
+        }
+
+        if (!xfHeader.listRowLocations.isEmpty()) {
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_CHUNK), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XPNG::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    // PNG integers are big-endian
+    if (nStructID == STRUCTID_SIGNATURE) {
+        listResult.append({"Signature", 0, 8, XFRECORD_FLAG_NONE, VT_BYTE_ARRAY});
+    } else if (nStructID == STRUCTID_CHUNK) {
+        listResult.append({"Length", 0, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"Type", 4, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+    } else if (nStructID == STRUCTID_IHDR) {
+        listResult.append({"Width", 0, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"Height", 4, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"BitDepth", 8, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"ColorType", 9, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"Compression", 10, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"Filter", 11, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"Interlace", 12, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+    } else if (nStructID == STRUCTID_pHYs) {
+        listResult.append({"PixelsPerUnitX", 0, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"PixelsPerUnitY", 4, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"UnitSpecifier", 8, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+    } else if (nStructID == STRUCTID_tIME) {
+        listResult.append({"Year", 0, 2, XFRECORD_FLAG_BE, VT_UINT16});
+        listResult.append({"Month", 2, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"Day", 3, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"Hour", 4, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"Minute", 5, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"Second", 6, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XPNG::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

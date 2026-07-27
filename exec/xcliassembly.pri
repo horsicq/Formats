@@ -8,7 +8,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/xcliassembly.cpp
 
-!contains(XCONFIG, xfilepart) {
-    XCONFIG += xfilepart
-    include($$PWD/../xfilepart.pri)
+!contains(XCONFIG, xbinary) {
+    XCONFIG += xbinary
+    include($$PWD/../xbinary.pri)
 }

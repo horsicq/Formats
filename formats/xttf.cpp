@@ -398,6 +398,104 @@ quint32 XTTF::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XTTF_STRUCTID, sizeof(_TABLE_XTTF_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XTTF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_HEADER;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_HEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 12;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_TABLE_DIRECTORY;
+            _xfStruct.xLoc = offsetToLoc(12);
+            _xfStruct.nCount = readHeader().numTables;
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_TABLE_DIRECTORY) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nCount = xfStruct.nCount;
+        qint64 nFileSize = getSize();
+
+        if (nOffset == -1) {
+            nOffset = 12;
+        }
+        if (nCount == 0) {
+            nCount = readHeader().numTables;
+        }
+
+        if (nCount > 0) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_TABLE_DIRECTORY);
+            xfHeader.xLoc = offsetToLoc(nOffset);
+            xfHeader.xfType = XFTYPE_TABLE;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_TABLE_DIRECTORY, xfHeader.xLoc);
+
+            qint64 nCurrentOffset = nOffset;
+            for (qint32 i = 0; i < nCount; i++) {
+                if ((nCurrentOffset + 16) > nFileSize) {
+                    break;
+                }
+                xfHeader.listRowLocations.append(nCurrentOffset);
+                nCurrentOffset += 16;
+            }
+
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_TABLE_DIRECTORY), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XTTF::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    // TTF/OTF files are big-endian
+    if (nStructID == STRUCTID_HEADER) {
+        listResult.append({"sfntVersion", 0, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"numTables", 4, 2, XFRECORD_FLAG_BE | XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"searchRange", 6, 2, XFRECORD_FLAG_BE, VT_UINT16});
+        listResult.append({"entrySelector", 8, 2, XFRECORD_FLAG_BE, VT_UINT16});
+        listResult.append({"rangeShift", 10, 2, XFRECORD_FLAG_BE, VT_UINT16});
+    } else if (nStructID == STRUCTID_TABLE_DIRECTORY) {
+        listResult.append({"tag", 0, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"checkSum", 4, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"offset", 8, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"length", 12, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+    }
+
+    return listResult;
+}
+
 XTTF::TTF_TABLE_RECORD XTTF::getTableRecord(quint32 tag, QList<TTF_TABLE_RECORD> *pListTables)
 {
     TTF_TABLE_RECORD result = {};

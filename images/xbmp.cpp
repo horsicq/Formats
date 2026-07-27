@@ -195,6 +195,97 @@ quint32 XBMP::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XBMP_STRUCTID, sizeof(_TABLE_XBMP_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XBMP::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_BMPFILEHEADER;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_BMPFILEHEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_BMPFILEHEADER);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 14;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_BMPFILEHEADER, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_BMPFILEHEADER), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_BMPINFOHEADER;
+            _xfStruct.xLoc = offsetToLoc(14);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_BMPINFOHEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(14);
+        }
+
+        qint64 nHeaderOffset = locToOffset(xfStruct.pMemoryMap, headerLoc);
+
+        if (nHeaderOffset != -1) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_BMPINFOHEADER);
+            xfHeader.xLoc = headerLoc;
+            xfHeader.nSize = read_uint32(nHeaderOffset);
+            xfHeader.xfType = XFTYPE_HEADER;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_BMPINFOHEADER, headerLoc);
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_BMPINFOHEADER), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XBMP::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    // On-disk layout (packed); literal offsets
+    if (nStructID == STRUCTID_BMPFILEHEADER) {
+        listResult.append({"bfType", 0, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"bfSize", 2, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"bfReserved1", 6, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"bfReserved2", 8, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"bfOffBits", 10, 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+    } else if (nStructID == STRUCTID_BMPINFOHEADER) {
+        listResult.append({"biSize", 0, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"biWidth", 4, 4, XFRECORD_FLAG_NONE, VT_INT32});
+        listResult.append({"biHeight", 8, 4, XFRECORD_FLAG_NONE, VT_INT32});
+        listResult.append({"biPlanes", 12, 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"biBitCount", 14, 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"biCompression", 16, 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"biSizeImage", 20, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"biXPelsPerMeter", 24, 4, XFRECORD_FLAG_NONE, VT_INT32});
+        listResult.append({"biYPelsPerMeter", 28, 4, XFRECORD_FLAG_NONE, VT_INT32});
+        listResult.append({"biClrUsed", 32, 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"biClrImportant", 36, 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+    }
+
+    return listResult;
+}
+
 XBMP::BMPINFOHEADER XBMP::getInfoHeader()
 {
     BMPINFOHEADER info = {};

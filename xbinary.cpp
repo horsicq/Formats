@@ -194,6 +194,20 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_BROTLI, "BROTLI", QString("Brotli")},
     {XBinary::HANDLE_METHOD_ACE, "ACE", QString("ACE")},
     {XBinary::HANDLE_METHOD_ACE_DELTA, "ACE_DELTA", QString("ACE Delta")},
+    {XBinary::HANDLE_METHOD_DELTA, "DELTA", QString("Delta")},
+    {XBinary::HANDLE_METHOD_ARM_BCJ, "ARM_BCJ", QString("ARM BCJ")},
+    {XBinary::HANDLE_METHOD_ARMT_BCJ, "ARMT_BCJ", QString("ARMT BCJ")},
+    {XBinary::HANDLE_METHOD_PPC_BCJ, "PPC_BCJ", QString("PPC BCJ")},
+    {XBinary::HANDLE_METHOD_SPARC_BCJ, "SPARC_BCJ", QString("SPARC BCJ")},
+    {XBinary::HANDLE_METHOD_IA64_BCJ, "IA64_BCJ", QString("IA64 BCJ")},
+    {XBinary::HANDLE_METHOD_LZX, "LZX", QString("LZX")},
+    {XBinary::HANDLE_METHOD_XPRESS, "XPRESS", QString("XPRESS")},
+    {XBinary::HANDLE_METHOD_XPRESS_HUFF, "XPRESS_HUFF", QString("XPRESS Huffman")},
+    {XBinary::HANDLE_METHOD_KWAJ_XOR, "KWAJ_XOR", QString("KWAJ XOR")},
+    {XBinary::HANDLE_METHOD_KWAJ_LZSS, "KWAJ_LZSS", QString("KWAJ LZSS")},
+    {XBinary::HANDLE_METHOD_KWAJ_LZH, "KWAJ_LZH", QString("KWAJ LZH")},
+    {XBinary::HANDLE_METHOD_ZOO_LZD, "ZOO_LZD", QString("ZOO LZD")},
+    {XBinary::HANDLE_METHOD_ZOO_LZH, "ZOO_LZH", QString("ZOO LZH")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -234,6 +248,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_MACHO64, "Mach-O64", QString("Mach-O64")},
     {XBinary::FT_AMIGAHUNK, "Amiga Hunk", QString("Amiga Hunk")},
     {XBinary::FT_ATARIST, "Atari ST", QString("Atari ST")},
+    {XBinary::FT_CLI_ASSEMBLY, ".NET", QString(".NET")},
     // Extra
     {XBinary::FT_7Z, "7-Zip", QString("7-Zip")},
     {XBinary::FT_ANDROIDASRC, "AndroidASRC", QString("Android ASRC")},
@@ -319,6 +334,12 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_LZ4, "LZ4", QString("LZ4")},
     {XBinary::FT_LZMA, "LZMA", QString("LZMA")},
     {XBinary::FT_WIM, "WIM", QString("Windows Imaging Format")},
+    {XBinary::FT_RPM, "RPM", QString("RPM Package")},
+    {XBinary::FT_KWAJ, "KWAJ", QString("KWAJ")},
+    {XBinary::FT_ASAR, "ASAR", QString("Electron ASAR")},
+    {XBinary::FT_XAR, "XAR", QString("XAR")},
+    {XBinary::FT_ZOO, "ZOO", QString("ZOO")},
+    {XBinary::FT_PDB, "PDB", QString("Program Database")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -8842,6 +8863,32 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
                     } else {
                         stResult.insert(FT_PE32);
                     }
+
+                    // .NET / CLI assembly: check the COM(CLR) descriptor data directory
+                    {
+                        quint16 nOptMagic = read_uint16(nLfanew + 24);
+
+                        qint64 nDataDirectoryOffset = -1;
+                        quint32 nNumberOfRvaAndSizes = 0;
+
+                        if (nOptMagic == 0x10B) {  // PE32
+                            nNumberOfRvaAndSizes = read_uint32(nLfanew + 24 + 92);
+                            nDataDirectoryOffset = nLfanew + 24 + 96;
+                        } else if (nOptMagic == 0x20B) {  // PE32+
+                            nNumberOfRvaAndSizes = read_uint32(nLfanew + 24 + 108);
+                            nDataDirectoryOffset = nLfanew + 24 + 112;
+                        }
+
+                        if ((nDataDirectoryOffset != -1) && (nNumberOfRvaAndSizes > 14)) {  // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+                            quint32 nCliRva = read_uint32(nDataDirectoryOffset + 14 * 8);
+                            quint32 nCliSize = read_uint32(nDataDirectoryOffset + 14 * 8 + 4);
+
+                            if (nCliRva && nCliSize) {
+                                stResult.insert(FT_CLI_ASSEMBLY);
+                            }
+                        }
+                    }
+
                     bIsNewHeaderValid = true;
                 } else if (_read_uint16(pOffset) == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
                     stResult.insert(FT_NE);
@@ -9139,6 +9186,11 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
         } else if (compareSignature(&memoryMap, "'%PDF'", 0)) {
             stResult.insert(FT_DOCUMENT);
             stResult.insert(FT_PDF);
+        } else if (compareSignature(&memoryMap, "'Microsoft C/C++ MSF 7.00'0D0A1A'DS'000000", 0) ||
+                   compareSignature(&memoryMap, "'Microsoft C/C++ program database 2.00'0D0A1A'JG'0000", 0) ||
+                   compareSignature(&memoryMap, "'BSJB'............'PDB v1.0'", 0)) {
+            // The last one is a portable PDB: ECMA-335 metadata carrying debug information
+            stResult.insert(FT_PDB);
         } else if ((compareSignature(&memoryMap, "30", 0)) && (nSize >= 4)) {
             // Minimal DER/ASN.1 check: first byte is a tag, second is definite length short form (<0x80)
             // or long form (>=0x80) followed by that many length bytes; ensure it fits into the file.
@@ -9405,6 +9457,11 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_MINIDUMP,
         FT_DMG,
         FT_WIM,
+        FT_RPM,
+        FT_XAR,
+        FT_ZOO,
+        FT_KWAJ,
+        FT_ASAR,
 
         // Android resources and bytecode
         FT_ANDROIDXML,
@@ -9417,6 +9474,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_PDF,
         FT_DER,
         FT_CFBF,
+        FT_PDB,
 
         // Compressed/pack formats
         FT_SZDD,
@@ -9517,6 +9575,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_7Z)) listResult.append(FT_7Z);
         if (stFileTypes.contains(FT_DEX)) listResult.append(FT_DEX);
         if (stFileTypes.contains(FT_PDF)) listResult.append(FT_PDF);
+        if (stFileTypes.contains(FT_PDB)) listResult.append(FT_PDB);
         if (stFileTypes.contains(FT_DER)) listResult.append(FT_DER);
         if (stFileTypes.contains(FT_PNG)) listResult.append(FT_PNG);
         if (stFileTypes.contains(FT_ICO)) listResult.append(FT_ICO);
@@ -9571,6 +9630,11 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         if (stFileTypes.contains(FT_MINIDUMP)) listResult.append(FT_MINIDUMP);
         if (stFileTypes.contains(FT_DMG)) listResult.append(FT_DMG);
         if (stFileTypes.contains(FT_WIM)) listResult.append(FT_WIM);
+        if (stFileTypes.contains(FT_RPM)) listResult.append(FT_RPM);
+        if (stFileTypes.contains(FT_XAR)) listResult.append(FT_XAR);
+        if (stFileTypes.contains(FT_ZOO)) listResult.append(FT_ZOO);
+        if (stFileTypes.contains(FT_KWAJ)) listResult.append(FT_KWAJ);
+        if (stFileTypes.contains(FT_ASAR)) listResult.append(FT_ASAR);
         if (stFileTypes.contains(FT_STK)) listResult.append(FT_STK);
     }
 
@@ -16825,6 +16889,10 @@ QList<QString> XBinary::getSearchSignatures()
         listResult.append("CFFAEDFE");
     } else if (XBinary::checkFileType(FT_PDF, fileType)) {
         listResult.append("'%PDF'");
+    } else if (XBinary::checkFileType(FT_PDB, fileType)) {
+        listResult.append("'Microsoft C/C++ MSF 7.00'0D0A1A'DS'000000");
+        listResult.append("'Microsoft C/C++ program database 2.00'0D0A1A'JG'0000");
+        listResult.append("'BSJB'............'PDB v1.0'");
     } else if (XBinary::checkFileType(FT_PNG, fileType)) {
         listResult.append("89'PNG\r\n'1A0A");
     } else if (XBinary::checkFileType(FT_JPEG, fileType)) {

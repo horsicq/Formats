@@ -89,6 +89,8 @@ public:
         STRUCTID_ELF_REL64,
         STRUCTID_ELF_RELA32,
         STRUCTID_ELF_RELA64,
+        STRUCTID_ELF_NOTE,
+        STRUCTID_ELF_INTERP,
     };
 
     XELF(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -479,6 +481,8 @@ public:
     virtual quint32 ftStringToStructID(const QString &sFtString);
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct) override;
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
+    void _appendNotesTable(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nOffset, qint64 nSize, const QString &sParentTag);
+    void _appendInterpHeader(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nOffset, const QString &sParentTag);
 
     struct FIXDUMP_OPTIONS {
         bool bOptimizeSize;

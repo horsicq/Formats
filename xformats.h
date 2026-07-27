@@ -36,6 +36,7 @@
 #include "xmsdos.h"
 #include "xne.h"
 #include "xpe.h"
+#include "xcliassembly.h"
 #include "xpng.h"
 #include "xtiff.h"
 #include "xmp3.h"
@@ -58,6 +59,9 @@
 #endif
 #ifdef USE_PDF
 #include "xpdf.h"
+#endif
+#ifdef USE_PDB
+#include "xpdb.h"
 #endif
 #ifdef USE_ARCHIVE
 #include "x_ar.h"
@@ -104,6 +108,11 @@
 #include "xtarcompressed.h"
 #include "xudf.h"
 #include "xwim.h"
+#include "xrpm.h"
+#include "xkwaj.h"
+#include "xasar.h"
+#include "xxar.h"
+#include "xzoo.h"
 #include "xxz.h"
 #include "xzip.h"
 #include "xzlib.h"

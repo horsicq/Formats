@@ -1139,6 +1139,146 @@ quint32 XNE::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XNE_STRUCTID, sizeof(_TABLE_XNE_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XNE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        // DOS stub header via the base class
+        listResult.append(XMSDOS::getXFHeaders(xfStruct, pPdStruct));
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+
+            if (!listResult.isEmpty()) {
+                _xfStruct.sParent = listResult.first().sTag;
+            }
+
+            _xfStruct.nStructID = STRUCTID_IMAGE_OS2_HEADER;
+            _xfStruct.xLoc = offsetToLoc(getImageOS2HeaderOffset());
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if ((nStructID == STRUCTID_IMAGE_DOS_HEADER) || (nStructID == STRUCTID_IMAGE_DOS_HEADEREX)) {
+        listResult.append(XMSDOS::getXFHeaders(xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_IMAGE_OS2_HEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(getImageOS2HeaderOffset());
+        }
+
+        qint64 nHeaderOffset = locToOffset(xfStruct.pMemoryMap, headerLoc);
+
+        if (nHeaderOffset != -1) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IMAGE_OS2_HEADER);
+            xfHeader.xLoc = headerLoc;
+            xfHeader.nSize = sizeof(XNE_DEF::IMAGE_OS2_HEADER);
+            xfHeader.xfType = XFTYPE_HEADER;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_OS2_HEADER, headerLoc);
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_IMAGE_OS2_HEADER), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+
+            if (xfStruct.bIsParent) {
+                quint16 nSegTab = read_uint16(nHeaderOffset + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_segtab));
+                quint16 nCSeg = read_uint16(nHeaderOffset + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cseg));
+
+                XFSTRUCT _xfStruct = xfStruct;
+                _xfStruct.sParent = xfHeader.sTag;
+                _xfStruct.nStructID = STRUCTID_SEGMENT_TABLE;
+                _xfStruct.xLoc = offsetToLoc(nHeaderOffset + nSegTab);
+                _xfStruct.nCount = nCSeg;
+                listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+            }
+        }
+    } else if (nStructID == STRUCTID_SEGMENT_TABLE) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nCount = xfStruct.nCount;
+        qint64 nFileSize = getSize();
+
+        if ((nOffset == -1) || (nCount == 0)) {
+            qint64 nHeaderOffset = getImageOS2HeaderOffset();
+            nOffset = nHeaderOffset + read_uint16(nHeaderOffset + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_segtab));
+            nCount = read_uint16(nHeaderOffset + offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cseg));
+        }
+
+        if ((nOffset > 0) && (nCount > 0)) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_SEGMENT_TABLE);
+            xfHeader.xLoc = offsetToLoc(nOffset);
+            xfHeader.xfType = XFTYPE_TABLE;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_SEGMENT_TABLE, xfHeader.xLoc);
+
+            qint64 nCurrentOffset = nOffset;
+            for (qint32 i = 0; i < nCount; i++) {
+                if ((nCurrentOffset + (qint64)sizeof(XNE_DEF::NE_SEGMENT)) > nFileSize) {
+                    break;
+                }
+                xfHeader.listRowLocations.append(nCurrentOffset);
+                nCurrentOffset += sizeof(XNE_DEF::NE_SEGMENT);
+            }
+
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_SEGMENT_TABLE), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XNE::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    QList<XBinary::XFRECORD> listResult;
+
+    if ((nStructID == STRUCTID_IMAGE_DOS_HEADER) || (nStructID == STRUCTID_IMAGE_DOS_HEADEREX)) {
+        listResult.append(XMSDOS::getXFRecords(fileType, nStructID, xLoc));
+    } else if (nStructID == STRUCTID_IMAGE_OS2_HEADER) {
+        listResult.append({"ne_magic", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_magic), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"ne_ver", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_ver), 1, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT8});
+        listResult.append({"ne_rev", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rev), 1, XFRECORD_FLAG_VERSION_MINOR, VT_UINT8});
+        listResult.append({"ne_enttab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_enttab), 2, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT16});
+        listResult.append({"ne_cbenttab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbenttab), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"ne_crc", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_crc), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"ne_flags", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_flags), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"ne_autodata", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_autodata), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"ne_heap", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_heap), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"ne_stack", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_stack), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"ne_csip", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_csip), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"ne_sssp", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_sssp), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"ne_cseg", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cseg), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"ne_cmod", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cmod), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"ne_cbnrestab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cbnrestab), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"ne_segtab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_segtab), 2, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT16});
+        listResult.append({"ne_rsrctab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_rsrctab), 2, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT16});
+        listResult.append({"ne_restab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_restab), 2, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT16});
+        listResult.append({"ne_modtab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_modtab), 2, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT16});
+        listResult.append({"ne_imptab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_imptab), 2, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT16});
+        listResult.append({"ne_nrestab", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_nrestab), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"ne_cmovent", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cmovent), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"ne_align", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_align), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"ne_cres", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_cres), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"ne_exetyp", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_exetyp), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"ne_flagsothers", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_flagsothers), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"ne_pretthunks", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_pretthunks), 2, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT16});
+        listResult.append({"ne_psegrefbytes", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_psegrefbytes), 2, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT16});
+        listResult.append({"ne_swaparea", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_swaparea), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"ne_expver", (qint32)offsetof(XNE_DEF::IMAGE_OS2_HEADER, ne_expver), 2, XFRECORD_FLAG_VERSION_DIVMOD, VT_UINT16});
+    } else if (nStructID == STRUCTID_SEGMENT_TABLE) {
+        // dwFileOffset is in logical sectors (units of 1 << ne_align), not bytes
+        listResult.append({"dwFileOffset", (qint32)offsetof(XNE_DEF::NE_SEGMENT, dwFileOffset), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"dwFileSize", (qint32)offsetof(XNE_DEF::NE_SEGMENT, dwFileSize), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"dwFlags", (qint32)offsetof(XNE_DEF::NE_SEGMENT, dwFlags), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"dwMinAllocSize", (qint32)offsetof(XNE_DEF::NE_SEGMENT, dwMinAllocSize), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XNE::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

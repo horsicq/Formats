@@ -217,6 +217,22 @@ public:
         STRUCTID_segment_command_64,
         STRUCTID_section,
         STRUCTID_section_64,
+        STRUCTID_dylib_command,
+        STRUCTID_dylinker_command,
+        STRUCTID_rpath_command,
+        STRUCTID_symtab_command,
+        STRUCTID_dysymtab_command,
+        STRUCTID_uuid_command,
+        STRUCTID_version_min_command,
+        STRUCTID_build_version_command,
+        STRUCTID_source_version_command,
+        STRUCTID_entry_point_command,
+        STRUCTID_encryption_info_command,
+        STRUCTID_encryption_info_command_64,
+        STRUCTID_linkedit_data_command,
+        STRUCTID_dyld_info_command,
+        STRUCTID_nlist,
+        STRUCTID_nlist_64,
     };
 
     XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -810,6 +826,8 @@ public:
     virtual quint32 ftStringToStructID(const QString &sFtString);
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc);
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
+    void _appendTypedLoadCommand(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nCommandOffset, quint32 nCmd, const QString &sParentTag,
+                                 PDSTRUCT *pPdStruct);
     // virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 
     virtual QString getMIMEString();

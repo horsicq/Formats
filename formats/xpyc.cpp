@@ -207,6 +207,79 @@ quint32 XPYC::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XPYC_STRUCTID, sizeof(_TABLE_XPYC_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XPYC::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_HEADER;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_HEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
+
+        if (!xfHeader.listFields.isEmpty()) {
+            const XFRECORD &lastField = xfHeader.listFields.last();
+            xfHeader.nSize = lastField.nOffset + lastField.nSize;
+        }
+
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XPYC::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    if (nStructID == STRUCTID_HEADER) {
+        INFO info = getInternalInfo();
+
+        qint32 nMajor = 0;
+        qint32 nMinor = 0;
+        _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
+
+        listResult.append({"MagicValue", 0, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"MagicMarker", 2, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+
+        if ((nMajor > 3) || ((nMajor == 3) && (nMinor >= 7))) {
+            listResult.append({"BitField", 4, 4, XFRECORD_FLAG_NONE, VT_UINT32});
+
+            if (info.bHashBased) {
+                listResult.append({"Hash", 8, 8, XFRECORD_FLAG_NONE, VT_BYTE_ARRAY});
+                listResult.append({"SourceSize", 16, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+            } else {
+                listResult.append({"Timestamp", 8, 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+                listResult.append({"SourceSize", 12, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+            }
+        } else {
+            listResult.append({"Timestamp", 4, 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+            listResult.append({"SourceSize", 8, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        }
+    }
+
+    return listResult;
+}
+
 XPYC::INFO XPYC::getInternalInfo(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)

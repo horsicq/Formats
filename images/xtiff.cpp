@@ -372,6 +372,103 @@ quint32 XTiff::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XTIFF_STRUCTID, sizeof(_TABLE_XTIFF_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XTiff::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    bool bIsBigEndian = (getEndian() == ENDIAN_BIG);
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_SIGNATURE;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_SIGNATURE) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_SIGNATURE);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 8;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_SIGNATURE, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_SIGNATURE), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_IFD_TABLE;
+            _xfStruct.xLoc = offsetToLoc(read_uint32(4, bIsBigEndian));
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_IFD_TABLE) {
+        qint64 nIfdOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        if (nIfdOffset == -1) {
+            nIfdOffset = read_uint32(4, bIsBigEndian);
+        }
+
+        qint64 nFileSize = getSize();
+
+        if ((nIfdOffset > 0) && ((nIfdOffset + 2) <= nFileSize)) {
+            quint16 nCount = read_uint16(nIfdOffset, bIsBigEndian);
+
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IFD_TABLE);
+            xfHeader.xLoc = offsetToLoc(nIfdOffset + 2);
+            xfHeader.xfType = XFTYPE_TABLE;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IFD_ENTRY, xfHeader.xLoc);
+
+            qint64 nCurrentOffset = nIfdOffset + 2;
+            for (qint32 i = 0; i < nCount; i++) {
+                if ((nCurrentOffset + (qint64)sizeof(IFD_ENTRY)) > nFileSize) {
+                    break;
+                }
+                xfHeader.listRowLocations.append(nCurrentOffset);
+                nCurrentOffset += sizeof(IFD_ENTRY);
+            }
+
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_IFD_TABLE), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XTiff::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    quint64 nEndianFlag = (getEndian() == ENDIAN_BIG) ? XFRECORD_FLAG_BE : XFRECORD_FLAG_NONE;
+
+    if (nStructID == STRUCTID_SIGNATURE) {
+        listResult.append({"ByteOrder", 0, 2, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Magic", 2, 2, nEndianFlag, VT_UINT16});
+        listResult.append({"IFDOffset", 4, 4, nEndianFlag | XFRECORD_FLAG_OFFSET, VT_UINT32});
+    } else if ((nStructID == STRUCTID_IFD_TABLE) || (nStructID == STRUCTID_IFD_ENTRY)) {
+        listResult.append({"Tag", (qint32)offsetof(IFD_ENTRY, nTag), 2, nEndianFlag, VT_UINT16});
+        listResult.append({"Type", (qint32)offsetof(IFD_ENTRY, nType), 2, nEndianFlag, VT_UINT16});
+        listResult.append({"Count", (qint32)offsetof(IFD_ENTRY, nCount), 4, nEndianFlag | XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"ValueOffset", (qint32)offsetof(IFD_ENTRY, nOffset), 4, nEndianFlag | XFRECORD_FLAG_OFFSET, VT_UINT32});
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XTiff::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

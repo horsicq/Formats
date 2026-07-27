@@ -77,6 +77,8 @@ public:
     QString structIDToString(quint32 nID) override;
     QString structIDToFtString(quint32 nID) override;
     quint32 ftStringToStructID(const QString &sFtString) override;
+    QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct) override;
+    QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
 
     // QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
 

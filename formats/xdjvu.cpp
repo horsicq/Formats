@@ -175,6 +175,87 @@ quint32 XDJVU::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XDJVU_STRUCTID, sizeof(_TABLE_XDJVU_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XDJVU::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_HEADER;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_HEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 16;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_CHUNK;
+            _xfStruct.xLoc = offsetToLoc(16);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_CHUNK) {
+        QList<CHUNK_RECORD> listChunks = _getChunkRecords(pPdStruct);
+
+        if (!listChunks.isEmpty()) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_CHUNK);
+            xfHeader.xLoc = offsetToLoc(listChunks.first().nOffset);
+            xfHeader.xfType = XFTYPE_TABLE;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_CHUNK, xfHeader.xLoc);
+
+            qint32 nNumberOfChunks = listChunks.count();
+
+            for (qint32 i = 0; i < nNumberOfChunks; i++) {
+                xfHeader.listRowLocations.append(listChunks.at(i).nOffset);
+            }
+
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_CHUNK), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XDJVU::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    // DjVu (IFF85) chunk sizes are big-endian
+    if (nStructID == STRUCTID_HEADER) {
+        listResult.append({"Signature", 0, 8, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"FormSize", 8, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"FormType", 12, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+    } else if (nStructID == STRUCTID_CHUNK) {
+        listResult.append({"ID", 0, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Size", 4, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XDJVU::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

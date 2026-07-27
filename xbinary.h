@@ -205,6 +205,7 @@ public:
         HANDLE_METHOD_ASCII85,
         HANDLE_METHOD_PPMD7,
         HANDLE_METHOD_PPMD8,
+        HANDLE_METHOD_LZH1,
         HANDLE_METHOD_LZH5,
         HANDLE_METHOD_LZH6,
         HANDLE_METHOD_LZH7,
@@ -252,8 +253,22 @@ public:
         HANDLE_METHOD_ARJ,          // ARJ compression methods 1-3 (Huffman + LZSS)
         HANDLE_METHOD_ARJ_FASTEST,  // ARJ compression method 4 (simple LZSS)
         HANDLE_METHOD_BROTLI,       // Brotli compression (.br)
-        HANDLE_METHOD_ACE,          // ACE method 1: LZ77 + Huffman (32KB window)
-        HANDLE_METHOD_ACE_DELTA     // ACE method 2: LZ77 + Huffman + inverse byte-delta filter
+        HANDLE_METHOD_ACE,           // ACE method 1: LZ77 + Huffman (32KB window)
+        HANDLE_METHOD_ACE_DELTA,     // ACE method 2: LZ77 + Huffman + inverse byte-delta filter
+        HANDLE_METHOD_DELTA,         // Delta filter (7z/XZ), property byte = distance - 1
+        HANDLE_METHOD_ARM_BCJ,       // ARM (LE) branch filter
+        HANDLE_METHOD_ARMT_BCJ,      // ARM Thumb (LE) branch filter
+        HANDLE_METHOD_PPC_BCJ,       // PowerPC (BE) branch filter
+        HANDLE_METHOD_SPARC_BCJ,     // SPARC branch filter
+        HANDLE_METHOD_IA64_BCJ,      // IA64 branch filter
+        HANDLE_METHOD_LZX,           // LZX (CAB/CHM/WIM)
+        HANDLE_METHOD_XPRESS,        // MS XPRESS plain LZ77 (MS-XCA)
+        HANDLE_METHOD_XPRESS_HUFF,   // MS XPRESS Huffman (MS-XCA)
+        HANDLE_METHOD_KWAJ_XOR,      // KWAJ method 1: XOR 0xFF
+        HANDLE_METHOD_KWAJ_LZSS,     // KWAJ method 2: SZDD LZSS
+        HANDLE_METHOD_KWAJ_LZH,      // KWAJ method 3: LZSS + Huffman
+        HANDLE_METHOD_ZOO_LZD,       // ZOO method 1: LZD (13-bit LZW)
+        HANDLE_METHOD_ZOO_LZH        // ZOO method 2: LZH (lh5-compatible)
         // TODO check more methods
     };
 
@@ -637,6 +652,12 @@ public:
         FT_LZ4,
         FT_LZMA,
         FT_WIM,
+        FT_RPM,
+        FT_KWAJ,
+        FT_ASAR,
+        FT_XAR,
+        FT_ZOO,
+        FT_PDB,
 
         // TODO more
     };

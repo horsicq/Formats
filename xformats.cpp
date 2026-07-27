@@ -195,6 +195,7 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
     else if (XBinary::checkFileType(XBinary::FT_NE, fileType)) return new XNE(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_LE, fileType) || XBinary::checkFileType(XBinary::FT_LX, fileType)) return new XLE(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_PE, fileType)) return new XPE(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_CLI_ASSEMBLY, fileType)) return new XCLIAssembly(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_ELF, fileType)) return new XELF(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_MACHO, fileType)) return new XMACH(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_AMIGAHUNK, fileType)) return new XAmigaHunk(pDevice, bIsImage, nModuleAddress);
@@ -230,6 +231,9 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
 #endif
 #ifdef USE_PDF
     else if (XBinary::checkFileType(XBinary::FT_PDF, fileType)) return new XPDF(pDevice);
+#endif
+#ifdef USE_PDB
+    else if (XBinary::checkFileType(XBinary::FT_PDB, fileType)) return new XPDB(pDevice);
 #endif
 #ifdef USE_ARCHIVE
     else if (XBinary::checkFileType(XBinary::FT_ZIP, fileType)) return new XZip(pDevice);
@@ -285,6 +289,11 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
     else if (XBinary::checkFileType(XBinary::FT_ISO9660, fileType)) return new XISO9660(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_UDF, fileType)) return new XUDF(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_WIM, fileType)) return new XWIM(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_RPM, fileType)) return new XRPM(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_KWAJ, fileType)) return new XKWAJ(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_ASAR, fileType)) return new XASAR(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_XAR, fileType)) return new XXAR(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_ZOO, fileType)) return new XZOO(pDevice);
 
     else if (XBinary::checkFileType(XBinary::FT_DOS4G, fileType) || XBinary::checkFileType(XBinary::FT_DOS16M, fileType)) return new XDOS16(pDevice);
 #endif
@@ -394,6 +403,9 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
 #ifdef USE_PDF
     listResult.append(XBinary::FT_PDF);
 #endif
+#ifdef USE_PDB
+    listResult.append(XBinary::FT_PDB);
+#endif
 #ifdef USE_ARCHIVE
     listResult.append(XBinary::FT_ZIP);
     listResult.append(XBinary::FT_JAR);
@@ -436,6 +448,11 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_ISO9660);
     listResult.append(XBinary::FT_UDF);
     listResult.append(XBinary::FT_WIM);
+    listResult.append(XBinary::FT_RPM);
+    listResult.append(XBinary::FT_KWAJ);
+    listResult.append(XBinary::FT_ASAR);
+    listResult.append(XBinary::FT_XAR);
+    listResult.append(XBinary::FT_ZOO);
     listResult.append(XBinary::FT_DOS4G);
     listResult.append(XBinary::FT_DOS16M);
 #endif
@@ -1597,6 +1614,13 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             }
         }
 #endif
+#ifdef USE_PDB
+        if (stResult.size() <= 1) {
+            if (XPDB::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_PDB);
+            }
+        }
+#endif
 #ifdef USE_DEX
         if (stResult.size() <= 1) {
             if (XDEX::isValid(pDevice, pPdStruct)) {
@@ -1678,6 +1702,18 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             } else if (XCPIO::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_CPIO);
+            } else if (XRPM::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_RPM);
+            } else if (XKWAJ::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_KWAJ);
+            } else if (XXAR::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_XAR);
+            } else if (XZOO::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ZOO);
             } else if (XMiniDump::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_MINIDUMP);
@@ -1687,6 +1723,9 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             } else if (XWIM::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_WIM);
+            } else if (XASAR::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ASAR);
             } else if (XARJ::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_ARJ);

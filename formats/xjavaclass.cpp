@@ -120,6 +120,90 @@ quint32 XJavaClass::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XJAVACLASS_STRUCTID, sizeof(_TABLE_XJAVACLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XJavaClass::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_MAGIC;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_MAGIC) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_MAGIC);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 10;  // magic + minor + major + constant_pool_count
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_MAGIC, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_MAGIC), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_CONSTANT_POOL;
+            _xfStruct.xLoc = offsetToLoc(10);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_CONSTANT_POOL) {
+        INFO info = _getInfo(pPdStruct);
+
+        if (!info.listCP.isEmpty()) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_CONSTANT_POOL);
+            xfHeader.xLoc = offsetToLoc(info.listCP.first().nOffset);
+            xfHeader.xfType = XFTYPE_TABLE;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_CONSTANT_POOL, xfHeader.xLoc);
+
+            qint32 nNumberOfEntries = info.listCP.count();
+
+            for (qint32 i = 0; i < nNumberOfEntries; i++) {
+                xfHeader.listRowLocations.append(info.listCP.at(i).nOffset);
+            }
+
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_CONSTANT_POOL), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XJavaClass::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    // Java class files are big-endian
+    if (nStructID == STRUCTID_MAGIC) {
+        listResult.append({"magic", 0, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"minor_version", 4, 2, XFRECORD_FLAG_BE | XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"major_version", 6, 2, XFRECORD_FLAG_BE | XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append({"constant_pool_count", 8, 2, XFRECORD_FLAG_BE | XFRECORD_FLAG_COUNT, VT_UINT16});
+    } else if (nStructID == STRUCTID_VERSION) {
+        listResult.append({"minor_version", 0, 2, XFRECORD_FLAG_BE | XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"major_version", 2, 2, XFRECORD_FLAG_BE | XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+    } else if (nStructID == STRUCTID_CONSTANT_POOL) {
+        listResult.append({"tag", 0, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+    }
+
+    return listResult;
+}
+
 QList<XBinary::MAPMODE> XJavaClass::getMapModesList()
 {
     QList<MAPMODE> listResult;

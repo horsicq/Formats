@@ -54,6 +54,8 @@ public:
     virtual QString structIDToString(quint32 nID) override;
     virtual QString structIDToFtString(quint32 nID) override;
     virtual quint32 ftStringToStructID(const QString &sFtString) override;
+    virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct) override;
+    virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
 };

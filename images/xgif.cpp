@@ -124,6 +124,90 @@ quint32 XGif::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XGIF_STRUCTID, sizeof(_TABLE_XGIF_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XGif::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_SIGNATURE;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_SIGNATURE) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_SIGNATURE);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 6;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_SIGNATURE, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_SIGNATURE), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_LOGICAL_SCREEN_DESCRIPTOR;
+            _xfStruct.xLoc = offsetToLoc(6);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_LOGICAL_SCREEN_DESCRIPTOR) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(6);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_LOGICAL_SCREEN_DESCRIPTOR);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 7;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_LOGICAL_SCREEN_DESCRIPTOR, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_LOGICAL_SCREEN_DESCRIPTOR), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XGif::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    if (nStructID == STRUCTID_SIGNATURE) {
+        listResult.append({"Signature", 0, 3, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Version", 3, 3, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+    } else if (nStructID == STRUCTID_LOGICAL_SCREEN_DESCRIPTOR) {
+        listResult.append({"Width", 0, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"Height", 2, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"Packed", 4, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"BackgroundColorIndex", 5, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"PixelAspectRatio", 6, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+    } else if (nStructID == STRUCTID_IMAGE_DESCRIPTOR) {
+        listResult.append({"Separator", 0, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"Left", 1, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"Top", 3, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"Width", 5, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"Height", 7, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"Packed", 9, 1, XFRECORD_FLAG_NONE, VT_UINT8});
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XGif::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

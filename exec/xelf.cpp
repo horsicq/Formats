@@ -4890,6 +4890,7 @@ XBinary::XCONVERT _TABLE_XELF_STRUCTID[] = {
     {XELF::STRUCTID_ELF_SYM64, "ELF_SYM64", QString("ELF_SYM64")},    {XELF::STRUCTID_ELF_REL32, "ELF_REL32", QString("ELF_REL32")},
     {XELF::STRUCTID_ELF_REL64, "ELF_REL64", QString("ELF_REL64")},    {XELF::STRUCTID_ELF_RELA32, "ELF_RELA32", QString("ELF_RELA32")},
     {XELF::STRUCTID_ELF_RELA64, "ELF_RELA64", QString("ELF_RELA64")},
+    {XELF::STRUCTID_ELF_NOTE, "ELF_NOTE", QString("ELF_NOTE")},       {XELF::STRUCTID_ELF_INTERP, "ELF_INTERP", QString("ELF_INTERP")},
 };
 
 QString XELF::structIDToString(quint32 nID)
@@ -5013,6 +5014,27 @@ QList<XBinary::XFRECORD> XELF::getXFRecords(FT fileType, quint32 nStructID, cons
         listResult.append({"r_offset", (qint32)offsetof(XELF_DEF::Elf64_Rela, r_offset), 8, XFRECORD_FLAG_OFFSET, VT_UINT64});
         listResult.append({"r_info", (qint32)offsetof(XELF_DEF::Elf64_Rela, r_info), 8, XFRECORD_FLAG_NONE, VT_UINT64});
         listResult.append({"r_addend", (qint32)offsetof(XELF_DEF::Elf64_Rela, r_addend), 8, XFRECORD_FLAG_NONE, VT_INT64});
+    } else if (nStructID == STRUCTID_ELF_NOTE) {
+        // Nhdr is the same layout for 32/64-bit ELF (three 32-bit words followed by name+desc)
+        listResult.append({"n_namesz", 0, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"n_descsz", 4, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"n_type", 8, 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        // Variable-length fields: name is null-terminated, name and descriptor padded to 4 bytes
+        bool bIsBigEndian = isBigEndian();
+        quint32 nNameLength = read_uint32(xLoc.nLocation + 0, bIsBigEndian);
+        quint32 nDescLength = read_uint32(xLoc.nLocation + 4, bIsBigEndian);
+
+        if ((nNameLength > 0) && (nNameLength <= 0x1000)) {
+            listResult.append({"name", 12, (qint32)nNameLength, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        }
+
+        if ((nDescLength > 0) && (nDescLength <= 0x10000)) {
+            listResult.append({"desc", 12 + (qint32)S_ALIGN_UP(nNameLength, 4), (qint32)nDescLength, XFRECORD_FLAG_NONE, VT_BYTE_ARRAY});
+        }
+    } else if (nStructID == STRUCTID_ELF_INTERP) {
+        // PT_INTERP segment holds a null-terminated interpreter path
+        QString sInterp = read_ansiString(xLoc.nLocation);
+        listResult.append({"interpreter", 0, (qint32)(sInterp.size() + 1), XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
     }
 
     return listResult;
@@ -5305,6 +5327,56 @@ static QList<QString> _getELFRelocationSymbolNames(XELF *pELF, const QList<XELF_
     return listResult;
 }
 
+void XELF::_appendNotesTable(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nOffset, qint64 nSize, const QString &sParentTag)
+{
+    if ((nOffset <= 0) || (nSize <= 0) || !checkOffsetSize(nOffset, qMin(nSize, (qint64)12))) {
+        return;
+    }
+
+    bool bIsBigEndian = isBigEndian();
+    QList<NOTE> listNotes = _getNotes(nOffset, nSize, bIsBigEndian);
+
+    if (listNotes.isEmpty()) {
+        return;
+    }
+
+    XFHEADER xfTable = {};
+    xfTable.sParentTag = sParentTag;
+    xfTable.fileType = xfStruct.fileType;
+    xfTable.structID = static_cast<XBinary::STRUCTID>(STRUCTID_ELF_NOTE);
+    xfTable.xLoc = offsetToLoc(listNotes.first().nOffset);
+    xfTable.xfType = XFTYPE_TABLE;
+    xfTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_ELF_NOTE, xfTable.xLoc);
+
+    for (qint32 i = 0; i < listNotes.count(); i++) {
+        xfTable.listRowLocations.append(listNotes.at(i).nOffset);
+        xfTable.listRowNames.append(listNotes.at(i).sName);
+    }
+
+    xfTable.sTag = xfHeaderToTag(xfTable, structIDToString(STRUCTID_ELF_NOTE), sParentTag);
+    listResult.append(xfTable);
+}
+
+void XELF::_appendInterpHeader(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nOffset, const QString &sParentTag)
+{
+    if ((nOffset <= 0) || !checkOffsetSize(nOffset, 1)) {
+        return;
+    }
+
+    QString sInterp = read_ansiString(nOffset);
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = xfStruct.fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_ELF_INTERP);
+    xfHeader.xLoc = offsetToLoc(nOffset);
+    xfHeader.nSize = sInterp.size() + 1;
+    xfHeader.xfType = XFTYPE_HEADER;
+    xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_ELF_INTERP, xfHeader.xLoc);
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_ELF_INTERP), sParentTag);
+    listResult.append(xfHeader);
+}
+
 QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::XFHEADER> listResult;
@@ -5386,28 +5458,36 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
             xfTable.sTag = xfHeaderToTag(xfTable, structIDToString(nStructID), xfTable.sParentTag);
             listResult.append(xfTable);
 
-            if (xfStruct.bIsParent && !isSectionsTablePresent()) {
+            if (xfStruct.bIsParent) {
+                bool bSectionsPresent = isSectionsTablePresent();
+
                 for (qint32 i = 0; i < xfTable.listRowLocations.count(); i++) {
                     qint64 nRowOffset = xfTable.listRowLocations.at(i);
                     quint32 nType = read_uint32(nRowOffset + offsetof(XELF_DEF::Elf32_Phdr, p_type), bIsBigEndian);
 
-                    if (nType == XELF_DEF::S_PT_DYNAMIC) {
-                        qint64 nDynamicOffset = bIs64 ? read_uint64(nRowOffset + offsetof(XELF_DEF::Elf64_Phdr, p_offset), bIsBigEndian)
-                                                      : read_uint32(nRowOffset + offsetof(XELF_DEF::Elf32_Phdr, p_offset), bIsBigEndian);
-                        qint64 nDynamicSize = bIs64 ? read_uint64(nRowOffset + offsetof(XELF_DEF::Elf64_Phdr, p_filesz), bIsBigEndian)
-                                                    : read_uint32(nRowOffset + offsetof(XELF_DEF::Elf32_Phdr, p_filesz), bIsBigEndian);
-                        qint64 nDynamicRowSize = bIs64 ? (qint64)sizeof(XELF_DEF::Elf64_Dyn) : (qint64)sizeof(XELF_DEF::Elf32_Dyn);
-                        qint32 nDynamicRows = (nDynamicRowSize > 0) ? (qint32)(nDynamicSize / nDynamicRowSize) : 0;
+                    qint64 nSegOffset = bIs64 ? read_uint64(nRowOffset + offsetof(XELF_DEF::Elf64_Phdr, p_offset), bIsBigEndian)
+                                              : read_uint32(nRowOffset + offsetof(XELF_DEF::Elf32_Phdr, p_offset), bIsBigEndian);
+                    qint64 nSegSize = bIs64 ? read_uint64(nRowOffset + offsetof(XELF_DEF::Elf64_Phdr, p_filesz), bIsBigEndian)
+                                            : read_uint32(nRowOffset + offsetof(XELF_DEF::Elf32_Phdr, p_filesz), bIsBigEndian);
 
-                        if ((nDynamicRows > 0) && checkOffsetSize(nDynamicOffset, nDynamicRows * nDynamicRowSize)) {
+                    if (nType == XELF_DEF::S_PT_INTERP) {
+                        // .interp has no distinct section type, so always surface it from the program header
+                        _appendInterpHeader(listResult, xfStruct, nSegOffset, xfTable.sTag);
+                    } else if ((nType == XELF_DEF::S_PT_DYNAMIC) && !bSectionsPresent) {
+                        qint64 nDynamicRowSize = bIs64 ? (qint64)sizeof(XELF_DEF::Elf64_Dyn) : (qint64)sizeof(XELF_DEF::Elf32_Dyn);
+                        qint32 nDynamicRows = (nDynamicRowSize > 0) ? (qint32)(nSegSize / nDynamicRowSize) : 0;
+
+                        if ((nDynamicRows > 0) && checkOffsetSize(nSegOffset, nDynamicRows * nDynamicRowSize)) {
                             XFSTRUCT dynStruct = xfStruct;
                             dynStruct.sParent = xfTable.sTag;
                             dynStruct.nStructID = nDynID;
-                            dynStruct.xLoc = offsetToLoc(nDynamicOffset);
+                            dynStruct.xLoc = offsetToLoc(nSegOffset);
                             dynStruct.nSize = nDynamicRowSize;
                             dynStruct.nCount = nDynamicRows;
                             listResult.append(getXFHeaders(dynStruct, pPdStruct));
                         }
+                    } else if ((nType == XELF_DEF::S_PT_NOTE) && !bSectionsPresent) {
+                        _appendNotesTable(listResult, xfStruct, nSegOffset, nSegSize, xfTable.sTag);
                     }
                 }
             }
@@ -5451,6 +5531,10 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
                     } else if (shdr.sh_type == XELF_DEF::S_SHT_RELA) {
                         nChildStructID = nRelaID;
                         nDefaultRowSize = bIs64 ? (qint64)sizeof(XELF_DEF::Elf64_Rela) : (qint64)sizeof(XELF_DEF::Elf32_Rela);
+                    } else if (shdr.sh_type == XELF_DEF::S_SHT_NOTE) {
+                        // Notes are variable-length; walked by a dedicated helper
+                        _appendNotesTable(listResult, xfStruct, (qint64)shdr.sh_offset, (qint64)shdr.sh_size, xfTable.sTag);
+                        continue;
                     }
 
                     qint64 nChildRowSize = shdr.sh_entsize ? (qint64)shdr.sh_entsize : nDefaultRowSize;
@@ -5508,6 +5592,32 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
 
             xfTable.sTag = xfHeaderToTag(xfTable, structIDToString(nStructID), xfTable.sParentTag);
             listResult.append(xfTable);
+        }
+    } else if (nStructID == STRUCTID_ELF_NOTE) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint64 nSize = xfStruct.nSize;
+
+        if ((nOffset == -1) || (nSize <= 0)) {
+            // Fallback: locate the first PT_NOTE segment / SHT_NOTE section
+            QList<NOTE> listNotes = getNotes();
+
+            if (!listNotes.isEmpty()) {
+                _appendNotesTable(listResult, xfStruct, listNotes.first().nOffset,
+                                  (listNotes.last().nOffset + listNotes.last().nSize) - listNotes.first().nOffset, xfStruct.sParent);
+            }
+        } else {
+            _appendNotesTable(listResult, xfStruct, nOffset, nSize, xfStruct.sParent);
+        }
+    } else if (nStructID == STRUCTID_ELF_INTERP) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        if (nOffset == -1) {
+            OS_STRING osInterp = getProgramInterpreterName();
+            nOffset = osInterp.nOffset;
+        }
+
+        if (nOffset != -1) {
+            _appendInterpHeader(listResult, xfStruct, nOffset, xfStruct.sParent);
         }
     }
 

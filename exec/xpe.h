@@ -248,66 +248,6 @@ public:
         quint16 nStreams;
     };
 
-    struct CLI_METADATA_STREAM {
-        qint64 nOffset;
-        qint64 nSize;
-        QString sName;
-    };
-
-    struct CLI_METADATA {
-        CLI_METADATA_HEADER header;
-        QList<CLI_METADATA_STREAM> listStreams;
-        OFFSETSIZE osMetadata;
-        quint32 nTables_Reserved1;
-        quint8 cTables_MajorVersion;
-        quint8 cTables_MinorVersion;
-        quint8 cTables_HeapOffsetSizes;
-        quint8 cTables_Reserved2;
-        quint64 nTables_Valid;
-        quint64 nTables_Sorted;
-        quint32 nTables_Valid_NumberOfRows;        // TODO remove
-        quint32 Tables_TablesNumberOfIndexes[64];  // TODO const
-        qint64 Tables_TablesOffsets[64];           // TODO const
-        qint64 Tables_TableElementSizes[64];       // TODO const
-        OFFSETSIZE osStrings;
-        OFFSETSIZE osUS;
-        OFFSETSIZE osBlob;
-        OFFSETSIZE osGUID;
-        QByteArray baMetadata;
-        QByteArray baStrings;
-        QByteArray baUS;
-        QByteArray baBlob;
-        QByteArray baGUID;
-        qint64 nEntryPoint;
-        qint64 nEntryPointSize;
-        // QList<QString> listAnsiStrings;
-        // QList<QString> listUnicodeStrings;
-        // QList<QString> listGUIDs;
-        qint32 nStringIndexSize;
-        qint32 nGUIDIndexSize;
-        qint32 nBLOBIndexSize;
-        qint32 nResolutionScopeSize;
-        qint32 nTypeDefOrRefSize;
-        qint32 nMethodDefOrRefSize;
-        qint32 nMemberRefParentSize;
-        qint32 nHasConstantSize;
-        qint32 nHasCustomAttributeSize;
-        qint32 nCustomAttributeTypeSize;
-        qint32 nHasFieldMarshalSize;
-        qint32 nHasDeclSecuritySize;
-        qint32 nHasSemanticsSize;
-        qint32 nMemberForwardedSize;
-        quint32 indexSize[64];
-    };
-
-    struct CLI_INFO {
-        bool bValid;
-        bool bHidden;
-        qint64 nHeaderOffset;
-        XPE_DEF::IMAGE_COR20_HEADER header;
-        qint64 nMetaDataOffset;
-        CLI_METADATA metaData;
-    };
 
     struct IMAGE_IMPORT_DESCRIPTOR_EX {
         union {
@@ -942,43 +882,10 @@ public:
     bool isDriver();
     bool isNETPresent();
     void initCLIAssembly(XCLIAssembly *pCLIAssembly, PDSTRUCT *pPdStruct = nullptr);
+    // Creates a fully initialized XCLIAssembly for this PE. The caller owns the result.
+    // Returns nullptr if the file is not a .NET (CLI) assembly.
+    XCLIAssembly *getCliAssembly(PDSTRUCT *pPdStruct = nullptr);
 
-    CLI_INFO getCliInfo(bool bFindHidden, PDSTRUCT *pPdStruct = nullptr);
-    CLI_INFO getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
-
-    QList<QString> getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
-    QList<QString> getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
-
-    bool isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
-    bool isNetTypePresent(CLI_INFO *pCliInfo, const QString &sTypeNamespace, const QString &sTypeName, PDSTRUCT *pPdStruct = nullptr);
-    bool isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct = nullptr);
-    bool isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sFieldName, PDSTRUCT *pPdStruct = nullptr);
-
-    XPE_DEF::S_METADATA_MODULE getMetadataModule(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_MEMBERREF getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_TYPEDEF getMetadataTypeDef(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_TYPEREF getMetadataTypeRef(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_MODULEREF getMetadataModuleRef(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_METHODDEF getMetadataMethodDef(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_METHODPTR getMetadataMethodPtr(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_PARAM getMetadataParam(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_TYPESPEC getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_FIELD getMetadataField(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_METHODIMPL getMetadataMethodImpl(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_ASSEMBLY getMetadataAssembly(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_CONSTANT getMetadataConstant(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_CUSTOMATTRIBUTE getMetadataCustomAttribute(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_FIELDMARSHAL getMetadataFieldMarshal(CLI_INFO *pCliInfo, qint32 nNumber);
-    XPE_DEF::S_METADATA_DECLSECURITY getMetadataDeclSecurity(CLI_INFO *pCliInfo, qint32 nNumber);
-
-    QString getMetadataModuleName(CLI_INFO *pCliInfo, qint32 nNumber);
-    QString getMetadataAssemblyName(CLI_INFO *pCliInfo, qint32 nNumber);
-
-    XPE_DEF::S_METADATA_METHODDEFORREF getMetadataMethodDefOrRef(CLI_INFO *pCliInfo, quint32 nValue);
-
-    QString getMetadataMemberRefParentName(CLI_INFO *pCliInfo, const XPE_DEF::S_METADATA_MEMBERREF &memberRef);
-
-    static QString mdtIdToString(quint32 nID);
 
     OFFSETSIZE getNet_MetadataOffsetSize();
 
@@ -995,13 +902,9 @@ public:
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory);
     bool isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XBinary::_MEMORY_MAP *pMemoryMap);
 
-    bool isNetMetadataPresent(PDSTRUCT *pPdStruct);
-    bool isNetMetadataPresent(CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap);
 
     quint32 getNetId();
 
-    qint64 findSignatureInBlob_NET(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
-    bool isSignatureInBlobPresent_NET(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
     qint32 getEntryPointSection();
     qint32 getEntryPointSection(XBinary::_MEMORY_MAP *pMemoryMap);
@@ -1313,17 +1216,6 @@ public:
     void setNetHeader_ManagedNativeHeader_Address(quint32 nValue);
     void setNetHeader_ManagedNativeHeader_Size(quint32 nValue);
 
-    struct CLI_METADATA_RECORD {
-        quint32 nNumber;
-        QString sId;
-        quint32 nCount;
-        bool bIsSorted;
-        qint64 nTableOffset;
-        qint64 nTableSize;
-    };
-
-    QList<CLI_METADATA_RECORD> getCliMetadataRecords(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
-
     virtual QList<SYMBOL_RECORD> getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap, SYMBOL_TYPE symbolType = SYMBOL_TYPE_ALL);
 
     virtual bool removeDosStub();
@@ -1402,6 +1294,11 @@ private:
     void _decorateImportThunkTable(XFHEADER *pXfHeader, const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
     void _appendExportFunctionNames(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nExportDirOffset, const QString &sParentTag);
     void _appendImportThunks(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, const QString &sParentTag, PDSTRUCT *pPdStruct);
+    void _appendResourceEntries(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nResourceDirOffset, const QString &sParentTag);
+    void _appendBaseRelocationBlocks(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nBaseRelocOffset, qint64 nSize, const QString &sParentTag,
+                                     PDSTRUCT *pPdStruct);
+    void _appendWinCertRecords(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nCertOffset, qint64 nSize, const QString &sParentTag, PDSTRUCT *pPdStruct);
+    void _appendNetMetadata(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, const QString &sParentTag, PDSTRUCT *pPdStruct);
 };
 
 #endif  // XPE_H

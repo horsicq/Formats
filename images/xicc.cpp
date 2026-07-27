@@ -275,6 +275,116 @@ quint32 XICC::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XICC_STRUCTID, sizeof(_TABLE_XICC_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XICC::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_HEADER;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_HEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 128;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_TAG;
+            _xfStruct.xLoc = offsetToLoc(132);
+            _xfStruct.nCount = (qint32)read_uint32(128, true);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_TAG) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nCount = xfStruct.nCount;
+        qint64 nFileSize = getSize();
+
+        if (nOffset == -1) {
+            nOffset = 132;
+        }
+        if (nCount == 0) {
+            nCount = (qint32)read_uint32(128, true);
+        }
+
+        if (nCount > 0) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_TAG);
+            xfHeader.xLoc = offsetToLoc(nOffset);
+            xfHeader.xfType = XFTYPE_TABLE;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_TAG, xfHeader.xLoc);
+
+            qint64 nCurrentOffset = nOffset;
+            for (qint32 i = 0; i < nCount; i++) {
+                if ((nCurrentOffset + 12) > nFileSize) {
+                    break;
+                }
+                xfHeader.listRowLocations.append(nCurrentOffset);
+                nCurrentOffset += 12;
+            }
+
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_TAG), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XICC::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    // ICC profiles are big-endian; literal offsets match the 128-byte on-disk header
+    if (nStructID == STRUCTID_HEADER) {
+        listResult.append({"ProfileSize", 0, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"CMMType", 4, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Version", 8, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_VERSION, VT_UINT32});
+        listResult.append({"DeviceClass", 12, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"DataColorSpace", 16, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"PCS", 20, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Date", 24, 12, XFRECORD_FLAG_NONE, VT_BYTE_ARRAY});
+        listResult.append({"Signature", 36, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Platform", 40, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Flags", 44, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"DeviceManufacturer", 48, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"DeviceModel", 52, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"DeviceAttributes", 56, 8, XFRECORD_FLAG_BE, VT_UINT64});
+        listResult.append({"RenderingIntent", 64, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"IlluminantX", 68, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"IlluminantY", 72, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"IlluminantZ", 76, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"Creator", 80, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+    } else if (nStructID == STRUCTID_TAG) {
+        listResult.append({"Signature", 0, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Offset", 4, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"Size", 8, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XICC::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

@@ -26,6 +26,10 @@ if (NOT DEFINED XPDF_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XPDF/xpdf.cmake)
     set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XPDF_SOURCES})
 endif()
+if (NOT DEFINED XPDB_SOURCES)
+    include(${CMAKE_CURRENT_LIST_DIR}/../XPDB/xpdb.cmake)
+    set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XPDB_SOURCES})
+endif()
 if (NOT DEFINED XARCHIVES_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XArchive/xarchives.cmake)
     set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XARCHIVES_SOURCES})
@@ -38,8 +42,6 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.h
     ${CMAKE_CURRENT_LIST_DIR}/xbinary_def.h
-    ${CMAKE_CURRENT_LIST_DIR}/xfilepart.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/xfilepart.h
     ${CMAKE_CURRENT_LIST_DIR}/subdevice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/subdevice.h
     ${CMAKE_CURRENT_LIST_DIR}/xformats.cpp

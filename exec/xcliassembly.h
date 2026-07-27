@@ -21,10 +21,10 @@
 #ifndef XCLIASSEMBLY_H
 #define XCLIASSEMBLY_H
 
-#include "xfilepart.h"
+#include "xbinary.h"
 #include "xcliassembly_def.h"
 
-class XCLIAssembly : public XFilePart {
+class XCLIAssembly : public XBinary {
     Q_OBJECT
 
 public:
@@ -39,6 +39,90 @@ public:
         STRUCTID_MZDOSHEADER,
         STRUCTID_NTHEADER,
         STRUCTID_CLRHEADER,
+    };
+
+    struct CLI_METADATA_HEADER {
+        quint32 nSignature;
+        quint16 nMajorVersion;
+        quint16 nMinorVersion;
+        quint32 nReserved;
+        quint32 nVersionStringLength;
+        QString sVersion;
+        quint16 nFlags;
+        quint16 nStreams;
+    };
+
+    struct CLI_METADATA_STREAM {
+        qint64 nOffset;
+        qint64 nSize;
+        QString sName;
+    };
+
+    struct CLI_METADATA {
+        CLI_METADATA_HEADER header;
+        QList<CLI_METADATA_STREAM> listStreams;
+        OFFSETSIZE osMetadata;
+        quint32 nTables_Reserved1;
+        quint8 cTables_MajorVersion;
+        quint8 cTables_MinorVersion;
+        quint8 cTables_HeapOffsetSizes;
+        quint8 cTables_Reserved2;
+        quint64 nTables_Valid;
+        quint64 nTables_Sorted;
+        quint32 nTables_Valid_NumberOfRows;        // TODO remove
+        quint32 Tables_TablesNumberOfIndexes[64];  // TODO const
+        qint64 Tables_TablesOffsets[64];           // TODO const
+        qint64 Tables_TableElementSizes[64];       // TODO const
+        OFFSETSIZE osStrings;
+        OFFSETSIZE osUS;
+        OFFSETSIZE osBlob;
+        OFFSETSIZE osGUID;
+        QByteArray baMetadata;
+        QByteArray baStrings;
+        QByteArray baUS;
+        QByteArray baBlob;
+        QByteArray baGUID;
+        qint64 nEntryPoint;
+        qint64 nEntryPointSize;
+        // QList<QString> listAnsiStrings;
+        // QList<QString> listUnicodeStrings;
+        // QList<QString> listGUIDs;
+        qint32 nStringIndexSize;
+        qint32 nGUIDIndexSize;
+        qint32 nBLOBIndexSize;
+        qint32 nResolutionScopeSize;
+        qint32 nTypeDefOrRefSize;
+        qint32 nMethodDefOrRefSize;
+        qint32 nMemberRefParentSize;
+        qint32 nHasConstantSize;
+        qint32 nHasCustomAttributeSize;
+        qint32 nCustomAttributeTypeSize;
+        qint32 nHasFieldMarshalSize;
+        qint32 nHasDeclSecuritySize;
+        qint32 nHasSemanticsSize;
+        qint32 nMemberForwardedSize;
+        qint32 nImplementationSize;
+        qint32 nTypeOrMethodDefSize;
+        qint32 nHasCustomDebugInformationSize;
+        quint32 indexSize[64];
+    };
+
+    struct CLI_INFO {
+        bool bValid;
+        bool bHidden;
+        qint64 nHeaderOffset;
+        XCLIASSEMBLY_DEF::IMAGE_COR20_HEADER header;
+        qint64 nMetaDataOffset;
+        CLI_METADATA metaData;
+    };
+
+    struct CLI_METADATA_RECORD {
+        quint32 nNumber;
+        QString sId;
+        quint32 nCount;
+        bool bIsSorted;
+        qint64 nTableOffset;
+        qint64 nTableSize;
     };
 
     explicit XCLIAssembly(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -71,14 +155,77 @@ public:
     // virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
+    // .NET / CLI metadata parsing (moved from XPE)
+    CLI_INFO getCliInfo(bool bFindHidden = false, PDSTRUCT *pPdStruct = nullptr);
+
+    QList<QString> getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
+    QList<QString> getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
+
+    bool isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
+    bool isNetTypePresent(CLI_INFO *pCliInfo, const QString &sTypeNamespace, const QString &sTypeName, PDSTRUCT *pPdStruct = nullptr);
+    bool isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct = nullptr);
+    bool isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sFieldName, PDSTRUCT *pPdStruct = nullptr);
+
+    XCLIASSEMBLY_DEF::S_METADATA_MODULE getMetadataModule(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_MEMBERREF getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_TYPEDEF getMetadataTypeDef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_TYPEREF getMetadataTypeRef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_MODULEREF getMetadataModuleRef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_METHODDEF getMetadataMethodDef(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_METHODPTR getMetadataMethodPtr(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_PARAM getMetadataParam(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_TYPESPEC getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_FIELD getMetadataField(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_METHODIMPL getMetadataMethodImpl(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_ASSEMBLY getMetadataAssembly(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_CONSTANT getMetadataConstant(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_CUSTOMATTRIBUTE getMetadataCustomAttribute(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_FIELDMARSHAL getMetadataFieldMarshal(CLI_INFO *pCliInfo, qint32 nNumber);
+    XCLIASSEMBLY_DEF::S_METADATA_DECLSECURITY getMetadataDeclSecurity(CLI_INFO *pCliInfo, qint32 nNumber);
+
+    QString getMetadataModuleName(CLI_INFO *pCliInfo, qint32 nNumber);
+    QString getMetadataAssemblyName(CLI_INFO *pCliInfo, qint32 nNumber);
+
+    XCLIASSEMBLY_DEF::S_METADATA_METHODDEFORREF getMetadataMethodDefOrRef(CLI_INFO *pCliInfo, quint32 nValue);
+
+    QString getMetadataMemberRefParentName(CLI_INFO *pCliInfo, const XCLIASSEMBLY_DEF::S_METADATA_MEMBERREF &memberRef);
+    static QString mdtIdToString(quint32 nID);
+
+    CLI_METADATA_HEADER _read_MetadataHeader(qint64 nOffset);
+    XCLIASSEMBLY_DEF::IMAGE_COR20_HEADER _read_IMAGE_COR20_HEADER(qint64 nOffset);
+
+    QList<CLI_METADATA_RECORD> getCliMetadataRecords(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct = nullptr);
+
+    qint64 findSignatureInBlob_NET(const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
+    bool isSignatureInBlobPresent_NET(const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
+
     void setNetHeaderOffset(qint64 nOffset);
     void setNetMetaDataOffset(qint64 nOffset);
     void setVersion(const QString &sVersion);
 
 private:
+    struct PE_SECTION_REGION {
+        quint32 nVirtualAddress;
+        quint32 nVirtualSize;
+        quint32 nPointerToRawData;
+        quint32 nSizeOfRawData;
+    };
+
+    bool _parseHeaders();
+    qint64 _rvaToOffset(quint32 nRVA);
+    qint64 _getNetHeaderOffset();
+    qint64 _getNetMetaDataOffset();
+
     qint64 g_nNetHeaderOffset;
     qint64 g_nNetMetaDataOffset;
     QString g_sVersion;
+    bool g_bPeParsed;
+    bool g_bPeValid;
+    bool g_bPeIs64;
+    quint16 g_nPeCharacteristics;
+    quint32 g_nCliRva;
+    quint32 g_nCliSize;
+    QList<PE_SECTION_REGION> g_listSectionRegions;
 };
 
 #endif  // XCLIASSEMBLY_H

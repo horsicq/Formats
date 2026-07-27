@@ -3,6 +3,10 @@ greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
+# xbinary.h includes the executable format definitions
+INCLUDEPATH += $$PWD/exec
+DEPENDPATH += $$PWD/exec
+
 HEADERS += \
     $$PWD/subdevice.h \
     $$PWD/xbinary.h \

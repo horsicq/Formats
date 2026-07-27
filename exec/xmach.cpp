@@ -57,6 +57,22 @@ XBinary::XCONVERT _TABLE_XMACH_STRUCTID[] = {
     {XMACH::STRUCTID_segment_command_64, "segment_64", QString("segment_64")},
     {XMACH::STRUCTID_section, "section", QString("section")},
     {XMACH::STRUCTID_section_64, "section_64", QString("section_64")},
+    {XMACH::STRUCTID_dylib_command, "dylib_command", QString("dylib_command")},
+    {XMACH::STRUCTID_dylinker_command, "dylinker_command", QString("dylinker_command")},
+    {XMACH::STRUCTID_rpath_command, "rpath_command", QString("rpath_command")},
+    {XMACH::STRUCTID_symtab_command, "symtab_command", QString("symtab_command")},
+    {XMACH::STRUCTID_dysymtab_command, "dysymtab_command", QString("dysymtab_command")},
+    {XMACH::STRUCTID_uuid_command, "uuid_command", QString("uuid_command")},
+    {XMACH::STRUCTID_version_min_command, "version_min_command", QString("version_min_command")},
+    {XMACH::STRUCTID_build_version_command, "build_version_command", QString("build_version_command")},
+    {XMACH::STRUCTID_source_version_command, "source_version_command", QString("source_version_command")},
+    {XMACH::STRUCTID_entry_point_command, "entry_point_command", QString("entry_point_command")},
+    {XMACH::STRUCTID_encryption_info_command, "encryption_info_command", QString("encryption_info_command")},
+    {XMACH::STRUCTID_encryption_info_command_64, "encryption_info_command_64", QString("encryption_info_command_64")},
+    {XMACH::STRUCTID_linkedit_data_command, "linkedit_data_command", QString("linkedit_data_command")},
+    {XMACH::STRUCTID_dyld_info_command, "dyld_info_command", QString("dyld_info_command")},
+    {XMACH::STRUCTID_nlist, "nlist", QString("nlist")},
+    {XMACH::STRUCTID_nlist_64, "nlist_64", QString("nlist_64")},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_HeaderMagics[] = {
@@ -5473,9 +5489,224 @@ QList<XBinary::XFRECORD> XMACH::getXFRecords(FT fileType, quint32 nStructID, con
         listResult.append({"reserved1", (qint32)offsetof(XMACH_DEF::section_64, reserved1), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"reserved2", (qint32)offsetof(XMACH_DEF::section_64, reserved2), 4, XFRECORD_FLAG_NONE, VT_UINT32});
         listResult.append({"reserved3", (qint32)offsetof(XMACH_DEF::section_64, reserved3), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if ((nStructID == STRUCTID_dylib_command) || (nStructID == STRUCTID_dylinker_command) || (nStructID == STRUCTID_rpath_command)) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::load_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::load_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+
+        qint32 nStrOffsetField = 8;  // dylinker_command.name / rpath_command.path
+
+        if (nStructID == STRUCTID_dylib_command) {
+            nStrOffsetField = (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, name));
+            listResult.append({"dylib.name", nStrOffsetField, 4, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT32});
+            listResult.append({"dylib.timestamp", (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, timestamp)), 4,
+                               XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+            listResult.append({"dylib.current_version", (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, current_version)), 4,
+                               XFRECORD_FLAG_NONE, VT_UINT32});
+            listResult.append({"dylib.compatibility_version", (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, compatibility_version)),
+                               4, XFRECORD_FLAG_NONE, VT_UINT32});
+        } else if (nStructID == STRUCTID_dylinker_command) {
+            listResult.append({"name", (qint32)offsetof(XMACH_DEF::dylinker_command, name), 4, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT32});
+        } else {
+            listResult.append({"path", (qint32)offsetof(XMACH_DEF::rpath_command, path), 4, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT32});
+        }
+
+        // Variable-length string: offset is relative to the start of the command
+        bool bIsBigEndian = (getEndian() == ENDIAN_BIG);
+        quint32 nCmdSize = read_uint32(xLoc.nLocation + offsetof(XMACH_DEF::load_command, cmdsize), bIsBigEndian);
+        quint32 nStrOffset = read_uint32(xLoc.nLocation + nStrOffsetField, bIsBigEndian);
+
+        if ((nStrOffset >= 8) && (nCmdSize > nStrOffset) && ((nCmdSize - nStrOffset) <= 0x1000)) {
+            listResult.append({"string", (qint32)nStrOffset, (qint32)(nCmdSize - nStrOffset), XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        }
+    } else if (nStructID == STRUCTID_symtab_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::symtab_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::symtab_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"symoff", (qint32)offsetof(XMACH_DEF::symtab_command, symoff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"nsyms", (qint32)offsetof(XMACH_DEF::symtab_command, nsyms), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"stroff", (qint32)offsetof(XMACH_DEF::symtab_command, stroff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"strsize", (qint32)offsetof(XMACH_DEF::symtab_command, strsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+    } else if (nStructID == STRUCTID_dysymtab_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::dysymtab_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::dysymtab_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"ilocalsym", (qint32)offsetof(XMACH_DEF::dysymtab_command, ilocalsym), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"nlocalsym", (qint32)offsetof(XMACH_DEF::dysymtab_command, nlocalsym), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"iextdefsym", (qint32)offsetof(XMACH_DEF::dysymtab_command, iextdefsym), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"nextdefsym", (qint32)offsetof(XMACH_DEF::dysymtab_command, nextdefsym), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"iundefsym", (qint32)offsetof(XMACH_DEF::dysymtab_command, iundefsym), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"nundefsym", (qint32)offsetof(XMACH_DEF::dysymtab_command, nundefsym), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"tocoff", (qint32)offsetof(XMACH_DEF::dysymtab_command, tocoff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"ntoc", (qint32)offsetof(XMACH_DEF::dysymtab_command, ntoc), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"modtaboff", (qint32)offsetof(XMACH_DEF::dysymtab_command, modtaboff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"nmodtab", (qint32)offsetof(XMACH_DEF::dysymtab_command, nmodtab), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"extrefsymoff", (qint32)offsetof(XMACH_DEF::dysymtab_command, extrefsymoff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"nextrefsyms", (qint32)offsetof(XMACH_DEF::dysymtab_command, nextrefsyms), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"indirectsymoff", (qint32)offsetof(XMACH_DEF::dysymtab_command, indirectsymoff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"nindirectsyms", (qint32)offsetof(XMACH_DEF::dysymtab_command, nindirectsyms), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"extreloff", (qint32)offsetof(XMACH_DEF::dysymtab_command, extreloff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"nextrel", (qint32)offsetof(XMACH_DEF::dysymtab_command, nextrel), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"locreloff", (qint32)offsetof(XMACH_DEF::dysymtab_command, locreloff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"nlocrel", (qint32)offsetof(XMACH_DEF::dysymtab_command, nlocrel), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+    } else if (nStructID == STRUCTID_uuid_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::uuid_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::uuid_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"uuid", (qint32)offsetof(XMACH_DEF::uuid_command, uuid), 16, XFRECORD_FLAG_NONE, VT_BYTE_ARRAY});
+    } else if (nStructID == STRUCTID_version_min_command) {
+        // version/sdk are nibble-encoded X.Y.Z (xxxx.yy.zz)
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::version_min_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::version_min_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"version", (qint32)offsetof(XMACH_DEF::version_min_command, version), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sdk", (qint32)offsetof(XMACH_DEF::version_min_command, sdk), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_build_version_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::build_version_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::build_version_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"platform", (qint32)offsetof(XMACH_DEF::build_version_command, platform), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"minos", (qint32)offsetof(XMACH_DEF::build_version_command, minos), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"sdk", (qint32)offsetof(XMACH_DEF::build_version_command, sdk), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"ntools", (qint32)offsetof(XMACH_DEF::build_version_command, ntools), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+    } else if (nStructID == STRUCTID_source_version_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::source_version_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::source_version_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"version", (qint32)offsetof(XMACH_DEF::source_version_command, version), 8, XFRECORD_FLAG_NONE, VT_UINT64});
+    } else if (nStructID == STRUCTID_entry_point_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::entry_point_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::entry_point_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"entryoff", (qint32)offsetof(XMACH_DEF::entry_point_command, entryoff), 8, XFRECORD_FLAG_OFFSET, VT_UINT64});
+        listResult.append({"stacksize", (qint32)offsetof(XMACH_DEF::entry_point_command, stacksize), 8, XFRECORD_FLAG_SIZE, VT_UINT64});
+    } else if ((nStructID == STRUCTID_encryption_info_command) || (nStructID == STRUCTID_encryption_info_command_64)) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::encryption_info_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::encryption_info_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"cryptoff", (qint32)offsetof(XMACH_DEF::encryption_info_command, cryptoff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"cryptsize", (qint32)offsetof(XMACH_DEF::encryption_info_command, cryptsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"cryptid", (qint32)offsetof(XMACH_DEF::encryption_info_command, cryptid), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+
+        if (nStructID == STRUCTID_encryption_info_command_64) {
+            listResult.append({"pad", (qint32)offsetof(XMACH_DEF::encryption_info_command_64, pad), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        }
+    } else if (nStructID == STRUCTID_linkedit_data_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::linkedit_data_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::linkedit_data_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"dataoff", (qint32)offsetof(XMACH_DEF::linkedit_data_command, dataoff), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"datasize", (qint32)offsetof(XMACH_DEF::linkedit_data_command, datasize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+    } else if (nStructID == STRUCTID_dyld_info_command) {
+        listResult.append({"cmd", (qint32)offsetof(XMACH_DEF::dyld_info_command, cmd), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"cmdsize", (qint32)offsetof(XMACH_DEF::dyld_info_command, cmdsize), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"rebase_off", (qint32)offsetof(XMACH_DEF::dyld_info_command, rebase_off), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"rebase_size", (qint32)offsetof(XMACH_DEF::dyld_info_command, rebase_size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"bind_off", (qint32)offsetof(XMACH_DEF::dyld_info_command, bind_off), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"bind_size", (qint32)offsetof(XMACH_DEF::dyld_info_command, bind_size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"weak_bind_off", (qint32)offsetof(XMACH_DEF::dyld_info_command, weak_bind_off), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"weak_bind_size", (qint32)offsetof(XMACH_DEF::dyld_info_command, weak_bind_size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"lazy_bind_off", (qint32)offsetof(XMACH_DEF::dyld_info_command, lazy_bind_off), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"lazy_bind_size", (qint32)offsetof(XMACH_DEF::dyld_info_command, lazy_bind_size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"export_off", (qint32)offsetof(XMACH_DEF::dyld_info_command, export_off), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"export_size", (qint32)offsetof(XMACH_DEF::dyld_info_command, export_size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+    } else if (nStructID == STRUCTID_nlist) {
+        listResult.append({"n_strx", (qint32)offsetof(XMACH_DEF::nlist, n_strx), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"n_type", (qint32)offsetof(XMACH_DEF::nlist, n_type), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"n_sect", (qint32)offsetof(XMACH_DEF::nlist, n_sect), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"n_desc", (qint32)offsetof(XMACH_DEF::nlist, n_desc), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"n_value", (qint32)offsetof(XMACH_DEF::nlist, n_value), 4, XFRECORD_FLAG_ADDRESS, VT_UINT32});
+    } else if (nStructID == STRUCTID_nlist_64) {
+        listResult.append({"n_strx", (qint32)offsetof(XMACH_DEF::nlist_64, n_strx), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"n_type", (qint32)offsetof(XMACH_DEF::nlist_64, n_type), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"n_sect", (qint32)offsetof(XMACH_DEF::nlist_64, n_sect), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"n_desc", (qint32)offsetof(XMACH_DEF::nlist_64, n_desc), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"n_value", (qint32)offsetof(XMACH_DEF::nlist_64, n_value), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
     }
 
     return listResult;
+}
+
+void XMACH::_appendTypedLoadCommand(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nCommandOffset, quint32 nCmd, const QString &sParentTag,
+                                    PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+
+    quint32 nChildStructID = STRUCTID_UNKNOWN;
+
+    if ((nCmd == XMACH_DEF::S_LC_ID_DYLIB) || (nCmd == XMACH_DEF::S_LC_LOAD_DYLIB) || (nCmd == XMACH_DEF::S_LC_LOAD_WEAK_DYLIB) ||
+        (nCmd == XMACH_DEF::S_LC_REEXPORT_DYLIB) || (nCmd == XMACH_DEF::S_LC_LAZY_LOAD_DYLIB) || (nCmd == XMACH_DEF::S_LC_LOAD_UPWARD_DYLIB)) {
+        nChildStructID = STRUCTID_dylib_command;
+    } else if ((nCmd == XMACH_DEF::S_LC_ID_DYLINKER) || (nCmd == XMACH_DEF::S_LC_LOAD_DYLINKER) || (nCmd == XMACH_DEF::S_LC_DYLD_ENVIRONMENT)) {
+        nChildStructID = STRUCTID_dylinker_command;
+    } else if (nCmd == XMACH_DEF::S_LC_RPATH) {
+        nChildStructID = STRUCTID_rpath_command;
+    } else if (nCmd == XMACH_DEF::S_LC_SYMTAB) {
+        nChildStructID = STRUCTID_symtab_command;
+    } else if (nCmd == XMACH_DEF::S_LC_DYSYMTAB) {
+        nChildStructID = STRUCTID_dysymtab_command;
+    } else if (nCmd == XMACH_DEF::S_LC_UUID) {
+        nChildStructID = STRUCTID_uuid_command;
+    } else if ((nCmd == XMACH_DEF::S_LC_VERSION_MIN_MACOSX) || (nCmd == XMACH_DEF::S_LC_VERSION_MIN_IPHONEOS) || (nCmd == XMACH_DEF::S_LC_VERSION_MIN_TVOS) ||
+               (nCmd == XMACH_DEF::S_LC_VERSION_MIN_WATCHOS)) {
+        nChildStructID = STRUCTID_version_min_command;
+    } else if (nCmd == XMACH_DEF::S_LC_BUILD_VERSION) {
+        nChildStructID = STRUCTID_build_version_command;
+    } else if (nCmd == XMACH_DEF::S_LC_SOURCE_VERSION) {
+        nChildStructID = STRUCTID_source_version_command;
+    } else if (nCmd == XMACH_DEF::S_LC_MAIN) {
+        nChildStructID = STRUCTID_entry_point_command;
+    } else if (nCmd == XMACH_DEF::S_LC_ENCRYPTION_INFO) {
+        nChildStructID = STRUCTID_encryption_info_command;
+    } else if (nCmd == XMACH_DEF::S_LC_ENCRYPTION_INFO_64) {
+        nChildStructID = STRUCTID_encryption_info_command_64;
+    } else if ((nCmd == XMACH_DEF::S_LC_CODE_SIGNATURE) || (nCmd == XMACH_DEF::S_LC_SEGMENT_SPLIT_INFO) || (nCmd == XMACH_DEF::S_LC_FUNCTION_STARTS) ||
+               (nCmd == XMACH_DEF::S_LC_DATA_IN_CODE) || (nCmd == XMACH_DEF::S_LC_DYLIB_CODE_SIGN_DRS) || (nCmd == XMACH_DEF::S_LC_LINKER_OPTIMIZATION_HINT) ||
+               (nCmd == XMACH_DEF::S_LC_DYLD_EXPORTS_TRIE) || (nCmd == XMACH_DEF::S_LC_DYLD_CHAINED_FIXUPS) || (nCmd == XMACH_DEF::S_LC_ATOM_INFO)) {
+        nChildStructID = STRUCTID_linkedit_data_command;
+    } else if ((nCmd == XMACH_DEF::S_LC_DYLD_INFO) || (nCmd == XMACH_DEF::S_LC_DYLD_INFO_ONLY)) {
+        nChildStructID = STRUCTID_dyld_info_command;
+    }
+
+    if (nChildStructID == STRUCTID_UNKNOWN) {
+        return;
+    }
+
+    bool bIsBigEndian = (xfStruct.pMemoryMap->endian == ENDIAN_BIG);
+    quint32 nCmdSize = read_uint32(nCommandOffset + offsetof(XMACH_DEF::load_command, cmdsize), bIsBigEndian);
+
+    XLOC commandLoc = offsetToLoc(nCommandOffset);
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = xfStruct.fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(nChildStructID);
+    xfHeader.xLoc = commandLoc;
+    xfHeader.nSize = nCmdSize;
+    xfHeader.xfType = XFTYPE_HEADER;
+    xfHeader.listFields = getXFRecords(xfStruct.fileType, nChildStructID, commandLoc);
+    xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_LoadCommandTypes, sizeof(_TABLE_XMACH_LoadCommandTypes) / sizeof(XBinary::XIDSTRING)});
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nChildStructID), xfHeader.sParentTag);
+    listResult.append(xfHeader);
+
+    if (nChildStructID == STRUCTID_symtab_command) {
+        // Symbol table child
+        quint32 nSymOff = read_uint32(nCommandOffset + offsetof(XMACH_DEF::symtab_command, symoff), bIsBigEndian);
+        quint32 nSyms = read_uint32(nCommandOffset + offsetof(XMACH_DEF::symtab_command, nsyms), bIsBigEndian);
+
+        bool bIs64 = (xfStruct.pMemoryMap->mode == MODE_64);
+        qint32 nSymbolStructID = bIs64 ? STRUCTID_nlist_64 : STRUCTID_nlist;
+        qint32 nSymbolSize = bIs64 ? (qint32)sizeof(XMACH_DEF::nlist_64) : (qint32)sizeof(XMACH_DEF::nlist);
+        qint32 nNumberOfSymbols = (qint32)qMin(nSyms, (quint32)0x10000);
+
+        if ((nSymOff > 0) && (nNumberOfSymbols > 0) && checkOffsetSize(nSymOff, (qint64)nNumberOfSymbols * nSymbolSize)) {
+            XFHEADER xfSymbolTable = {};
+            xfSymbolTable.sParentTag = xfHeader.sTag;
+            xfSymbolTable.fileType = xfStruct.fileType;
+            xfSymbolTable.structID = static_cast<XBinary::STRUCTID>(nSymbolStructID);
+            xfSymbolTable.xLoc = offsetToLoc(nSymOff);
+            xfSymbolTable.nSize = nSymbolSize;
+            xfSymbolTable.xfType = XFTYPE_TABLE;
+            xfSymbolTable.listFields = getXFRecords(xfStruct.fileType, nSymbolStructID, xfSymbolTable.xLoc);
+
+            for (qint32 i = 0; i < nNumberOfSymbols; i++) {
+                xfSymbolTable.listRowLocations.append((qint64)nSymOff + (qint64)i * nSymbolSize);
+            }
+
+            xfSymbolTable.sTag = xfHeaderToTag(xfSymbolTable, structIDToString(nSymbolStructID), xfSymbolTable.sParentTag);
+            listResult.append(xfSymbolTable);
+        }
+    }
 }
 
 QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
@@ -5589,6 +5820,8 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
                     _xfStruct.nSize = (nCmd == XMACH_DEF::S_LC_SEGMENT_64) ? sizeof(XMACH_DEF::segment_command_64) : sizeof(XMACH_DEF::segment_command);
 
                     listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+                } else {
+                    _appendTypedLoadCommand(listResult, xfStruct, nRowOffset, nCmd, xfHeader.sTag, pPdStruct);
                 }
             }
         }
@@ -5698,6 +5931,48 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
 
             xfSectionTable.sTag = xfHeaderToTag(xfSectionTable, structIDToString(nStructID), xfSectionTable.sParentTag);
             listResult.append(xfSectionTable);
+        }
+    } else if ((nStructID == STRUCTID_dylib_command) || (nStructID == STRUCTID_dylinker_command) || (nStructID == STRUCTID_rpath_command) ||
+               (nStructID == STRUCTID_symtab_command) || (nStructID == STRUCTID_dysymtab_command) || (nStructID == STRUCTID_uuid_command) ||
+               (nStructID == STRUCTID_version_min_command) || (nStructID == STRUCTID_build_version_command) || (nStructID == STRUCTID_source_version_command) ||
+               (nStructID == STRUCTID_entry_point_command) || (nStructID == STRUCTID_encryption_info_command) || (nStructID == STRUCTID_encryption_info_command_64) ||
+               (nStructID == STRUCTID_linkedit_data_command) || (nStructID == STRUCTID_dyld_info_command)) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        if (nOffset != -1) {
+            bool bIsBigEndian = (xfStruct.pMemoryMap->endian == ENDIAN_BIG);
+            quint32 nCmd = read_uint32(nOffset + offsetof(XMACH_DEF::load_command, cmd), bIsBigEndian);
+
+            _appendTypedLoadCommand(listResult, xfStruct, nOffset, nCmd, xfStruct.sParent, pPdStruct);
+        }
+    } else if ((nStructID == STRUCTID_nlist) || (nStructID == STRUCTID_nlist_64)) {
+        bool bIs64 = (nStructID == STRUCTID_nlist_64);
+        qint32 nSymbolSize = bIs64 ? (qint32)sizeof(XMACH_DEF::nlist_64) : (qint32)sizeof(XMACH_DEF::nlist);
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+        qint32 nRows = qMin(xfStruct.nCount, 0x10000);
+
+        if ((nOffset != -1) && (nRows > 0)) {
+            XFHEADER xfSymbolTable = {};
+            xfSymbolTable.sParentTag = xfStruct.sParent;
+            xfSymbolTable.fileType = xfStruct.fileType;
+            xfSymbolTable.structID = static_cast<XBinary::STRUCTID>(nStructID);
+            xfSymbolTable.xLoc = xfStruct.xLoc;
+            xfSymbolTable.nSize = nSymbolSize;
+            xfSymbolTable.xfType = XFTYPE_TABLE;
+            xfSymbolTable.listFields = getXFRecords(xfStruct.fileType, nStructID, xfStruct.xLoc);
+
+            for (qint32 i = 0; i < nRows; i++) {
+                qint64 nRowOffset = nOffset + (qint64)i * nSymbolSize;
+
+                if (!checkOffsetSize(nRowOffset, nSymbolSize)) {
+                    break;
+                }
+
+                xfSymbolTable.listRowLocations.append(nRowOffset);
+            }
+
+            xfSymbolTable.sTag = xfHeaderToTag(xfSymbolTable, structIDToString(nStructID), xfSymbolTable.sParentTag);
+            listResult.append(xfSymbolTable);
         }
     }
 

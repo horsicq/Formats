@@ -376,6 +376,87 @@ quint32 XXM::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, g_tableXxmStructId, sizeof(g_tableXxmStructId) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XXM::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_HEADER;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_HEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = sizeof(HEADER);
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XXM::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    if (nStructID == STRUCTID_HEADER) {
+        listResult.append({"id_text", (qint32)offsetof(HEADER, id_text), 17, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"module_name", (qint32)offsetof(HEADER, module_name), 20, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"ctrl_byte_1a", (qint32)offsetof(HEADER, ctrl_byte_1a), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"tracker_name", (qint32)offsetof(HEADER, tracker_name), 20, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"version", (qint32)offsetof(HEADER, version), 2, XFRECORD_FLAG_VERSION, VT_UINT16});
+        listResult.append({"header_size", (qint32)offsetof(HEADER, header_size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"song_length", (qint32)offsetof(HEADER, song_length), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"song_restart", (qint32)offsetof(HEADER, song_restart), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"channels", (qint32)offsetof(HEADER, channels), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"num_patterns", (qint32)offsetof(HEADER, num_patterns), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"num_instruments", (qint32)offsetof(HEADER, num_instruments), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"flags", (qint32)offsetof(HEADER, flags), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"default_tempo", (qint32)offsetof(HEADER, default_tempo), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"default_bpm", (qint32)offsetof(HEADER, default_bpm), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"pattern_order", (qint32)offsetof(HEADER, pattern_order), 256, XFRECORD_FLAG_NONE, VT_BYTE_ARRAY});
+    } else if (nStructID == STRUCTID_PATTERN_HEADER) {
+        listResult.append({"header_length", (qint32)offsetof(PATTERN_HEADER, header_length), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"packing_type", (qint32)offsetof(PATTERN_HEADER, packing_type), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"num_rows", (qint32)offsetof(PATTERN_HEADER, num_rows), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"packed_data_size", (qint32)offsetof(PATTERN_HEADER, packed_data_size), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+    } else if (nStructID == STRUCTID_INSTRUMENT_HEADER) {
+        listResult.append({"instrument_header_size", (qint32)offsetof(INSTRUMENT_HEADER, instrument_header_size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"instrument_name", (qint32)offsetof(INSTRUMENT_HEADER, instrument_name), 22, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"instrument_type", (qint32)offsetof(INSTRUMENT_HEADER, instrument_type), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"num_samples", (qint32)offsetof(INSTRUMENT_HEADER, num_samples), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+    } else if (nStructID == STRUCTID_SAMPLE_HEADER) {
+        listResult.append({"sample_length", (qint32)offsetof(SAMPLE_HEADER, sample_length), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"loop_start", (qint32)offsetof(SAMPLE_HEADER, loop_start), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"loop_length", (qint32)offsetof(SAMPLE_HEADER, loop_length), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"volume", (qint32)offsetof(SAMPLE_HEADER, volume), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"finetune", (qint32)offsetof(SAMPLE_HEADER, finetune), 1, XFRECORD_FLAG_NONE, VT_INT8});
+        listResult.append({"type", (qint32)offsetof(SAMPLE_HEADER, type), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"panning", (qint32)offsetof(SAMPLE_HEADER, panning), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"relative_note_number", (qint32)offsetof(SAMPLE_HEADER, relative_note_number), 1, XFRECORD_FLAG_NONE, VT_INT8});
+        listResult.append({"reserved", (qint32)offsetof(SAMPLE_HEADER, reserved), 1, XFRECORD_FLAG_NONE, VT_UINT8});
+        listResult.append({"sample_name", (qint32)offsetof(SAMPLE_HEADER, sample_name), 22, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+    }
+
+    return listResult;
+}
+
 // QList<XXM::DATA_HEADER> XXM::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

@@ -362,6 +362,116 @@ quint32 XJpeg::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XJPEG_STRUCTID, jpegStructIdCount());
 }
 
+QList<XBinary::XFHEADER> XJpeg::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_SIGNATURE;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_SIGNATURE) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_SIGNATURE);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 2;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_SIGNATURE, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_SIGNATURE), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_CHUNK;
+            _xfStruct.xLoc = offsetToLoc(2);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_CHUNK) {
+        qint64 nStartOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        if (nStartOffset == -1) {
+            nStartOffset = 2;
+        }
+
+        qint64 nFileSize = getSize();
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_CHUNK);
+        xfHeader.xLoc = offsetToLoc(nStartOffset);
+        xfHeader.xfType = XFTYPE_TABLE;
+
+        qint64 nCurrentOffset = nStartOffset;
+
+        while (((nCurrentOffset + 2) <= nFileSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            quint8 nPrefix = read_uint8(nCurrentOffset);
+
+            if (nPrefix != 0xFF) {
+                break;
+            }
+
+            quint8 nId = read_uint8(nCurrentOffset + 1);
+
+            xfHeader.listRowLocations.append(nCurrentOffset);
+
+            bool bStandalone = ((nId == 0xD8) || (nId == 0xD9) || ((nId >= 0xD0) && (nId <= 0xD7)) || (nId == 0x01));
+
+            if (bStandalone) {
+                nCurrentOffset += 2;
+            } else {
+                quint16 nLength = read_uint16(nCurrentOffset + 2, true);
+                nCurrentOffset += 2 + nLength;
+            }
+
+            if ((nId == 0xDA) || (nId == 0xD9)) {  // SOS: entropy-coded data follows; EOI: end
+                break;
+            }
+        }
+
+        if (!xfHeader.listRowLocations.isEmpty()) {
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_CHUNK, offsetToLoc(xfHeader.listRowLocations.first()));
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_CHUNK), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XJpeg::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    if (nStructID == STRUCTID_SIGNATURE) {
+        listResult.append({"Marker", 0, 2, XFRECORD_FLAG_BE, VT_UINT16});
+    } else if (nStructID == STRUCTID_CHUNK) {
+        listResult.append({"Marker", 0, 2, XFRECORD_FLAG_BE, VT_UINT16});
+
+        quint8 nId = read_uint8(xLoc.nLocation + 1);
+        bool bStandalone = ((nId == 0xD8) || (nId == 0xD9) || ((nId >= 0xD0) && (nId <= 0xD7)) || (nId == 0x01));
+
+        if (!bStandalone) {
+            listResult.append({"Length", 2, 2, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT16});
+        }
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XJpeg::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

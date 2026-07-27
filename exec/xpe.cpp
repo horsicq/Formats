@@ -2675,7 +2675,12 @@ QList<XPE::IMPORT_POSITION> XPE::_getImportPositions(XBinary::_MEMORY_MAP *pMemo
     while (!(pPdStruct->bIsStop)) {
         IMPORT_POSITION importPosition = {};
         importPosition.nThunkOffset = nThunksOffset;
-        importPosition.nThunkRVA = nThunksRVA;
+        // The thunk value (name pointer / ordinal) is read from nThunksRVA -- the
+        // OriginalFirstThunk (INT) when present -- but nThunkRVA must name the IAT slot
+        // that the loader overwrites with the resolved address, i.e. FirstThunk (passed in
+        // as nRVA and advanced in lockstep below). When OFT != FirstThunk (e.g. FSG-packed
+        // binaries) these differ, and using nThunksRVA here patches the read-only INT.
+        importPosition.nThunkRVA = nRVA;
 
         if (bIs64) {
             importPosition.nThunkValue = read_uint64(nThunksOffset);
@@ -7896,34 +7901,6 @@ void XPE::setNetHeader_ManagedNativeHeader_Size(quint32 nValue)
     }
 }
 
-QList<XPE::CLI_METADATA_RECORD> XPE::getCliMetadataRecords(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
-{
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
-    QList<XPE::CLI_METADATA_RECORD> listResult;
-
-    for (qint32 i = 0; (i < 64) && (!(pPdStruct->bIsStop)); i++) {
-        if (pCliInfo->metaData.nTables_Valid & ((unsigned long long)1 << i)) {
-            CLI_METADATA_RECORD record = {};
-
-            record.nNumber = i;
-            record.bIsSorted = pCliInfo->metaData.nTables_Sorted & ((unsigned long long)1 << i);
-            record.sId = mdtIdToString(i);
-            record.nTableOffset = pCliInfo->metaData.Tables_TablesOffsets[i];
-            record.nTableSize = pCliInfo->metaData.Tables_TablesNumberOfIndexes[i] * pCliInfo->metaData.Tables_TableElementSizes[i];
-            record.nCount = pCliInfo->metaData.Tables_TablesNumberOfIndexes[i];
-
-            listResult.append(record);
-        }
-    }
-
-    return listResult;
-}
-
 QList<XBinary::SYMBOL_RECORD> XPE::getSymbolRecords(XBinary::_MEMORY_MAP *pMemoryMap, SYMBOL_TYPE symbolType)
 {
     // TODO Import
@@ -9530,6 +9507,46 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
                            XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
         listResult.append({"StrongNameSignature.Size", (qint32)offsetof(XPE_DEF::IMAGE_COR20_HEADER, StrongNameSignature) + offsetof(XPE_DEF::IMAGE_DATA_DIRECTORY, Size),
                            4, XFRECORD_FLAG_SIZE, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_RESOURCE_DIRECTORY) {
+        listResult.append({"Characteristics", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, Characteristics), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"TimeDateStamp", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, TimeDateStamp), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+        listResult.append({"MajorVersion", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, MajorVersion), 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append({"MinorVersion", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, MinorVersion), 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"NumberOfNamedEntries", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfNamedEntries), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"NumberOfIdEntries", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY, NumberOfIdEntries), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+    } else if (nStructID == STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY) {
+        // High bit of Name = name is a string; high bit of OffsetToData = entry is a subdirectory
+        listResult.append({"Name", 0, 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"OffsetToData", 4, 4, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_RESOURCE_DATA_ENTRY) {
+        listResult.append({"OffsetToData", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, OffsetToData), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"Size", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Size), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"CodePage", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, CodePage), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"Reserved", (qint32)offsetof(XPE_DEF::IMAGE_RESOURCE_DATA_ENTRY, Reserved), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_IMAGE_BASE_RELOCATION) {
+        listResult.append({"VirtualAddress", (qint32)offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, VirtualAddress), 4, XFRECORD_FLAG_RELATIVE_ADDRESS, VT_UINT32});
+        listResult.append({"SizeOfBlock", (qint32)offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, SizeOfBlock), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+    } else if (nStructID == STRUCTID_WIN_CERT_RECORD) {
+        listResult.append({"dwLength", (qint32)offsetof(XPE_DEF::WIN_CERT_RECORD, dwLength), 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"wRevision", (qint32)offsetof(XPE_DEF::WIN_CERT_RECORD, wRevision), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"wCertificateType", (qint32)offsetof(XPE_DEF::WIN_CERT_RECORD, wCertificateType), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+    } else if (nStructID == STRUCTID_NET_METADATA) {
+        listResult.append({"Signature", 0, 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"MajorVersion", 4, 2, XFRECORD_FLAG_VERSION_MAJOR, VT_UINT16});
+        listResult.append({"MinorVersion", 6, 2, XFRECORD_FLAG_VERSION_MINOR, VT_UINT16});
+        listResult.append({"Reserved", 8, 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"VersionStringLength", 12, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        // Variable-length fields
+        quint32 nVersionStringLength = qMin(read_uint32(xLoc.nLocation + 12), (quint32)0x400);
+        listResult.append({"Version", 16, (qint32)nVersionStringLength, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Flags", 16 + (qint32)nVersionStringLength, 2, XFRECORD_FLAG_NONE, VT_UINT16});
+        listResult.append({"Streams", 18 + (qint32)nVersionStringLength, 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+    } else if (nStructID == STRUCTID_NET_METADATA_STREAM) {
+        listResult.append({"Offset", 0, 4, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT32});
+        listResult.append({"Size", 4, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
+        // Variable-length fields: name is null-terminated, padded to a 4-byte boundary
+        QString sName = read_ansiString(xLoc.nLocation + 8, 32);
+        listResult.append({"Name", 8, (qint32)(((sName.size() + 1) + 3) & ~3), XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
     } else {
         listResult = XMSDOS::getXFRecords(fileType, nStructID, xLoc);
     }
@@ -9573,6 +9590,172 @@ void XPE::_appendExportFunctionNames(QList<XFHEADER> &listResult, const XFSTRUCT
     }
     xfNamesTable.sTag = xfHeaderToTag(xfNamesTable, structIDToString(STRUCTID_IMAGE_EXPORT_FUNCTION), sParentTag);
     listResult.append(xfNamesTable);
+}
+
+void XPE::_appendResourceEntries(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nResourceDirOffset, const QString &sParentTag)
+{
+    XPE_DEF::IMAGE_RESOURCE_DIRECTORY ird = read_IMAGE_RESOURCE_DIRECTORY(nResourceDirOffset);
+
+    qint32 nNumberOfEntries = (qint32)ird.NumberOfNamedEntries + (qint32)ird.NumberOfIdEntries;
+
+    if ((nNumberOfEntries <= 0) || (nNumberOfEntries > 0x2000)) {
+        return;
+    }
+
+    qint64 nEntriesOffset = nResourceDirOffset + sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY);
+
+    if (!checkOffsetSize(nEntriesOffset, (qint64)nNumberOfEntries * sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY))) {
+        return;
+    }
+
+    XFHEADER xfEntryTable = {};
+    xfEntryTable.sParentTag = sParentTag;
+    xfEntryTable.fileType = xfStruct.fileType;
+    xfEntryTable.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY);
+    xfEntryTable.xLoc = offsetToLoc(nEntriesOffset);
+    xfEntryTable.xfType = XFTYPE_TABLE;
+    xfEntryTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY, xfEntryTable.xLoc);
+    xfEntryTable.nSize = sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY);
+
+    for (qint32 i = 0; i < nNumberOfEntries; i++) {
+        xfEntryTable.listRowLocations.append(nEntriesOffset + i * sizeof(XPE_DEF::IMAGE_RESOURCE_DIRECTORY_ENTRY));
+    }
+
+    xfEntryTable.sTag = xfHeaderToTag(xfEntryTable, structIDToString(STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY), sParentTag);
+    listResult.append(xfEntryTable);
+}
+
+void XPE::_appendBaseRelocationBlocks(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nBaseRelocOffset, qint64 nSize, const QString &sParentTag,
+                                      PDSTRUCT *pPdStruct)
+{
+    if ((nBaseRelocOffset <= 0) || (nSize <= 0)) {
+        return;
+    }
+
+    XFHEADER xfTable = {};
+    xfTable.sParentTag = sParentTag;
+    xfTable.fileType = xfStruct.fileType;
+    xfTable.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IMAGE_BASE_RELOCATION);
+    xfTable.xLoc = offsetToLoc(nBaseRelocOffset);
+    xfTable.xfType = XFTYPE_TABLE;
+    xfTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IMAGE_BASE_RELOCATION, xfTable.xLoc);
+    xfTable.nSize = sizeof(XPE_DEF::IMAGE_BASE_RELOCATION);
+
+    qint64 nEndOffset = qMin(nBaseRelocOffset + nSize, getSize());
+    qint64 nCurrentOffset = nBaseRelocOffset;
+
+    while (((nCurrentOffset + (qint64)sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)) <= nEndOffset) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+        quint32 nSizeOfBlock = read_uint32(nCurrentOffset + offsetof(XPE_DEF::IMAGE_BASE_RELOCATION, SizeOfBlock));
+
+        if (nSizeOfBlock < sizeof(XPE_DEF::IMAGE_BASE_RELOCATION)) {
+            break;
+        }
+
+        xfTable.listRowLocations.append(nCurrentOffset);
+        nCurrentOffset += nSizeOfBlock;
+    }
+
+    if (!xfTable.listRowLocations.isEmpty()) {
+        xfTable.sTag = xfHeaderToTag(xfTable, structIDToString(STRUCTID_IMAGE_BASE_RELOCATION), sParentTag);
+        listResult.append(xfTable);
+    }
+}
+
+void XPE::_appendWinCertRecords(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nCertOffset, qint64 nSize, const QString &sParentTag, PDSTRUCT *pPdStruct)
+{
+    if ((nCertOffset <= 0) || (nSize <= 0)) {
+        return;
+    }
+
+    XFHEADER xfTable = {};
+    xfTable.sParentTag = sParentTag;
+    xfTable.fileType = xfStruct.fileType;
+    xfTable.structID = static_cast<XBinary::STRUCTID>(STRUCTID_WIN_CERT_RECORD);
+    xfTable.xLoc = offsetToLoc(nCertOffset);
+    xfTable.xfType = XFTYPE_TABLE;
+    xfTable.listFields = getXFRecords(xfStruct.fileType, STRUCTID_WIN_CERT_RECORD, xfTable.xLoc);
+    xfTable.nSize = sizeof(XPE_DEF::WIN_CERT_RECORD);
+
+    qint64 nEndOffset = qMin(nCertOffset + nSize, getSize());
+    qint64 nCurrentOffset = nCertOffset;
+
+    while (((nCurrentOffset + (qint64)sizeof(XPE_DEF::WIN_CERT_RECORD)) <= nEndOffset) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+        quint32 nLength = read_uint32(nCurrentOffset + offsetof(XPE_DEF::WIN_CERT_RECORD, dwLength));
+
+        if (nLength < sizeof(XPE_DEF::WIN_CERT_RECORD)) {
+            break;
+        }
+
+        xfTable.listRowLocations.append(nCurrentOffset);
+        nCurrentOffset += ((qint64)nLength + 7) & ~(qint64)7;  // Records are 8-byte aligned
+    }
+
+    if (!xfTable.listRowLocations.isEmpty()) {
+        xfTable.sTag = xfHeaderToTag(xfTable, structIDToString(STRUCTID_WIN_CERT_RECORD), sParentTag);
+        listResult.append(xfTable);
+    }
+}
+
+void XPE::_appendNetMetadata(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, const QString &sParentTag, PDSTRUCT *pPdStruct)
+{
+    OFFSETSIZE osMetadata = getNet_MetadataOffsetSize();
+
+    if ((osMetadata.nOffset == -1) || (osMetadata.nSize <= 0)) {
+        return;
+    }
+
+    qint64 nMetadataOffset = osMetadata.nOffset;
+
+    if (read_uint32(nMetadataOffset) != 0x424A5342) {  // 'BSJB'
+        return;
+    }
+
+    CLI_METADATA_HEADER metadataHeader = _read_MetadataHeader(nMetadataOffset);
+    quint32 nVersionStringLength = qMin(metadataHeader.nVersionStringLength, (quint32)0x400);
+
+    XLOC metadataLoc = offsetToLoc(nMetadataOffset);
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = xfStruct.fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_NET_METADATA);
+    xfHeader.xLoc = metadataLoc;
+    xfHeader.nSize = 16 + nVersionStringLength + 4;
+    xfHeader.xfType = XFTYPE_HEADER;
+    xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_NET_METADATA, metadataLoc);
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_NET_METADATA), xfHeader.sParentTag);
+    listResult.append(xfHeader);
+
+    qint32 nNumberOfStreams = qMin((qint32)metadataHeader.nStreams, 0x100);
+
+    if (nNumberOfStreams > 0) {
+        qint64 nEndOffset = qMin(nMetadataOffset + osMetadata.nSize, getSize());
+        qint64 nCurrentOffset = nMetadataOffset + 16 + nVersionStringLength + 4;
+
+        XFHEADER xfStreams = {};
+        xfStreams.sParentTag = xfHeader.sTag;
+        xfStreams.fileType = xfStruct.fileType;
+        xfStreams.structID = static_cast<XBinary::STRUCTID>(STRUCTID_NET_METADATA_STREAM);
+        xfStreams.xLoc = offsetToLoc(nCurrentOffset);
+        xfStreams.xfType = XFTYPE_TABLE;
+
+        for (qint32 i = 0; (i < nNumberOfStreams) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+            if ((nCurrentOffset + 8) > nEndOffset) {
+                break;
+            }
+
+            xfStreams.listRowLocations.append(nCurrentOffset);
+
+            QString sName = read_ansiString(nCurrentOffset + 8, 32);
+            nCurrentOffset += 8 + (((sName.size() + 1) + 3) & ~3);
+        }
+
+        if (!xfStreams.listRowLocations.isEmpty()) {
+            xfStreams.listFields = getXFRecords(xfStruct.fileType, STRUCTID_NET_METADATA_STREAM, offsetToLoc(xfStreams.listRowLocations.first()));
+            xfStreams.sTag = xfHeaderToTag(xfStreams, structIDToString(STRUCTID_NET_METADATA_STREAM), xfStreams.sParentTag);
+            listResult.append(xfStreams);
+        }
+    }
 }
 
 void XPE::_decorateImportThunkTable(XFHEADER *pXfHeader, const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
@@ -9925,6 +10108,14 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 for (qint32 i = 0; i < nDataDirCount; i++) {
                     XPE_DEF::IMAGE_DATA_DIRECTORY idd = read_IMAGE_DATA_DIRECTORY(nDataDirOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
 
+                    // Security dir holds WIN_CERT records at a raw file offset (often in the overlay), so handle it before the RVA check
+                    if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY) {
+                        if ((idd.VirtualAddress != 0) && checkOffsetSize(idd.VirtualAddress, idd.Size)) {
+                            _appendWinCertRecords(listResult, xfStruct, idd.VirtualAddress, idd.Size, xfDataDirTable.sTag, pPdStruct);
+                        }
+                        continue;
+                    }
+
                     if (!isDataDirectoryValid(&idd, xfStruct.pMemoryMap)) {
                         continue;
                     }
@@ -9943,12 +10134,19 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                         continue;
                     }
 
+                    // Base relocations are variable-size blocks; walked by a dedicated helper
+                    if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC) {
+                        _appendBaseRelocationBlocks(listResult, xfStruct, nChildOffset, idd.Size, xfDataDirTable.sTag, pPdStruct);
+                        continue;
+                    }
+
                     quint32 nChildStructID = STRUCTID_UNKNOWN;
                     bool bChildIsTable = false;
                     qint32 nChildRows = 1;
 
                     switch (i) {
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT: nChildStructID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE: nChildStructID = STRUCTID_IMAGE_RESOURCE_DIRECTORY; break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
                             nChildStructID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR;
                             bChildIsTable = true;
@@ -10015,6 +10213,10 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                         _appendExportFunctionNames(listResult, xfStruct, nChildOffset, xfChild.sTag);
                     } else if (nChildStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) {
                         _appendImportThunks(listResult, xfStruct, xfChild.sTag, pPdStruct);
+                    } else if (nChildStructID == STRUCTID_IMAGE_RESOURCE_DIRECTORY) {
+                        _appendResourceEntries(listResult, xfStruct, nChildOffset, xfChild.sTag);
+                    } else if (nChildStructID == STRUCTID_IMAGE_COR20_HEADER) {
+                        _appendNetMetadata(listResult, xfStruct, xfChild.sTag, pPdStruct);
                     }
                 }
             }
@@ -10069,6 +10271,14 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 for (qint32 i = 0; i < nRows; i++) {
                     XPE_DEF::IMAGE_DATA_DIRECTORY idd = read_IMAGE_DATA_DIRECTORY(nOffset + i * sizeof(XPE_DEF::IMAGE_DATA_DIRECTORY));
 
+                    // Security dir holds WIN_CERT records at a raw file offset (often in the overlay), so handle it before the RVA check
+                    if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY) {
+                        if ((idd.VirtualAddress != 0) && checkOffsetSize(idd.VirtualAddress, idd.Size)) {
+                            _appendWinCertRecords(listResult, xfStruct, idd.VirtualAddress, idd.Size, xfDataDirTable.sTag, pPdStruct);
+                        }
+                        continue;
+                    }
+
                     if (!isDataDirectoryValid(&idd, xfStruct.pMemoryMap)) {
                         continue;
                     }
@@ -10086,12 +10296,19 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                         continue;
                     }
 
+                    // Base relocations are variable-size blocks; walked by a dedicated helper
+                    if (i == XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC) {
+                        _appendBaseRelocationBlocks(listResult, xfStruct, nChildOffset, idd.Size, xfDataDirTable.sTag, pPdStruct);
+                        continue;
+                    }
+
                     quint32 nChildStructID = STRUCTID_UNKNOWN;
                     bool bChildIsTable = false;
                     qint32 nChildRows = 1;
 
                     switch (i) {
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT: nChildStructID = STRUCTID_IMAGE_EXPORT_DIRECTORY; break;
+                        case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE: nChildStructID = STRUCTID_IMAGE_RESOURCE_DIRECTORY; break;
                         case XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_IMPORT:
                             nChildStructID = STRUCTID_IMAGE_IMPORT_DESCRIPTOR;
                             bChildIsTable = true;
@@ -10158,13 +10375,17 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                         _appendExportFunctionNames(listResult, xfStruct, nChildOffset, xfChild.sTag);
                     } else if (nChildStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) {
                         _appendImportThunks(listResult, xfStruct, xfChild.sTag, pPdStruct);
+                    } else if (nChildStructID == STRUCTID_IMAGE_RESOURCE_DIRECTORY) {
+                        _appendResourceEntries(listResult, xfStruct, nChildOffset, xfChild.sTag);
+                    } else if (nChildStructID == STRUCTID_IMAGE_COR20_HEADER) {
+                        _appendNetMetadata(listResult, xfStruct, xfChild.sTag, pPdStruct);
                     }
                 }
             }
         }
     } else if ((nStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) || (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY32) || (nStructID == STRUCTID_IMAGE_TLS_DIRECTORY64) ||
                (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY32) || (nStructID == STRUCTID_IMAGE_LOAD_CONFIG_DIRECTORY64) ||
-               (nStructID == STRUCTID_IMAGE_COR20_HEADER)) {
+               (nStructID == STRUCTID_IMAGE_COR20_HEADER) || (nStructID == STRUCTID_IMAGE_RESOURCE_DIRECTORY)) {
         qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
 
         XLOC headerLoc = xfStruct.xLoc;
@@ -10178,6 +10399,8 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
                 nOffset = getLoadConfigDirectoryOffset();
             } else if (nStructID == STRUCTID_IMAGE_COR20_HEADER) {
                 nOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+            } else if (nStructID == STRUCTID_IMAGE_RESOURCE_DIRECTORY) {
+                nOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
             }
 
             if (nOffset != -1) {
@@ -10198,14 +10421,19 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
             xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
             listResult.append(xfHeader);
 
-            if (xfStruct.bIsParent && nStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY) {
+            if (xfStruct.bIsParent && (nStructID == STRUCTID_IMAGE_EXPORT_DIRECTORY)) {
                 _appendExportFunctionNames(listResult, xfStruct, nOffset, xfHeader.sTag);
+            } else if (xfStruct.bIsParent && (nStructID == STRUCTID_IMAGE_RESOURCE_DIRECTORY)) {
+                _appendResourceEntries(listResult, xfStruct, nOffset, xfHeader.sTag);
+            } else if (xfStruct.bIsParent && (nStructID == STRUCTID_IMAGE_COR20_HEADER)) {
+                _appendNetMetadata(listResult, xfStruct, xfHeader.sTag, pPdStruct);
             }
         }
     } else if ((nStructID == STRUCTID_IMAGE_EXPORT_FUNCTION) || (nStructID == STRUCTID_IMAGE_IMPORT_DESCRIPTOR) || (nStructID == STRUCTID_IMAGE_THUNK_DATA32) ||
                (nStructID == STRUCTID_IMAGE_THUNK_DATA64) || (nStructID == STRUCTID_IMAGE_DEBUG_DIRECTORY) ||
                (nStructID == STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY) || (nStructID == STRUCTID_IMAGE_BOUND_IMPORT_DESCRIPTOR) ||
-               (nStructID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR)) {
+               (nStructID == STRUCTID_IMAGE_DELAYLOAD_DESCRIPTOR) || (nStructID == STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY) ||
+               (nStructID == STRUCTID_IMAGE_RESOURCE_DATA_ENTRY)) {
         qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
         qint32 nRows = xfStruct.nCount;
         if ((nOffset != -1) && (nRows > 0)) {
@@ -10229,6 +10457,28 @@ QList<XBinary::XFHEADER> XPE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
             xfTable.sTag = xfHeaderToTag(xfTable, structIDToString(nStructID), xfTable.sParentTag);
             listResult.append(xfTable);
         }
+    } else if (nStructID == STRUCTID_IMAGE_BASE_RELOCATION) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        XPE_DEF::IMAGE_DATA_DIRECTORY idd = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
+
+        if (nOffset == -1) {
+            nOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
+        }
+
+        _appendBaseRelocationBlocks(listResult, xfStruct, nOffset, idd.Size, xfStruct.sParent, pPdStruct);
+    } else if (nStructID == STRUCTID_WIN_CERT_RECORD) {
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        XPE_DEF::IMAGE_DATA_DIRECTORY idd = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_SECURITY);
+
+        if (nOffset == -1) {
+            nOffset = idd.VirtualAddress;  // Security dir stores a raw file offset
+        }
+
+        _appendWinCertRecords(listResult, xfStruct, nOffset, idd.Size, xfStruct.sParent, pPdStruct);
+    } else if ((nStructID == STRUCTID_NET_METADATA) || (nStructID == STRUCTID_NET_METADATA_STREAM)) {
+        _appendNetMetadata(listResult, xfStruct, xfStruct.sParent, pPdStruct);
     } else {
         listResult = XMSDOS::getXFHeaders(xfStruct, pPdStruct);
     }
@@ -11366,1425 +11616,45 @@ bool XPE::isNETPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
 }
 
+XCLIAssembly *XPE::getCliAssembly(PDSTRUCT *pPdStruct)
+{
+    XCLIAssembly *pResult = nullptr;
+
+    if (isNETPresent()) {
+        pResult = new XCLIAssembly(getDevice(), isImage(), getModuleAddress());
+
+        initCLIAssembly(pResult, pPdStruct);
+    }
+
+    return pResult;
+}
+
 void XPE::initCLIAssembly(XCLIAssembly *pCLIAssembly, PDSTRUCT *pPdStruct)
 {
     if (!isNETPresent()) {
         return;
     }
 
-    pCLIAssembly->setNetHeaderOffset(getNetHeaderOffset());
+    qint64 nCLIHeaderOffset = getNetHeaderOffset();
 
-    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-    CLI_INFO cliInfo = getCliInfo(false, &memoryMap, pPdStruct);
-
-    if (cliInfo.bValid) {
-        pCLIAssembly->setNetMetaDataOffset(cliInfo.nMetaDataOffset);
-
-        if (!cliInfo.metaData.header.sVersion.isEmpty()) {
-            pCLIAssembly->setVersion(cliInfo.metaData.header.sVersion);
-        }
-    }
-}
-
-QList<QString> XPE::getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
-{
-    QList<QString> listResult;
-
-    char *_pOffset = pCliInfo->metaData.baStrings.data();
-    qint32 _nSize = pCliInfo->metaData.baStrings.size();
-
-    // TODO UTF8
-    for (qint32 i = 1; (i < _nSize) && isPdStructNotCanceled(pPdStruct); i++) {
-        _pOffset++;
-        QString sTemp = _pOffset;
-        listResult.append(sTemp);
-
-        _pOffset += sTemp.size();
-        i += sTemp.size();
+    if (nCLIHeaderOffset == -1) {
+        return;
     }
 
-    return listResult;
-}
+    pCLIAssembly->setNetHeaderOffset(nCLIHeaderOffset);
 
-QList<QString> XPE::getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
-{
-    QList<QString> listResult;
+    // Resolve the metadata offset here: only the PE knows how to map the RVA.
+    XPE_DEF::IMAGE_COR20_HEADER header = _read_IMAGE_COR20_HEADER(nCLIHeaderOffset);
 
-    char *pStringOffset = pCliInfo->metaData.baUS.data();
-    char *pStringCurrentOffsetOffset = pStringOffset;
-    qint32 _nSize = pCliInfo->metaData.baUS.size();
+    if ((header.cb == 0x48) && header.MetaData.VirtualAddress && header.MetaData.Size) {
+        _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-    pStringCurrentOffsetOffset++;
+        qint64 nMetaDataOffset = addressToOffset(&memoryMap, memoryMap.nModuleAddress + header.MetaData.VirtualAddress);
 
-    for (qint32 i = 1; (i < _nSize) && isPdStructNotCanceled(pPdStruct); i++) {
-        qint32 nStringSize = (*((unsigned char *)pStringCurrentOffsetOffset));
-
-        if (nStringSize == 0x80) {
-            nStringSize = 0;
-        }
-
-        if (nStringSize > _nSize - i) {
-            break;
-        }
-
-        pStringCurrentOffsetOffset++;
-
-        if (pStringCurrentOffsetOffset > pStringOffset + _nSize) {
-            break;
-        }
-
-        QString sTemp = QString::fromUtf16((quint16 *)pStringCurrentOffsetOffset, nStringSize / 2);
-
-        listResult.append(sTemp);
-
-        pStringCurrentOffsetOffset += nStringSize;
-        i += nStringSize;
-    }
-
-    return listResult;
-}
-
-XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, PDSTRUCT *pPdStruct)
-{
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
-    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-
-    return getCliInfo(bFindHidden, &memoryMap, pPdStruct);
-}
-
-XPE::CLI_INFO XPE::getCliInfo(bool bFindHidden, XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
-{
-    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
-
-    if (!pPdStruct) {
-        pPdStruct = &pdStructEmpty;
-    }
-
-    // https://www.codeproject.com/Articles/12585/The-NET-File-Format
-    CLI_INFO result = {};
-
-    if (isNETPresent() || bFindHidden) {
-        qint64 nBaseAddress = pMemoryMap->nModuleAddress;
-
-        qint64 nCLIHeaderOffset = -1;
-
-        if (isNETPresent()) {
-            XPE_DEF::IMAGE_DATA_DIRECTORY _idd = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
-
-            nCLIHeaderOffset = addressToOffset(pMemoryMap, nBaseAddress + _idd.VirtualAddress);
-        } else {
-            // mb TODO
-            // TODO Check!
-            nCLIHeaderOffset = addressToOffset(pMemoryMap, nBaseAddress + 0x2008);
-            result.bHidden = true;
-        }
-
-        if (nCLIHeaderOffset != -1) {
-            result.nHeaderOffset = nCLIHeaderOffset;
-
-            result.header = _read_IMAGE_COR20_HEADER(result.nHeaderOffset);
-
-            if ((result.header.cb == 0x48) && result.header.MetaData.VirtualAddress && result.header.MetaData.Size) {
-                result.bValid = true;
-
-                result.metaData.nEntryPointSize = 0;
-                result.metaData.nEntryPoint = result.header.EntryPointRVA;
-
-                result.nMetaDataOffset = addressToOffset(pMemoryMap, nBaseAddress + result.header.MetaData.VirtualAddress);
-
-                if (result.nMetaDataOffset != -1) {
-                    result.metaData.header = _read_MetadataHeader(result.nMetaDataOffset);
-
-                    if (result.metaData.header.nSignature == 0x424a5342) {
-                        // result.bInit=true;
-                        qint64 nOffset = result.nMetaDataOffset + 20 + result.metaData.header.nVersionStringLength;
-
-                        bool bStrings = false;
-                        bool bUS = false;
-
-                        for (qint32 i = 0; i < result.metaData.header.nStreams; i++) {
-                            CLI_METADATA_STREAM stream = {};
-
-                            stream.nOffset = read_uint32(nOffset + 0);
-                            stream.nSize = read_uint32(nOffset + 4);
-                            stream.sName = read_ansiString(nOffset + 8);
-
-                            stream.nOffset += result.nMetaDataOffset;
-
-                            result.metaData.listStreams.append(stream);
-
-                            if ((result.metaData.listStreams.at(i).sName == "#~") || (result.metaData.listStreams.at(i).sName == "#-")) {
-                                result.metaData.osMetadata.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osMetadata.nSize = result.metaData.listStreams.at(i).nSize;
-
-                                result.metaData.baMetadata = read_array(result.metaData.osMetadata.nOffset, result.metaData.osMetadata.nSize);
-                            } else if ((result.metaData.listStreams.at(i).sName == "#Strings") && (!bStrings)) {
-                                result.metaData.osStrings.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osStrings.nSize = result.metaData.listStreams.at(i).nSize;
-
-                                result.metaData.baStrings = read_array(result.metaData.osStrings.nOffset, result.metaData.osStrings.nSize);
-                                bStrings = true;
-                            } else if ((result.metaData.listStreams.at(i).sName == "#US") && (!bUS)) {
-                                result.metaData.osUS.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osUS.nSize = result.metaData.listStreams.at(i).nSize;
-
-                                result.metaData.baUS = read_array(result.metaData.osUS.nOffset, result.metaData.osUS.nSize);
-                                bUS = true;
-                            } else if (result.metaData.listStreams.at(i).sName == "#Blob") {
-                                result.metaData.osBlob.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osBlob.nSize = result.metaData.listStreams.at(i).nSize;
-                            } else if (result.metaData.listStreams.at(i).sName == "#GUID") {
-                                result.metaData.osGUID.nOffset = result.metaData.listStreams.at(i).nOffset;
-                                result.metaData.osGUID.nSize = result.metaData.listStreams.at(i).nSize;
-                            }
-
-                            nOffset += 8;
-                            nOffset += S_ALIGN_UP((result.metaData.listStreams.at(i).sName.length() + 1), 4);
-                        }
-
-                        if (result.metaData.osMetadata.nOffset) {
-                            qint32 _nOffset = 0;
-                            char *pBuffer = result.metaData.baMetadata.data();
-                            qint32 nBufferOffset = result.metaData.baMetadata.size();
-
-                            result.metaData.nTables_Reserved1 = _read_uint32_safe(pBuffer, nBufferOffset, _nOffset + 0);
-                            result.metaData.cTables_MajorVersion = _read_uint8_safe(pBuffer, nBufferOffset, _nOffset + 4);
-                            result.metaData.cTables_MinorVersion = _read_uint8_safe(pBuffer, nBufferOffset, _nOffset + 5);
-                            result.metaData.cTables_HeapOffsetSizes = _read_uint8_safe(pBuffer, nBufferOffset, _nOffset + 6);
-                            result.metaData.cTables_Reserved2 = _read_uint8_safe(pBuffer, nBufferOffset, _nOffset + 7);
-                            result.metaData.nTables_Valid = _read_uint64_safe(pBuffer, nBufferOffset, _nOffset + 8);
-                            result.metaData.nTables_Sorted = _read_uint64_safe(pBuffer, nBufferOffset, _nOffset + 16);
-
-                            quint64 nValid = result.metaData.nTables_Valid;
-
-                            quint32 nTemp = 0;
-
-                            for (nTemp = 0; nValid; nTemp++) {
-                                nValid &= (nValid - 1);
-                            }
-
-                            result.metaData.nTables_Valid_NumberOfRows = nTemp;
-
-                            nOffset = result.metaData.osMetadata.nOffset + 24;
-                            _nOffset = 24;
-
-                            for (qint32 i = 0; i < 64; i++) {
-                                if (result.metaData.nTables_Valid & ((unsigned long long)1 << i)) {
-                                    result.metaData.Tables_TablesNumberOfIndexes[i] = _read_uint32_safe(pBuffer, nBufferOffset, _nOffset);
-                                    nOffset += 4;
-                                    _nOffset += 4;
-                                } else {
-                                    result.metaData.Tables_TablesNumberOfIndexes[i] = 0;
-                                }
-                            }
-
-                            result.metaData.nStringIndexSize = 2;
-                            result.metaData.nGUIDIndexSize = 2;
-                            result.metaData.nBLOBIndexSize = 2;
-                            result.metaData.nResolutionScopeSize = 2;
-                            result.metaData.nTypeDefOrRefSize = 2;
-                            result.metaData.nMemberRefParentSize = 2;
-                            result.metaData.nHasConstantSize = 2;
-                            result.metaData.nHasCustomAttributeSize = 2;
-                            result.metaData.nCustomAttributeTypeSize = 2;
-                            result.metaData.nHasFieldMarshalSize = 2;
-                            result.metaData.nHasDeclSecuritySize = 2;
-                            result.metaData.nHasSemanticsSize = 2;
-                            result.metaData.nMethodDefOrRefSize = 2;
-                            result.metaData.nMemberForwardedSize = 2;
-
-                            quint8 cHeapOffsetSizes = result.metaData.cTables_HeapOffsetSizes;
-
-                            if (cHeapOffsetSizes & 0x01) {
-                                result.metaData.nStringIndexSize = 4;
-                            }
-
-                            if (cHeapOffsetSizes & 0x02) {
-                                result.metaData.nGUIDIndexSize = 4;
-                            }
-
-                            if (cHeapOffsetSizes & 0x04) {
-                                result.metaData.nBLOBIndexSize = 4;
-                            }
-
-                            // TODO !!!
-
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Module] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_AssemblyRef] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x3FFF) {
-                                result.metaData.nResolutionScopeSize = 4;
-                            }
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x3FFF) {
-                                result.metaData.nTypeDefOrRefSize = 4;
-                            }
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x1FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x1FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x1FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x1FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x1FFF) {
-                                result.metaData.nMemberRefParentSize = 4;
-                            }
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Property] > 0x3FFF) {
-                                result.metaData.nHasConstantSize = 4;
-                            }
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_InterfaceImpl] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Module] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Property] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Event] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_StandAloneSig] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec] > 0x7FF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Assembly] > 0x7FF) {
-                                result.metaData.nHasCustomAttributeSize = 4;
-                            }
-
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x1FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef] > 0x1FFF) {
-                                result.metaData.nCustomAttributeTypeSize = 4;
-                            }
-
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x7FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef] > 0x7FFF) {
-                                result.metaData.nMethodDefOrRefSize = 4;
-                            }
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0x7FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param] > 0x7FFF) {
-                                result.metaData.nHasFieldMarshalSize = 4;
-                            }
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x3FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Assembly] > 0x3FFF) {
-                                result.metaData.nHasDeclSecuritySize = 4;
-                            }
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Event] > 0x7FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Property] > 0x7FFF) {
-                                result.metaData.nHasSemanticsSize = 4;
-                            }
-                            if (result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field] > 0x7FFF ||
-                                result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef] > 0x7FFF) {
-                                result.metaData.nMemberForwardedSize = 4;
-                            }
-
-                            for (qint32 i = 0; i < 64; i++) {
-                                if (result.metaData.Tables_TablesNumberOfIndexes[i] > 0xFFFF) {
-                                    result.metaData.indexSize[i] = 4;
-                                } else {
-                                    result.metaData.indexSize[i] = 2;
-                                }
-                            }
-
-                            // Module
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nGUIDIndexSize;
-                                nSize += result.metaData.nGUIDIndexSize;
-                                nSize += result.metaData.nGUIDIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Module] = nSize;
-                            }
-                            // TypeRef
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.nResolutionScopeSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeRef] = nSize;
-                            }
-                            // TypeDef
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nTypeDefOrRefSize;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Field];
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_MethodDef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeDef] = nSize;
-                            }
-                            // Field
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Field] = nSize;
-                            }
-                            // MethodPtr
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_MethodDef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodPtr] = nSize;
-                            }
-                            // MethodDef
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Param];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodDef] = nSize;
-                            }
-                            // ParamPtr
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Param];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ParamPtr] = nSize;
-                            }
-                            // Param
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += result.metaData.nStringIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Param] = nSize;
-                            }
-                            // InterfaceImpl
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
-                                nSize += result.metaData.nTypeDefOrRefSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_InterfaceImpl] = nSize;
-                            }
-                            // MemberRef
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.nMemberRefParentSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MemberRef] = nSize;
-                            }
-                            // Constant
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.nHasConstantSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Constant] = nSize;
-                            }
-                            // CustomAttribute
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.nHasCustomAttributeSize;
-                                nSize += result.metaData.nCustomAttributeTypeSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_CustomAttribute] = nSize;
-                            }
-                            // FieldMarshal
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.nHasFieldMarshalSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_FieldMarshal] = nSize;
-                            }
-                            // DeclSecurity
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.nHasDeclSecuritySize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_DeclSecurity] = nSize;
-                            }
-                            // ClassLayout
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += 4;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ClassLayout] = nSize;
-                            }
-                            // FieldLayout
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Field];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_FieldLayout] = nSize;
-                            }
-                            // StandAloneSig
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_StandAloneSig] = nSize;
-                            }
-                            // EventMap
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Event];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_EventMap] = nSize;
-                            }
-                            // EventPtr
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Event];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_EventPtr] = nSize;
-                            }
-                            // Event
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nTypeDefOrRefSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Event] = nSize;
-                            }
-                            // PropertyMap
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Property];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_PropertyMap] = nSize;
-                            }
-                            // PropertyPtr
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_PropertyPtr] = nSize;
-                            }
-                            // Property
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Property] = nSize;
-                            }
-                            // MethodSemantics
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_MethodDef];
-                                nSize += result.metaData.nHasSemanticsSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodSemantics] = nSize;
-                            }
-                            // MethodImpl
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
-                                nSize += result.metaData.nMethodDefOrRefSize;
-                                nSize += result.metaData.nMethodDefOrRefSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodImpl] = nSize;
-                            }
-                            // ModuleRef
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.nStringIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ModuleRef] = nSize;
-                            }
-                            // TypeSpec
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeSpec] = nSize;
-                            }
-                            // ImplMap
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += result.metaData.nMemberForwardedSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_ModuleRef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ImplMap] = nSize;
-                            }
-                            // FieldRVA
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_Field];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_FieldRVA] = nSize;
-                            }
-                            // EncLog
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_MethodDef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ENCLog] = nSize;
-                            }
-                            // EncMap
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_MethodDef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ENCMap] = nSize;
-                            }
-
-                            // Assembly
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += 4;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Assembly] = nSize;  // Checked
-                            }
-                            // AssemblyProcessor
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyProcessor] = nSize;  // Checked
-                            }
-                            // AssemblyOS
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += 4;
-                                nSize += 4;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyOS] = nSize;  // Checked
-                            }
-                            // AssemblyRef
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += 4;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRef] = nSize;  // Checked
-                            }
-                            // AssemblyRefProcessor
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_AssemblyRef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRefProcessor] = nSize;  // Checked
-                            }
-                            // AssemblyRefOS
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += 4;
-                                nSize += 4;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_AssemblyRef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_AssemblyRefOS] = nSize;  // Checked
-                            }
-                            // File
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_File] = nSize;  // Checked
-                            }
-                            // ExportedType
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += 4;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_File];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ExportedType] = nSize;
-                            }
-                            // ManifestResource
-                            {
-                                qint32 nSize = 0;
-                                nSize += 4;
-                                nSize += 4;
-                                nSize += result.metaData.nStringIndexSize;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_File];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ManifestResource] = nSize;
-                            }
-                            // NestedClass
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
-                                nSize += result.metaData.indexSize[XPE_DEF::metadata_TypeDef];
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_NestedClass] = nSize;
-                            }
-                            // GenericParam
-                            {
-                                qint32 nSize = 0;
-                                nSize += 2;
-                                nSize += 2;
-                                nSize += result.metaData.nTypeDefOrRefSize;
-                                nSize += result.metaData.nStringIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_GenericParam] = nSize;  // Checked
-                            }
-                            // MethodSpec
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.nMethodDefOrRefSize;
-                                nSize += result.metaData.nBLOBIndexSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodSpec] = nSize;
-                            }
-                            // GenericParamConstraint
-                            {
-                                qint32 nSize = 0;
-                                nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_GenericParam];
-                                nSize += result.metaData.nTypeDefOrRefSize;
-                                result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_GenericParamConstraint] = nSize;
-                            }
-                            // {
-                            //     qint32 nSize = 0;
-                            //     nSize += result.metaData.nStringIndexSize;
-                            //     nSize += result.metaData.nGUIDIndexSize;
-                            //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_Document] = nSize;
-                            // }
-                            // {
-                            //     qint32 nSize = 0;
-                            //     nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Document];
-                            //     nSize += 4; // Offset
-                            //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodDebugInformation] = nSize;
-                            // }
-                            // {
-                            //     qint32 nSize = 0;
-                            //     nSize += result.metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ImportScope];
-                            //     nSize += result.metaData.nMethodDefOrRefSize;
-                            //     nSize += 4; // Offset
-                            //     nSize += 4; // Length
-                            //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_LocalScope] = nSize;
-                            // }
-                            // {
-                            //     qint32 nSize = 0;
-                            //     nSize += 2;
-                            //     nSize += result.metaData.nStringIndexSize;
-                            //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_LocalVariable] = nSize;
-                            // }
-                            // {
-                            //     qint32 nSize = 0;
-                            //     nSize += result.metaData.nStringIndexSize;
-                            //     nSize += result.metaData.nConstantSize;
-                            //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_LocalConstant] = nSize;
-                            // }
-                            // {
-                            //     qint32 nSize = 0;
-                            //     nSize += result.metaData.nImportScopeSize;
-                            //     nSize += result.metaData.nBLOBIndexSize;
-                            //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_ImportScope] = nSize;
-                            // }
-                            // {
-                            //     qint32 nSize = 0;
-                            //     nSize += result.metaData.nMethodDefOrRefSize;
-                            //     nSize += result.metaData.nMethodDefOrRefSize;
-                            //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_StateMachineMethod] = nSize;
-                            // }
-                            // {
-                            //     qint32 nSize = 0;
-                            //     nSize += result.metaData.nHasCustomDebugInformationSize;
-                            //     nSize += result.metaData.nBLOBIndexSize;
-                            //     result.metaData.Tables_TableElementSizes[XPE_DEF::metadata_CustomDebugInformation] = nSize;
-                            // }
-
-                            // TODO
-
-                            if (result.metaData.cTables_HeapOffsetSizes & 0x40) {
-                                nOffset += 4;
-                            }
-
-                            for (qint32 i = 0; i < 64; i++) {
-                                if (result.metaData.Tables_TablesNumberOfIndexes[i]) {
-                                    result.metaData.Tables_TablesOffsets[i] = nOffset;
-                                    nOffset += result.metaData.Tables_TableElementSizes[i] * result.metaData.Tables_TablesNumberOfIndexes[i];
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        if (nMetaDataOffset != -1) {
+            pCLIAssembly->setNetMetaDataOffset(nMetaDataOffset);
         }
     }
-
-    //    emit appendError(".NET is not present");
-    return result;
-}
-
-bool XPE::isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
-{
-    return isNetMethodPresent(pCliInfo, "", "<Module>", ".cctor", pPdStruct);
-}
-
-bool XPE::isNetTypePresent(CLI_INFO *pCliInfo, const QString &sTypeNamespace, const QString &sTypeName, PDSTRUCT *pPdStruct)
-{
-    bool bResult = false;
-
-    if (pCliInfo->bValid) {
-        char *pBuffer = pCliInfo->metaData.baStrings.data();
-        qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
-
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
-
-        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-            XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
-
-            QString _sTypeName;
-            QString _sTypeNamespace;
-
-            if (sTypeName != "") {
-                _sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
-            }
-
-            if (sTypeNamespace != "") {
-                _sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
-            }
-
-            if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
-                bResult = true;
-                break;
-            }
-        }
-    }
-
-    return bResult;
-}
-
-bool XPE::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sMethodName, PDSTRUCT *pPdStruct)
-{
-    bool bResult = false;
-
-    if (pCliInfo->bValid) {
-        char *pBuffer = pCliInfo->metaData.baStrings.data();
-        qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
-
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
-
-        bool bProcess = true;
-
-        if (nNumberOfRecords > 0xFFFF) {
-            bProcess = false;
-        }
-
-        if (bProcess) {
-            for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
-                XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
-
-                QString _sTypeName;
-                QString _sTypeNamespace;
-
-                if (sTypeName != "") {
-                    _sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
-                }
-
-                if (sTypeNamespace != "") {
-                    _sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
-                }
-
-                if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
-                    qint32 nNumberOfMethodsPtrRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodPtr];
-                    qint32 nNumberOfMethodsDefRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef];
-
-                    qint32 nMethodsCount = 0;
-                    if (i < (nNumberOfRecords - 1)) {
-                        XPE_DEF::S_METADATA_TYPEDEF recordNext = getMetadataTypeDef(pCliInfo, i + 1);
-                        nMethodsCount = recordNext.nMethodList - record.nMethodList;
-                    } else {
-                        nMethodsCount = nNumberOfMethodsPtrRecords - record.nMethodList;
-                    }
-
-                    for (qint32 j = 0; (j < nMethodsCount) && isPdStructNotCanceled(pPdStruct); j++) {
-                        if (record.nMethodList) {
-                            QString _sMethodName;
-
-                            if (nNumberOfMethodsPtrRecords) {
-                                XPE_DEF::S_METADATA_METHODPTR methodPtr = getMetadataMethodPtr(pCliInfo, record.nMethodList + j - 1);
-
-                                if (methodPtr.nMethod) {
-                                    if (methodPtr.nMethod <= (quint32)nNumberOfMethodsDefRecords) {
-                                        XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, methodPtr.nMethod - 1);
-                                        _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
-                                    }
-                                }
-                            } else {
-                                XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, record.nMethodList + j - 1);
-                                _sMethodName = _read_ansiString_safe(pBuffer, nBufferSize, methodDef.nName);
-                            }
-
-                            // qDebug("_sMethodName: %s", _sMethodName.toLatin1().data());
-
-                            if (sMethodName == _sMethodName) {
-                                bResult = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    break;
-                }
-
-                // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
-            }
-        }
-    }
-
-    return bResult;
-}
-
-bool XPE::isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace, QString sTypeName, QString sFieldName, PDSTRUCT *pPdStruct)
-{
-    bool bResult = false;
-
-    if (pCliInfo->bValid) {
-        char *pBuffer = pCliInfo->metaData.baStrings.data();
-        qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
-
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
-
-        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-            XPE_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
-
-            QString _sTypeName;
-            QString _sTypeNamespace;
-
-            if (sTypeName != "") {
-                _sTypeName = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeName);
-            }
-
-            if (sTypeNamespace != "") {
-                _sTypeNamespace = _read_ansiString_safe(pBuffer, nBufferSize, record.nTypeNamespace);
-            }
-
-            if ((sTypeNamespace == _sTypeNamespace) && (sTypeName == _sTypeName)) {
-                qint32 nNumberOfFieldsRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field];
-                qint32 nFieldsCount = 0;
-                if (i < (nNumberOfRecords - 1)) {
-                    XPE_DEF::S_METADATA_TYPEDEF recordNext = getMetadataTypeDef(pCliInfo, i + 1);
-                    nFieldsCount = recordNext.nFieldList - record.nFieldList;
-                } else {
-                    nFieldsCount = nNumberOfFieldsRecords - record.nFieldList;
-                }
-
-                for (qint32 j = 0; (j < nFieldsCount) && (!(pPdStruct->bIsStop)); j++) {
-                    XPE_DEF::S_METADATA_FIELD field = getMetadataField(pCliInfo, record.nFieldList + j - 1);
-
-                    QString _sFieldName = _read_ansiString_safe(pBuffer, nBufferSize, field.nName);
-
-                    if (sFieldName == _sFieldName) {
-                        bResult = true;
-                    }
-                }
-
-                break;
-            }
-
-            // qDebug("%s %s", sTypeName.toLatin1().data(), sTypeNamespace.toLatin1().data());
-        }
-    }
-
-    return bResult;
-}
-
-XPE_DEF::S_METADATA_MODULE XPE::getMetadataModule(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_MODULE result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Module];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Module] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Module] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nGeneration = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nMvid = pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nGUIDIndexSize;
-            result.nEncId = pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nGUIDIndexSize;
-            result.nEncBaseId =
-                pCliInfo->metaData.nGUIDIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_MEMBERREF XPE::getMetadataMemberRef(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_MEMBERREF result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MemberRef];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MemberRef] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MemberRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nClass =
-                pCliInfo->metaData.nMemberRefParentSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nMemberRefParentSize;
-            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nSignature =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_TYPEDEF XPE::getMetadataTypeDef(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_TYPEDEF result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeDef] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeDef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nFlags = _read_uint32_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 4;
-            result.nTypeName =
-                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nTypeNamespace =
-                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nExtends =
-                pCliInfo->metaData.nTypeDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nTypeDefOrRefSize;
-            result.nFieldList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_Field] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                           : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.indexSize[XPE_DEF::metadata_Field];
-            result.nMethodList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                                : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_TYPEREF XPE::getMetadataTypeRef(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_TYPEREF result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeRef] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nResolutionScope =
-                pCliInfo->metaData.nResolutionScopeSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nResolutionScopeSize;
-            result.nTypeName =
-                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nTypeNamespace =
-                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_MODULEREF XPE::getMetadataModuleRef(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_MODULEREF result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_ModuleRef] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_ModuleRef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_METHODDEF XPE::getMetadataMethodDef(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_METHODDEF result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodDef] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodDef] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nRVA = _read_uint32_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 4;
-            result.nImplFlags = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nFlags = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nSignature =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nBLOBIndexSize;
-            result.nParamList = pCliInfo->metaData.indexSize[XPE_DEF::metadata_Param] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                           : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_METHODPTR XPE::getMetadataMethodPtr(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_METHODPTR result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodPtr];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodPtr] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodPtr] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-            result.nMethod = pCliInfo->metaData.indexSize[XPE_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                            : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_PARAM XPE::getMetadataParam(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_PARAM result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Param];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Param] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Param] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nFlags = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nSequence = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_TYPESPEC XPE::getMetadataTypeSpec(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_TYPESPEC result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_TypeSpec] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_TypeSpec] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nSignature =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_FIELD XPE::getMetadataField(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_FIELD result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Field];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Field] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Field] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nFlags = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nSignature =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_METHODIMPL XPE::getMetadataMethodImpl(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_METHODIMPL result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodImpl];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_MethodImpl] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_MethodImpl] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nClass =
-                pCliInfo->metaData.nTypeDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nTypeDefOrRefSize;
-            result.nMethodBody =
-                pCliInfo->metaData.nMethodDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nMethodDefOrRefSize;
-            result.nMethodDeclaration =
-                pCliInfo->metaData.nMethodDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_ASSEMBLY XPE::getMetadataAssembly(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_ASSEMBLY result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Assembly];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Assembly] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Assembly] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nHashAlgId = _read_uint32_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 4;
-            result.nMajorVersion = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nMinorVersion = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nBuildNumber = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nRevisionNumber = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nFlags = _read_uint32_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 4;
-            result.nPublicKeyOrToken =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nBLOBIndexSize;
-            result.nName = pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nStringIndexSize;
-            result.nCulture =
-                pCliInfo->metaData.nStringIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_CONSTANT XPE::getMetadataConstant(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_CONSTANT result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_Constant];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_Constant] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_Constant] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nType = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nParent =
-                pCliInfo->metaData.nHasConstantSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nHasConstantSize;
-            result.nValue = pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_CUSTOMATTRIBUTE XPE::getMetadataCustomAttribute(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_CUSTOMATTRIBUTE result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_CustomAttribute];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_CustomAttribute] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_CustomAttribute] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nParent =
-                pCliInfo->metaData.nHasCustomAttributeSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nHasCustomAttributeSize;
-            result.nType =
-                pCliInfo->metaData.nCustomAttributeTypeSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nCustomAttributeTypeSize;
-            result.nValue = pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_FIELDMARSHAL XPE::getMetadataFieldMarshal(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_FIELDMARSHAL result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_FieldMarshal];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_FieldMarshal] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_FieldMarshal] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nParent =
-                pCliInfo->metaData.nHasFieldMarshalSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nHasFieldMarshalSize;
-            result.nNativeType =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-XPE_DEF::S_METADATA_DECLSECURITY XPE::getMetadataDeclSecurity(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    XPE_DEF::S_METADATA_DECLSECURITY result = {};
-
-    if (pCliInfo->bValid) {
-        qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_DeclSecurity];
-        char *pBuffer = pCliInfo->metaData.baMetadata.data();
-        qint32 nBufferSize = pCliInfo->metaData.baMetadata.size();
-
-        if (nNumber < nNumberOfRecords) {
-            qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XPE_DEF::metadata_DeclSecurity] +
-                             pCliInfo->metaData.Tables_TableElementSizes[XPE_DEF::metadata_DeclSecurity] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
-
-            result.nAction = _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += 2;
-            result.nParent =
-                pCliInfo->metaData.nHasDeclSecuritySize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-            nOffset += pCliInfo->metaData.nHasDeclSecuritySize;
-            result.nPermissionSet =
-                pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
-        }
-    }
-
-    return result;
-}
-
-QString XPE::getMetadataModuleName(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    return _read_ansiString_safe(pCliInfo->metaData.baStrings.data(), pCliInfo->metaData.baStrings.size(), getMetadataModule(pCliInfo, nNumber).nName);
-}
-
-QString XPE::getMetadataAssemblyName(CLI_INFO *pCliInfo, qint32 nNumber)
-{
-    return _read_ansiString_safe(pCliInfo->metaData.baStrings.data(), pCliInfo->metaData.baStrings.size(), getMetadataAssembly(pCliInfo, nNumber).nName);
-}
-
-XPE_DEF::S_METADATA_METHODDEFORREF XPE::getMetadataMethodDefOrRef(CLI_INFO *pCliInfo, quint32 nValue)
-{
-    XPE_DEF::S_METADATA_METHODDEFORREF result = {};
-
-    if (pCliInfo->bValid) {
-        result.nTag = nValue & 0x1;
-        result.nIndex = nValue >> 1;
-
-        if (result.nTag == XPE_DEF::S_METADATA_METHODDEFORREF_METHODDEF) {
-            result.record.methoddef = getMetadataMethodDef(pCliInfo, result.nIndex);
-        } else if (result.nTag == XPE_DEF::S_METADATA_METHODDEFORREF_MEMBERREF) {
-            result.record.memberref = getMetadataMemberRef(pCliInfo, result.nIndex);
-        }
-    }
-
-    return result;
-}
-
-QString XPE::getMetadataMemberRefParentName(CLI_INFO *pCliInfo, const XPE_DEF::S_METADATA_MEMBERREF &memberRef)
-{
-    QString sResult;
-
-    quint32 nIndex = (memberRef.nClass >> 3) - 1;
-    quint32 nTag = (memberRef.nClass & 0x7);
-
-    if (nTag == 0) {
-        if (nIndex < pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeDef]) {
-            XPE_DEF::S_METADATA_TYPEDEF typeDef = getMetadataTypeDef(pCliInfo, nIndex);
-
-            sResult = _read_ansiString_safe(pCliInfo->metaData.baStrings.data(), pCliInfo->metaData.baStrings.size(), typeDef.nTypeName);
-        }
-    } else if (nTag == 1) {
-        if (nIndex < pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeRef]) {
-            XPE_DEF::S_METADATA_TYPEREF typeRef = getMetadataTypeRef(pCliInfo, nIndex);
-
-            sResult = _read_ansiString_safe(pCliInfo->metaData.baStrings.data(), pCliInfo->metaData.baStrings.size(), typeRef.nTypeName);
-        }
-    } else if (nTag == 2) {
-        if (nIndex < pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_ModuleRef]) {
-            XPE_DEF::S_METADATA_MODULEREF moduleRef = getMetadataModuleRef(pCliInfo, nIndex);
-
-            sResult = _read_ansiString_safe(pCliInfo->metaData.baStrings.data(), pCliInfo->metaData.baStrings.size(), moduleRef.nName);
-        }
-    } else if (nTag == 3) {
-        if (nIndex < pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_MethodDef]) {
-            XPE_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(pCliInfo, nIndex);
-
-            sResult = _read_ansiString_safe(pCliInfo->metaData.baStrings.data(), pCliInfo->metaData.baStrings.size(), methodDef.nName);
-        }
-    } else if (nTag == 4) {
-        if (nIndex < pCliInfo->metaData.Tables_TablesNumberOfIndexes[XPE_DEF::metadata_TypeSpec]) {
-            XPE_DEF::S_METADATA_TYPESPEC typeSpec = getMetadataTypeSpec(pCliInfo, nIndex);
-
-            sResult = QString("BLOB[%1]").arg(typeSpec.nSignature);
-        }
-    } else {
-        sResult = tr("Unknown");
-    }
-
-    return sResult;
 }
 
 XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
@@ -12816,78 +11686,6 @@ XBinary::OFFSETSIZE XPE::getNet_MetadataOffsetSize()
     }
 
     return osResult;
-}
-
-QString XPE::mdtIdToString(quint32 nID)
-{
-    QString sResult;
-
-    switch (nID) {
-        case 0x00: sResult = "Module"; break;
-        case 0x01: sResult = "TypeRef"; break;
-        case 0x02: sResult = "TypeDef"; break;
-        case 0x04: sResult = "Field"; break;
-        case 0x05: sResult = "MethodPtr"; break;
-        case 0x06: sResult = "MethodDef"; break;
-        case 0x07: sResult = "ParamPtr"; break;
-        case 0x08: sResult = "Param"; break;
-        case 0x09: sResult = "InterfaceImpl"; break;
-        case 0x0A: sResult = "MemberRef"; break;
-        case 0x0B: sResult = "Constant"; break;
-        case 0x0C: sResult = "CustomAttribute"; break;
-        case 0x0D: sResult = "FieldMarshal"; break;
-        case 0x0E: sResult = "DeclSecurity"; break;
-        case 0x0F: sResult = "ClassLayout"; break;
-        case 0x10: sResult = "FieldLayout"; break;
-        case 0x11: sResult = "StandAloneSig"; break;
-        case 0x12: sResult = "EventMap"; break;
-        case 0x13: sResult = "EventPtr"; break;
-        case 0x14: sResult = "Event"; break;
-        case 0x15: sResult = "PropertyMap"; break;
-        case 0x16: sResult = "PropertyPtr"; break;
-        case 0x17: sResult = "Property"; break;
-        case 0x18: sResult = "MethodSemantics"; break;
-        case 0x19: sResult = "MethodImpl"; break;
-        case 0x1A: sResult = "ModuleRef"; break;
-        case 0x1B: sResult = "TypeSpec"; break;
-        case 0x1C: sResult = "ImplMap"; break;
-        case 0x1D: sResult = "FieldRVA"; break;
-        case 0x1E: sResult = "ENCLog"; break;
-        case 0x1F: sResult = "ENCMap"; break;
-        case 0x20: sResult = "Assembly"; break;
-        case 0x21: sResult = "AssemblyProcessor"; break;
-        case 0x22: sResult = "AssemblyOS"; break;
-        case 0x23: sResult = "AssemblyRef"; break;
-        case 0x24: sResult = "AssemblyRefProcessor"; break;
-        case 0x25: sResult = "AssemblyRefOS"; break;
-        case 0x26: sResult = "File"; break;
-        case 0x27: sResult = "ExportedType"; break;
-        case 0x28: sResult = "ManifestResource"; break;
-        case 0x29: sResult = "NestedClass"; break;
-        case 0x2A: sResult = "GenericParam"; break;
-        case 0x2B: sResult = "MethodSpec"; break;
-        case 0x2C: sResult = "GenericParamConstraint"; break;
-        case 0x2D: sResult = "Document"; break;
-        case 0x2E: sResult = "MethodDebugInformation"; break;
-        case 0x2F: sResult = "LocalScope"; break;
-        case 0x30: sResult = "LocalVariable"; break;
-        case 0x31: sResult = "LocalConstant"; break;
-        case 0x32: sResult = "ImportScope"; break;
-        case 0x33: sResult = "StateMachineMethod"; break;
-        case 0x34: sResult = "CustomDebugInformation"; break;
-        case 0x38: sResult = "Reserved 38"; break;
-        case 0x39: sResult = "Reserved 39"; break;
-        case 0x3A: sResult = "Reserved 3A"; break;
-        case 0x3B: sResult = "Reserved 3B"; break;
-        case 0x3C: sResult = "Reserved 3C"; break;
-        case 0x3D: sResult = "Reserved 3D"; break;
-        case 0x3E: sResult = "Reserved 3E"; break;
-        case 0x3F: sResult = "Reserved 3F"; break;
-
-        default: sResult = tr("Unknown"); break;
-    }
-
-    return sResult;
 }
 
 XPE::CLI_METADATA_HEADER XPE::_read_MetadataHeader(qint64 nOffset)
@@ -13011,18 +11809,6 @@ bool XPE::isDataDirectoryValid(XPE_DEF::IMAGE_DATA_DIRECTORY *pDataDirectory, XB
     return bResult;
 }
 
-bool XPE::isNetMetadataPresent(PDSTRUCT *pPdStruct)
-{
-    _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-    CLI_INFO cliInfo = getCliInfo(true, &memoryMap, pPdStruct);
-
-    return isNetMetadataPresent(&cliInfo, &memoryMap);
-}
-
-bool XPE::isNetMetadataPresent(XPE::CLI_INFO *pCliInfo, XBinary::_MEMORY_MAP *pMemoryMap)
-{
-    return isDataDirectoryValid(&(pCliInfo->header.MetaData), pMemoryMap);
-}
 
 quint32 XPE::getNetId()
 {
@@ -13039,17 +11825,6 @@ quint32 XPE::getNetId()
     return nResult;
 }
 
-qint64 XPE::findSignatureInBlob_NET(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
-{
-    XPE::CLI_INFO clinfo = getCliInfo(true, pMemoryMap, pPdStruct);
-
-    return find_signature(pMemoryMap, clinfo.metaData.osBlob.nOffset, clinfo.metaData.osBlob.nSize, sSignature, nullptr, pPdStruct);
-}
-
-bool XPE::isSignatureInBlobPresent_NET(const QString &sSignature, _MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
-{
-    return (findSignatureInBlob_NET(sSignature, pMemoryMap, pPdStruct) != -1);
-}
 
 qint32 XPE::getEntryPointSection()
 {

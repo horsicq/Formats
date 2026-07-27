@@ -490,6 +490,96 @@ quint32 XAmigaHunk::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XAmigaHunk_STRUCTID, sizeof(_TABLE_XAmigaHunk_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+static XBinary::XIDSTRING _TABLE_XAmigaHunk_HunkIds[] = {{XAMIGAHUNK_DEF::HUNK_UNIT, "HUNK_UNIT"},
+                                                         {XAMIGAHUNK_DEF::HUNK_NAME, "HUNK_NAME"},
+                                                         {XAMIGAHUNK_DEF::HUNK_CODE, "HUNK_CODE"},
+                                                         {XAMIGAHUNK_DEF::HUNK_DATA, "HUNK_DATA"},
+                                                         {XAMIGAHUNK_DEF::HUNK_BSS, "HUNK_BSS"},
+                                                         {XAMIGAHUNK_DEF::HUNK_RELOC32, "HUNK_RELOC32"},
+                                                         {XAMIGAHUNK_DEF::HUNK_RELOC16, "HUNK_RELOC16"},
+                                                         {XAMIGAHUNK_DEF::HUNK_RELOC8, "HUNK_RELOC8"},
+                                                         {XAMIGAHUNK_DEF::HUNK_EXT, "HUNK_EXT"},
+                                                         {XAMIGAHUNK_DEF::HUNK_SYMBOL, "HUNK_SYMBOL"},
+                                                         {XAMIGAHUNK_DEF::HUNK_DEBUG, "HUNK_DEBUG"},
+                                                         {XAMIGAHUNK_DEF::HUNK_END, "HUNK_END"},
+                                                         {XAMIGAHUNK_DEF::HUNK_HEADER, "HUNK_HEADER"},
+                                                         {XAMIGAHUNK_DEF::HUNK_OVERLAY, "HUNK_OVERLAY"},
+                                                         {XAMIGAHUNK_DEF::HUNK_BREAK, "HUNK_BREAK"},
+                                                         {XAMIGAHUNK_DEF::HUNK_DREL32, "HUNK_DREL32"},
+                                                         {XAMIGAHUNK_DEF::HUNK_DREL16, "HUNK_DREL16"},
+                                                         {XAMIGAHUNK_DEF::HUNK_DREL8, "HUNK_DREL8"},
+                                                         {XAMIGAHUNK_DEF::HUNK_LIB, "HUNK_LIB"},
+                                                         {XAMIGAHUNK_DEF::HUNK_INDEX, "HUNK_INDEX"},
+                                                         {XAMIGAHUNK_DEF::HUNK_RELOC32SHORT, "HUNK_RELOC32SHORT"},
+                                                         {XAMIGAHUNK_DEF::HUNK_RELRELOC32, "HUNK_RELRELOC32"},
+                                                         {XAMIGAHUNK_DEF::HUNK_ABSRELOC16, "HUNK_ABSRELOC16"},
+                                                         {XAMIGAHUNK_DEF::HUNK_DREL32EXE, "HUNK_DREL32EXE"},
+                                                         {XAMIGAHUNK_DEF::HUNK_PPC_CODE, "HUNK_PPC_CODE"},
+                                                         {XAMIGAHUNK_DEF::HUNK_RELRELOC26, "HUNK_RELRELOC26"}};
+
+QList<XBinary::XFHEADER> XAmigaHunk::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_HUNK;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_HUNK) {
+        QList<HUNK> listHunks = getHunks(pPdStruct);
+
+        if (!listHunks.isEmpty()) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HUNK);
+            xfHeader.xLoc = offsetToLoc(listHunks.first().nOffset);
+            xfHeader.xfType = XFTYPE_TABLE;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HUNK, xfHeader.xLoc);
+            // Field 0 = Id
+            xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XAmigaHunk_HunkIds, sizeof(_TABLE_XAmigaHunk_HunkIds) / sizeof(XBinary::XIDSTRING)});
+
+            qint32 nNumberOfHunks = listHunks.count();
+
+            for (qint32 i = 0; i < nNumberOfHunks; i++) {
+                xfHeader.listRowLocations.append(listHunks.at(i).nOffset);
+            }
+
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HUNK), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XAmigaHunk::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    // Amiga Hunk files are big-endian
+    if (nStructID == STRUCTID_HUNK) {
+        listResult.append({"Id", 0, 4, XFRECORD_FLAG_BE, VT_UINT32});
+    } else if ((nStructID == STRUCTID_HUNK_CODE) || (nStructID == STRUCTID_HUNK_DATA) || (nStructID == STRUCTID_HUNK_BSS) || (nStructID == STRUCTID_HUNK_PPC_CODE)) {
+        listResult.append({"Id", 0, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"NumLongs", 4, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+    } else if (nStructID == STRUCTID_HUNK_HEADER) {
+        listResult.append({"Id", 0, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"StringsSize", 4, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"TableSize", 8, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"FirstHunk", 12, 4, XFRECORD_FLAG_BE, VT_UINT32});
+        listResult.append({"LastHunk", 16, 4, XFRECORD_FLAG_BE, VT_UINT32});
+    }
+
+    return listResult;
+}
+
 bool XAmigaHunk::isExecutable()
 {
     return true;

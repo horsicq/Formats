@@ -260,6 +260,100 @@ quint32 XRiff::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XRIFF_STRUCTID, sizeof(_TABLE_XRIFF_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XRiff::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_HEADER;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_HEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
+        xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = 12;
+        xfHeader.xfType = XFTYPE_HEADER;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
+        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);
+        listResult.append(xfHeader);
+
+        if (xfStruct.bIsParent) {
+            XFSTRUCT _xfStruct = xfStruct;
+            _xfStruct.sParent = xfHeader.sTag;
+            _xfStruct.nStructID = STRUCTID_CHUNK;
+            _xfStruct.xLoc = offsetToLoc(12);
+            listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+        }
+    } else if (nStructID == STRUCTID_CHUNK) {
+        qint64 nStartOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        if (nStartOffset == -1) {
+            nStartOffset = 12;
+        }
+
+        bool bIsBigEndian = (read_ansiString(0, 4) == "RIFX");
+        qint64 nEndOffset = qMin(getSize(), (qint64)(8 + read_uint32(4, bIsBigEndian)));
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_CHUNK);
+        xfHeader.xLoc = offsetToLoc(nStartOffset);
+        xfHeader.xfType = XFTYPE_TABLE;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_CHUNK, xfHeader.xLoc);
+
+        qint64 nCurrentOffset = nStartOffset;
+
+        while (((nCurrentOffset + 8) <= nEndOffset) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            quint32 nChunkSize = read_uint32(nCurrentOffset + 4, bIsBigEndian);
+
+            xfHeader.listRowLocations.append(nCurrentOffset);
+
+            nCurrentOffset += 8 + nChunkSize + (nChunkSize & 1);  // Chunks are word-aligned
+        }
+
+        if (!xfHeader.listRowLocations.isEmpty()) {
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_CHUNK), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XRiff::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    bool bIsBigEndian = (read_ansiString(0, 4) == "RIFX");
+    quint64 nEndianFlag = bIsBigEndian ? XFRECORD_FLAG_BE : XFRECORD_FLAG_NONE;
+
+    if (nStructID == STRUCTID_HEADER) {
+        listResult.append({"Signature", 0, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Size", 4, 4, nEndianFlag | XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"FormType", 8, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+    } else if (nStructID == STRUCTID_CHUNK) {
+        listResult.append({"ID", 0, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"Size", 4, 4, nEndianFlag | XFRECORD_FLAG_SIZE, VT_UINT32});
+    }
+
+    return listResult;
+}
+
 QList<QString> XRiff::getSearchSignatures()
 {
     QList<QString> listResult;

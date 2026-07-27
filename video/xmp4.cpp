@@ -231,6 +231,119 @@ quint32 XMP4::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_XMP4_STRUCTID, sizeof(_TABLE_XMP4_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
+QList<XBinary::XFHEADER> XMP4::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
+{
+    QList<XBinary::XFHEADER> listResult;
+
+    quint32 nStructID = xfStruct.nStructID;
+
+    if (nStructID == STRUCTID_UNKNOWN) {
+        XFSTRUCT _xfStruct = xfStruct;
+        _xfStruct.nStructID = STRUCTID_HEADER;
+        _xfStruct.xLoc = offsetToLoc(0);
+        listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+    } else if (nStructID == STRUCTID_HEADER) {
+        XLOC headerLoc = xfStruct.xLoc;
+        if (headerLoc.locType == LT_UNKNOWN) {
+            headerLoc = offsetToLoc(0);
+        }
+
+        qint64 nHeaderOffset = locToOffset(xfStruct.pMemoryMap, headerLoc);
+
+        if (nHeaderOffset != -1) {
+            XFHEADER xfHeader = {};
+            xfHeader.sParentTag = xfStruct.sParent;
+            xfHeader.fileType = xfStruct.fileType;
+            xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
+            xfHeader.xLoc = headerLoc;
+            xfHeader.nSize = read_uint32(nHeaderOffset, true);
+            xfHeader.xfType = XFTYPE_HEADER;
+            xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+
+            if (xfStruct.bIsParent) {
+                XFSTRUCT _xfStruct = xfStruct;
+                _xfStruct.sParent = xfHeader.sTag;
+                _xfStruct.nStructID = STRUCTID_BOX;
+                _xfStruct.xLoc = offsetToLoc(0);
+                listResult.append(getXFHeaders(_xfStruct, pPdStruct));
+            }
+        }
+    } else if (nStructID == STRUCTID_BOX) {
+        qint64 nStartOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        if (nStartOffset == -1) {
+            nStartOffset = 0;
+        }
+
+        qint64 nFileSize = getSize();
+
+        XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
+        xfHeader.fileType = xfStruct.fileType;
+        xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_BOX);
+        xfHeader.xLoc = offsetToLoc(nStartOffset);
+        xfHeader.xfType = XFTYPE_TABLE;
+        xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_BOX, xfHeader.xLoc);
+
+        qint64 nCurrentOffset = nStartOffset;
+
+        while (((nCurrentOffset + 8) <= nFileSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            quint32 nBoxSize = read_uint32(nCurrentOffset, true);
+            QString sType = read_ansiString(nCurrentOffset + 4, 4);
+
+            if (!isTagValid(sType)) {
+                break;
+            }
+
+            xfHeader.listRowLocations.append(nCurrentOffset);
+
+            qint64 nRealSize = nBoxSize;
+
+            if (nBoxSize == 0) {
+                break;  // Box extends to the end of the file
+            } else if (nBoxSize == 1) {
+                nRealSize = read_uint64(nCurrentOffset + 8, true);  // 64-bit largesize
+            }
+
+            if (nRealSize < 8) {
+                break;
+            }
+
+            nCurrentOffset += nRealSize;
+        }
+
+        if (!xfHeader.listRowLocations.isEmpty()) {
+            xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_BOX), xfHeader.sParentTag);
+            listResult.append(xfHeader);
+        }
+    }
+
+    return listResult;
+}
+
+QList<XBinary::XFRECORD> XMP4::getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc)
+{
+    Q_UNUSED(fileType)
+    Q_UNUSED(xLoc)
+
+    QList<XBinary::XFRECORD> listResult;
+
+    // MP4/QuickTime box sizes are big-endian
+    if (nStructID == STRUCTID_HEADER) {
+        listResult.append({"Size", 0, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"Type", 4, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"MajorBrand", 8, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+        listResult.append({"MinorVersion", 12, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_VERSION, VT_UINT32});
+    } else if (nStructID == STRUCTID_BOX) {
+        listResult.append({"Size", 0, 4, XFRECORD_FLAG_BE | XFRECORD_FLAG_SIZE, VT_UINT32});
+        listResult.append({"Type", 4, 4, XFRECORD_FLAG_NONE, VT_CHAR_ARRAY});
+    }
+
+    return listResult;
+}
+
 QList<QString> XMP4::getSearchSignatures()
 {
     QList<QString> listResult;
