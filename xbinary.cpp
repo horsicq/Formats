@@ -5428,7 +5428,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
             }
 
             if (!bIsStart) {
-                quint16 nCode = cPrevSymbol + (cSymbol << 8);  // TODO BE/LE
+                quint16 nCode = (quint8)cPrevSymbol | ((quint16)(quint8)cSymbol << 8);  // TODO BE/LE
 
                 bool bIsUnicodeSymbol = false;
 
