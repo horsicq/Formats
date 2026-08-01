@@ -35,11 +35,11 @@ qint64 getHeaderEndOffset(const XBinary::XFHEADER &xfHeader)
         return -1;
     }
 
-    if (xfHeader.xLoc.nLocation == (XBinary::XADDR)-1) {
+    if (xfHeader.xLoc.nLocation == (XADDR)-1) {
         return -1;
     }
 
-    if (xfHeader.xLoc.nLocation > (XBinary::XADDR)std::numeric_limits<qint64>::max()) {
+    if (xfHeader.xLoc.nLocation > (XADDR)std::numeric_limits<qint64>::max()) {
         return -1;
     }
 
@@ -61,8 +61,8 @@ qint64 getHeaderEndOffset(const XBinary::XFHEADER &xfHeader)
 
         qint64 nEndOffset = -1;
 
-        for (XBinary::XADDR nRowLocation : xfHeader.listRowLocations) {
-            if ((nRowLocation > (XBinary::XADDR)std::numeric_limits<qint64>::max()) ||
+        for (XADDR nRowLocation : xfHeader.listRowLocations) {
+            if ((nRowLocation > (XADDR)std::numeric_limits<qint64>::max()) ||
                 ((qint64)nRowLocation > std::numeric_limits<qint64>::max() - nRowSize)) {
                 return -1;
             }
@@ -99,11 +99,11 @@ bool isValidOffsetLocation(const XBinary::XLOC &xLoc)
         return false;
     }
 
-    if (xLoc.nLocation == (XBinary::XADDR)-1) {
+    if (xLoc.nLocation == (XADDR)-1) {
         return false;
     }
 
-    if (xLoc.nLocation > (XBinary::XADDR)std::numeric_limits<qint64>::max()) {
+    if (xLoc.nLocation > (XADDR)std::numeric_limits<qint64>::max()) {
         return false;
     }
 
