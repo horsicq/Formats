@@ -27,6 +27,12 @@ class XTTF : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_TRUETYPE,
@@ -101,6 +107,9 @@ public:
 
     static QMap<quint64, QString> getHeaderVersions();
     static QMap<quint64, QString> getHeaderVersionsS();
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XTTF_H

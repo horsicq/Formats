@@ -27,6 +27,12 @@ class XText : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum TEXT_TYPE : qint32 {
         TEXT_TYPE_UNKNOWN = 0,
         TEXT_TYPE_PLAINTEXT,
@@ -100,6 +106,9 @@ private:
     LINE_ENDING _detectLineEndingInData(const QByteArray &data);
     qint64 _countLines(const QByteArray &data);
     qint64 _countWords(const QString &text);
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XTEXT_H

@@ -82,3 +82,40 @@ XBinary *XWAV::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XWAV(pDevice);
 }
+
+bool XWAV::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XRiff::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XRiff::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XRiff::INTERNAL_INFO *>(XRiff::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XWAV::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XWAV::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XRiff::setInternalInfo(static_cast<XRiff::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XRiff::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
+}

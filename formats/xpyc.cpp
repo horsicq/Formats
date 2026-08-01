@@ -135,7 +135,7 @@ XBinary::FT XPYC::getFileType()
 
 QString XPYC::getVersion()
 {
-    INFO info = getInternalInfo();
+    INFO info = *static_cast<INFO *>(getInternalInfo(nullptr));
 
     return info.sVersion;
 }
@@ -155,7 +155,7 @@ qint64 XPYC::getFileFormatSize(PDSTRUCT *pPdStruct)
     qint64 nResult = 0;
 
     if (isValid(pPdStruct)) {
-        INFO info = getInternalInfo(pPdStruct);
+        INFO info = *static_cast<INFO *>(getInternalInfo(pPdStruct));
         qint32 nMajor = 0;
         qint32 nMinor = 0;
         _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
@@ -252,7 +252,7 @@ QList<XBinary::XFRECORD> XPYC::getXFRecords(FT fileType, quint32 nStructID, cons
     QList<XBinary::XFRECORD> listResult;
 
     if (nStructID == STRUCTID_HEADER) {
-        INFO info = getInternalInfo();
+        INFO info = *static_cast<INFO *>(getInternalInfo(nullptr));
 
         qint32 nMajor = 0;
         qint32 nMinor = 0;
@@ -280,7 +280,42 @@ QList<XBinary::XFRECORD> XPYC::getXFRecords(FT fileType, quint32 nStructID, cons
     return listResult;
 }
 
-XPYC::INFO XPYC::getInternalInfo(PDSTRUCT *pPdStruct)
+bool XPYC::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        m_internalInfo = INTERNAL_INFO();
+        setIsInternalInfoHandled(true);
+        m_internalInfo = _getInternalInfo(pPdStruct);
+        m_internalInfo.memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+        XBinary::setInternalInfo(static_cast<XBinary::INTERNAL_INFO *>(&m_internalInfo));
+    }
+
+    return bResult;
+}
+
+void *XPYC::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XPYC::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XBinary::setInternalInfo(static_cast<XBinary::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XBinary::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
+}
+
+XPYC::INTERNAL_INFO XPYC::_getInternalInfo(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
@@ -628,7 +663,7 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
         return codeObject;
     }
 
-    INFO info = getInternalInfo(pPdStruct);
+    INFO info = *static_cast<INFO *>(getInternalInfo(pPdStruct));
     qint32 nMajor = 0;
     qint32 nMinor = 0;
     _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
@@ -907,7 +942,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
 
     qint64 nTotalSize = getSize();
     qint64 nFormatSize = getFileFormatSize(pPdStruct);
-    INFO info = getInternalInfo(pPdStruct);
+    INFO info = *static_cast<INFO *>(getInternalInfo(pPdStruct));
 
     // Calculate header size (magic + marker + metadata)
     qint64 nHeaderSize = 4;  // Magic + Marker

@@ -1637,6 +1637,43 @@ QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList(qint32 nLimit)
     return listResult;
 }
 
+bool XELF::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XBinary::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XELF::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XELF::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XBinary::setInternalInfo(static_cast<XBinary::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XBinary::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
+}
+
 QList<XELF_DEF::Elf64_Shdr> XELF::getElf64_ShdrList(qint32 nLimit)
 {
     QList<XELF_DEF::Elf64_Shdr> listResult;

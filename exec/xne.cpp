@@ -87,11 +87,10 @@ bool XNE::isValid(PDSTRUCT *pPdStruct)
     quint16 magic = get_magic();
 
     if (magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) {
-        qint32 lfanew = get_lfanew();
-        qint64 nSize = getSize();
+        qint64 nImageHeaderOffset = getImageOS2HeaderOffset();
 
-        if ((lfanew > 0) && (lfanew < (nSize & 0xFFFFFFFF))) {
-            quint32 signature = read_uint16(lfanew);
+        if ((nImageHeaderOffset >= 0) && _isOffsetValid(nImageHeaderOffset + (qint64)sizeof(quint16) - 1)) {
+            quint32 signature = read_uint16(nImageHeaderOffset);
 
             if (signature == XNE_DEF::S_IMAGE_OS2_SIGNATURE) {
                 return true;
@@ -894,9 +893,16 @@ QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()
     QList<XNE_DEF::NE_SEGMENT> listResult;
 
     qint64 nOffset = getSegmentTableOffset();
-    qint32 nNumberOfSegments = getImageOS2Header_cseg();
+    if (!_isOffsetValid(nOffset)) {
+        return listResult;
+    }
 
-    for (qint32 i = 0; i < nNumberOfSegments; i++) {
+    qint64 nNumberOfSegmentsMax = (getSize() - nOffset) / sizeof(XNE_DEF::NE_SEGMENT);
+    qint64 nNumberOfSegments = getImageOS2Header_cseg();
+
+    nNumberOfSegments = qMin<qint64>(nNumberOfSegments, nNumberOfSegmentsMax);
+
+    for (qint64 i = 0; i < nNumberOfSegments; i++) {
         XNE_DEF::NE_SEGMENT segment = _read_NE_SEGMENT(nOffset);
 
         listResult.append(segment);
@@ -971,7 +977,11 @@ qint64 XNE::getModuleAddress()
 
 XBinary::MODE XNE::getMode()
 {
-    return MODE_16SEG;
+    if (isValid()) {
+        return MODE_16SEG;
+    }
+
+    return MODE_UNKNOWN;
 }
 
 QString XNE::getArch()
@@ -1496,13 +1506,20 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         record.nVirtualAddress = nModuleAddress;
         record.nVirtualSize = 0x200;
         record.nFileOffset = 0;
-        record.nFileSize = qMin<qint64>(getImageOS2HeaderOffset() + sizeof(XNE_DEF::IMAGE_OS2_HEADER), nTotalSize);
+        qint64 nImageHeaderOffset = getImageOS2HeaderOffset();
+        qint64 nImageHeaderSize = 0;
+
+        if (nImageHeaderOffset >= 0) {
+            nImageHeaderSize = qMin<qint64>(nImageHeaderOffset + sizeof(XNE_DEF::IMAGE_OS2_HEADER), nTotalSize);
+        }
+
+        record.nFileSize = nImageHeaderSize;
         record.sName = tr("Header");
 
         if (bCalcAddress) {
             _listCalc.append(record);
         }
-        if (nFileParts & FILEPART_HEADER) {
+        if ((nFileParts & FILEPART_HEADER) && (nImageHeaderSize > 0)) {
             listResult.append(record);
         }
         nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
@@ -1516,12 +1533,21 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             const XNE_DEF::NE_SEGMENT &seg = listSegments.at(i);
 
             qint64 nFileSize = seg.dwFileSize ? seg.dwFileSize : 0x10000;
-            qint64 nFileOffset = static_cast<qint64>(seg.dwFileOffset) << nShift;
+            if (nShift > 62) {
+                continue;
+            }
+
+            qint64 nSegmentBase = getSize() - 1;
+            qint64 nFileOffset = static_cast<qint64>(seg.dwFileOffset);
+            if ((nSegmentBase > 0) && (nFileOffset > (nSegmentBase >> nShift))) {
+                continue;
+            }
+            nFileOffset <<= nShift;
 
             if (nFileOffset > nTotalSize) {
                 continue;
             }
-            if (nFileOffset + nFileSize > nTotalSize) {
+            if (nFileOffset > (nTotalSize - nFileSize)) {
                 nFileSize = nTotalSize - nFileOffset;
             }
 
@@ -1571,4 +1597,41 @@ XBinary *XNE::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAdd
     Q_UNUSED(nModuleAddress)
 
     return new XNE(pDevice);
+}
+
+bool XNE::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XMSDOS::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XMSDOS::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XMSDOS::INTERNAL_INFO *>(XMSDOS::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XNE::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XNE::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XMSDOS::setInternalInfo(static_cast<XMSDOS::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XMSDOS::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
 }

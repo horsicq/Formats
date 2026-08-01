@@ -545,3 +545,40 @@ qint64 XText::_countWords(const QString &text)
     // return text.split(QRegExp("\\s+"), Qt::SkipEmptyParts).count();
     return 0;
 }
+
+bool XText::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XBinary::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XText::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XText::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XBinary::setInternalInfo(static_cast<XBinary::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XBinary::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
+}

@@ -27,6 +27,12 @@
 class EXAMPLE_CLASS : public XBinary {
     Q_OBJECT
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_ORIGINALHEADERNAME,
@@ -88,6 +94,9 @@ public:
     ORIGINALHEADERNAME _read_ORIGINALHEADERNAME(qint64 nOffset);
     DATA_STRUCT1 _read_DATA_STRUCT1(qint64 nOffset);
     DATA_STRUCT2 _read_DATA_STRUCT2(qint64 nOffset);
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // EXAMPLE_CLASS_H

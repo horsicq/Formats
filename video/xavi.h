@@ -27,6 +27,12 @@ class XAVI : public XRiff {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XRiff::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_HEADER = XRiff::STRUCTID_UNKNOWN + 1,
@@ -62,6 +68,9 @@ public:
     QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
     QList<QString> getSearchSignatures() override;
     XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XAVI_H

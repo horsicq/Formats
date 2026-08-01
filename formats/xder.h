@@ -28,6 +28,12 @@ class XDER : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     struct HEADER {
         quint8 nTag;            // Top-level tag (usually 0x30 for SEQUENCE)
         qint64 nHeaderSize;     // Size of Tag+Length
@@ -53,6 +59,9 @@ public:
 
 private:
     HEADER _getHeader(PDSTRUCT *pPdStruct);
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XDER_H

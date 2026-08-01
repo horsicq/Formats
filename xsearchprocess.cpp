@@ -22,7 +22,39 @@
 
 #include "xformats.h"
 
+#include <limits>
 #include <QtGlobal>
+
+namespace {
+bool getMSRecordOffset(const XBinary::_MEMORY_MAP &memoryMap, const XBinary::MS_RECORD &record, qint64 *pnOffset)
+{
+    if (!pnOffset || (record.nRelOffset > (quint64)(std::numeric_limits<qint64>::max)())) {
+        return false;
+    }
+
+    const qint64 nRelOffset = (qint64)record.nRelOffset;
+
+    if (record.nRegionIndex == -1) {
+        *pnOffset = nRelOffset;
+        return true;
+    }
+
+    const qint32 nRegionIndex = record.nRegionIndex;
+
+    if ((nRegionIndex < 0) || (nRegionIndex >= memoryMap.listRecords.count())) {
+        return false;
+    }
+
+    const qint64 nRegionOffset = memoryMap.listRecords.at(nRegionIndex).nOffset;
+
+    if ((nRegionOffset < 0) || (nRelOffset > (std::numeric_limits<qint64>::max)() - nRegionOffset)) {
+        return false;
+    }
+
+    *pnOffset = nRegionOffset + nRelOffset;
+    return true;
+}
+}  // namespace
 
 XSearchProcess::XSearchProcess(QObject *pParent) : XThreadObject(pParent)
 {
@@ -97,27 +129,8 @@ void XSearchProcess::process()
 
             if (pRecord->sValue.isEmpty()) {
                 qint64 nRecordOffset = -1;
-
-                if (pRecord->nRegionIndex != -1) {
-                    if (m_pMemoryMap->listRecords.at(pRecord->nRegionIndex).nOffset != -1) {
-                        nRecordOffset = m_pMemoryMap->listRecords.at(pRecord->nRegionIndex).nOffset + pRecord->nRelOffset;
-                    }
-                } else {
-                    nRecordOffset = pRecord->nRelOffset;
-                }
-
-                if (nRecordOffset != -1) {
-                    bool bBigEndian = (m_ssOptions.endian == XBinary::ENDIAN_BIG);
-
-                    if (pRecord->nValueType == XBinary::VT_U) {
-                        if (pRecord->nInfo == XBinary::ENDIAN_BIG) {
-                            bBigEndian = true;
-                        } else if (pRecord->nInfo == XBinary::ENDIAN_LITTLE) {
-                            bBigEndian = false;
-                        }
-                    }
-
-                    pRecord->sValue = pBinary->read_value((XBinary::VT)(pRecord->nValueType), nRecordOffset, pRecord->nSize, bBigEndian).toString();
+                if (getMSRecordOffset(*m_pMemoryMap, *pRecord, &nRecordOffset)) {
+                    pRecord->sValue = pBinary->read_msRecordString(*pRecord, nRecordOffset);
                 }
             }
         }

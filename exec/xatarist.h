@@ -28,6 +28,12 @@ class XAtariST : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_HEADER
@@ -66,6 +72,9 @@ public:
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
     virtual QString typeIdToString(qint32 nType) override;
     virtual QString getFileFormatExtsString() override;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XATARIST_H

@@ -642,6 +642,11 @@ struct S_IMAGE_RUNTIME_FUNCTION_ENTRY {
     };
 };
 
+struct S_IMAGE_ARM_RUNTIME_FUNCTION_ENTRY {
+    quint32 BeginAddress;
+    quint32 UnwindData;
+};
+
 struct S_IMAGE_LOAD_CONFIG_CODE_INTEGRITY {
     quint16 Flags;    // Flags to indicate if CI information is available, etc.
     quint16 Catalog;  // 0xFFFF means not available
@@ -781,6 +786,12 @@ struct IMAGE_BOUND_IMPORT_DESCRIPTOR {
     quint16 OffsetModuleName;
     quint16 NumberOfModuleForwarderRefs;
     // Array of zero or more IMAGE_BOUND_FORWARDER_REF follows
+};
+
+struct IMAGE_BOUND_FORWARDER_REF {
+    quint32 TimeDateStamp;
+    quint16 OffsetModuleName;
+    quint16 Reserved;
 };
 
 struct WIN_CERT_RECORD {

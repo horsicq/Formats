@@ -38,6 +38,12 @@ class XPE : public XMSDOS {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XMSDOS::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_IMAGE_DOS_HEADER,
@@ -75,6 +81,12 @@ public:
         STRUCTID_IMAGE_RESOURCE_DIRECTORY_ENTRY,
         STRUCTID_IMAGE_RESOURCE_DATA_ENTRY,
         STRUCTID_IMAGE_BASE_RELOCATION,
+        STRUCTID_IMAGE_BASE_RELOCATION_ENTRY,
+        STRUCTID_IMAGE_BOUND_FORWARDER_REF,
+        STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY_ARM,
+        STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY_ALPHA,
+        STRUCTID_IMAGE_RUNTIME_FUNCTION_ENTRY_ALPHA64,
+        STRUCTID_IMAGE_EXCEPTION_DIRECTORY_RAW,
     };
 
     struct SECTION_RECORD {
@@ -206,7 +218,7 @@ public:
     };
 
     struct RELOCS_POSITION {
-        qint16 nTypeOffset;
+        quint16 nTypeOffset;
         quint32 nType;
         XADDR nAddress;
     };
@@ -563,7 +575,8 @@ public:
 
     QList<QString> getImportNames(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct = nullptr);
 
-    QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA, qint64 nRVA, PDSTRUCT *pPdStruct = nullptr);
+    QList<IMPORT_POSITION> _getImportPositions(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nThunksRVA, qint64 nRVA,
+                                               PDSTRUCT *pPdStruct = nullptr, qint32 nMaxPositions = 16384);
     QList<IMPORT_POSITION> getImportPositions(qint32 nIndex, PDSTRUCT *pPdStruct = nullptr);
 
     QList<quint32> getImportPositionHashes(bool bLibraryName = false);
@@ -881,6 +894,7 @@ public:
     static bool isConsole(const QString &sFileName);
     bool isDriver();
     bool isNETPresent();
+    static bool isNETPresent(QIODevice *pDevice);
     void initCLIAssembly(XCLIAssembly *pCLIAssembly, PDSTRUCT *pPdStruct = nullptr);
     // Creates a fully initialized XCLIAssembly for this PE. The caller owns the result.
     // Returns nullptr if the file is not a .NET (CLI) assembly.
@@ -1292,13 +1306,29 @@ private:
     void _fixFileOffsets(qint64 nDelta);
     quint32 __getResourcesVersion(RESOURCES_VERSION *pResourcesVersionResult, qint64 nOffset, qint64 nSize, const QString &sPrefix, qint32 nLevel);
     void _decorateImportThunkTable(XFHEADER *pXfHeader, const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
-    void _appendExportFunctionNames(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nExportDirOffset, const QString &sParentTag);
+    void _decorateDelayImportTable(XFHEADER *pXfHeader, const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
+    void _decorateExportFunctionTable(XFHEADER *pXfHeader, const XFSTRUCT &xfStruct, qint64 nExportDirOffset, qint64 nSize,
+                                      PDSTRUCT *pPdStruct);
+    qint32 _getResourceEntryTableLevel(qint64 nResourceDirOffset, qint64 nSize, qint64 nEntriesOffset, PDSTRUCT *pPdStruct);
+    void _decorateResourceEntryTable(XFHEADER *pXfHeader, qint64 nResourceDirOffset, qint64 nSize, qint32 nLevel, PDSTRUCT *pPdStruct);
+    void _decorateBoundForwarderTable(XFHEADER *pXfHeader, qint64 nBoundImportOffset, qint64 nSize, PDSTRUCT *pPdStruct);
+    void _appendExportFunctionNames(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nExportDirOffset, qint64 nSize,
+                                    const QString &sParentTag, PDSTRUCT *pPdStruct);
     void _appendImportThunks(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, const QString &sParentTag, PDSTRUCT *pPdStruct);
-    void _appendResourceEntries(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nResourceDirOffset, const QString &sParentTag);
+    void _appendResourceEntries(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nResourceDirOffset, qint64 nSize, const QString &sParentTag,
+                                PDSTRUCT *pPdStruct);
     void _appendBaseRelocationBlocks(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nBaseRelocOffset, qint64 nSize, const QString &sParentTag,
                                      PDSTRUCT *pPdStruct);
+    void _appendBoundImportRecords(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nBoundImportOffset, qint64 nSize,
+                                   const QString &sParentTag, PDSTRUCT *pPdStruct);
     void _appendWinCertRecords(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nCertOffset, qint64 nSize, const QString &sParentTag, PDSTRUCT *pPdStruct);
-    void _appendNetMetadata(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, const QString &sParentTag, PDSTRUCT *pPdStruct);
+    void _appendNetMetadata(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, const QString &sParentTag, PDSTRUCT *pPdStruct,
+                            qint64 nMetadataOffset = -1, qint64 nMetadataSize = 0);
+    void _appendCor20Children(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nCor20Offset, qint64 nSize, const QString &sParentTag,
+                              PDSTRUCT *pPdStruct);
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XPE_H

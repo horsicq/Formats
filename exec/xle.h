@@ -28,6 +28,12 @@ class XLE : public XMSDOS {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XMSDOS::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_EXE
@@ -181,6 +187,9 @@ public:
     virtual QList<XBinary::FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XLE_H

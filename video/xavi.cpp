@@ -244,3 +244,40 @@ XBinary *XAVI::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
     return new XAVI(pDevice);
 }
+
+bool XAVI::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XRiff::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XRiff::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XRiff::INTERNAL_INFO *>(XRiff::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XAVI::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XAVI::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XRiff::setInternalInfo(static_cast<XRiff::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XRiff::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
+}

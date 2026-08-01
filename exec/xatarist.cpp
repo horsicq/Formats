@@ -20,6 +20,12 @@
  */
 #include "xatarist.h"
 
+namespace {
+
+constexpr qint64 g_nAtariSTHeaderSize = 2 + (6 * sizeof(quint32)) + sizeof(quint16);
+
+}  // namespace
+
 XBinary::XCONVERT _TABLE_XAtariST_STRUCTID[] = {
     {XAtariST::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XAtariST::STRUCTID_HEADER, "HEADER", QString("HEADER")},
@@ -39,7 +45,7 @@ bool XAtariST::isValid(PDSTRUCT *pPdStruct)
 
     bool bResult = false;
 
-    if (getSize() >= (qint64)sizeof(XATARIST_DEF::HEADER)) {
+    if (getSize() >= g_nAtariSTHeaderSize) {
         quint16 nMagic = read_uint16(0, true);  // Big-endian
 
         if (nMagic == XATARIST_DEF::MAGIC) {
@@ -104,7 +110,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
     XATARIST_DEF::HEADER header = getHeader();
 
     qint64 nTotalSize = getSize();
-    qint64 nHeaderSize = sizeof(XATARIST_DEF::HEADER);
+    qint64 nHeaderSize = qMin(g_nAtariSTHeaderSize, qMax((qint64)0, nTotalSize));
     qint64 nCurrentOffset = nHeaderSize;
 
     if (nFileParts & FILEPART_HEADER) {
@@ -160,7 +166,11 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
 
         for (qint32 i = 0; i < nNumberOfParts; i++) {
             const FPART &part = listResult.at(i);
-            qint64 nPartEnd = part.nFileOffset + part.nFileSize;
+            qint64 nPartEnd = -1;
+
+            if (part.nFileOffset >= 0) {
+                nPartEnd = part.nFileOffset + part.nFileSize;
+            }
 
             if (nPartEnd > nCoveredEnd) {
                 nCoveredEnd = nPartEnd;
@@ -289,7 +299,7 @@ QList<XBinary::XFHEADER> XAtariST::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRU
         xfHeader.fileType = xfStruct.fileType;
         xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
         xfHeader.xLoc = headerLoc;
-        xfHeader.nSize = 28;
+        xfHeader.nSize = qMin((qint64)sizeof(XATARIST_DEF::HEADER), getSize());
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);
@@ -336,4 +346,41 @@ QString XAtariST::typeIdToString(qint32 nType)
 QString XAtariST::getFileFormatExtsString()
 {
     return QString("tos,ttp,prg");
+}
+
+bool XAtariST::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XBinary::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XAtariST::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XAtariST::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XBinary::setInternalInfo(static_cast<XBinary::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XBinary::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
 }

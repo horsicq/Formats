@@ -31,6 +31,12 @@ class XAmigaHunk : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     struct HUNK {
         quint32 nId;
         qint64 nOffset;
@@ -127,6 +133,9 @@ public:
     //                             void *pUserData, PDSTRUCT *pPdStruct) override;
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XAMIGAHUNK_H

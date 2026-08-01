@@ -27,6 +27,12 @@ class XICC : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     struct TAG {
         bool bValid;
         quint32 nSignature;
@@ -105,6 +111,9 @@ private:
     QString _readTextType(qint64 nOffset);
     QString _readMultiLocalizedUnicodeType(qint64 nOffset);
     QString _fourCCToString(quint32 nValue);
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XICC_H

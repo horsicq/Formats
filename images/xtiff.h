@@ -37,6 +37,12 @@ class XTiff : public XBinary {
 #pragma pack(pop)
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
     enum STRUCTID {
@@ -82,6 +88,9 @@ public:
 
 private:
     qint32 getBaseTypeSize(quint16 nType);
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XTIFF_H

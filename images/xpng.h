@@ -31,6 +31,12 @@ class XPNG : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
     enum COLOR_TYPE {
@@ -137,6 +143,9 @@ private:
     static bool _writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByteArray &data);
     static QByteArray _compressData(const QByteArray &data);
     static QByteArray _convertImageData(const char *pData, qint32 nDataSize, quint32 nWidth, quint32 nHeight, COLOR_TYPE colorType, quint8 nBitDepth);
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XPNG_H

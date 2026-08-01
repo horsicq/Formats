@@ -22,36 +22,113 @@
 #include "xftree_model.h"
 #include "xformats.h"
 #include <QDebug>
+#include <QHash>
+#include <QVector>
+#include <algorithm>
+#include <limits>
+
 
 namespace {
-QString getTreeItemStructName(const XBinary::XFHEADER &xfHeader)
+qint64 getHeaderEndOffset(const XBinary::XFHEADER &xfHeader)
 {
-    QString sResult;
-
-    if (xfHeader.sTag.startsWith("!")) {
-        sResult = xfHeader.sTag;
-    } else {
-        sResult = XFormats::getXFHeaderStructName(xfHeader);
-
-        if (sResult.isEmpty()) {
-            sResult = QString::number(xfHeader.structID);
-        }
+    if (xfHeader.xLoc.locType != XBinary::LT_OFFSET) {
+        return -1;
     }
 
-    return sResult;
+    if (xfHeader.xLoc.nLocation == (XBinary::XADDR)-1) {
+        return -1;
+    }
+
+    if (xfHeader.xLoc.nLocation > (XBinary::XADDR)std::numeric_limits<qint64>::max()) {
+        return -1;
+    }
+
+    qint64 nOffset = (qint64)xfHeader.xLoc.nLocation;
+    qint64 nSize = xfHeader.nSize;
+
+    if (xfHeader.xfType == XBinary::XFTYPE_TABLE) {
+        qint64 nRowSize = nSize;
+
+        if (nRowSize <= 0) {
+            for (const XBinary::XFRECORD &record : xfHeader.listFields) {
+                nRowSize = qMax(nRowSize, (qint64)record.nOffset + record.nSize);
+            }
+        }
+
+        if ((nRowSize <= 0) || xfHeader.listRowLocations.isEmpty()) {
+            return -1;
+        }
+
+        qint64 nEndOffset = -1;
+
+        for (XBinary::XADDR nRowLocation : xfHeader.listRowLocations) {
+            if ((nRowLocation > (XBinary::XADDR)std::numeric_limits<qint64>::max()) ||
+                ((qint64)nRowLocation > std::numeric_limits<qint64>::max() - nRowSize)) {
+                return -1;
+            }
+
+            nEndOffset = qMax(nEndOffset, (qint64)nRowLocation + nRowSize);
+        }
+
+        return nEndOffset;
+    }
+
+    if (nSize <= 0) {
+        qint32 nNumberOfFields = xfHeader.listFields.count();
+        for (qint32 i = 0; i < nNumberOfFields; i++) {
+            const XBinary::XFRECORD &record = xfHeader.listFields.at(i);
+            nSize = qMax(nSize, (qint64)record.nOffset + record.nSize);
+        }
+
+    }
+
+    if (nSize <= 0) {
+        return -1;
+    }
+
+    if (nOffset > std::numeric_limits<qint64>::max() - nSize) {
+        return -1;
+    }
+
+    return nOffset + nSize;
 }
 
-QString getTreeItemString(const XBinary::XFHEADER &xfHeader)
+bool isValidOffsetLocation(const XBinary::XLOC &xLoc)
 {
-    QString sResult;
-
-    if (xfHeader.sTag.startsWith("!")) {
-        sResult = xfHeader.sTag;
-    } else {
-        sResult = XBinary::xfHeaderToString(xfHeader, getTreeItemStructName(xfHeader), xfHeader.sParentTag);
+    if (xLoc.locType != XBinary::LT_OFFSET) {
+        return false;
     }
 
-    return sResult;
+    if (xLoc.nLocation == (XBinary::XADDR)-1) {
+        return false;
+    }
+
+    if (xLoc.nLocation > (XBinary::XADDR)std::numeric_limits<qint64>::max()) {
+        return false;
+    }
+
+    return true;
+}
+
+qint32 findRightmostContainingPosition(const QVector<quint64> &listMaxEnds, qint32 nNode, qint32 nLeft, qint32 nRight,
+                                       qint32 nMaximumPosition, quint64 nRequiredEnd)
+{
+    if ((nLeft > nMaximumPosition) || (listMaxEnds.at(nNode) < nRequiredEnd)) {
+        return -1;
+    }
+
+    if (nLeft == nRight) {
+        return nLeft;
+    }
+
+    qint32 nMiddle = nLeft + (nRight - nLeft) / 2;
+    qint32 nResult = findRightmostContainingPosition(listMaxEnds, nNode * 2 + 1, nMiddle + 1, nRight, nMaximumPosition, nRequiredEnd);
+
+    if (nResult == -1) {
+        nResult = findRightmostContainingPosition(listMaxEnds, nNode * 2, nLeft, nMiddle, nMaximumPosition, nRequiredEnd);
+    }
+
+    return nResult;
 }
 
 XFTreeModel::TREEITEM *appendExtraTreeItem(XFTreeModel::TREEITEM *pRoot, XBinary::FT fileType, const QString &sTag, XBinary::STRUCTID structID)
@@ -64,6 +141,8 @@ XFTreeModel::TREEITEM *appendExtraTreeItem(XFTreeModel::TREEITEM *pRoot, XBinary
     pItem->xfHeader.xLoc.locType = XBinary::LT_OFFSET;
     pItem->xfHeader.xLoc.nLocation = 0;
     pItem->xfHeader.xfType = XBinary::XFTYPE_COMMAND;
+    pItem->sStructName = sTag;
+    pItem->sStructString = sTag;
     pItem->pParent = pRoot;
     pItem->nRow = pRoot->listChildren.count();
     pRoot->listChildren.append(pItem);
@@ -88,7 +167,7 @@ void XFTreeModel::setData(const XBinary::INDATA &inData, const QList<XBinary::XF
 
     clear();
 
-    m_inData= inData;
+    m_inData = inData;
 
     m_pRootItem = new TREEITEM();
     m_pRootItem->pParent = nullptr;
@@ -219,7 +298,7 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
             } else if (pItem->xfHeader.sTag == "!RESOURCES") {
                 result = tr("Resources");
             } else {
-                result = getTreeItemStructName(pItem->xfHeader);
+                result = pItem->sStructName;
             }
             // TODO if table number of records
         } /*else if (nColumn == COLUMN_TYPE) {
@@ -304,74 +383,204 @@ void XFTreeModel::clear()
 
 void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bExtraInfo)
 {
-    QMap<QString, TREEITEM *> mapItems;
-
     qint32 nCount = listHeaders.count();
 
     QList<TREEITEM *> listItems;
+    listItems.reserve(nCount);
+    QList<qint64> listHeaderEnds;
+    listHeaderEnds.reserve(nCount);
+    QHash<quint64, QString> mapStructNames;
 
     for (qint32 i = 0; i < nCount; i++) {
         TREEITEM *pItem = new TREEITEM();
         pItem->xfHeader = listHeaders.at(i);
         pItem->pParent = nullptr;
-        pItem->nRow = 0;
-        listItems.append(pItem);
-        mapItems.insert(pItem->xfHeader.sTag, pItem);
-    }
+        pItem->nRow = -1;
 
-    if (bExtraInfo) {
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!VISUALIZATION", XBinary::STRUCTID_VISUALIZATION);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HEX", XBinary::STRUCTID_HEX);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!DISASM", XBinary::STRUCTID_DISASM);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!NFDSCAN", XBinary::STRUCTID_NFDSCAN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HASH", XBinary::STRUCTID_HASH);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SIGNATURES", XBinary::STRUCTID_SIGNATURES);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!MEMORYMAP", XBinary::STRUCTID_MEMORYMAP);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!ENTROPY", XBinary::STRUCTID_ENTROPY);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXTRACTOR", XBinary::STRUCTID_EXTRACTOR);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SEARCH", XBinary::STRUCTID_SEARCH);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!STRINGS", XBinary::STRUCTID_STRINGS);
+        if (pItem->xfHeader.sTag.startsWith("!")) {
+            pItem->sStructName = pItem->xfHeader.sTag;
+            pItem->sStructString = pItem->xfHeader.sTag;
+        } else {
+            quint64 nStructKey = (static_cast<quint64>(static_cast<quint32>(pItem->xfHeader.fileType)) << 32) |
+                                 static_cast<quint32>(pItem->xfHeader.structID);
+            QHash<quint64, QString>::const_iterator it = mapStructNames.constFind(nStructKey);
 
-        QIODevice *pDevice = XFormats::createDevice(m_inData);
-        XBinary *pBinary = XFormats::createClass(m_inData.fileType, pDevice, m_inData.bIsImage, m_inData.nModuleAddress);
+            if (it == mapStructNames.constEnd()) {
+                pItem->sStructName = XFormats::getXFHeaderStructName(pItem->xfHeader);
 
-        if (pBinary) {
-            if (pBinary->isImportPresent()) {
-                appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!IMPORT", XBinary::STRUCTID_IMPORT);
-            }
-            if (pBinary->isExportPresent()) {
-                appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXPORT", XBinary::STRUCTID_EXPORT);
-            }
-            if (pBinary->isSymbolsPresent()) {
-                appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SYMBOLS", XBinary::STRUCTID_SYMBOLS);
-            }
-            if (pBinary->isResourcesPresent()) {
-                appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!RESOURCES", XBinary::STRUCTID_RESOURCES);
+                if (pItem->sStructName.isEmpty()) {
+                    pItem->sStructName = QString::number(pItem->xfHeader.structID);
+                }
+
+                mapStructNames.insert(nStructKey, pItem->sStructName);
+            } else {
+                pItem->sStructName = it.value();
             }
 
-            delete pBinary;
+            pItem->sStructString = XBinary::xfHeaderToString(pItem->xfHeader, pItem->sStructName, pItem->xfHeader.sParentTag);
         }
 
-        XFormats::removeDevice(pDevice, m_inData);
+        listItems.append(pItem);
+        listHeaderEnds.append(getHeaderEndOffset(pItem->xfHeader));
     }
 
+    QVector<qint32> listParentOrder;
+    listParentOrder.reserve(nCount);
+
+    for (qint32 i = 0; i < nCount; i++) {
+        if (isValidOffsetLocation(listItems.at(i)->xfHeader.xLoc)) {
+            listParentOrder.append(i);
+        }
+    }
+
+    std::sort(listParentOrder.begin(), listParentOrder.end(), [&listItems](qint32 nLeftIndex, qint32 nRightIndex) {
+        qint64 nLeftOffset = (qint64)listItems.at(nLeftIndex)->xfHeader.xLoc.nLocation;
+        qint64 nRightOffset = (qint64)listItems.at(nRightIndex)->xfHeader.xLoc.nLocation;
+
+        if (nLeftOffset != nRightOffset) {
+            return nLeftOffset < nRightOffset;
+        }
+
+        // Earlier source items win ties, matching the previous forward scan.
+        return nLeftIndex > nRightIndex;
+    });
+
+    QVector<qint32> listParentPositions(nCount, -1);
+    QHash<qint64, qint32> mapLastParentPositions;
+
+    for (qint32 i = 0; i < listParentOrder.count(); i++) {
+        qint32 nSourceIndex = listParentOrder.at(i);
+        qint64 nOffset = (qint64)listItems.at(nSourceIndex)->xfHeader.xLoc.nLocation;
+        listParentPositions[nSourceIndex] = i;
+        mapLastParentPositions.insert(nOffset, i);
+    }
+
+    qint32 nParentTreeBase = 1;
+    while (nParentTreeBase < listParentOrder.count()) {
+        nParentTreeBase *= 2;
+    }
+
+    QVector<quint64> listParentMaxEnds(nParentTreeBase * 2, 0);
+    QHash<QString, TREEITEM *> mapLatestItemsByTag;
+
+    // Build tree hierarchy in source order to keep parent references deterministic.
     for (qint32 i = 0; i < nCount; i++) {
         TREEITEM *pItem = listItems.at(i);
         QString sParentTag = pItem->xfHeader.sParentTag;
 
-        if (!sParentTag.isEmpty() && mapItems.contains(sParentTag)) {
-            TREEITEM *pParentItem = mapItems.value(sParentTag);
-            pItem->pParent = pParentItem;
-            pItem->nRow = pParentItem->listChildren.count();
-            pParentItem->listChildren.append(pItem);
-        } else {
-            pItem->pParent = m_pRootItem;
-            pItem->nRow = m_pRootItem->listChildren.count();
-            m_pRootItem->listChildren.append(pItem);
+        TREEITEM *pBestParent = nullptr;
+
+        if (!sParentTag.isEmpty()) {
+            // An explicit tag describes a logical relationship. PE directory
+            // children are commonly stored outside their parent's byte range,
+            // so physical containment must not invalidate that relationship.
+            pBestParent = mapLatestItemsByTag.value(sParentTag, nullptr);
         }
+
+        if (!pBestParent) {
+            // Without a resolvable explicit tag, infer the nearest containing
+            // previous structure by physical offset. The interval tree keeps
+            // this lookup logarithmic even for large sibling tables.
+            if (isValidOffsetLocation(pItem->xfHeader.xLoc)) {
+                qint64 nItemOffset = (qint64)pItem->xfHeader.xLoc.nLocation;
+                quint64 nRequiredEnd = (quint64)nItemOffset + 1;
+
+                if (listHeaderEnds.at(i) >= 0) {
+                    nRequiredEnd = qMax(nRequiredEnd, (quint64)listHeaderEnds.at(i));
+                }
+
+                qint32 nMaximumPosition = mapLastParentPositions.value(nItemOffset, -1);
+
+                if (nMaximumPosition >= 0) {
+                    qint32 nParentPosition = findRightmostContainingPosition(listParentMaxEnds, 1, 0, nParentTreeBase - 1,
+                                                                             nMaximumPosition, nRequiredEnd);
+
+                    if ((nParentPosition >= 0) && (nParentPosition < listParentOrder.count())) {
+                        pBestParent = listItems.at(listParentOrder.at(nParentPosition));
+                    }
+                }
+            }
+        }
+
+        if (!pBestParent) {
+            pBestParent = m_pRootItem;
+        }
+
+        pItem->pParent = pBestParent;
+        pItem->nRow = pBestParent->listChildren.count();
+        pBestParent->listChildren.append(pItem);
+
+        if (!pItem->xfHeader.sTag.isEmpty()) {
+            mapLatestItemsByTag.insert(pItem->xfHeader.sTag, pItem);
+        }
+
+        qint32 nParentPosition = listParentPositions.at(i);
+
+        if (nParentPosition >= 0) {
+            quint64 nParentEnd = (listHeaderEnds.at(i) >= 0) ? (quint64)listHeaderEnds.at(i) : std::numeric_limits<quint64>::max();
+            qint32 nTreeIndex = nParentTreeBase + nParentPosition;
+            listParentMaxEnds[nTreeIndex] = nParentEnd;
+
+            while (nTreeIndex > 1) {
+                nTreeIndex /= 2;
+                listParentMaxEnds[nTreeIndex] = qMax(listParentMaxEnds.at(nTreeIndex * 2), listParentMaxEnds.at(nTreeIndex * 2 + 1));
+            }
+        }
+    }
+
+    if (bExtraInfo && m_pRootItem) {
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!VISUALIZATION", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HEX", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!DISASM", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!NFDSCAN", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HASH", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SIGNATURES", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!MEMORYMAP", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!ENTROPY", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXTRACTOR", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SEARCH", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!STRINGS", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!IMPORT", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXPORT", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SYMBOLS", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!RESOURCES", XBinary::STRUCTID_UNKNOWN);
     }
 }
 
+QString XFTreeModel::getItemSize(TREEITEM *pItem)
+{
+    if (!pItem) {
+        return "?";
+    }
+
+    qint64 nSize = pItem->xfHeader.nSize;
+
+    if (nSize > 0) {
+        if ((pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) && !pItem->xfHeader.listRowLocations.isEmpty()) {
+            qint64 nRows = pItem->xfHeader.listRowLocations.count();
+            if (nSize <= std::numeric_limits<qint64>::max() / nRows) {
+                nSize *= nRows;
+            }
+        }
+        return XBinary::valueToHexEx(nSize);
+    }
+
+    qint64 nEndOffset = getHeaderEndOffset(pItem->xfHeader);
+
+    if (nEndOffset < 0) {
+        return "?";
+    }
+
+    if ((qint64)pItem->xfHeader.xLoc.nLocation >= 0) {
+        nSize = nEndOffset - (qint64)pItem->xfHeader.xLoc.nLocation;
+    }
+
+    if (nSize > 0) {
+        return XBinary::valueToHexEx(nSize);
+    }
+
+    return "?";
+}
 QString XFTreeModel::treeToString(XFTreeModel *pModel, const QString &sTitle)
 {
     QStringList listLines;
@@ -407,8 +616,8 @@ void XFTreeModel::appendTreeLines(QStringList *pListLines, XBinary *pXBinary, TR
 {
     Q_UNUSED(pXBinary)
 
-    QString sStructName = getTreeItemStructName(pItem->xfHeader);
-    QString sString = "[" + getTreeItemString(pItem->xfHeader) + "]";
+    QString sStructName = pItem->sStructName;
+    QString sString = "[" + pItem->sStructString + "]";
 
     QString sLine = sPrefix + sStructName + sString;
 
@@ -423,15 +632,14 @@ QString XFTreeModel::getItemName(XBinary *pXBinary, TREEITEM *pItem)
 {
     Q_UNUSED(pXBinary)
 
-    QString sStructName = getTreeItemStructName(pItem->xfHeader);
-    return QString(sStructName).toUpper().remove(" ").remove("-");
+    return QString(pItem->sStructName).toUpper().remove(" ").remove("-");
 }
 
 QString XFTreeModel::getItemString(XBinary *pXBinary, TREEITEM *pItem)
 {
     Q_UNUSED(pXBinary)
 
-    return getTreeItemString(pItem->xfHeader);
+    return pItem->sStructString;
 }
 
 QString XFTreeModel::getItemType(TREEITEM *pItem)
@@ -449,10 +657,6 @@ QString XFTreeModel::getItemOffset(TREEITEM *pItem)
     return XBinary::valueToHexEx(pItem->xfHeader.xLoc.nLocation);
 }
 
-QString XFTreeModel::getItemSize(TREEITEM *pItem)
-{
-    return XBinary::valueToHexEx(pItem->xfHeader.nSize);
-}
 
 QString XFTreeModel::getItemRows(TREEITEM *pItem)
 {
@@ -653,3 +857,9 @@ QString XFTreeModel::toTSV() const
 
     return listLines.join("\n");
 }
+
+
+
+
+
+

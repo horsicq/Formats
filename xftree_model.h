@@ -39,6 +39,8 @@ public:
 
     struct TREEITEM {
         XBinary::XFHEADER xfHeader;
+        QString sStructName;
+        QString sStructString;
         TREEITEM *pParent;
         QList<TREEITEM *> listChildren;
         qint32 nRow;

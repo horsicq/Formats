@@ -27,6 +27,12 @@ class XWAV : public XRiff {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XRiff::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     explicit XWAV(QIODevice *pDevice = nullptr);
     ~XWAV();
 
@@ -41,6 +47,9 @@ public:
 
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XWAV_H

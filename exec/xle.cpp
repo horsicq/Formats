@@ -33,11 +33,10 @@ bool XLE::isValid(PDSTRUCT *pPdStruct)
     quint16 magic = get_magic();
 
     if (magic == XMSDOS_DEF::S_IMAGE_DOS_SIGNATURE_MZ) {
-        qint32 lfanew = get_lfanew();
-        qint64 nSize = getSize();
+        qint64 nImageHeaderOffset = getImageVxdHeaderOffset();
 
-        if ((lfanew > 0) && (lfanew < (nSize & 0xFFFFFFFF))) {
-            quint32 signature = read_uint32(lfanew);
+        if ((nImageHeaderOffset >= 0) && _isOffsetValid(nImageHeaderOffset + (qint64)sizeof(quint32) - 1)) {
+            quint32 signature = read_uint32(nImageHeaderOffset);
 
             if ((signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) || (signature == XLE_DEF::S_IMAGE_LX_SIGNATURE)) {
                 bResult = true;
@@ -1190,9 +1189,24 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
     QList<XLE_DEF::o32_obj> listResult;
 
     qint64 nObjOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objtab();
+    if (!_isOffsetValid(nObjOffset)) {
+        return listResult;
+    }
+
+    qint64 nImageSize = getSize();
+    qint64 nMaxObjectsBySize = 0;
+    if (nImageSize >= (nObjOffset + sizeof(XLE_DEF::o32_obj))) {
+        nMaxObjectsBySize = (nImageSize - nObjOffset) / sizeof(XLE_DEF::o32_obj);
+    }
+
     quint32 nNumberOfObjects = getImageVxdHeader_objcnt();
 
-    nNumberOfObjects = qMin(nNumberOfObjects, (quint32)100);
+    if (nMaxObjectsBySize > 0) {
+        nNumberOfObjects = qMin(nNumberOfObjects, (quint32)100);
+        nNumberOfObjects = qMin<quint32>(nNumberOfObjects, (quint32)qMin<qint64>(nMaxObjectsBySize, (qint64)INT32_MAX));
+    } else {
+        nNumberOfObjects = 0;
+    }
 
     for (quint32 i = 0; i < nNumberOfObjects; i++) {
         XLE_DEF::o32_obj record = _read_o32_obj(nObjOffset);
@@ -1211,6 +1225,16 @@ QList<XLE_DEF::o16_map> XLE::getMapsLE()
 
     qint64 nMapOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
     quint32 nNumberOfMaps = getImageVxdHeader_mpages();
+    if (!_isOffsetValid(nMapOffset)) {
+        return listResult;
+    }
+
+    qint64 nImageSize = getSize();
+    qint64 nMaxMapsBySize = 0;
+    if (nImageSize - nMapOffset >= (qint64)sizeof(XLE_DEF::o16_map)) {
+        nMaxMapsBySize = (nImageSize - nMapOffset) / sizeof(XLE_DEF::o16_map);
+    }
+    nNumberOfMaps = qMin(nNumberOfMaps, (quint32)qMin<qint64>(nMaxMapsBySize, (qint64)UINT32_MAX));
 
     for (quint32 i = 0; i < nNumberOfMaps; i++) {
         XLE_DEF::o16_map record = _read_o16_map(nMapOffset);
@@ -1229,6 +1253,16 @@ QList<XLE_DEF::o32_map> XLE::getMapsLX()
 
     qint64 nMapOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
     quint32 nNumberOfMaps = getImageVxdHeader_mpages();
+    if (!_isOffsetValid(nMapOffset)) {
+        return listResult;
+    }
+
+    qint64 nImageSize = getSize();
+    qint64 nMaxMapsBySize = 0;
+    if (nImageSize - nMapOffset >= (qint64)sizeof(XLE_DEF::o32_map)) {
+        nMaxMapsBySize = (nImageSize - nMapOffset) / sizeof(XLE_DEF::o32_map);
+    }
+    nNumberOfMaps = qMin(nNumberOfMaps, (quint32)qMin<qint64>(nMaxMapsBySize, (qint64)UINT32_MAX));
 
     for (quint32 i = 0; i < nNumberOfMaps; i++) {
         XLE_DEF::o32_map record = _read_o32_map(nMapOffset);
@@ -1269,7 +1303,17 @@ qint64 XLE::getImageSize()
         XADDR base = objs.at(i).o32_base;
         quint32 pages = objs.at(i).o32_mapsize;
         quint32 pageSize = getImageVxdHeader_pagesize();
-        XADDR end = base + (XADDR)pages * (XADDR)pageSize;
+        XADDR end = base;
+
+        if ((pages > 0) && (pageSize > 0)) {
+            XADDR maxSpan = ((XADDR)LLONG_MAX - base) / pageSize;
+            if (pages > maxSpan) {
+                end = (XADDR)LLONG_MAX;
+            } else {
+                end = base + (XADDR)pages * (XADDR)pageSize;
+            }
+        }
+
         if (end > maxEnd) maxEnd = end;
     }
     return (qint64)maxEnd;
@@ -1288,20 +1332,21 @@ XADDR XLE::_getEntryPointAddress()
 
 XBinary::MODE XLE::getMode()
 {
-    // TODO CHECK MODE_16SEG
-    MODE result = MODE_16SEG;
-
-    qint32 lfanew = get_lfanew();
-    quint16 signature = read_uint16(lfanew);
-
-    if (signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
-        result = MODE_16SEG;
-        // result = MODE_32;
-    } else if (signature == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
-        result = MODE_32;
+    if (!isValid()) {
+        return MODE_UNKNOWN;
     }
 
-    return result;
+    qint64 nImageHeaderOffset = getImageVxdHeaderOffset();
+    quint16 signature = read_uint16(nImageHeaderOffset);
+
+    if (signature == XLE_DEF::S_IMAGE_VXD_SIGNATURE) {
+        return MODE_16SEG;
+        // return MODE_32;
+    } else if (signature == XLE_DEF::S_IMAGE_LX_SIGNATURE) {
+        return MODE_32;
+    }
+
+    return MODE_UNKNOWN;
 }
 
 QString XLE::getArch()
@@ -1560,16 +1605,28 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
     QList<FPART> listResult;
     qint64 nTotal = getSize();
+    qint64 nMaxOffset = 0;
 
     // Header
     if (nFileParts & FILEPART_HEADER) {
         FPART rec = {};
         rec.filePart = FILEPART_HEADER;
         rec.nFileOffset = 0;
-        rec.nFileSize = qMin<qint64>(getImageVxdHeaderOffset() + getImageVxdHeaderSize(), nTotal);
+        qint64 nImageHeaderOffset = getImageVxdHeaderOffset();
+        qint64 nImageHeaderSize = 0;
+
+        if (nImageHeaderOffset >= 0) {
+            nImageHeaderSize = qMin<qint64>(nImageHeaderOffset + getImageVxdHeaderSize(), nTotal);
+        }
+
+        rec.nFileSize = nImageHeaderSize;
         rec.nVirtualAddress = 0;
         rec.sName = tr("Header");
-        listResult.append(rec);
+        if (nImageHeaderSize > 0) {
+            listResult.append(rec);
+        }
+
+        nMaxOffset = qMax(nMaxOffset, rec.nFileOffset + rec.nFileSize);
     }
 
     // Segments/objects (treat as segments for file parts)
@@ -1581,25 +1638,75 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         qint64 nDataPageOff = getImageVxdHeader_datapage();
         qint64 nMapOff = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
         qint64 nLoaderSize = 0;
-        if (nPages > 0) nLoaderSize = nDataPageOff + (qint64)(nPages - 1) * (qint64)nPageSize + (qint64)nLastPageSize;
+        if ((nPages > 0) && (nPageSize > 0) && (nDataPageOff >= 0) && (nDataPageOff < nTotal)) {
+            qint64 nPageSpan = (qint64)(nPages - 1);
+            if (nPageSpan > 0) {
+                qint64 nMaxSpan = (nDataPageOff <= (nTotal - (qint64)nLastPageSize))
+                                       ? ((nTotal - (qint64)nDataPageOff - (qint64)nLastPageSize) / (qint64)nPageSize)
+                                       : -1;
+
+                if ((nMaxSpan >= 0) && (nPageSpan <= nMaxSpan)) {
+                    nLoaderSize = nDataPageOff + (qint64)(nPages - 1) * (qint64)nPageSize + (qint64)nLastPageSize;
+                } else {
+                    nLoaderSize = nTotal;
+                }
+            } else {
+                nLoaderSize = nDataPageOff + (qint64)nLastPageSize;
+            }
+        }
         bool bIsLE = isLE();
         for (qint32 i = 0; i < objs.size(); i++) {
             // Determine object span over pages
             qint64 nObjMin = -1;
             qint64 nObjMax = 0;
-            qint32 nMapSize = qMin((qint32)objs.at(i).o32_mapsize, (qint32)nPages);
-            for (qint32 j = 0; j < nMapSize; j++) {
+            qint64 nMapSize = qMin<qint64>((qint64)objs.at(i).o32_mapsize, (qint64)nPages);
+            qint64 nMapEntrySize = bIsLE ? (qint64)sizeof(XLE_DEF::o16_map) : (qint64)sizeof(XLE_DEF::o32_map);
+            qint64 nMapBasePage = (qint64)objs.at(i).o32_pagemap - 1;
+
+            if (nMapBasePage < 0) {
+                continue;
+            }
+
+            if ((nTotal - nMapOff) < nMapEntrySize) {
+                continue;
+            }
+            qint64 nMaxMapPage = (nTotal - nMapOff - nMapEntrySize) / nMapEntrySize;
+            qint64 nAvailableMapPages = nMaxMapPage - nMapBasePage + 1;
+
+            if (nAvailableMapPages <= 0) {
+                continue;
+            }
+            nMapSize = qMin<qint64>(nMapSize, nAvailableMapPages);
+
+            if (nMapBasePage > nMaxMapPage) {
+                continue;
+            }
+
+            for (qint64 j = 0; j < nMapSize; j++) {
                 qint64 nPageDataOffset = 0;
                 qint64 nThisPageSize = nPageSize;
-                qint64 nMapEntryOff = 0;
+                qint64 nMapIndex = nMapBasePage + j;
+                if (nMapIndex > nMaxMapPage) {
+                    break;
+                }
+
+                qint64 nMapEntryOff = nMapOff + nMapIndex * nMapEntrySize;
+                if (nMapEntryOff + nMapEntrySize > nTotal) {
+                    continue;
+                }
+
                 if (bIsLE) {
-                    nMapEntryOff = nMapOff + (qint64)(objs.at(i).o32_pagemap - 1 + j) * (qint64)sizeof(XLE_DEF::o16_map);
-                    if ((nMapEntryOff < 0) || (nMapEntryOff + (qint64)sizeof(XLE_DEF::o16_map) > nTotal)) {
-                        continue;
-                    }
                     XLE_DEF::o16_map m = _read_o16_map(nMapEntryOff);
                     quint32 nOfs = m.o16_pagenum[2] + (m.o16_pagenum[1] << 8) + ((quint32)m.o16_pagenum[0] << 16);
                     if (nOfs) {
+                        if (nPageSize == 0) {
+                            continue;
+                        }
+
+                        if ((nDataPageOff > nTotal) || ((qint64)(nOfs - 1) > ((nTotal - nDataPageOff - 1) / (qint64)nPageSize))) {
+                            continue;
+                        }
+
                         nPageDataOffset = ((qint64)(nOfs - 1) * (qint64)nPageSize) + nDataPageOff;
                     }
                     // For LE, all pages except last have standard page size; clamp to loader end
@@ -1607,11 +1714,11 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                         nThisPageSize = qMin((qint64)nPageSize, nLoaderSize - nPageDataOffset);
                     }
                 } else {
-                    nMapEntryOff = nMapOff + (qint64)(objs.at(i).o32_pagemap - 1 + j) * (qint64)sizeof(XLE_DEF::o32_map);
-                    if ((nMapEntryOff < 0) || (nMapEntryOff + (qint64)sizeof(XLE_DEF::o32_map) > nTotal)) {
+                    XLE_DEF::o32_map m = _read_o32_map(nMapEntryOff);
+                    if ((qint64)nDataPageOff > (nTotal - (qint64)m.o32_pagedataoffset - 1)) {
                         continue;
                     }
-                    XLE_DEF::o32_map m = _read_o32_map(nMapEntryOff);
+
                     nPageDataOffset = nDataPageOff + m.o32_pagedataoffset;
                     nThisPageSize = m.o32_pagesize ? m.o32_pagesize : nPageSize;
                 }
@@ -1637,28 +1744,23 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                 rec.nVirtualSize = rec.nFileSize;
                 rec.sName = QString("%1(%2)").arg(tr("Object")).arg(i + 1);
                 listResult.append(rec);
+                nMaxOffset = qMax(nMaxOffset, rec.nFileOffset + rec.nFileSize);
             }
         }
         Q_UNUSED(nPages)
     }
 
-    // // Overlay
-    // if (nFileParts & FILEPART_OVERLAY) {
-    //     qint64 nMax = 0;
-    //     for (int i = 0; i < listResult.size(); ++i) {
-    //         const auto &r = listResult.at(i);
-    //         nMax = qMax(nMax, r.nFileOffset + r.nFileSize);
-    //     }
-    //     if (nMax < nTotal) {
-    //         FPART rec = {};
-    //         rec.filePart = FILEPART_OVERLAY;
-    //         rec.nFileOffset = nMax;
-    //         rec.nFileSize = nTotal - nMax;
-    //         rec.nVirtualAddress = -1;
-    //         rec.sName = tr("Overlay");
-    //         listResult.append(rec);
-    //     }
-    // }
+    if (nFileParts & FILEPART_OVERLAY) {
+        if (nMaxOffset < nTotal) {
+            FPART rec = {};
+            rec.filePart = FILEPART_OVERLAY;
+            rec.nFileOffset = nMaxOffset;
+            rec.nFileSize = nTotal - nMaxOffset;
+            rec.nVirtualAddress = -1;
+            rec.sName = tr("Overlay");
+            listResult.append(rec);
+        }
+    }
 
     return listResult;
 }
@@ -1678,4 +1780,41 @@ XBinary *XLE::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAdd
     Q_UNUSED(nModuleAddress)
 
     return new XLE(pDevice);
+}
+
+bool XLE::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XMSDOS::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XMSDOS::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XMSDOS::INTERNAL_INFO *>(XMSDOS::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XLE::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XLE::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XMSDOS::setInternalInfo(static_cast<XMSDOS::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XMSDOS::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
 }

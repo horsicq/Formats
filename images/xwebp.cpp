@@ -61,3 +61,40 @@ quint32 XWEBP::ftStringToStructID(const QString &sFtString)
 {
     return XCONVERT_ftStringToId(sFtString, _TABLE_XWEBP_STRUCTID, sizeof(_TABLE_XWEBP_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
+
+bool XWEBP::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XRiff::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XRiff::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XRiff::INTERNAL_INFO *>(XRiff::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XWEBP::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XWEBP::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XRiff::setInternalInfo(static_cast<XRiff::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XRiff::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
+}

@@ -120,6 +120,8 @@ class XBinary : public QObject {
     static const double D_ENTROPY_THRESHOLD;  // 6.5 TODO set get
 
 public:
+    struct PDSTRUCT;
+
     struct XCONVERT {
         quint32 nID;
         QString sSetString;
@@ -384,8 +386,18 @@ public:
         UNPACK_PROP_UNKNOWN = 0,
         UNPACK_PROP_PASSWORD,
         UNPACK_PROP_FIXFILENAMES,  // Sanitize filenames for current OS; handle duplicates with _2, _3; treat symlinks as folders
-        UNPACK_PROP_NOCRC,         // Do not check CRC after unpacking
+        UNPACK_PROP_NOCRC,         // Deprecated: use UNPACK_PROP_CHECKCRC
+        UNPACK_PROP_CHECKCRC,        // Compatibility master switch for every stored checksum
+        UNPACK_PROP_OVERWRITEFILES,  // Replace files already present in the result directory
+        UNPACK_PROP_CHECKCRC32,      // Check CRC-32 values
+        UNPACK_PROP_CHECKCRC16,      // Check format-designated CRC-16 values
+        UNPACK_PROP_CHECKCRC16ARC,   // Check CRC-16/ARC values
+        UNPACK_PROP_CHECKADLER32,    // Check Adler-32 values
+        UNPACK_PROP_CHECKRAR14       // Check the RAR 1.4 rotate/add checksum
     };
+
+    virtual QMap<UNPACK_PROP, QVariant> getDefaultUnpackProperties();
+    bool hasUnpackCRC(PDSTRUCT *pPdStruct = nullptr);
 
     struct DATAPROCESS_STATE {
         QIODevice *pDeviceInput;
@@ -1034,6 +1046,7 @@ public:
         VT_DWORD_ARRAY,
         VT_PACKEDNUMBER,
         VT_ULEB128,
+        VT_UTF32,
         // TODO pascal strings(A/U)
     };
 
@@ -1158,7 +1171,7 @@ public:
         XADDR nRelOffset;
         qint16 nRegionIndex;
         quint16 nValueType;
-        quint16 nSize;
+        quint16 nSize;  // Size in source bytes (including string records).
         quint16 nInfo;
         QString sValue;
     };
@@ -1204,7 +1217,6 @@ public:
 
     const static qint32 N_NUMBER_PDRECORDS = 5;
 
-    struct PDSTRUCT;
     typedef void (*PDSTRUCT_CALLBACK)(void *pUserData, PDSTRUCT *pPdStruct);
 
     struct PDSTRUCT {
@@ -1554,6 +1566,7 @@ public:
 
     QString read_ansiString(qint64 nOffset, qint64 nMaxSize = 256);
     QString read_unicodeString(qint64 nOffset, qint64 nMaxSize = 256, bool bIsBigEndian = false);
+    QString read_utf32String(qint64 nOffset, qint64 nMaxByteSize = 256, bool bIsBigEndian = false);
     QString read_ucsdString(qint64 nOffset);
     QString read_utf8String(qint64 nOffset, qint64 nMaxSize = 256);
     QString _read_utf8String(qint64 nOffset, qint64 nMaxSize = 256);
@@ -1561,6 +1574,7 @@ public:
     QString _read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize, qint32 nDataOffset);
 
     QString read_codePageString(qint64 nOffset, qint64 nMaxByteSize = 256, const QString &sCodePage = "System");
+    QString read_msRecordString(const MS_RECORD &record, qint64 nOffset);
 
     bool isUnicodeStringLatin(qint64 nOffset, qint64 nMaxSize = 256, bool bIsBigEndian = false);
 
@@ -1871,6 +1885,9 @@ public:
     static QString getLoadSectionNameByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
 
     static bool isSolidAddressRange(_MEMORY_MAP *pMemoryMap, XADDR nAddress, qint64 nSize);
+    static bool isPhysicalAddressRange(_MEMORY_MAP *pMemoryMap,
+                                       XADDR nAddress,
+                                       qint64 nSize);
 
     QString getMemoryRecordInfoByOffset(qint64 nOffset);
     QString getMemoryRecordInfoByAddress(XADDR nAddress);
@@ -2535,9 +2552,17 @@ public:
         CRC_TYPE_EDB88320,
         CRC_TYPE_ADLER32,
         CRC_TYPE_FFFFFFFF_EDB88320_00000000,
-        CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF
+        CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF,
+        CRC_TYPE_CRC16ARC,  // ARC-designated reflected polynomial 0xA001, init/xorout 0
+        CRC_TYPE_0000_A001_0000 = CRC_TYPE_CRC16ARC,  // Source-compatible alias
+        CRC_TYPE_RAR14,  // RAR 1.4 16-bit additive/rotate checksum
+        CRC_TYPE_CRC16   // Format-designated CRC-16; reflected polynomial 0xA001, init/xorout 0
     };
 
+    static UNPACK_PROP getUnpackCRCProperty(CRC_TYPE crcType);
+    static bool isUnpackCRCProperty(UNPACK_PROP unpackProperty);
+    static bool isUnpackCRCEnabled(const QMap<UNPACK_PROP, QVariant> &mapProperties);
+    static bool isUnpackCRCEnabled(const QMap<UNPACK_PROP, QVariant> &mapProperties, CRC_TYPE crcType);
     static bool checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
@@ -2620,6 +2645,16 @@ public:
 
     QVector<MS_RECORD> multiSearch_strings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const XFSS_OPTIONS &ssOptions, PDSTRUCT *pPdStruct = nullptr);
 
+    struct INTERNAL_INFO {
+        _MEMORY_MAP memoryMap;
+    };
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct);
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct);
+    virtual void setInternalInfo(void *pInternalInfo);
+    bool isInternalInfoHandled();
+    void setIsInternalInfoHandled(bool bState);
+
 private:
     static QString qcharToHex(QChar cSymbol);
 
@@ -2674,6 +2709,8 @@ private:
     bool m_bIsExecutable;
     bool m_bIsArchive;
     QString m_sFileFormatExts;
+    bool m_bIsInternalInfoHandled;
+    XBinary::INTERNAL_INFO m_internalInfo;
 };
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b);

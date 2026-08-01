@@ -28,6 +28,12 @@ class XCLIAssembly : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum TYPE {
         TYPE_UNKNOWN = 0,
         TYPE_EXE,
@@ -226,6 +232,9 @@ private:
     quint32 g_nCliRva;
     quint32 g_nCliSize;
     QList<PE_SECTION_REGION> g_listSectionRegions;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XCLIASSEMBLY_H

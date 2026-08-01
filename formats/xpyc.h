@@ -33,7 +33,7 @@ public:
         STRUCTID_CODEOBJECT
     };
 
-    struct INFO {
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {
         quint16 nMagicValue;
         quint16 nMagicMarker;
         QString sVersion;
@@ -43,6 +43,12 @@ public:
         quint32 nSourceSize;
         QByteArray baHash;
     };
+
+    using INFO = INTERNAL_INFO;
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
 
     // Marshal format type codes
     enum MARSHAL_TYPE : qint32 {
@@ -124,7 +130,6 @@ public:
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct) override;
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
 
-    INFO getInternalInfo(PDSTRUCT *pPdStruct = nullptr);
     CODE_OBJECT getCodeObject(PDSTRUCT *pPdStruct = nullptr);
     bool isConstPresent(const QString &sConstValue, PDSTRUCT *pPdStruct = nullptr);
     static bool isConstPresent(const CODE_OBJECT *pCodeObject, const QString &sConstValue, PDSTRUCT *pPdStruct = nullptr);
@@ -133,6 +138,8 @@ public:
     // virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct = nullptr) override;
 
 private:
+    INTERNAL_INFO _getInternalInfo(PDSTRUCT *pPdStruct);
+
     static QString _magicToVersion(quint16 nMagicValue);
     static bool _isMagicKnown(quint16 nMagicValue);
     static void _parseVersionNumbers(const QString &sVersion, qint32 *pnMajor, qint32 *pnMinor);
@@ -141,6 +148,8 @@ private:
     QString _readMarshalString(qint64 *pnOffset);
     qint32 _readMarshalInt(qint64 *pnOffset);
     QList<MARSHAL_OBJECT> _readMarshalTuple(qint64 *pnOffset, PDSTRUCT *pPdStruct);
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XPYC_H

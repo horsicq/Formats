@@ -27,6 +27,12 @@
 class XXM : public XBinary {
     Q_OBJECT
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
         STRUCTID_HEADER,
@@ -154,6 +160,9 @@ public:
     SAMPLE_HEADER _read_SAMPLE_HEADER(qint64 nOffset);
 
     // Add more as needed
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XXM_H

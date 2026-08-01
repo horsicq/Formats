@@ -20,7 +20,16 @@
  */
 #include "xmsdos.h"
 
-#include <algorithm>
+namespace {
+
+static qint64 _safeHeaderSizeFromCparhdr(qint64 nImageSize, quint16 nCparhdr, qint64 nTotalSize)
+{
+    qint64 nHeaderSize = (qint64)nCparhdr * 16;
+
+    return qMin(nHeaderSize, qMin(nImageSize, nTotalSize));
+}
+
+}  // namespace
 
 XBinary::XCONVERT _TABLE_XMSDOS_STRUCTID[] = {
     {XMSDOS::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -115,23 +124,20 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
     Q_UNUSED(pPdStruct)
 
     QList<FPART> listResult;
-
+    qint64 nImageSize = getImageSize();
     qint64 nTotal = getSize();
 
-    qint64 nHeaderSize = (quint32)get_e_cparhdr() * 16;
-
-    // When e_cp is 0 treat the entire file as the image (non-standard but common)
-    quint16 nEcp = get_e_cp();
-    qint64 nMaxOffset = (nEcp == 0) ? nTotal : ((quint32)nEcp * 0x200 - ((-get_e_cblp()) & 0x1ff));
+    qint64 nHeaderSize = _safeHeaderSizeFromCparhdr(nImageSize, get_e_cparhdr(), nTotal);
+    qint64 nMaxOffset = qMin(nImageSize, nTotal);
 
     qint64 nBodyOffset = nHeaderSize;
-    qint64 nBodySize = (std::max)((qint64)0, (std::min)(nTotal, nMaxOffset) - nBodyOffset);
+    qint64 nBodySize = qMax((qint64)0, qMin(nTotal, nMaxOffset) - nBodyOffset);
 
     if (nFileParts & FILEPART_HEADER) {
         FPART record = {};
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
-        record.nFileSize = (std::min)(nHeaderSize, nTotal);
+        record.nFileSize = qMin(nHeaderSize, nTotal);
         record.nVirtualAddress = -1;
         record.sName = tr("Header");
         listResult.append(record);
@@ -415,23 +421,23 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     _MEMORY_MAP result = {};
 
     qint32 nIndex = 0;
+    qint64 nImageSize = getImageSize();
+    qint64 nBinarySize = getSize();
 
     result.fileType = FT_MSDOS;
 
     result.sArch = QString("8086");
-    ;
     result.sType = getTypeAsString();
     result.mode = MODE_16;
-    result.nBinarySize = getSize();
-    result.nImageSize = getImageSize();
+    result.nBinarySize = nBinarySize;
+    result.nImageSize = nImageSize;
     result.nModuleAddress = getModuleAddress();
     result.endian = ENDIAN_LITTLE;
 
-    // qint64 nMaxOffset = (get_e_cp() - 1) * 512 + get_e_cblp();  // TODO Check if get_e_cp()=0
-    qint64 nMaxOffset = (quint32)get_e_cp() * 0x200 - ((-get_e_cblp()) & 0x1ff);
+    qint64 nMaxOffset = nImageSize;
 
     qint64 nHeaderOffset = 0;
-    qint64 nHeaderSize = (quint32)(get_e_cparhdr() * 16);
+    qint64 nHeaderSize = _safeHeaderSizeFromCparhdr(nImageSize, get_e_cparhdr(), nBinarySize);
     // qint64 nCodeOffset = (get_e_cparhdr() * 16) + (get_e_cs() * 16);
 
     // result.nEntryPointAddress = ((get_e_cs() << 16) + get_e_ip()) & 0xFFFFFFFF;
@@ -443,11 +449,11 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
     //     nCodeOffset = get_e_cparhdr() * 16;  // TODO Check
     // }
 
-    result.nStartLoadOffset = (get_e_cparhdr() * 16);
+    result.nStartLoadOffset = nHeaderSize;
 
     // qint64 nCodeSize = 0;
     qint64 nOverlayOffset = nMaxOffset;
-    qint64 nOverlaySize = (std::max)(getSize() - nMaxOffset, (qint64)0);
+    qint64 nOverlaySize = qMax(nBinarySize - nMaxOffset, (qint64)0);
 
     // if (nMaxOffset > nCodeOffset) {
     //     nCodeSize = S_ALIGN_UP(nMaxOffset - nCodeOffset, 512);
@@ -518,13 +524,25 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
 qint64 XMSDOS::getImageSize()
 {
-    return 0x10000;  // TODO Check
+    quint16 nPages = (quint16)get_e_cp();
+    quint16 nCblp = (quint16)get_e_cblp();
+
+    qint64 nResult = getSize();
+
+    if (nPages > 0) {
+        nResult = (qint64)nPages * 0x200 - ((-(qint64)nCblp) & 0x1ff);
+
+        if ((nResult < 0) || (nResult > getSize())) {
+            nResult = getSize();
+        }
+    }
+
+    return nResult;
 }
 
 qint64 XMSDOS::getModuleAddress()
 {
-    return 0x10000000;  // TODO Check
-    // return 0x100000;
+    return 0;
 }
 
 QMap<quint64, QString> XMSDOS::getImageMagics()
@@ -713,7 +731,7 @@ qint64 XMSDOS::getDosStubSize()
 {
     qint64 nSize = (qint64)get_lfanew() - sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX);
 
-    nSize = (std::max)(nSize, (qint64)0);
+    nSize = qMax(nSize, (qint64)0);
 
     return nSize;
 }
@@ -840,23 +858,53 @@ QList<XBinary::XFHEADER> XMSDOS::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT
         }
 
         _xfStruct.xLoc = offsetToLoc(0);
+        _xfStruct.nSize = 0;
+        _xfStruct.nCount = 0;
 
         listResult.append(XMSDOS::getXFHeaders(_xfStruct, pPdStruct));
     } else if ((nStructID == STRUCTID_IMAGE_DOS_HEADER) || (nStructID == STRUCTID_IMAGE_DOS_HEADEREX)) {
-        XLOC headerLoc = xfStruct.xLoc;
+        qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
+
+        if (nOffset == -1) {
+            nOffset = 0;
+        }
+
+        qint64 nDefaultSize = (nStructID == STRUCTID_IMAGE_DOS_HEADEREX) ? (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)
+                                                                        : (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
+        qint64 nHeaderSize = xfStruct.nSize > 0 ? qMin(xfStruct.nSize, nDefaultSize) : nDefaultSize;
+
+        if ((nOffset < 0) || (nOffset >= getSize())) {
+            return listResult;
+        }
+
+        nHeaderSize = qMin(nHeaderSize, getSize() - nOffset);
+
+        if (nHeaderSize < (qint64)sizeof(quint16)) {
+            return listResult;
+        }
+
+        XLOC headerLoc = offsetToLoc(nOffset);
 
         XFHEADER xfHeader = {};
+        xfHeader.sParentTag = xfStruct.sParent;
         xfHeader.fileType = xfStruct.fileType;
         xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
         xfHeader.xLoc = headerLoc;
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = XMSDOS::getXFRecords(xfStruct.fileType, nStructID, headerLoc);
-        xfHeader.nSize = (xfStruct.nSize > 0)
-                             ? xfStruct.nSize
-                             : ((nStructID == STRUCTID_IMAGE_DOS_HEADEREX) ? sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX) : sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER));
+        QList<XFRECORD> listFilteredFields;
+        for (const XFRECORD &record : qAsConst(xfHeader.listFields)) {
+            if ((record.nOffset >= 0) && ((qint64)record.nOffset + record.nSize <= nHeaderSize)) {
+                listFilteredFields.append(record);
+            }
+        }
+        xfHeader.listFields = listFilteredFields;
+        xfHeader.nSize = nHeaderSize;
         // Field 0 = e_magic
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMSDOS_ImageMagics, sizeof(_TABLE_XMSDOS_ImageMagics) / sizeof(XBinary::XIDSTRING)});
-        xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nStructID), xfHeader.sParentTag);
+        // Qualify the converter: derived formats (PE/NE/LE) reuse numeric
+        // STRUCTID values for unrelated structures.
+        xfHeader.sTag = xfHeaderToTag(xfHeader, XMSDOS::structIDToString(nStructID), xfHeader.sParentTag);
 
         listResult.append(xfHeader);
     }
@@ -990,3 +1038,40 @@ QList<XBinary::XFRECORD> XMSDOS::getXFRecords(FT fileType, quint32 nStructID, co
 
 //     return listResult;
 // }
+
+bool XMSDOS::handleInternalInfo(PDSTRUCT *pPdStruct)
+{
+    bool bResult = true;
+
+    if (!isInternalInfoHandled()) {
+        bResult = XBinary::handleInternalInfo(pPdStruct);
+
+        if (bResult) {
+            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
+                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
+            setIsInternalInfoHandled(true);
+        }
+    }
+
+    return bResult;
+}
+
+void *XMSDOS::getInternalInfo(PDSTRUCT *pPdStruct)
+{
+    handleInternalInfo(pPdStruct);
+
+    return &m_internalInfo;
+}
+
+void XMSDOS::setInternalInfo(void *pInternalInfo)
+{
+    if (pInternalInfo) {
+        m_internalInfo = *static_cast<INTERNAL_INFO *>(pInternalInfo);
+        XBinary::setInternalInfo(static_cast<XBinary::INTERNAL_INFO *>(&m_internalInfo));
+        setIsInternalInfoHandled(true);
+    } else {
+        m_internalInfo = INTERNAL_INFO();
+        XBinary::setInternalInfo(nullptr);
+        setIsInternalInfoHandled(false);
+    }
+}

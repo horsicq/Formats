@@ -27,6 +27,12 @@ class XWEBP : public XRiff {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XRiff::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     enum STRUCTID {
         STRUCTID_UNKNOWN = 0,
     };
@@ -45,6 +51,9 @@ public:
     virtual QString structIDToString(quint32 nID) override;
     virtual QString structIDToFtString(quint32 nID) override;
     virtual quint32 ftStringToStructID(const QString &sFtString) override;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XWEBP_H

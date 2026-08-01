@@ -116,6 +116,31 @@ XBinary::XFTYPE getXFTypeFromStructString(const QString &sStruct)
 
     return result;
 }
+
+qint64 parseXFOffset(const QString &sValue, bool *pbOk = nullptr)
+{
+    QString sTrimmed = sValue.trimmed();
+    bool bOk = false;
+    qint64 nOffset = 0;
+
+    if (sTrimmed.startsWith("0x", Qt::CaseInsensitive)) {
+        sTrimmed = sTrimmed.mid(2);
+    }
+
+    if (!sTrimmed.isEmpty()) {
+        nOffset = sTrimmed.toLongLong(&bOk, 16);
+
+        if (!bOk) {
+            nOffset = sTrimmed.toLongLong(&bOk, 10);
+        }
+    }
+
+    if (pbOk) {
+        *pbOk = bOk;
+    }
+
+    return nOffset;
+}
 }  // namespace
 
 XFormats::XFormats(QObject *pParent) : XThreadObject(pParent)
@@ -912,7 +937,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
         XBinary::FT fileType = XBinary::ftStringToFileTypeId(sFileTypeFt);
 
         bool bOk = false;
-        qint64 nOffset = sOffset.toLongLong(&bOk, 16);
+        qint64 nOffset = parseXFOffset(sOffset, &bOk);
 
         if ((fileType != XBinary::FT_UNKNOWN) && bOk) {
             XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
@@ -976,7 +1001,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
 
                         if (nFilterPartCount >= 1) {
                             bool bFilterOk = false;
-                            nFilterOffset = listFilterParts.at(0).toLongLong(&bFilterOk, 16);
+                            nFilterOffset = parseXFOffset(listFilterParts.at(0), &bFilterOk);
                             if (!bFilterOk) {
                                 nFilterPartCount = 0;
                             }
@@ -1195,10 +1220,7 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
                 const QString sValue = sParam.mid(nEqIdx + 1);
                 if (sKey == "offset") {
                     bool bOk = false;
-                    qint64 nOffset = sValue.toLongLong(&bOk, 16);
-                    if (!bOk) {
-                        nOffset = sValue.toLongLong(&bOk, 10);
-                    }
+                    qint64 nOffset = parseXFOffset(sValue, &bOk);
                     if (bOk) {
                         xLoc = XBinary::offsetToLoc(nOffset);
                     }
@@ -1271,14 +1293,10 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
         xfStruct.xfType = xfType;
 
         if ((xfType == XBinary::XFTYPE_TABLE) && (nSize > 0) && (nCount > 0)) {
-            qint64 nDefaultRowSize = 0;
-            QList<XBinary::XFRECORD> listFields = pBinary->getXFRecords(fileType, xfStruct.nStructID, xLoc);
-
-            for (const XBinary::XFRECORD &record : qAsConst(listFields)) {
-                nDefaultRowSize = (std::max)(nDefaultRowSize, (qint64)record.nOffset + record.nSize);
-            }
-
-            if ((nSize != nDefaultRowSize) && ((nSize % nCount) == 0)) {
+            // xfHeaderToString() serializes a table's total byte size. Always
+            // restore the per-row stride, including the ambiguous case where
+            // total size happens to equal the structure's default row size.
+            if ((nSize % nCount) == 0) {
                 nSize /= nCount;
             }
         }

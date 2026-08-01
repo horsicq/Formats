@@ -27,6 +27,12 @@ class XDJVU : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
     enum TYPE {
@@ -118,6 +124,9 @@ private:
     bool _isChunkValid(const QString &sChunkName);
 
     HEADER m_header;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XDJVU_H

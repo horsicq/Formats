@@ -28,6 +28,12 @@ class XMSDOS : public XBinary {
     Q_OBJECT
 
 public:
+    struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
+
+    virtual bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void *getInternalInfo(PDSTRUCT *pPdStruct) override;
+    virtual void setInternalInfo(void *pInternalInfo) override;
+
     struct MS_RICH_RECORD  // For PE and LE
     {
         quint16 nId;
@@ -159,6 +165,9 @@ public:
 
     // File parts enumeration
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+private:
+    INTERNAL_INFO m_internalInfo;
+
 };
 
 #endif  // XMSDOS_H
