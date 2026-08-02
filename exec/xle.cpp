@@ -1188,7 +1188,17 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
 {
     QList<XLE_DEF::o32_obj> listResult;
 
-    qint64 nObjOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objtab();
+    qint64 nHeaderOffset = getImageVxdHeaderOffset();
+    if (nHeaderOffset < 0) {
+        return listResult;
+    }
+
+    quint32 nObjTab = getImageVxdHeader_objtab();
+    if (nObjTab > (quint32)(LLONG_MAX - nHeaderOffset)) {
+        return listResult;
+    }
+
+    qint64 nObjOffset = nHeaderOffset + (qint64)nObjTab;
     if (!_isOffsetValid(nObjOffset)) {
         return listResult;
     }
@@ -1223,7 +1233,17 @@ QList<XLE_DEF::o16_map> XLE::getMapsLE()
 {
     QList<XLE_DEF::o16_map> listResult;
 
-    qint64 nMapOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
+    qint64 nHeaderOffset = getImageVxdHeaderOffset();
+    if (nHeaderOffset < 0) {
+        return listResult;
+    }
+
+    quint32 nObjMap = getImageVxdHeader_objmap();
+    if (nObjMap > (quint32)(LLONG_MAX - nHeaderOffset)) {
+        return listResult;
+    }
+
+    qint64 nMapOffset = nHeaderOffset + (qint64)nObjMap;
     quint32 nNumberOfMaps = getImageVxdHeader_mpages();
     if (!_isOffsetValid(nMapOffset)) {
         return listResult;
@@ -1251,7 +1271,17 @@ QList<XLE_DEF::o32_map> XLE::getMapsLX()
 {
     QList<XLE_DEF::o32_map> listResult;
 
-    qint64 nMapOffset = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
+    qint64 nHeaderOffset = getImageVxdHeaderOffset();
+    if (nHeaderOffset < 0) {
+        return listResult;
+    }
+
+    quint32 nObjMap = getImageVxdHeader_objmap();
+    if (nObjMap > (quint32)(LLONG_MAX - nHeaderOffset)) {
+        return listResult;
+    }
+
+    qint64 nMapOffset = nHeaderOffset + (qint64)nObjMap;
     quint32 nNumberOfMaps = getImageVxdHeader_mpages();
     if (!_isOffsetValid(nMapOffset)) {
         return listResult;
@@ -1613,10 +1643,11 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         rec.filePart = FILEPART_HEADER;
         rec.nFileOffset = 0;
         qint64 nImageHeaderOffset = getImageVxdHeaderOffset();
+        qint64 nImageHeaderSizeValue = getImageVxdHeaderSize();
         qint64 nImageHeaderSize = 0;
 
         if (nImageHeaderOffset >= 0) {
-            nImageHeaderSize = qMin<qint64>(nImageHeaderOffset + getImageVxdHeaderSize(), nTotal);
+            nImageHeaderSize = (nImageHeaderOffset <= (nTotal - nImageHeaderSizeValue)) ? (nImageHeaderOffset + nImageHeaderSizeValue) : nTotal;
         }
 
         rec.nFileSize = nImageHeaderSize;
@@ -1636,7 +1667,14 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         quint32 nPages = getImageVxdHeader_mpages();
         quint32 nLastPageSize = getImageVxdHeader_lastpagesize();
         qint64 nDataPageOff = getImageVxdHeader_datapage();
-        qint64 nMapOff = getImageVxdHeaderOffset() + getImageVxdHeader_objmap();
+        qint64 nHeaderOffset = getImageVxdHeaderOffset();
+        qint64 nMapOff = -1;
+        if (nHeaderOffset >= 0) {
+            quint32 nObjMap = getImageVxdHeader_objmap();
+            if (nObjMap <= (quint32)(LLONG_MAX - nHeaderOffset)) {
+                nMapOff = nHeaderOffset + (qint64)nObjMap;
+            }
+        }
         qint64 nLoaderSize = 0;
         if ((nPages > 0) && (nPageSize > 0) && (nDataPageOff >= 0) && (nDataPageOff < nTotal)) {
             qint64 nPageSpan = (qint64)(nPages - 1);
@@ -1662,6 +1700,9 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             qint64 nMapSize = qMin<qint64>((qint64)objs.at(i).o32_mapsize, (qint64)nPages);
             qint64 nMapEntrySize = bIsLE ? (qint64)sizeof(XLE_DEF::o16_map) : (qint64)sizeof(XLE_DEF::o32_map);
             qint64 nMapBasePage = (qint64)objs.at(i).o32_pagemap - 1;
+            if (nMapOff < 0) {
+                continue;
+            }
 
             if (nMapBasePage < 0) {
                 continue;
@@ -1698,17 +1739,18 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                 if (bIsLE) {
                     XLE_DEF::o16_map m = _read_o16_map(nMapEntryOff);
                     quint32 nOfs = m.o16_pagenum[2] + (m.o16_pagenum[1] << 8) + ((quint32)m.o16_pagenum[0] << 16);
-                    if (nOfs) {
-                        if (nPageSize == 0) {
-                            continue;
-                        }
-
-                        if ((nDataPageOff > nTotal) || ((qint64)(nOfs - 1) > ((nTotal - nDataPageOff - 1) / (qint64)nPageSize))) {
-                            continue;
-                        }
-
-                        nPageDataOffset = ((qint64)(nOfs - 1) * (qint64)nPageSize) + nDataPageOff;
+                    if (nOfs == 0) {
+                        continue;
                     }
+                    if (nPageSize == 0) {
+                        continue;
+                    }
+
+                    if ((nDataPageOff > nTotal) || ((qint64)(nOfs - 1) > ((nTotal - nDataPageOff - 1) / (qint64)nPageSize))) {
+                        continue;
+                    }
+
+                    nPageDataOffset = ((qint64)(nOfs - 1) * (qint64)nPageSize) + nDataPageOff;
                     // For LE, all pages except last have standard page size; clamp to loader end
                     if ((nLoaderSize > 0) && (nPageDataOffset < nLoaderSize)) {
                         nThisPageSize = qMin((qint64)nPageSize, nLoaderSize - nPageDataOffset);
@@ -1730,9 +1772,13 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                 if (nThisPageSize <= 0) {
                     continue;
                 }
+                qint64 nPageEndOffset = nPageDataOffset + nThisPageSize;
+                if (nPageEndOffset < nPageDataOffset) {
+                    continue;
+                }
                 if (nObjMin == -1) nObjMin = nPageDataOffset;
                 nObjMin = qMin(nObjMin, nPageDataOffset);
-                nObjMax = qMax(nObjMax, nPageDataOffset + nThisPageSize);
+                nObjMax = qMax(nObjMax, nPageEndOffset);
             }
 
             if (nObjMin >= 0 && nObjMax > nObjMin) {
