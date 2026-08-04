@@ -99,14 +99,6 @@ contains(XCONFIG, use_pdf) {
     }
 }
 
-contains(XCONFIG, use_pdb) {
-    DEFINES += USE_PDB
-    !contains(XCONFIG, xpdb) {
-        XCONFIG += xpdb
-        include($$PWD/../XPDB/xpdb.pri)
-    }
-}
-
 contains(XCONFIG, use_archive) {
     DEFINES += USE_ARCHIVE
     !contains(XCONFIG, xarchives) {

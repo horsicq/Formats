@@ -71,10 +71,21 @@ if(XSIMD_ENABLE_CUDA)
             ${PROJECT_SOURCE_DIR}/src/xsimd_cuda.cu
         )
         target_include_directories(xsimd_cuda PRIVATE ${PROJECT_SOURCE_DIR}/src/)
+
+        # GPU architectures depend on the toolkit. CUDA 13.0 removed support for the pre-Turing
+        # architectures (Maxwell/Pascal/Volta) -- its minimum is compute_75 -- so requesting
+        # compute_50/compute_61 there fails with "nvcc fatal : Unsupported gpu architecture
+        # 'compute_50'". Select a list valid for the detected toolkit. (Ref: horsicq/Formats#9.)
+        if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 13.0)
+            set(XSIMD_CUDA_ARCHITECTURES "75;86;89;90")     # Turing, Ampere, Ada, Hopper
+        else()
+            set(XSIMD_CUDA_ARCHITECTURES "50;61;75;86;89")  # Maxwell, Pascal, Turing, Ampere, Ada
+        endif()
+
         set_target_properties(xsimd_cuda PROPERTIES
             CUDA_STANDARD          11
             CUDA_STANDARD_REQUIRED ON
-            CUDA_ARCHITECTURES     "50;61;75;86;89"
+            CUDA_ARCHITECTURES     "${XSIMD_CUDA_ARCHITECTURES}"
         )
         target_link_libraries(xsimd_cuda PUBLIC CUDA::cudart)
 
