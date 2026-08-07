@@ -3529,19 +3529,51 @@ QString XBinary::_read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize,
     return sResult;
 }
 
+static QString decodeWindows1250(const QByteArray &baData)
+{
+    // QTextCodec availability is build-dependent even in Qt 5. Keep the
+    // Windows-1250 contract used by persisted MS_RECORD metadata deterministic
+    // on every supported host instead of falling back to locale/Latin-1.
+    static const quint16 g_anWindows1250HighBytes[128] = {
+        0x20AC, 0xFFFD, 0x201A, 0xFFFD, 0x201E, 0x2026, 0x2020, 0x2021, 0xFFFD, 0x2030, 0x0160, 0x2039, 0x015A, 0x0164, 0x017D, 0x0179,
+        0xFFFD, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014, 0xFFFD, 0x2122, 0x0161, 0x203A, 0x015B, 0x0165, 0x017E, 0x017A,
+        0x00A0, 0x02C7, 0x02D8, 0x0141, 0x00A4, 0x0104, 0x00A6, 0x00A7, 0x00A8, 0x00A9, 0x015E, 0x00AB, 0x00AC, 0x00AD, 0x00AE, 0x017B,
+        0x00B0, 0x00B1, 0x02DB, 0x0142, 0x00B4, 0x00B5, 0x00B6, 0x00B7, 0x00B8, 0x0105, 0x015F, 0x00BB, 0x013D, 0x02DD, 0x013E, 0x017C,
+        0x0154, 0x00C1, 0x00C2, 0x0102, 0x00C4, 0x0139, 0x0106, 0x00C7, 0x010C, 0x00C9, 0x0118, 0x00CB, 0x011A, 0x00CD, 0x00CE, 0x010E,
+        0x0110, 0x0143, 0x0147, 0x00D3, 0x00D4, 0x0150, 0x00D6, 0x00D7, 0x0158, 0x016E, 0x00DA, 0x0170, 0x00DC, 0x00DD, 0x0162, 0x00DF,
+        0x0155, 0x00E1, 0x00E2, 0x0103, 0x00E4, 0x013A, 0x0107, 0x00E7, 0x010D, 0x00E9, 0x0119, 0x00EB, 0x011B, 0x00ED, 0x00EE, 0x010F,
+        0x0111, 0x0144, 0x0148, 0x00F3, 0x00F4, 0x0151, 0x00F6, 0x00F7, 0x0159, 0x016F, 0x00FA, 0x0171, 0x00FC, 0x00FD, 0x0163, 0x02D9,
+    };
+
+    QString sResult;
+    sResult.reserve(baData.size());
+
+    for (char cValue : baData) {
+        const quint8 nValue = (quint8)cValue;
+        const quint16 nUnicode = (nValue < 0x80) ? (quint16)nValue : g_anWindows1250HighBytes[nValue - 0x80];
+        sResult.append(QChar(nUnicode));
+    }
+
+    return sResult;
+}
+
 QString XBinary::read_codePageString(qint64 nOffset, qint64 nMaxByteSize, const QString &sCodePage)
 {
     QString sResult;
-
-#if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
     QByteArray baData = read_array(nOffset, nMaxByteSize);
 
-    QTextCodec *pCodec = QTextCodec::codecForName(sCodePage.toLatin1().data());
+    if (sCodePage.compare(QStringLiteral("Windows-1250"), Qt::CaseInsensitive) == 0) {
+        sResult = decodeWindows1250(baData);
+    } else {
 
-    if (pCodec) {
-        sResult = pCodec->toUnicode(baData);
-    }
+#if (QT_VERSION_MAJOR < 6) || defined(QT_CORE5COMPAT_LIB)
+        QTextCodec *pCodec = QTextCodec::codecForName(sCodePage.toLatin1().data());
+
+        if (pCodec) {
+            sResult = pCodec->toUnicode(baData);
+        }
 #endif
+    }
 
     sResult = sResult.section(QChar(0xFFFD), 0, 0);
     sResult = sResult.section(QChar(0), 0, 0);
