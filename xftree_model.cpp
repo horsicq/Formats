@@ -529,21 +529,21 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bE
     }
 
     if (bExtraInfo && m_pRootItem) {
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!VISUALIZATION", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HEX", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!DISASM", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!NFDSCAN", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HASH", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SIGNATURES", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!MEMORYMAP", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!ENTROPY", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXTRACTOR", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SEARCH", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!STRINGS", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!IMPORT", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXPORT", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SYMBOLS", XBinary::STRUCTID_UNKNOWN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!RESOURCES", XBinary::STRUCTID_UNKNOWN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!VISUALIZATION", XBinary::STRUCTID_VISUALIZATION);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HEX", XBinary::STRUCTID_HEX);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!DISASM", XBinary::STRUCTID_DISASM);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!NFDSCAN", XBinary::STRUCTID_NFDSCAN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HASH", XBinary::STRUCTID_HASH);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SIGNATURES", XBinary::STRUCTID_SIGNATURES);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!MEMORYMAP", XBinary::STRUCTID_MEMORYMAP);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!ENTROPY", XBinary::STRUCTID_ENTROPY);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXTRACTOR", XBinary::STRUCTID_EXTRACTOR);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SEARCH", XBinary::STRUCTID_SEARCH);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!STRINGS", XBinary::STRUCTID_STRINGS);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!IMPORT", XBinary::STRUCTID_IMPORT);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXPORT", XBinary::STRUCTID_EXPORT);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SYMBOLS", XBinary::STRUCTID_SYMBOLS);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!RESOURCES", XBinary::STRUCTID_RESOURCES);
     }
 }
 

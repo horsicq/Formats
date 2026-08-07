@@ -270,7 +270,9 @@ public:
         HANDLE_METHOD_KWAJ_LZSS,     // KWAJ method 2: SZDD LZSS
         HANDLE_METHOD_KWAJ_LZH,      // KWAJ method 3: LZSS + Huffman
         HANDLE_METHOD_ZOO_LZD,       // ZOO method 1: LZD (13-bit LZW)
-        HANDLE_METHOD_ZOO_LZH        // ZOO method 2: LZH (lh5-compatible)
+        HANDLE_METHOD_ZOO_LZH,       // ZOO method 2: LZH (lh5-compatible)
+        HANDLE_METHOD_ASCIIHEX,      // PDF /ASCIIHexDecode
+        HANDLE_METHOD_RUNLENGTH      // PDF /RunLengthDecode (PackBits-style)
         // TODO check more methods
     };
 

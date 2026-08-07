@@ -838,6 +838,38 @@ XBinary::FILEFORMATINFO XFormats::getFileFormatInfo(XBinary::FT fileType, QIODev
     result = pBinary->getFileFormatInfo(pPdStruct);
     delete pBinary;
 
+#ifdef USE_DWARF
+    // DWARF is not a file type of its own; it is debug information embedded in an
+    // ELF/PE/Mach-O container. When present, surface its version in the info line.
+    // This lives at the XFormats layer(which may depend on XDWARF); it must not go
+    // into xelf/xpe/xmach, which XDWARF itself depends on.
+    if (result.bIsValid && (XBinary::checkFileType(XBinary::FT_ELF, fileType) || XBinary::checkFileType(XBinary::FT_PE, fileType) ||
+                            XBinary::checkFileType(XBinary::FT_MACHO, fileType))) {
+        // The DWARF sections are extracted by file offset, so the probe uses file
+        // semantics(bIsImage false): getFileFormatInfo analyzes on-disk file bytes,
+        // and some callers pass bIsImage true for a file, which would make the section
+        // reads use virtual addresses and miss the debug data.
+        XDWARF xdwarf(_pDevice, false, -1);
+
+        // A non-empty version means real .debug_info/.debug_types units are present.
+        // isValid() alone is true for a bare .eh_frame(runtime unwind data present in
+        // almost every binary, stripped or not), which is not debug information.
+        if (xdwarf.isValid(pPdStruct)) {
+            QString sVersion = xdwarf.getVersion();
+
+            if (!sVersion.isEmpty()) {
+                QString sDwarf = QString("DWARF%1").arg(sVersion);
+
+                if (result.sInfo.isEmpty()) {
+                    result.sInfo = sDwarf;
+                } else {
+                    result.sInfo += QString(", ") + sDwarf;
+                }
+            }
+        }
+    }
+#endif
+
     if (pSubDevice) {
         pSubDevice->close();
         delete pSubDevice;
@@ -1283,31 +1315,35 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
     if (!bParent) {
         XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
 
-        XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
+        if (pBinary) {
+            XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
 
-        XBinary::XFSTRUCT xfStruct = {};
-        xfStruct.fileType = fileType;
-        xfStruct.nStructID = pBinary->ftStringToStructID(sStructName);
-        xfStruct.pMemoryMap = &memoryMap;
-        xfStruct.xLoc = xLoc;
-        xfStruct.xfType = xfType;
+            XBinary::XFSTRUCT xfStruct = {};
+            xfStruct.fileType = fileType;
+            xfStruct.nStructID = pBinary->ftStringToStructID(sStructName);
+            xfStruct.pMemoryMap = &memoryMap;
+            xfStruct.xLoc = xLoc;
+            xfStruct.xfType = xfType;
 
-        if ((xfType == XBinary::XFTYPE_TABLE) && (nSize > 0) && (nCount > 0)) {
-            // xfHeaderToString() serializes a table's total byte size. Always
-            // restore the per-row stride, including the ambiguous case where
-            // total size happens to equal the structure's default row size.
-            if ((nSize % nCount) == 0) {
-                nSize /= nCount;
+            if ((xfType == XBinary::XFTYPE_TABLE) && (nSize > 0) && (nCount > 0)) {
+                // xfHeaderToString() serializes a table's total byte size. Always
+                // restore the per-row stride, including the ambiguous case where
+                // total size happens to equal the structure's default row size.
+                if ((nSize % nCount) == 0) {
+                    nSize /= nCount;
+                }
             }
-        }
 
-        xfStruct.nSize = nSize;
-        xfStruct.nCount = nCount;
+            xfStruct.nSize = nSize;
+            xfStruct.nCount = nCount;
 
-        QList<XBinary::XFHEADER> listResult = pBinary->getXFHeaders(xfStruct, pPdStruct);
+            QList<XBinary::XFHEADER> listResult = pBinary->getXFHeaders(xfStruct, pPdStruct);
 
-        if (listResult.size() > 0) {
-            result = listResult.last();
+            if (listResult.size() > 0) {
+                result = listResult.last();
+            }
+
+            delete pBinary;
         }
     }
 

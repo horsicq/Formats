@@ -2012,7 +2012,7 @@ QList<XPE::SECTION_RECORD> XPE::getSectionRecords(QList<XPE_DEF::IMAGE_SECTION_H
     for (qint32 i = 0; (i < nNumberOfSections) && isPdStructNotCanceled(pPdStruct); i++) {
         SECTION_RECORD record = {};
 
-        record.sName = QString((char *)pListSectionHeaders->at(i).Name);
+        record.sName = QString::fromLatin1((const char *)pListSectionHeaders->at(i).Name, qstrnlen((const char *)pListSectionHeaders->at(i).Name, 8));
         record.sName.resize(qMin(record.sName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
 
         record.sName = convertSectionName(record.sName, &osStringTable);
@@ -13275,7 +13275,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             }
 
             if (nFileParts & FILEPART_SECTION) {
-                QString _sSectionName = QString((char *)section.Name);
+                QString _sSectionName = QString::fromLatin1((const char *)section.Name, qstrnlen((const char *)section.Name, 8));
                 _sSectionName.resize(qMin(_sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
                 _sSectionName = convertSectionName(_sSectionName, &osStringTable);
                 record.mapProperties.insert(FPART_PROP_ORIGINALNAME, _sSectionName);
@@ -13787,7 +13787,7 @@ qint32 XPE::getNormalCodeSection(_MEMORY_MAP *pMemoryMap)
     nNumberOfSections = qMin(nNumberOfSections, 2);
 
     for (qint32 i = 0; i < nNumberOfSections; i++) {
-        QString sSectionName = QString((char *)listSections.at(i).Name);
+        QString sSectionName = QString::fromLatin1((const char *)listSections.at(i).Name, qstrnlen((const char *)listSections.at(i).Name, 8));
         sSectionName.resize(qMin(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics = listSections.at(i).Characteristics;
         nSectionCharacteristics &= 0xFF0000FF;
@@ -13836,7 +13836,7 @@ qint32 XPE::getNormalDataSection(_MEMORY_MAP *pMemoryMap)
         // 0xc0700040 MinGW
         // 0xc0600040 MinGW
         // 0xc0300040 MinGW
-        QString sSectionName = QString((char *)listSections.at(i).Name);
+        QString sSectionName = QString::fromLatin1((const char *)listSections.at(i).Name, qstrnlen((const char *)listSections.at(i).Name, 8));
         sSectionName.resize(qMin(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics = listSections.at(i).Characteristics;
         nSectionCharacteristics &= 0xFF0000FF;
@@ -13884,7 +13884,7 @@ qint32 XPE::getConstDataSection(_MEMORY_MAP *pMemoryMap)
         // 0x40700040 MinGW
         // 0x40600040 MinGW
         // 0x40300040 MinGW
-        QString sSectionName = QString((char *)listSections.at(i).Name);
+        QString sSectionName = QString::fromLatin1((const char *)listSections.at(i).Name, qstrnlen((const char *)listSections.at(i).Name, 8));
         sSectionName.resize(qMin(sSectionName.length(), XPE_DEF::S_IMAGE_SIZEOF_SHORT_NAME));
         quint32 nSectionCharacteristics = listSections.at(i).Characteristics;
         nSectionCharacteristics &= 0xFF0000FF;
