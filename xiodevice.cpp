@@ -68,7 +68,7 @@ bool XIODevice::seek(qint64 nPos)
 {
     bool bResult = false;
 
-    if ((nPos < size()) && (nPos >= 0)) {
+    if ((nPos <= size()) && (nPos >= 0)) {
         bResult = QIODevice::seek(nPos);
     }
 

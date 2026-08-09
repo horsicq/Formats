@@ -761,7 +761,7 @@ bool XBinary::hasUnpackCRC(PDSTRUCT *pPdStruct)
             }
         }
 
-        finishUnpack(&state, pPdStruct);
+        finishUnpack(&state, nullptr);
     }
 
     return bResult;
@@ -828,9 +828,13 @@ qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
     UNPACK_STATE state = {};
     QMap<UNPACK_PROP, QVariant> mapProperties;
 
-    // Initialize packing (this writes signature/header)
+    // Initialize the streaming archive state.
     if (initUnpack(&state, mapProperties, pPdStruct)) {
         nResult = state.nNumberOfRecords;
+
+        // A successful initUnpack() owns its context until finishUnpack(),
+        // even when the caller was canceled while initialization completed.
+        finishUnpack(&state, nullptr);
     }
 
     return nResult;
@@ -871,8 +875,8 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
             }
         }
 
-        // Clean up
-        finishUnpack(&state, pPdStruct);
+        // Cleanup must not inherit a canceled enumeration token.
+        finishUnpack(&state, nullptr);
     }
 
     return listResult;
@@ -952,20 +956,56 @@ QList<QString> XBinary::getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVar
             }
         }
 
-        // Clean up
-        finishUnpack(&state, pPdStruct);
+        // Cleanup must not inherit a canceled enumeration token.
+        finishUnpack(&state, nullptr);
     }
 
     return listResult;
 }
 
+static qint64 readDeviceWithBoundedProgress(QIODevice *pDevice, char *pBuffer, qint64 nSize)
+{
+    if (!pDevice || (nSize < 0) || ((nSize > 0) && !pBuffer)) return -1;
+
+    // Sequential/nonblocking QIODevice implementations may transiently return
+    // zero without being at EOF.  Give them a small bounded opportunity to
+    // become readable; a real EOF or persistent no-progress condition is still
+    // returned to the decoder promptly.
+    for (qint32 i = 0; i < 3; i++) {
+        const qint64 nResult = pDevice->read(pBuffer, nSize);
+        if ((nResult != 0) || (nSize == 0) || pDevice->atEnd()) return nResult;
+        if (i != 2) pDevice->waitForReadyRead(10);
+    }
+
+    return 0;
+}
+
 qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
 {
-    qint32 nRead = pState->pDeviceInput->read(pBuffer, nBufferSize);
+    if (!pState || !pState->pDeviceInput || (nBufferSize < 0) || ((nBufferSize > 0) && !pBuffer) || (pState->nCountInput < 0) ||
+        (pState->nInputLimit < -1) || ((pState->nInputLimit != -1) && (pState->nCountInput > pState->nInputLimit))) {
+        if (pState) {
+            pState->bReadError = true;
+        }
+        return -1;
+    }
 
+    qint32 nReadSize = nBufferSize;
+    if (pState->nInputLimit != -1) {
+        nReadSize = (qint32)(std::min)((qint64)nReadSize, pState->nInputLimit - pState->nCountInput);
+    }
+    const qint64 nReadResult = readDeviceWithBoundedProgress(pState->pDeviceInput, pBuffer, nReadSize);
+
+    if ((nReadResult < 0) || (nReadResult > (qint64)nReadSize) ||
+        ((nReadResult > 0) && (pState->nCountInput > ((std::numeric_limits<qint64>::max)() - nReadResult)))) {
+        pState->bReadError = true;
+        return -1;
+    }
+
+    const qint32 nRead = (qint32)nReadResult;
     if (nRead > 0) {
         pState->nCountInput += nRead;
-    } else if (nBufferSize > 0) {
+    } else if ((nReadSize > 0) && (pState->nInputLimit != -1) && (pState->nCountInput < pState->nInputLimit)) {
         // QIODevice is allowed to return a positive short read.  Treat only an
         // actual error/EOF before the requested bounded input is complete as a
         // read failure; callers will request the remaining bytes on the next
@@ -978,50 +1018,66 @@ qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE
 
 qint32 XBinary::_readDevice(DATAPROCESS_STATE *pState)
 {
-    qint32 nRead = pState->pDeviceInput->read(pState->pInputBuffer, pState->nInputBufferSize);
+    if (!pState || !pState->pDeviceInput || (pState->nInputBufferSize < 0) || ((pState->nInputBufferSize > 0) && !pState->pInputBuffer) ||
+        (pState->nCountInput < 0) || (pState->nInputLimit < -1) ||
+        ((pState->nInputLimit != -1) && (pState->nCountInput > pState->nInputLimit))) {
+        if (pState) {
+            pState->bReadError = true;
+        }
+        return -1;
+    }
 
+    qint32 nReadSize = pState->nInputBufferSize;
+    if (pState->nInputLimit != -1) {
+        nReadSize = (qint32)(std::min)((qint64)nReadSize, pState->nInputLimit - pState->nCountInput);
+    }
+    const qint64 nReadResult = readDeviceWithBoundedProgress(pState->pDeviceInput, pState->pInputBuffer, nReadSize);
+
+    if ((nReadResult < 0) || (nReadResult > (qint64)nReadSize) ||
+        ((nReadResult > 0) && (pState->nCountInput > ((std::numeric_limits<qint64>::max)() - nReadResult)))) {
+        pState->bReadError = true;
+        return -1;
+    }
+
+    const qint32 nRead = (qint32)nReadResult;
     if (nRead > 0) {
         pState->nCountInput += nRead;
-    } else if (pState->nInputBufferSize > 0) {
+    } else if ((nReadSize > 0) && (pState->nInputLimit != -1) && (pState->nCountInput < pState->nInputLimit)) {
         pState->bReadError = true;
     }
 
     return nRead;
 }
 
-qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
+qint32 XBinary::_writeDevice(const char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
 {
-    qint64 nRealSize = 0;
-    qint64 nSkip = 0;
-
-    if (pState->nProcessedOffset == 0 && (pState->nProcessedLimit == -1)) {
-        nRealSize = nBufferSize;
-        nSkip = 0;
-    } else if (pState->nProcessedOffset == 0 && (pState->nProcessedLimit != -1)) {
-        // Start of output with a cap: limit total output to nProcessedLimit bytes
-        nRealSize = nBufferSize;
-        if ((pState->nCountOutput + nRealSize) > pState->nProcessedLimit) {
-            nRealSize = pState->nProcessedLimit - pState->nCountOutput;
-            if (nRealSize < 0) {
-                nRealSize = 0;
-            }
+    if (!pState || (nBufferSize < 0) || ((nBufferSize > 0) && !pBuffer)) {
+        if (pState) {
+            pState->bWriteError = true;
         }
-    } else if (pState->nProcessedOffset > 0) {
-        nSkip = pState->nProcessedOffset;  // TODO fix
-        nRealSize = nBufferSize - nSkip;
-
-        if (nRealSize < 0) {
-            nRealSize = 0;
-        }
-
-        if (pState->nProcessedLimit != -1) {
-            if ((pState->nProcessedOffset + nRealSize) > pState->nProcessedLimit) {
-                nRealSize = pState->nProcessedLimit - pState->nProcessedOffset;
-            }
-        }
-    } else {
-        nRealSize = nBufferSize;
+        return 0;
     }
+
+    const qint64 nWindowOffset = pState->nProcessedOffset;
+    const qint64 nWindowSize = pState->nProcessedLimit;
+    const qint64 nChunkStart = pState->nCountOutput;
+    const qint64 nMax = (std::numeric_limits<qint64>::max)();
+
+    // nProcessedLimit is the number of bytes requested after
+    // nProcessedOffset, not an absolute end position.  Validate the state
+    // before doing any arithmetic so a malformed window cannot wrap around.
+    if ((nWindowOffset < 0) || (nWindowSize < -1) || (nChunkStart < 0) ||
+        (nChunkStart > (nMax - nBufferSize)) || ((nWindowSize != -1) && (nWindowOffset > (nMax - nWindowSize)))) {
+        pState->bWriteError = true;
+        return 0;
+    }
+
+    const qint64 nChunkEnd = nChunkStart + nBufferSize;
+    const qint64 nWindowEnd = (nWindowSize == -1) ? nMax : nWindowOffset + nWindowSize;
+    const qint64 nWriteStart = (std::max)(nChunkStart, nWindowOffset);
+    const qint64 nWriteEnd = (std::min)(nChunkEnd, nWindowEnd);
+    const qint64 nSkip = (nWriteEnd > nWriteStart) ? (nWriteStart - nChunkStart) : 0;
+    const qint64 nRealSize = (nWriteEnd > nWriteStart) ? (nWriteEnd - nWriteStart) : 0;
 
     bool bWriteOK = true;
 
@@ -1049,7 +1105,7 @@ qint32 XBinary::_writeDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STAT
         }
     }
 
-    pState->nCountOutput += nBufferSize;
+    pState->nCountOutput = nChunkEnd;
 
     // Preserve the historical return contract (the number of produced bytes,
     // including bytes skipped by a processed-output window) while making zero
@@ -1837,6 +1893,14 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 void XBinary::setDevice(QIODevice *pDevice)
 {
     m_pDevice = pDevice;
+    m_pConstMemory = nullptr;
+    m_nSize = 0;
+    m_nFileFormatSize = 0;
+
+    // A parsed internal-info object is tied to the previous device contents.
+    // Invalidate through the virtual setter so format-specific caches cannot
+    // survive an explicit device replacement (including replacement by null).
+    setInternalInfo(nullptr);
 
     if (m_pDevice) {
         QBuffer *pBuffer = dynamic_cast<QBuffer *>(pDevice);
@@ -1852,6 +1916,7 @@ void XBinary::setDevice(QIODevice *pDevice)
         // qDebug("%s",XBinary::valueToHex((quint64)m_pDevice).toLatin1().data());
 
         m_nSize = m_pDevice->size();
+        m_nFileFormatSize = m_nSize;
 
         if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
     }
@@ -17256,7 +17321,22 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
                     qint64 nChunkSize = qMin(nRemaining, (qint64)baBuffer.size());
                     qint64 nRead = pCRCBuffer->read(baBuffer.data(), nChunkSize);
 
-                    if ((nRead != nChunkSize) || (pOutDevice->write(baBuffer.constData(), nRead) != nRead)) {
+                    if (nRead != nChunkSize) {
+                        bResult = false;
+                        break;
+                    }
+
+                    qint64 nWrittenTotal = 0;
+                    while (bResult && (nWrittenTotal < nRead) && isPdStructNotCanceled(pPdStruct)) {
+                        qint64 nWritten = pOutDevice->write(baBuffer.constData() + nWrittenTotal, nRead - nWrittenTotal);
+                        if ((nWritten <= 0) || (nWritten > (nRead - nWrittenTotal))) {
+                            bResult = false;
+                            break;
+                        }
+                        nWrittenTotal += nWritten;
+                    }
+
+                    if (nWrittenTotal != nRead) {
                         bResult = false;
                         break;
                     }
@@ -17269,6 +17349,10 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
                 }
 
                 if (!bResult) {
+                    if (!pOutDevice->isSequential()) {
+                        resize(pOutDevice, 0);
+                        pOutDevice->seek(0);
+                    }
                     setPdStructErrorString(pPdStruct, tr("Cannot write unpacked output"));
                 }
             }
@@ -17276,7 +17360,7 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
 
         freeFileBuffer(&pCRCBuffer);
 
-        finishUnpack(&state, pPdStruct);
+        finishUnpack(&state, nullptr);
     }
 
     return bResult;
@@ -17780,7 +17864,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
             } while (moveToNext(&state, pPdStruct));
 
-            finishUnpack(&state, pPdStruct);
+            finishUnpack(&state, nullptr);
         }
     }
 

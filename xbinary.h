@@ -406,8 +406,8 @@ public:
         QIODevice *pDeviceOutput;
         qint64 nInputOffset;
         qint64 nInputLimit;
-        qint64 nProcessedOffset;
-        qint64 nProcessedLimit;
+        qint64 nProcessedOffset;  // First decoded byte to write.
+        qint64 nProcessedLimit;   // Bytes to write after nProcessedOffset; -1 means to end.
         QMap<FPART_PROP, QVariant> mapProperties;
         QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
         bool bReadError;
@@ -464,7 +464,7 @@ public:
 
     static qint32 _readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState);
     static qint32 _readDevice(DATAPROCESS_STATE *pState);
-    static qint32 _writeDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState);
+    static qint32 _writeDevice(const char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState);
 
     struct BYTE_COUNTS {
         qint64 nSize;

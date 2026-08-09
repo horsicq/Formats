@@ -1205,8 +1205,9 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
 
     qint64 nImageSize = getSize();
     qint64 nMaxObjectsBySize = 0;
-    if (nImageSize >= (nObjOffset + sizeof(XLE_DEF::o32_obj))) {
-        nMaxObjectsBySize = (nImageSize - nObjOffset) / sizeof(XLE_DEF::o32_obj);
+    const qint64 nObjectSize = (qint64)sizeof(XLE_DEF::o32_obj);
+    if ((nObjOffset <= nImageSize) && ((nImageSize - nObjOffset) >= nObjectSize)) {
+        nMaxObjectsBySize = (nImageSize - nObjOffset) / nObjectSize;
     }
 
     quint32 nNumberOfObjects = getImageVxdHeader_objcnt();

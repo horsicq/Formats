@@ -22,29 +22,23 @@
 
 SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *pParent) : XIODevice(pParent)
 {
-    if (nOffset > pDevice->size()) {
-        nOffset = pDevice->size();
-    }
+    m_pDevice = pDevice;
 
-    if (nOffset < 0) {
-        nOffset = 0;
-    }
-
-    if ((nSize + nOffset > pDevice->size()) || (nSize == -1))  // TODO Check
-    {
-        nSize = pDevice->size() - nOffset;
-    }
-
-    if (nSize + nOffset < 0) {
+    qint64 nDeviceSize = pDevice ? pDevice->size() : 0;
+    if (nDeviceSize < 0) nDeviceSize = 0;
+    nOffset = qBound<qint64>(0, nOffset, nDeviceSize);
+    const qint64 nAvailable = nDeviceSize - nOffset;
+    if ((nSize == -1) || (nSize > nAvailable)) {
+        nSize = nAvailable;
+    } else if (nSize < 0) {
         nSize = 0;
     }
-
-    m_pDevice = pDevice;
 
     setInitLocation(nOffset);
     setSize(nSize);
 
-    //    reset();
+    if (!pDevice) return;
+
     pDevice->seek(nOffset);
 
     setProperty("BACKUPDEVICE", reinterpret_cast<quint64>(pDevice));
@@ -71,7 +65,7 @@ bool SubDevice::seek(qint64 nPos)
 {
     bool bResult = false;
 
-    if ((nPos < size()) && (nPos >= 0)) {
+    if (m_pDevice && (nPos <= size()) && (nPos >= 0)) {
         if (m_pDevice->seek(getInitLocation() + nPos)) {
             bResult = QIODevice::seek(nPos);
         }
@@ -87,6 +81,7 @@ bool SubDevice::reset()
 
 qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
 {
+    if (!m_pDevice || (nMaxSize < 0) || ((nMaxSize > 0) && !pData) || (pos() < 0) || (pos() > size())) return -1;
     nMaxSize = qMin(nMaxSize, size() - pos());
 
     return m_pDevice->read(pData, nMaxSize);
@@ -94,6 +89,7 @@ qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
 
 qint64 SubDevice::writeData(const char *pData, qint64 nMaxSize)
 {
+    if (!m_pDevice || (nMaxSize < 0) || ((nMaxSize > 0) && !pData) || (pos() < 0) || (pos() > size())) return -1;
     nMaxSize = qMin(nMaxSize, size() - pos());
 
     return m_pDevice->write(pData, nMaxSize);
