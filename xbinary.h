@@ -2290,6 +2290,10 @@ public:
     static QString msecToDate(quint64 nValue);
 
     // DOS date/time helpers (used by ZIP, RAR, etc.)
+    // Validates raw MS-DOS packed date/time values.
+    static bool isValidDosDate(quint16 nDosDate);
+    static bool isValidDosTime(quint16 nDosTime);
+    static bool isValidDosDateTime(quint16 nDosDate, quint16 nDosTime);
     // Converts MS-DOS packed date (nDosDate) and time (nDosTime) into QDateTime (local time).
     // If the values are invalid (e.g., zero month/day), returns an invalid QDateTime.
     static QDateTime dosDateTimeToQDateTime(quint16 nDosDate, quint16 nDosTime);

@@ -84,6 +84,23 @@ QString getCurrentStructSegment(const QString &sStruct)
     return sResult;
 }
 
+XBinary::XFTYPE getXFTypeFromToken(const QString &sValue)
+{
+    XBinary::XFTYPE result = XBinary::XFTYPE_UNKNOWN;
+
+    const QString sType = normalizeStructToken(sValue);
+
+    if (sType == "HEADER") {
+        result = XBinary::XFTYPE_HEADER;
+    } else if (sType == "TABLE") {
+        result = XBinary::XFTYPE_TABLE;
+    } else if (sType == "COMMAND") {
+        result = XBinary::XFTYPE_COMMAND;
+    }
+
+    return result;
+}
+
 XBinary::XFTYPE getXFTypeFromStructString(const QString &sStruct)
 {
     XBinary::XFTYPE result = XBinary::XFTYPE_UNKNOWN;
@@ -94,10 +111,11 @@ XBinary::XFTYPE getXFTypeFromStructString(const QString &sStruct)
         sFiltered = sFiltered.mid(nHashIdx + 1);
     }
 
-    qint32 nParamIdx = sFiltered.indexOf('?');
+    const QString sInputNoParams = sFiltered;
+    qint32 nParamIdx = sInputNoParams.indexOf('?');
     if (nParamIdx != -1) {
-        const QString sParams = sFiltered.mid(nParamIdx + 1);
-        sFiltered = sFiltered.left(nParamIdx);
+        const QString sParams = sInputNoParams.mid(nParamIdx + 1);
+        sFiltered = sInputNoParams.left(nParamIdx);
 
         for (const QString &sParam : splitAndTrim(sParams, "&")) {
             qint32 nEqIdx = sParam.indexOf('=');
@@ -106,13 +124,7 @@ XBinary::XFTYPE getXFTypeFromStructString(const QString &sStruct)
                 const QString sValue = normalizeStructToken(sParam.mid(nEqIdx + 1));
 
                 if (sKey == "TYPE") {
-                    if (sValue == "HEADER") {
-                        result = XBinary::XFTYPE_HEADER;
-                    } else if (sValue == "TABLE") {
-                        result = XBinary::XFTYPE_TABLE;
-                    } else if (sValue == "COMMAND") {
-                        result = XBinary::XFTYPE_COMMAND;
-                    }
+                    result = getXFTypeFromToken(sValue);
 
                     break;
                 }
@@ -125,14 +137,7 @@ XBinary::XFTYPE getXFTypeFromStructString(const QString &sStruct)
 
         if (listParts.size() >= 4) {
             const QString sType = normalizeStructToken(listParts.at(3));
-
-            if (sType == "HEADER") {
-                result = XBinary::XFTYPE_HEADER;
-            } else if (sType == "TABLE") {
-                result = XBinary::XFTYPE_TABLE;
-            } else if (sType == "COMMAND") {
-                result = XBinary::XFTYPE_COMMAND;
-            }
+            result = getXFTypeFromToken(sType);
         }
     }
 
@@ -994,20 +999,14 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
         bool bOk = false;
         qint64 nOffset = parseXFOffset(sOffset, &bOk);
 
-        if ((fileType != XBinary::FT_UNKNOWN) && bOk) {
+        if ((fileType != XBinary::FT_UNKNOWN) && bOk && (nOffset >= 0)) {
             XBinary *pBinary = XFormats::createClass(fileType, pDevice, bIsImage, nModuleAddress);
 
             if (pBinary) {
                 quint32 nStructID = pBinary->ftStringToStructID(sStructFt);
 
-        XBinary::XFTYPE xfType = XBinary::XFTYPE_UNKNOWN;
-        if (normalizeStructToken(sTypeName) == "HEADER") {
-            xfType = XBinary::XFTYPE_HEADER;
-        } else if (normalizeStructToken(sTypeName) == "TABLE") {
-            xfType = XBinary::XFTYPE_TABLE;
-        } else if (normalizeStructToken(sTypeName) == "COMMAND") {
-            xfType = XBinary::XFTYPE_COMMAND;
-        }
+                XBinary::XFTYPE xfType = XBinary::XFTYPE_UNKNOWN;
+                xfType = getXFTypeFromToken(sTypeName);
 
                 XBinary::_MEMORY_MAP memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
 
@@ -1024,7 +1023,9 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                 xfStruct.bIsParent = bIsParent;
                 xfStruct.nCount = -1;
 
-                if (listParts.size() >= 5) {
+                // Count is only accepted for canonical 5-part root tags.
+                // Overlong root tags are treated as noisy input and parsed with defaults.
+                if (listParts.size() == 5) {
                     bool bCountOk = false;
                     qint64 nCount = parseXFOffset(listParts.at(4), &bCountOk);
                     if (bCountOk && (nCount >= 0) && (nCount <= INT32_MAX)) {
@@ -1039,43 +1040,61 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                 } else {
                     // Pre-parse filter criteria
                     qint32 nFilterCount = 0;
+                    const qint32 nFilterTagCount = listFilterTags.size();
                     QList<qint32> listFilterPartCounts;
                     QList<XBinary::FT> listFilterFileTypes;
                     QList<quint32> listFilterStructIDs;
                     QList<XBinary::XFTYPE> listFilterXfTypes;
                     QList<qint64> listFilterOffsets;
 
-                for (qint32 i = 0; i < nFilterCount; i++) {
-                    QStringList listFilterParts = splitAndTrim(listFilterTags.at(i), "::");
-                    qint32 nFilterPartCount = listFilterParts.size();
+                    for (qint32 i = 0; i < nFilterTagCount; i++) {
+                        QStringList listFilterParts = splitAndTrim(listFilterTags.at(i), "::");
+                        qint32 nFilterPartCount = listFilterParts.size();
 
-                    qint64 nFilterOffset = 0;
+                        qint64 nFilterOffset = 0;
                         XBinary::FT filterFileType = XBinary::FT_UNKNOWN;
                         quint32 nFilterStructID = 0;
                         XBinary::XFTYPE filterXfType = XBinary::XFTYPE_UNKNOWN;
+                        bool bFilterValid = true;
 
-                    if (nFilterPartCount >= 1) {
-                        bool bFilterOk = false;
-                        nFilterOffset = parseXFOffset(listFilterParts.at(0), &bFilterOk);
-                        if (!bFilterOk) {
+                        if (nFilterPartCount == 0) {
                             continue;
                         }
-                    }
-                    if (nFilterPartCount >= 2) {
-                        filterFileType = XBinary::ftStringToFileTypeId(normalizeStructToken(listFilterParts.at(1)));
-                    }
-                        if (nFilterPartCount >= 3) {
-                            nFilterStructID = pBinary->ftStringToStructID(normalizeStructToken(listFilterParts.at(2)));
+                        if (nFilterPartCount > 4) {
+                            bFilterValid = false;
                         }
-                        if (nFilterPartCount >= 4) {
-                            const QString sFilterType = normalizeStructToken(listFilterParts.at(3));
-                            if (sFilterType == "HEADER") {
-                                filterXfType = XBinary::XFTYPE_HEADER;
-                            } else if (sFilterType == "TABLE") {
-                                filterXfType = XBinary::XFTYPE_TABLE;
-                            } else if (sFilterType == "COMMAND") {
-                                filterXfType = XBinary::XFTYPE_COMMAND;
+
+                        if (nFilterPartCount >= 1) {
+                            bool bFilterOk = false;
+                            nFilterOffset = parseXFOffset(listFilterParts.at(0), &bFilterOk);
+                            if (!bFilterOk || (nFilterOffset < 0)) {
+                                bFilterValid = false;
                             }
+                        }
+
+                        if (bFilterValid && (nFilterPartCount >= 2)) {
+                            filterFileType = XBinary::ftStringToFileTypeId(normalizeStructToken(listFilterParts.at(1)));
+                            if (filterFileType == XBinary::FT_UNKNOWN) {
+                                bFilterValid = false;
+                            }
+                        }
+
+                        if (bFilterValid && (nFilterPartCount >= 3)) {
+                            nFilterStructID = pBinary->ftStringToStructID(normalizeStructToken(listFilterParts.at(2)));
+                            if (nFilterStructID == 0) {
+                                bFilterValid = false;
+                            }
+                        }
+
+                        if (bFilterValid && (nFilterPartCount >= 4)) {
+                            filterXfType = getXFTypeFromToken(listFilterParts.at(3));
+                            if (filterXfType == XBinary::XFTYPE_UNKNOWN) {
+                                bFilterValid = false;
+                            }
+                        }
+
+                        if (!bFilterValid) {
+                            continue;
                         }
 
                         listFilterPartCounts.append(nFilterPartCount);
@@ -1086,40 +1105,43 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                         nFilterCount++;
                     }
 
-                    // Filter headers against pre-parsed criteria
-                    qint32 nAllCount = listAllHeaders.size();
+                    if (!nFilterCount) {
+                        listResult = listAllHeaders;
+                    } else {
+                        qint32 nAllCount = listAllHeaders.size();
 
-                    for (qint32 i = 0; i < nAllCount; i++) {
-                        const XBinary::XFHEADER &header = listAllHeaders.at(i);
+                        for (qint32 i = 0; i < nAllCount; i++) {
+                            const XBinary::XFHEADER &header = listAllHeaders.at(i);
 
-                        for (qint32 j = 0; j < nFilterCount; j++) {
-                            bool bMatch = true;
-                            qint32 nFPC = listFilterPartCounts.at(j);
+                            for (qint32 j = 0; j < nFilterCount; j++) {
+                                bool bMatch = true;
+                                qint32 nFPC = listFilterPartCounts.at(j);
 
-                            if (bMatch && (nFPC >= 1)) {
-                                if (header.xLoc.nLocation != listFilterOffsets.at(j)) {
-                                    bMatch = false;
+                                if (bMatch && (nFPC >= 1)) {
+                                    if (header.xLoc.nLocation != listFilterOffsets.at(j)) {
+                                        bMatch = false;
+                                    }
                                 }
-                            }
-                            if (bMatch && (nFPC >= 2)) {
-                                if (header.fileType != listFilterFileTypes.at(j)) {
-                                    bMatch = false;
+                                if (bMatch && (nFPC >= 2)) {
+                                    if (header.fileType != listFilterFileTypes.at(j)) {
+                                        bMatch = false;
+                                    }
                                 }
-                            }
-                            if (bMatch && (nFPC >= 3)) {
-                                if (header.structID != listFilterStructIDs.at(j)) {
-                                    bMatch = false;
+                                if (bMatch && (nFPC >= 3)) {
+                                    if (header.structID != listFilterStructIDs.at(j)) {
+                                        bMatch = false;
+                                    }
                                 }
-                            }
-                            if (bMatch && (nFPC >= 4)) {
-                                if (header.xfType != listFilterXfTypes.at(j)) {
-                                    bMatch = false;
+                                if (bMatch && (nFPC >= 4)) {
+                                    if (header.xfType != listFilterXfTypes.at(j)) {
+                                        bMatch = false;
+                                    }
                                 }
-                            }
 
-                            if (bMatch) {
-                                listResult.append(header);
-                                break;
+                                if (bMatch) {
+                                    listResult.append(header);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1259,6 +1281,7 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
     if (nHashIdx != -1) {
         sFiltered = sFiltered.mid(nHashIdx + 1);
     }
+    QString sInputNoParams = sFiltered;
 
     // Parse params before stripping them
     XBinary::XLOC xLoc = {};
@@ -1278,7 +1301,7 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
                 if (sKey == "OFFSET") {
                     bool bOk = false;
                     qint64 nOffset = parseXFOffset(sValue, &bOk);
-                    if (bOk) {
+                    if (bOk && (nOffset >= 0)) {
                         xLoc = XBinary::offsetToLoc(nOffset);
                     }
                 } else if (sKey == "TYPE") {
@@ -1325,6 +1348,20 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
             fileType = XBinary::ftStringToFileTypeId(sFileType);
             sStructName = listStructParts.mid(1).join("::");
         }
+    }
+    if (fileType == XBinary::FT_UNKNOWN) {
+        if (!sInputNoParams.contains("::") && (nParamIdx > 0)) {
+            const QString sMaybeFileType = normalizeStructToken(sInputNoParams.left(nParamIdx));
+            const XBinary::FT nMaybeFileType = XBinary::ftStringToFileTypeId(sMaybeFileType);
+            if (nMaybeFileType != XBinary::FT_UNKNOWN) {
+                fileType = nMaybeFileType;
+                sStructName.clear();
+            }
+        }
+    }
+    sStructName = sStructName.trimmed();
+    if (sStructName.startsWith("?")) {
+        sStructName.clear();
     }
 
     // Fall back to device detection if no file type in string

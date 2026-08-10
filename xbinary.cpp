@@ -2325,9 +2325,9 @@ QDateTime XBinary::winFileTimeToQDateTime(quint64 nWinFileTime)
         return QDateTime();
     }
 
-    qint64 nMsecsSinceEpoch = (qint64)((nWinFileTime - nEpochDelta) / Q_UINT64_C(10000));
+    quint64 nMsecsSinceEpoch = (nWinFileTime - nEpochDelta) / Q_UINT64_C(10000);
 
-    return QDateTime::fromMSecsSinceEpoch(nMsecsSinceEpoch, Qt::UTC);
+    return QDateTime::fromMSecsSinceEpoch((qint64)nMsecsSinceEpoch, Qt::UTC);
 }
 
 bool XBinary::setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties, const QString &sFileName)
@@ -14049,19 +14049,16 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
         result = QDateTime::fromMSecsSinceEpoch((quint32)nValue * 1000, Qt::UTC);
 #endif
     } else if (type == DT_TYPE_DOSTIME) {
-        quint16 nDosTime = (quint16)nValue;
+        // MS-DOS time is always a 16-bit packed value; mask higher bits explicitly.
+        quint16 nDosTime = (quint16)(nValue & 0xFFFF);
         // Use a valid dummy date (1980-01-01 = 0x0021) since we only need the time component
         result = dosDateTimeToQDateTime(0x0021, nDosTime);
     } else if (type == DT_TYPE_DOSDATE) {
-        quint16 nDosDate = (quint16)nValue;
+        // MS-DOS date is always a 16-bit packed value; mask higher bits explicitly.
+        quint16 nDosDate = (quint16)(nValue & 0xFFFF);
         result = dosDateTimeToQDateTime(nDosDate, 0);
     } else if (type == DT_TYPE_FILETIME) {
-        // FILETIME: 100-nanosecond intervals since 1601-01-01
-        qint64 nTicksSinceEpoch = (qint64)nValue - 116444736000000000LL;
-        if (nTicksSinceEpoch >= 0) {
-            qint64 nMsec = nTicksSinceEpoch / 10000;
-            result = QDateTime::fromMSecsSinceEpoch(nMsec, Qt::UTC);
-        }
+        result = winFileTimeToQDateTime(nValue);
     }
 
     return result;
@@ -14118,6 +14115,10 @@ QString XBinary::msecToDate(quint64 nValue)
 
 QDateTime XBinary::dosDateTimeToQDateTime(quint16 nDosDate, quint16 nDosTime)
 {
+    if (!isValidDosDateTime(nDosDate, nDosTime)) {
+        return QDateTime();
+    }
+
     // MS-DOS date format: bits 0-4 day (1-31), 5-8 month (1-12), 9-15 years from 1980
     // MS-DOS time format: bits 0-4 seconds/2 (0-29 => 0-58), 5-10 minutes (0-59), 11-15 hours (0-23)
     qint32 nDay = (nDosDate & 0x1F);
@@ -14137,6 +14138,41 @@ QDateTime XBinary::dosDateTimeToQDateTime(quint16 nDosDate, quint16 nDosTime)
     }
 
     return result;
+}
+
+bool XBinary::isValidDosDateTime(quint16 nDosDate, quint16 nDosTime)
+{
+    return isValidDosDate(nDosDate) && isValidDosTime(nDosTime);
+}
+
+bool XBinary::isValidDosDate(quint16 nDosDate)
+{
+    const qint32 nDay = (nDosDate & 0x1F);
+    const qint32 nMonth = (nDosDate >> 5) & 0x0F;
+    const qint32 nYear = ((nDosDate >> 9) & 0x7F) + 1980;
+
+    if ((nDay < 1) || (nDay > 31) || (nMonth < 1) || (nMonth > 12)) {
+        return false;
+    }
+
+    if ((nYear < 1980) || (nYear > 2107)) {
+        return false;
+    }
+
+    return QDate(nYear, nMonth, nDay).isValid();
+}
+
+bool XBinary::isValidDosTime(quint16 nDosTime)
+{
+    const qint32 nSecond = (nDosTime & 0x1F) * 2;
+    const qint32 nMinute = (nDosTime >> 5) & 0x3F;
+    const qint32 nHour = (nDosTime >> 11) & 0x1F;
+
+    if ((nSecond > 58) || (nMinute > 59) || (nHour > 23)) {
+        return false;
+    }
+
+    return true;
 }
 
 QPair<quint16, quint16> XBinary::qDateTimeToDosDateTime(const QDateTime &dateTime)
@@ -14161,7 +14197,9 @@ QPair<quint16, quint16> XBinary::qDateTimeToDosDateTime(const QDateTime &dateTim
             nDosTime = ((time.second() / 2) & 0x1F) | ((time.minute() & 0x3F) << 5) | ((time.hour() & 0x1F) << 11);
         }
 
-        result = {nDosDate, nDosTime};
+        if (isValidDosDateTime(nDosDate, nDosTime)) {
+            result = {nDosDate, nDosTime};
+        }
     }
 
     return result;
