@@ -31,19 +31,6 @@ if (NOT DEFINED XARCHIVES_SOURCES)
     set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XARCHIVES_SOURCES})
 endif()
 
-# XDWARF: only xdwarf.cpp/xdwarfexport.cpp are added here (the exec parsers and the
-# zlib/zstd decoders they need are already compiled into xformats via XArchive).
-# Compiled unconditionally like XPDF; the USE_DWARF define only gates its use.
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../XDWARF)
-set(XFORMATS_SOURCES
-    ${XFORMATS_SOURCES}
-    ${CMAKE_CURRENT_LIST_DIR}/../XDWARF/xdwarf.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../XDWARF/xdwarf.h
-    ${CMAKE_CURRENT_LIST_DIR}/../XDWARF/xdwarf_def.h
-    ${CMAKE_CURRENT_LIST_DIR}/../XDWARF/xdwarfexport.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../XDWARF/xdwarfexport.h
-)
-
 # TODO
 
 set(XFORMATS_SOURCES

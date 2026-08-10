@@ -99,14 +99,6 @@ contains(XCONFIG, use_pdf) {
     }
 }
 
-contains(XCONFIG, use_dwarf) {
-    DEFINES += USE_DWARF
-    !contains(XCONFIG, xdwarf) {
-        XCONFIG += xdwarf
-        include($$PWD/../XDWARF/xdwarf.pri)
-    }
-}
-
 contains(XCONFIG, use_archive) {
     DEFINES += USE_ARCHIVE
     !contains(XCONFIG, xarchives) {
