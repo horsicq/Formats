@@ -63,9 +63,6 @@
 #ifdef USE_PDB
 #include "xpdb.h"
 #endif
-#ifdef USE_DWARF
-#include "xdwarf.h"
-#endif
 #ifdef USE_ARCHIVE
 #include "x_ar.h"
 #include "xace.h"
