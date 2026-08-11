@@ -379,6 +379,7 @@ public:
         FPART_PROP_BCJ2_AES_PROPS_3,   // AES properties for BCJ2 range stream
         FPART_PROP_BCJ2_AES_UNPACK_3,  // AES output size for BCJ2 range stream
         FPART_PROP_PASSWORD_MODIFIER,  // ARJ garble password modifier byte
+        FPART_PROP_GEN,                // PDF object generation number (for the per-object decryption key)
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
