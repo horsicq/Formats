@@ -2009,6 +2009,18 @@ public:
     bool moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
     static bool moveMemory(QIODevice *pDevice, qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize);
 
+    enum REMOVE_MEMORY_RESULT {
+        REMOVE_MEMORY_RESULT_FAILED = 0,
+        REMOVE_MEMORY_RESULT_OK,
+        REMOVE_MEMORY_RESULT_FAILED_RESTORED,
+        REMOVE_MEMORY_RESULT_FAILED_CHANGED
+    };
+
+    REMOVE_MEMORY_RESULT removeMemoryEx(qint64 nOffset, qint64 nSize);
+    static REMOVE_MEMORY_RESULT removeMemoryEx(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
+    bool removeMemory(qint64 nOffset, qint64 nSize);
+    static bool removeMemory(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
+
     static bool dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize);
     bool dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
     static bool dumpToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
@@ -2091,7 +2103,14 @@ public:
 
     static QString getCurrentBackupDate();
 
+    enum FIXUP_WIDTH {
+        FIXUP_WIDTH_32 = 4,
+        FIXUP_WIDTH_64 = 8
+    };
+
     static QList<qint64> getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, PDSTRUCT *pPdStruct = nullptr);
+    static QList<qint64> getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, FIXUP_WIDTH fixupWidth,
+                                      PDSTRUCT *pPdStruct = nullptr);
 
     static QString getHash(HASH hash, const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static QString getHash(HASH hash, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);

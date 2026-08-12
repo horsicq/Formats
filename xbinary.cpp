@@ -25,6 +25,7 @@
 #include <limits>
 #include <QDebug>
 #include <QFileDevice>
+#include <QPointer>
 #include <QSaveFile>
 #include <QWaitCondition>
 #ifdef Q_OS_WIN
@@ -68,6 +69,13 @@ bool isCurrentPdCallbackState(const XBinary::PDSTRUCT_CALLBACK_STATE *pState)
 bool isCurrentPdCallbackEntry(const XBinary::PDSTRUCT_CALLBACK_STATE::ENTRY *pEntry)
 {
     return g_listActivePdCallbackEntries.contains(pEntry);
+}
+
+bool isPdCallbackOwnerAlive(const QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE> &pState)
+{
+    if (pState.isNull()) return false;
+    QMutexLocker locker(&pState->mutex);
+    return !pState->bDestroying;
 }
 
 class PD_CALLBACK_INVOCATION_GUARD {
@@ -1087,6 +1095,8 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
 {
     QList<XBinary::ARCHIVERECORD> listResult;
 
+    if ((nLimit == 0) || (nLimit < -1)) return listResult;
+
     PDSTRUCT pdStructEmpty = createPdStruct();
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
@@ -1297,7 +1307,11 @@ qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE
     const qint32 nRead = (qint32)nReadResult;
     if (nRead > 0) {
         pState->nCountInput += nRead;
-    } else if ((nReadSize > 0) && (pState->nInputLimit != -1) && (pState->nCountInput < pState->nInputLimit)) {
+    } else if ((nReadSize > 0) &&
+               (((pState->nInputLimit != -1) &&
+                 (pState->nCountInput < pState->nInputLimit)) ||
+                ((pState->nInputLimit == -1) &&
+                 !pState->pDeviceInput->atEnd()))) {
         // QIODevice is allowed to return a positive short read.  Treat only an
         // actual error/EOF before the requested bounded input is complete as a
         // read failure; callers will request the remaining bytes on the next
@@ -1334,7 +1348,11 @@ qint32 XBinary::_readDevice(DATAPROCESS_STATE *pState)
     const qint32 nRead = (qint32)nReadResult;
     if (nRead > 0) {
         pState->nCountInput += nRead;
-    } else if ((nReadSize > 0) && (pState->nInputLimit != -1) && (pState->nCountInput < pState->nInputLimit)) {
+    } else if ((nReadSize > 0) &&
+               (((pState->nInputLimit != -1) &&
+                 (pState->nCountInput < pState->nInputLimit)) ||
+                ((pState->nInputLimit == -1) &&
+                 !pState->pDeviceInput->atEnd()))) {
         pState->bReadError = true;
     }
 
@@ -2358,6 +2376,12 @@ qint64 XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qi
 {
     // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
+
+    if (!pDevice || !pDevice->isReadable() || (nPos < 0) ||
+        (nMaxLen < 0) || ((nMaxLen > 0) && !pData) ||
+        (nMaxLen == 0)) {
+        return nResult;
+    }
 
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
@@ -6341,14 +6365,13 @@ bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *
     bool bAdd = true;
 
     if (pSsOptions->bLinks) {
-        bAdd = false;
-
-        if (sString.contains("http:") || sString.contains("www.") || sString.contains("mailto:")) {
-            bAdd = true;
-        }
+        bAdd = sString.contains(QLatin1String("http://"), Qt::CaseInsensitive) ||
+               sString.contains(QLatin1String("https://"), Qt::CaseInsensitive) ||
+               sString.contains(QLatin1String("www."), Qt::CaseInsensitive) ||
+               sString.contains(QLatin1String("mailto:"), Qt::CaseInsensitive);
     }
 
-    if (pSsOptions->sMask != "") {
+    if (bAdd && (pSsOptions->sMask != "")) {
         bAdd = isRegExpPresent(pSsOptions->sMask, sString);
     }
 
@@ -6373,10 +6396,10 @@ bool XBinary::_addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS
     bool bAdd = true;
 
     if (pSsOptions->bLinks) {
-        // Early rejection - most strings don't contain links
-        // Use indexOf for faster rejection than contains()
-        bAdd = (sString.indexOf("http:", 0, Qt::CaseSensitive) != -1 || sString.indexOf("www.", 0, Qt::CaseSensitive) != -1 ||
-                sString.indexOf("mailto:", 0, Qt::CaseSensitive) != -1);
+        bAdd = sString.contains(QLatin1String("http://"), Qt::CaseInsensitive) ||
+               sString.contains(QLatin1String("https://"), Qt::CaseInsensitive) ||
+               sString.contains(QLatin1String("www."), Qt::CaseInsensitive) ||
+               sString.contains(QLatin1String("mailto:"), Qt::CaseInsensitive);
     }
 
     if (bAdd && pRegex) {
@@ -6396,6 +6419,11 @@ bool XBinary::_addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS
 
 QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
 {
+    // Keep one canonical implementation of combined string searching.  The
+    // specialized scanners have independent ANSI/UTF-16 size bounds and the
+    // union preserves identical filtering and record-value semantics.
+    return multiSearch_allStrings2(pMemoryMap, nOffset, nSize, ssOptions, pPdStruct);
+#if 0
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
@@ -6637,12 +6665,13 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
     delete[] pBuffer;
     delete[] pAnsiBuffer;
+
     delete[] pUnicodeBuffer[0];
     delete[] pUnicodeBuffer[1];
 
     _finalizeBestMSRecords(&listResult, ssOptions.nLimit);
 
-    if (bLimitReached) {
+    if (bLimitReached && !bReadError) {
         setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(ssOptions.nLimit)));
     }
 
@@ -6653,6 +6682,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
     }
 
     return listResult;
+#endif
 }
 
 QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
@@ -6665,41 +6695,72 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pProgressLifetime = pPdStruct->_pdCallbackState;
 
     const qint32 nEffectiveLimit =
         (ssOptions.nLimit > 0) ? ssOptions.nLimit : (std::numeric_limits<qint32>::max)();
 
+    const QString sInitialError = getPdStructErrorString(pPdStruct);
+    bool bLimitReached = false;
+
     // Search for ANSI strings if flag is set
     if (ssOptions.bAnsi) {
+        // A caller may reuse a PDSTRUCT whose error text already equals the
+        // error produced by this pass.  Comparing the text before/after would
+        // then mistake a fresh read failure for stale state and publish the
+        // other pass's partial results.  Give every pass an isolated status
+        // slot and restore the caller's original status only after the whole
+        // combined operation succeeds.
+        clearPdStructErrorString(pPdStruct);
+
         STRINGSEARCH_OPTIONS ansiOptions = ssOptions;
         ansiOptions.bUnicode = false;  // ANSI only
         ansiOptions.bAnsi = true;
         ansiOptions.nLimit = nEffectiveLimit;
 
         QVector<XBinary::MS_RECORD> listAnsi = multiSearch_ansiStrings(pMemoryMap, nOffset, nSize, ansiOptions, pPdStruct);
-        listResult.append(listAnsi);
-
-        if (!isPdStructNotCanceled(pPdStruct)) {
+        if (!isPdCallbackOwnerAlive(pProgressLifetime)) {
             listResult.clear();
             return listResult;
         }
+        listResult.append(listAnsi);
+
+        const QString sAnsiError = getPdStructErrorString(pPdStruct);
+        const bool bAnsiLimitReached = sAnsiError.startsWith(tr("Maximum"));
+        if (!isPdStructNotCanceled(pPdStruct) || ((!sAnsiError.isEmpty()) && !bAnsiLimitReached)) {
+            listResult.clear();
+            return listResult;
+        }
+
+        bLimitReached = bAnsiLimitReached;
     }
 
     // Each enabled encoding gets the full limit. The best N results of the
     // union must be present in the best N results of each individual search.
     if (ssOptions.bUnicode) {
+        clearPdStructErrorString(pPdStruct);
+
         STRINGSEARCH_OPTIONS unicodeOptions = ssOptions;
         unicodeOptions.bAnsi = false;  // Unicode only
         unicodeOptions.bUnicode = true;
         unicodeOptions.nLimit = nEffectiveLimit;
 
         QVector<XBinary::MS_RECORD> listUnicode = multiSearch_unicodeStrings(pMemoryMap, nOffset, nSize, unicodeOptions, pPdStruct);
-        listResult.append(listUnicode);
-
-        if (!isPdStructNotCanceled(pPdStruct)) {
+        if (!isPdCallbackOwnerAlive(pProgressLifetime)) {
             listResult.clear();
             return listResult;
         }
+        listResult.append(listUnicode);
+
+        const QString sUnicodeError = getPdStructErrorString(pPdStruct);
+        const bool bUnicodeLimitReached = sUnicodeError.startsWith(tr("Maximum"));
+        if (!isPdStructNotCanceled(pPdStruct) || ((!sUnicodeError.isEmpty()) && !bUnicodeLimitReached)) {
+            listResult.clear();
+            return listResult;
+        }
+
+
+        bLimitReached = bUnicodeLimitReached || bLimitReached;
     }
 
     // Sort results by region index first, then by relative offset within region
@@ -6710,7 +6771,13 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
     // Enforce final limit if needed
     if (listResult.size() > nEffectiveLimit) {
         listResult.resize(nEffectiveLimit);
+        bLimitReached = true;
+    }
+
+    if (bLimitReached) {
         setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nEffectiveLimit)));
+    } else {
+        setPdStructErrorString(pPdStruct, sInitialError);
     }
 
     return listResult;
@@ -6723,6 +6790,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pProgressLifetime = pPdStruct->_pdCallbackState;
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
 
@@ -6757,6 +6825,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
     qint64 _nSize = nSize;
 
     bool bReadError = false;
+    bool bProgressOwnerAlive = true;
 
     const qint32 BUFFER_SIZE = 0x10000;  // 64KB chunks for efficient processing
 
@@ -6766,6 +6835,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
 
     char *pBuffer = new (std::nothrow) char[BUFFER_SIZE];
     if (!pBuffer) {
+        setPdStructErrorString(pPdStruct, tr("Allocation error"));
         return listResult;
     }
 
@@ -6773,6 +6843,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
     char *pAnsiBuffer = new (std::nothrow) char[nStringCapacity];
     if (!pAnsiBuffer) {
         delete[] pBuffer;
+        setPdStructErrorString(pPdStruct, tr("Allocation error"));
         return listResult;
     }
 
@@ -6906,6 +6977,8 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
                         _setMSRecordLocation(&record, pMemoryMap, nCurrentAnsiOffset);
 
                         if (!bNeedStringFilter) {
+                            record.sValue = QString::fromLatin1(
+                                pAnsiBuffer, (qint32)nCurrentAnsiSize);
                             listResult.append(record);
                             bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                         } else {
@@ -6936,6 +7009,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
                         _setMSRecordLocation(&record, pMemoryMap, nCurrentAnsiOffset);
 
                         if (!bNeedStringFilter) {
+                            record.sValue = QString::fromLatin1(pAnsiBuffer, (qint32)nCurrentAnsiSize);
                             listResult.append(record);
                             bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                         } else {
@@ -7010,6 +7084,8 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
                         _setMSRecordLocation(&record, pMemoryMap, nCurrentAnsiOffset);
 
                         if (!bNeedStringFilter) {
+                            record.sValue = QString::fromLatin1(
+                                pAnsiBuffer, (qint32)nCurrentAnsiSize);
                             listResult.append(record);
                             bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                         } else {
@@ -7030,19 +7106,28 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
         _nOffset += nCurrentSize;
 
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
+        if (!isPdCallbackOwnerAlive(pProgressLifetime)) {
+            bProgressOwnerAlive = false;
+            break;
+        }
 
     }
 
-    if (bReadError) {
+    if (bProgressOwnerAlive && bReadError) {
         setPdStructErrorString(pPdStruct, tr("Read error"));
     }
 
     delete[] pBuffer;
     delete[] pAnsiBuffer;
 
+    if (!bProgressOwnerAlive) {
+        listResult.clear();
+        return listResult;
+    }
+
     _finalizeBestMSRecords(&listResult, ssOptions.nLimit);
 
-    if (bLimitReached) {
+    if (bLimitReached && !bReadError) {
         setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(ssOptions.nLimit)));
     }
 
@@ -7063,6 +7148,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pProgressLifetime = pPdStruct->_pdCallbackState;
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
 
@@ -7097,6 +7183,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
     qint64 _nSize = nSize;
 
     bool bReadError = false;
+    bool bProgressOwnerAlive = true;
 
     const qint32 BUFFER_SIZE = 0x10000;  // 64KB chunks for efficient processing
 
@@ -7113,6 +7200,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
         delete[] pBuffer;
         delete[] pUnicodeBuffer[0];
         delete[] pUnicodeBuffer[1];
+        setPdStructErrorString(pPdStruct, tr("Allocation error"));
         return listResult;
     }
 
@@ -7185,6 +7273,8 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
                             _setMSRecordLocation(&record, pMemoryMap, nCurrentUnicodeOffset[nParity]);
 
                             if (!bNeedStringFilter) {
+                                record.sValue = QString::fromUtf16(
+                                    pUnicodeBuffer[nParity], (qint32)nCurrentUnicodeSize[nParity]);
                                 listResult.append(record);
                                 bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                             } else {
@@ -7214,6 +7304,8 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
                         _setMSRecordLocation(&record, pMemoryMap, nCurrentUnicodeOffset[nOtherParity]);
 
                         if (!bNeedStringFilter) {
+                            record.sValue = QString::fromUtf16(
+                                pUnicodeBuffer[nOtherParity], (qint32)nCurrentUnicodeSize[nOtherParity]);
                             listResult.append(record);
                             bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                         } else {
@@ -7237,10 +7329,14 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
         _nOffset += nCurrentSize;
 
         XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, _nOffset - nOffset);
+        if (!isPdCallbackOwnerAlive(pProgressLifetime)) {
+            bProgressOwnerAlive = false;
+            break;
+        }
 
     }
 
-    if (bReadError) {
+    if (bProgressOwnerAlive && bReadError) {
         setPdStructErrorString(pPdStruct, tr("Read error"));
     }
 
@@ -7248,9 +7344,14 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
     delete[] pUnicodeBuffer[0];
     delete[] pUnicodeBuffer[1];
 
+    if (!bProgressOwnerAlive) {
+        listResult.clear();
+        return listResult;
+    }
+
     _finalizeBestMSRecords(&listResult, ssOptions.nLimit);
 
-    if (bLimitReached) {
+    if (bLimitReached && !bReadError) {
         setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(ssOptions.nLimit)));
     }
 
@@ -7478,25 +7579,25 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
     } else if (valueType == XBinary::VT_BYTE) {
         nResult = find_uint8(nOffset, nSize, (quint8)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_WORD) {
-        nResult = find_uint16(nOffset, nSize, (quint16)(varValue.toULongLong()), pPdStruct);
+        nResult = find_uint16(nOffset, nSize, (quint16)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_DWORD) {
         nResult = find_uint32(nOffset, nSize, (quint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_QWORD) {
         nResult = find_uint64(nOffset, nSize, (quint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_CHAR) {
-        nResult = find_int8(nOffset, nSize, (qint8)(varValue.toULongLong()), pPdStruct);
+        nResult = find_int8(nOffset, nSize, (qint8)(varValue.toLongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_UCHAR) {
         nResult = find_uint8(nOffset, nSize, (quint8)(varValue.toULongLong()), pPdStruct);
     } else if (valueType == XBinary::VT_SHORT) {
-        nResult = find_int16(nOffset, nSize, (qint16)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
+        nResult = find_int16(nOffset, nSize, (qint16)(varValue.toLongLong()), bIsBigEndian, pPdStruct);
     } else if ((valueType == XBinary::VT_USHORT) || (valueType == XBinary::VT_UINT16)) {
         nResult = find_uint16(nOffset, nSize, (quint16)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_INT) {
-        nResult = find_int32(nOffset, nSize, (qint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
+        nResult = find_int32(nOffset, nSize, (qint32)(varValue.toLongLong()), bIsBigEndian, pPdStruct);
     } else if ((valueType == XBinary::VT_UINT) || (valueType == XBinary::VT_UINT32)) {
         nResult = find_uint32(nOffset, nSize, (quint32)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_INT64) {
-        nResult = find_int64(nOffset, nSize, (qint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
+        nResult = find_int64(nOffset, nSize, (qint64)(varValue.toLongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_UINT64) {
         nResult = find_uint64(nOffset, nSize, (quint64)(varValue.toULongLong()), bIsBigEndian, pPdStruct);
     } else if (valueType == XBinary::VT_FLOAT) {
@@ -10153,6 +10254,167 @@ bool XBinary::moveMemory(QIODevice *pDevice, qint64 nSourceOffset, qint64 nDestO
     return binary.moveMemory(nSourceOffset, nDestOffset, nSize);
 }
 
+XBinary::REMOVE_MEMORY_RESULT XBinary::removeMemoryEx(qint64 nOffset, qint64 nSize)
+{
+    REMOVE_MEMORY_RESULT result = REMOVE_MEMORY_RESULT_FAILED;
+    QIODevice *pOriginalDevice = m_pDevice;
+    QIODevice *pOriginalData = nullptr;
+    QPointer<QBuffer> pMemoryPropertyBuffer;
+    bool bRefreshDevice = false;
+
+    {
+        QMutexLocker locker(m_pReadWriteMutex);
+
+        if (!m_pDevice || !m_pDevice->isWritable() || m_pDevice->isSequential() || !isResizeEnable(m_pDevice) ||
+            (m_pDevice->openMode() & (QIODevice::Append | QIODevice::Text))) {
+            return result;
+        }
+
+        const qint64 nMaxSize = m_pDevice->size();
+        if ((nMaxSize < 0) || (nOffset < 0) || (nSize <= 0) || (nOffset >= nMaxSize) ||
+            (nSize > (nMaxSize - nOffset))) {
+            return result;
+        }
+
+        const qint64 nTailSize = nMaxSize - nOffset - nSize;
+        if (!m_pDevice->isReadable()) {
+            return result;
+        }
+
+        const qint64 nOriginalPosition = m_pDevice->pos();
+        if (nOriginalPosition < 0) {
+            return result;
+        }
+
+        const qint64 nNewSize = nMaxSize - nSize;
+        qint64 nNewPosition = nOriginalPosition;
+        if (nOriginalPosition > nOffset) {
+            nNewPosition = (nOriginalPosition < (nOffset + nSize)) ? nOffset : (nOriginalPosition - nSize);
+        }
+        nNewPosition = qBound((qint64)0, nNewPosition, nNewSize);
+
+        if (QBuffer *pBuffer = qobject_cast<QBuffer *>(m_pDevice)) {
+            if ((nMaxSize > (std::numeric_limits<qint32>::max)()) ||
+                (nOffset > (std::numeric_limits<qint32>::max)()) ||
+                (nSize > (std::numeric_limits<qint32>::max)())) {
+                return result;
+            }
+
+            QByteArray baCandidate;
+            try {
+                baCandidate = pBuffer->buffer();
+                baCandidate.remove((qint32)nOffset, (qint32)nSize);
+            } catch (const std::bad_alloc &) {
+                return result;
+            }
+
+            if (baCandidate.size() != nNewSize) {
+                return result;
+            }
+
+            // Commit the detached candidate in one swap. If restoring the
+            // mapped position unexpectedly fails, the second swap restores
+            // the exact original QByteArray without another allocation.
+            pBuffer->buffer().swap(baCandidate);
+            if (m_pDevice->seek(nNewPosition)) {
+                result = REMOVE_MEMORY_RESULT_OK;
+                bRefreshDevice = true;
+                if (pBuffer->property("Memory").isValid()) {
+                    pMemoryPropertyBuffer = pBuffer;
+                }
+            } else {
+                pBuffer->buffer().swap(baCandidate);
+                const bool bPositionRestored = m_pDevice->seek(nOriginalPosition);
+                result = bPositionRestored ? REMOVE_MEMORY_RESULT_FAILED_RESTORED
+                                           : REMOVE_MEMORY_RESULT_FAILED_CHANGED;
+                bRefreshDevice = !bPositionRestored;
+            }
+        } else {
+            QFileDevice *pFileDevice = qobject_cast<QFileDevice *>(m_pDevice);
+            if (!pFileDevice) {
+                return result;
+            }
+
+            if (pFileDevice->flush()) {
+                const qint64 nAffectedSize = nMaxSize - nOffset;
+                pOriginalData = createFileBuffer(nAffectedSize, nullptr);
+
+                bool bStaged = pOriginalData &&
+                               copyDeviceMemory(m_pDevice, nOffset, pOriginalData, 0, nAffectedSize, nullptr) &&
+                               (pOriginalData->size() == nAffectedSize);
+                if (bStaged) {
+                    if (QFileDevice *pJournalFile = qobject_cast<QFileDevice *>(pOriginalData)) {
+                        bStaged = pJournalFile->flush();
+                    }
+                }
+
+                if (bStaged) {
+                    const bool bShifted = (nTailSize == 0) ||
+                                          copyDeviceMemory(m_pDevice, nOffset + nSize, m_pDevice, nOffset, nTailSize, nullptr);
+                    const bool bResized = bShifted && pFileDevice->resize(nNewSize);
+                    const bool bFlushed = bResized && pFileDevice->flush();
+                    const bool bPositionSet = bFlushed && m_pDevice->seek(nNewPosition);
+
+                    if (bPositionSet) {
+                        result = REMOVE_MEMORY_RESULT_OK;
+                        bRefreshDevice = true;
+                    } else {
+                        // The journal contains every byte that may have moved
+                        // or been truncated. Restore it without honoring a
+                        // canceled/failed commit operation.
+                        const bool bSizeRestored = pFileDevice->resize(nMaxSize);
+                        const bool bDataRestored = bSizeRestored &&
+                                                   copyDeviceMemory(pOriginalData, 0, m_pDevice, nOffset, nAffectedSize, nullptr);
+                        const bool bRollbackFlushed = bDataRestored && pFileDevice->flush();
+                        const bool bPositionRestored = bRollbackFlushed && m_pDevice->seek(nOriginalPosition);
+
+                        result = bPositionRestored ? REMOVE_MEMORY_RESULT_FAILED_RESTORED
+                                                   : REMOVE_MEMORY_RESULT_FAILED_CHANGED;
+                        bRefreshDevice = !bPositionRestored;
+                    }
+                } else {
+                    if (!m_pDevice->seek(nOriginalPosition)) {
+                        result = REMOVE_MEMORY_RESULT_FAILED_CHANGED;
+                        bRefreshDevice = true;
+                    }
+                }
+            }
+        }
+    }
+
+    freeFileBuffer(&pOriginalData);
+
+    if (bRefreshDevice) {
+        setDevice(pOriginalDevice);
+    }
+
+    if (pMemoryPropertyBuffer) {
+        // A swap invalidates any raw QByteArray pointer published through the
+        // optional fast path. Dispatch the property event only after releasing
+        // the non-recursive device mutex.
+        pMemoryPropertyBuffer->setProperty("Memory", QVariant());
+    }
+
+    return result;
+}
+
+XBinary::REMOVE_MEMORY_RESULT XBinary::removeMemoryEx(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+{
+    XBinary binary(pDevice);
+
+    return binary.removeMemoryEx(nOffset, nSize);
+}
+
+bool XBinary::removeMemory(qint64 nOffset, qint64 nSize)
+{
+    return removeMemoryEx(nOffset, nSize) == REMOVE_MEMORY_RESULT_OK;
+}
+
+bool XBinary::removeMemory(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
+{
+    return removeMemoryEx(pDevice, nOffset, nSize) == REMOVE_MEMORY_RESULT_OK;
+}
+
 bool XBinary::dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize)
 {
     if ((nDataSize < 0) || ((nDataSize > 0) && !pData)) {
@@ -11483,7 +11745,7 @@ bool XBinary::checkString_byte(const QString &sValue)
     quint16 nValue = sValue.toUShort(&bResult, 16);
 
     if (bResult) {
-        bResult = (nValue <= 256);
+        bResult = (nValue <= 255);
     }
 
     return bResult;
@@ -11525,7 +11787,7 @@ bool XBinary::checkString_uint8(const QString &sValue)
     quint16 nValue = sValue.toUShort(&bResult);
 
     if (bResult) {
-        bResult = (nValue <= 256);
+        bResult = (nValue <= 255);
     }
 
     return bResult;
@@ -11538,7 +11800,7 @@ bool XBinary::checkString_int8(const QString &sValue)
     qint16 nValue = sValue.toShort(&bResult);
 
     if (bResult) {
-        bResult = ((-127 <= nValue) && (nValue <= 128));
+        bResult = ((-128 <= nValue) && (nValue <= 127));
     }
 
     return bResult;
@@ -11941,6 +12203,15 @@ QString XBinary::getCurrentBackupDate()
 
 QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, PDSTRUCT *pPdStruct)
 {
+    // Preserve the historical API and its PE32/HIGHLOW semantics.  PE32+
+    // callers must opt in explicitly so existing users never start receiving
+    // a different set of heuristic candidates.
+    return getFixupList(pDevice1, pDevice2, nDelta, FIXUP_WIDTH_32, pPdStruct);
+}
+
+QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, FIXUP_WIDTH fixupWidth,
+                                    PDSTRUCT *pPdStruct)
+{
     QList<qint64> listResult;
 
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
@@ -11948,11 +12219,18 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pProgressLifetime = pPdStruct->_pdCallbackState;
 
     if (!pDevice1 || !pDevice2 || !pDevice1->isReadable() || !pDevice2->isReadable() || pDevice1->isSequential() || pDevice2->isSequential() ||
-        !isPdStructNotCanceled(pPdStruct)) {
+        ((fixupWidth != FIXUP_WIDTH_32) && (fixupWidth != FIXUP_WIDTH_64)) || !isPdStructNotCanceled(pPdStruct)) {
         return listResult;
     }
+
+    const qint32 nValueSize = (qint32)fixupWidth;
+
+    const qint64 nOriginalPosition1 = pDevice1->pos();
+    const qint64 nOriginalPosition2 = pDevice2->pos();
+    if ((nOriginalPosition1 < 0) || (nOriginalPosition2 < 0)) return listResult;
 
     const qint64 nSize1 = pDevice1->size();
     const qint64 nSize2 = pDevice2->size();
@@ -11988,10 +12266,11 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
 
         qint64 nOffset = 0;
         bool bReadError = false;
+        bool bProgressOwnerAlive = true;
         XBinary binary;
         const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
-        while ((nSize > 3) && isPdStructNotCanceled(pPdStruct)) {
+        while ((nSize >= nValueSize) && isPdStructNotCanceled(pPdStruct)) {
             qint32 nTemp = nBufferSize;
 
             if (nSize < nBufferSize) {
@@ -12004,31 +12283,67 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
                 break;
             }
 
-            for (qint32 i = 0; (i <= nTemp - (qint32)sizeof(qint32)) && isPdStructNotCanceled(pPdStruct); i++) {
-                qint32 nValue1 = 0;
-                qint32 nValue2 = 0;
-                memcpy(&nValue1, pBuffer1 + i, sizeof(nValue1));
-                memcpy(&nValue2, pBuffer2 + i, sizeof(nValue2));
+            for (qint32 i = 0; (i <= nTemp - nValueSize) && isPdStructNotCanceled(pPdStruct); i++) {
+                bool bIsFixup = false;
 
-                if (((qint64)nValue2 - (qint64)nValue1) == nDelta) {
+                if (fixupWidth == FIXUP_WIDTH_32) {
+                    quint32 nValue1 = 0;
+                    quint32 nValue2 = 0;
+                    memcpy(&nValue1, pBuffer1 + i, sizeof(nValue1));
+                    memcpy(&nValue2, pBuffer2 + i, sizeof(nValue2));
+                    nValue1 = qFromLittleEndian(nValue1);
+                    nValue2 = qFromLittleEndian(nValue2);
+
+                    // PE HIGHLOW fixups use modulo-2^32 arithmetic.  Widening
+                    // signed values before subtracting misses relocations that
+                    // cross the 0x7fffffff/0x80000000 boundary.
+                    bIsFixup = ((quint32)(nValue2 - nValue1) == (quint32)nDelta);
+                } else {
+                    quint64 nValue1 = 0;
+                    quint64 nValue2 = 0;
+                    memcpy(&nValue1, pBuffer1 + i, sizeof(nValue1));
+                    memcpy(&nValue2, pBuffer2 + i, sizeof(nValue2));
+                    nValue1 = qFromLittleEndian(nValue1);
+                    nValue2 = qFromLittleEndian(nValue2);
+
+                    // DIR64 candidates must match the complete pointer.  A
+                    // low-32-bit comparison systematically turns unrelated
+                    // values that differ by 2^32 into false DIR64 entries.
+                    bIsFixup = ((quint64)(nValue2 - nValue1) == (quint64)nDelta);
+                }
+
+                if (bIsFixup) {
                     listResult.append(nOffset + i);
                 }
             }
 
-            nSize -= nTemp - 3;
-            nOffset += nTemp - 3;
+            const qint32 nStep = nTemp - (nValueSize - 1);
+            nSize -= nStep;
+            nOffset += nStep;
             XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+            if (!isPdCallbackOwnerAlive(pProgressLifetime)) {
+                bProgressOwnerAlive = false;
+                break;
+            }
         }
 
         delete[] pBuffer1;
         delete[] pBuffer2;
-        XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
-
-        if (bReadError || !isPdStructNotCanceled(pPdStruct)) {
+        if (!bProgressOwnerAlive) {
             listResult.clear();
+        } else {
+            XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+            if (bReadError || !isPdStructNotCanceled(pPdStruct)) {
+                listResult.clear();
+            }
         }
     }
 
+    const bool bPosition1Restored = pDevice1->seek(nOriginalPosition1);
+    const bool bPosition2Restored = pDevice2->seek(nOriginalPosition2);
+    if (!bPosition1Restored || !bPosition2Restored) {
+        listResult.clear();
+    }
     return listResult;
 }
 
@@ -13162,7 +13477,8 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
         pPdStruct = &pdStructEmpty;
     }
 
-    if (!m_pDevice || !m_pDevice->isReadable() || !m_pDevice->isWritable() || !isPdStructNotCanceled(pPdStruct)) {
+    if (!m_pDevice || !m_pDevice->isReadable() || !m_pDevice->isWritable() || m_pDevice->isSequential() ||
+        !isPdStructNotCanceled(pPdStruct)) {
         return;
     }
 
@@ -13171,7 +13487,7 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    if ((nOffset == -1) || (nSize <= 0)) {
+    if ((nOffset == -1) || (nSize <= 0) || (nXorValue == 0)) {
         return;
     }
 
@@ -13185,41 +13501,259 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
     char *pBuffer = new (std::nothrow) char[nBufferSize];
 
     if (!pBuffer) {
+        setPdStructErrorString(pPdStruct, tr("Allocation error"));
         return;
     }
 
-    const qint64 nStartOffset = nOffset;
+    // Stage the complete original range before the first live write.  This
+    // makes read/allocation/cancellation failures non-mutating and gives us
+    // the exact bytes required to undo a partial commit.
+    QIODevice *pOriginalData = createFileBuffer(nSize, pPdStruct);
+
+    if (!pOriginalData) {
+        if (isPdStructNotCanceled(pPdStruct)) {
+            setPdStructErrorString(pPdStruct, tr("Cannot create temporary buffer"));
+        }
+        delete[] pBuffer;
+        return;
+    }
+
     const qint64 nTotalSize = nSize;
     const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nTotalSize);
+    QString sFailure;
+    bool bSuccess = false;
+    bool bRollbackSuccess = true;
+    bool bPositionRestored = true;
+    QPointer<QBuffer> pMemoryPropertyBuffer;
 
-    while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
-        qint32 nTemp = nBufferSize;
+    // These helpers deliberately do not use safeReadData/safeWriteData: the
+    // operation holds m_pReadWriteMutex for its complete transaction and the
+    // public helpers would try to lock the same non-recursive mutex again.
+    const auto readExactAt = [](QIODevice *pDevice, qint64 nPosition, char *pData, qint64 nLength,
+                                PDSTRUCT *pProgress, bool bHonorCancellation, bool *pbValid) -> qint64 {
+        qint64 nResult = 0;
+        *pbValid = false;
 
-        if (nSize < nBufferSize) {
-            nTemp = (qint32)nSize;
+        if (!pDevice || !pData || (nPosition < 0) || (nLength < 0) || !pDevice->seek(nPosition)) {
+            return nResult;
         }
 
-        if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
-            _errorMessage(tr("Read error"));
-            break;
+        while (nResult < nLength) {
+            if (bHonorCancellation && !XBinary::isPdStructNotCanceled(pProgress)) {
+                return nResult;
+            }
+
+            const qint64 nRemaining = nLength - nResult;
+            const qint64 nCurrent = pDevice->read(pData + nResult, nRemaining);
+
+            if ((nCurrent <= 0) || (nCurrent > nRemaining)) {
+                return nResult;
+            }
+
+            nResult += nCurrent;
         }
 
-        for (qint32 i = 0; i < nTemp; i++) {
-            pBuffer[i] ^= nXorValue;
+        *pbValid = !bHonorCancellation || XBinary::isPdStructNotCanceled(pProgress);
+        return nResult;
+    };
+
+    const auto writeExactAt = [](QIODevice *pDevice, qint64 nPosition, const char *pData, qint64 nLength,
+                                 PDSTRUCT *pProgress, bool bHonorCancellation, bool *pbValid) -> qint64 {
+        qint64 nResult = 0;
+        *pbValid = false;
+
+        if (!pDevice || !pData || (nPosition < 0) || (nLength < 0) || !pDevice->seek(nPosition)) {
+            return nResult;
         }
 
-        if (write_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
-            _errorMessage(tr("Write error"));
-            break;
+        while (nResult < nLength) {
+            if (bHonorCancellation && !XBinary::isPdStructNotCanceled(pProgress)) {
+                return nResult;
+            }
+
+            const qint64 nRemaining = nLength - nResult;
+            const qint64 nCurrent = pDevice->write(pData + nResult, nRemaining);
+
+            if (nCurrent > nRemaining) {
+                // A backend that violates QIODevice's write contract may have
+                // touched the complete request.  Return that extent so the
+                // caller restores all possibly modified bytes.
+                nResult = nLength;
+                return nResult;
+            }
+
+            if (nCurrent <= 0) {
+                return nResult;
+            }
+
+            nResult += nCurrent;
         }
 
-        nSize -= nTemp;
-        nOffset += nTemp;
-        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset - nStartOffset);
+        *pbValid = !bHonorCancellation || XBinary::isPdStructNotCanceled(pProgress);
+        return nResult;
+    };
+
+    {
+        QMutexLocker locker(m_pReadWriteMutex);
+        const qint64 nOriginalPosition = m_pDevice->pos();
+        QBuffer *pQBuffer = qobject_cast<QBuffer *>(m_pDevice);
+        QFileDevice *pFileDevice = qobject_cast<QFileDevice *>(m_pDevice);
+        QByteArray baQBufferOriginal;
+        bool bHaveQBufferSnapshot = false;
+        qint64 nCommitted = 0;
+
+        if (nOriginalPosition < 0) {
+            sFailure = tr("Cannot determine device position");
+        } else {
+            const qint64 nDeviceSize = m_pDevice->size();
+
+            if ((nDeviceSize < 0) || (nOffset < 0) || (nOffset > nDeviceSize) || (nTotalSize > (nDeviceSize - nOffset))) {
+                sFailure = tr("Invalid XOR range");
+            } else {
+                if (pQBuffer) {
+                    // QByteArray's implicit sharing keeps this snapshot cheap
+                    // until the first live write detaches the device buffer.
+                    baQBufferOriginal = pQBuffer->buffer();
+                    bHaveQBufferSnapshot = true;
+                }
+
+                if (pFileDevice && !pFileDevice->flush()) {
+                    sFailure = tr("Flush error");
+                }
+            }
+
+            qint64 nStaged = 0;
+
+            while (sFailure.isEmpty() && (nStaged < nTotalSize) && isPdStructNotCanceled(pPdStruct)) {
+                const qint32 nTemp = (qint32)qMin((qint64)nBufferSize, nTotalSize - nStaged);
+                bool bReadValid = false;
+                const qint64 nRead = readExactAt(m_pDevice, nOffset + nStaged, pBuffer, nTemp, pPdStruct, true, &bReadValid);
+
+                if (!bReadValid || (nRead != nTemp)) {
+                    if (isPdStructNotCanceled(pPdStruct)) sFailure = tr("Read error");
+                    break;
+                }
+
+                bool bWriteValid = false;
+                const qint64 nWritten = writeExactAt(pOriginalData, nStaged, pBuffer, nTemp, pPdStruct, true, &bWriteValid);
+
+                if (!bWriteValid || (nWritten != nTemp)) {
+                    if (isPdStructNotCanceled(pPdStruct)) sFailure = tr("Temporary buffer write error");
+                    break;
+                }
+
+                nStaged += nTemp;
+            }
+
+            if (sFailure.isEmpty() && (nStaged == nTotalSize) && isPdStructNotCanceled(pPdStruct)) {
+                while ((nCommitted < nTotalSize) && isPdStructNotCanceled(pPdStruct)) {
+                    const qint32 nTemp = (qint32)qMin((qint64)nBufferSize, nTotalSize - nCommitted);
+                    bool bReadValid = false;
+                    const qint64 nRead = readExactAt(pOriginalData, nCommitted, pBuffer, nTemp, pPdStruct, true, &bReadValid);
+
+                    if (!bReadValid || (nRead != nTemp)) {
+                        if (isPdStructNotCanceled(pPdStruct)) sFailure = tr("Temporary buffer read error");
+                        break;
+                    }
+
+                    for (qint32 i = 0; i < nTemp; i++) {
+                        pBuffer[i] ^= nXorValue;
+                    }
+
+                    bool bWriteValid = false;
+                    const qint64 nWritten = writeExactAt(m_pDevice, nOffset + nCommitted, pBuffer, nTemp, pPdStruct, true, &bWriteValid);
+                    nCommitted += nWritten;
+
+                    if (!bWriteValid || (nWritten != nTemp)) {
+                        if (isPdStructNotCanceled(pPdStruct)) sFailure = tr("Write error");
+                        break;
+                    }
+
+                }
+
+                if ((nCommitted == nTotalSize) && isPdStructNotCanceled(pPdStruct)) {
+                    if (!pFileDevice || pFileDevice->flush()) {
+                        bSuccess = true;
+                    } else {
+                        sFailure = tr("Flush error");
+                    }
+                }
+            }
+
+            if (!bSuccess && (nCommitted > 0)) {
+                if (bHaveQBufferSnapshot) {
+                    // Restore the complete QByteArray in one noexcept swap;
+                    // this remains reliable even when an overridden QBuffer
+                    // writeData() is the operation that stalled.
+                    pQBuffer->buffer().swap(baQBufferOriginal);
+                } else {
+                    qint64 nRestored = 0;
+
+                    while (nRestored < nCommitted) {
+                        const qint32 nTemp = (qint32)qMin((qint64)nBufferSize, nCommitted - nRestored);
+                        bool bReadValid = false;
+                        const qint64 nRead = readExactAt(pOriginalData, nRestored, pBuffer, nTemp, nullptr, false, &bReadValid);
+
+                        if (!bReadValid || (nRead != nTemp)) {
+                            bRollbackSuccess = false;
+                            break;
+                        }
+
+                        bool bWriteValid = false;
+                        const qint64 nWritten = writeExactAt(m_pDevice, nOffset + nRestored, pBuffer, nTemp, nullptr, false, &bWriteValid);
+
+                        if (!bWriteValid || (nWritten != nTemp)) {
+                            bRollbackSuccess = false;
+                            break;
+                        }
+
+                        nRestored += nTemp;
+                    }
+
+                    if (pFileDevice && !pFileDevice->flush()) {
+                        bRollbackSuccess = false;
+                    }
+                }
+            }
+
+            // QObject::setProperty synchronously dispatches a dynamic-property
+            // event.  Cache the refresh here, but emit that reentrant event
+            // only after the non-recursive device mutex has been released and
+            // every device operation is complete.
+            if ((nCommitted > 0) && pQBuffer && pQBuffer->property("Memory").isValid()) {
+                pMemoryPropertyBuffer = pQBuffer;
+            }
+
+            bPositionRestored = m_pDevice->seek(nOriginalPosition);
+        }
+    }
+
+    if (!bSuccess && !bRollbackSuccess) {
+        sFailure = sFailure.isEmpty() ? tr("XOR rollback failed; device may be partially modified")
+                                      : QString("%1; %2").arg(sFailure, tr("rollback failed; device may be partially modified"));
+    }
+
+    if (!bPositionRestored) {
+        sFailure = sFailure.isEmpty() ? tr("Cannot restore device position")
+                                      : QString("%1; %2").arg(sFailure, tr("cannot restore device position"));
+    }
+
+    if (!sFailure.isEmpty()) {
+        setPdStructErrorString(pPdStruct, sFailure);
+        _errorMessage(sFailure);
     }
 
     XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+    freeFileBuffer(&pOriginalData);
     delete[] pBuffer;
+
+    if (pMemoryPropertyBuffer) {
+        // A raw constData pointer cannot be republished safely after unlocking:
+        // another writer may detach the QByteArray first.  Remove the optional
+        // fast-path marker instead; normal QIODevice reads remain authoritative.
+        // Keep this reentrant QObject notification as the final operation.
+        pMemoryPropertyBuffer->setProperty("Memory", QVariant());
+    }
 }
 
 // quint32 XBinary::_ror32(quint32 nValue, quint32 nShift)
@@ -20354,19 +20888,25 @@ QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
     if (nFileBufferSize <= 0) nFileBufferSize = 0x1000000;  // 16 MB
 
     if (nSize < nFileBufferSize) {
-        QBuffer *pBuffer = new QBuffer();
+        QBuffer *pBuffer = new (std::nothrow) QBuffer();
+        if (!pBuffer) return nullptr;
 
         if (pBuffer->open(QIODevice::ReadWrite)) {
-            const QByteArray ba((qint32)nSize, '\0');
-            if ((ba.size() == nSize) && (pBuffer->write(ba) == nSize) &&
-                pBuffer->seek(0) && isPdStructNotCanceled(pPdStruct)) {
-                pResult = pBuffer;
-                pResult->setProperty("Memory", (quint64)pBuffer->buffer().constData());
+            try {
+                const QByteArray ba((qint32)nSize, '\0');
+                if ((ba.size() == nSize) && (pBuffer->write(ba) == nSize) &&
+                    pBuffer->seek(0) && isPdStructNotCanceled(pPdStruct)) {
+                    pResult = pBuffer;
+                    pResult->setProperty("Memory", (quint64)pBuffer->buffer().constData());
+                }
+            } catch (const std::bad_alloc &) {
+                pResult = nullptr;
             }
         }
         if (!pResult) delete pBuffer;
     } else {
-        QTemporaryFile *pTempFile = new QTemporaryFile();
+        QTemporaryFile *pTempFile = new (std::nothrow) QTemporaryFile();
+        if (!pTempFile) return nullptr;
         if (pTempFile->open() && pTempFile->resize(nSize) &&
             (pTempFile->size() == nSize) && pTempFile->seek(0) &&
             isPdStructNotCanceled(pPdStruct)) {
