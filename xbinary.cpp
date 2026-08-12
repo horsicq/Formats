@@ -20346,8 +20346,9 @@ qint32 XBinary::getFileBufferSize(PDSTRUCT *pPdStruct)
 
 QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
     QIODevice *pResult = nullptr;
+
+    if ((nSize < 0) || !isPdStructNotCanceled(pPdStruct)) return pResult;
 
     qint32 nFileBufferSize = pPdStruct ? pPdStruct->nFileBufferSize.loadAcquire() : 0;
     if (nFileBufferSize <= 0) nFileBufferSize = 0x1000000;  // 16 MB
@@ -20356,22 +20357,22 @@ QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
         QBuffer *pBuffer = new QBuffer();
 
         if (pBuffer->open(QIODevice::ReadWrite)) {
-            QByteArray ba(nSize, '\0');
-            pBuffer->write(ba);
-            pBuffer->seek(0);  // FIX: Reset position to beginning after pre-allocating
-            pResult = pBuffer;
-            pResult->setProperty("Memory", (quint64)pBuffer->buffer().constData());
-        } else {
-            delete pBuffer;
+            const QByteArray ba((qint32)nSize, '\0');
+            if ((ba.size() == nSize) && (pBuffer->write(ba) == nSize) &&
+                pBuffer->seek(0) && isPdStructNotCanceled(pPdStruct)) {
+                pResult = pBuffer;
+                pResult->setProperty("Memory", (quint64)pBuffer->buffer().constData());
+            }
         }
+        if (!pResult) delete pBuffer;
     } else {
         QTemporaryFile *pTempFile = new QTemporaryFile();
-        if (pTempFile->open()) {
-            pTempFile->resize(nSize);
+        if (pTempFile->open() && pTempFile->resize(nSize) &&
+            (pTempFile->size() == nSize) && pTempFile->seek(0) &&
+            isPdStructNotCanceled(pPdStruct)) {
             pResult = pTempFile;
-        } else {
-            delete pTempFile;
         }
+        if (!pResult) delete pTempFile;
     }
 
     return pResult;
