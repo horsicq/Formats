@@ -84,6 +84,12 @@ qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
     if (!m_pDevice || (nMaxSize < 0) || ((nMaxSize > 0) && !pData) || (pos() < 0) || (pos() > size())) return -1;
     nMaxSize = qMin(nMaxSize, size() - pos());
 
+    // The backing device can be shared by multiple SubDevice instances (and by
+    // parsers doing absolute reads).  Its cursor therefore cannot be assumed to
+    // still match this view's logical cursor from the constructor or last seek.
+    const qint64 nAbsolutePosition = (qint64)getInitLocation() + pos();
+    if ((m_pDevice->pos() != nAbsolutePosition) && !m_pDevice->seek(nAbsolutePosition)) return -1;
+
     return m_pDevice->read(pData, nMaxSize);
 }
 
@@ -91,6 +97,9 @@ qint64 SubDevice::writeData(const char *pData, qint64 nMaxSize)
 {
     if (!m_pDevice || (nMaxSize < 0) || ((nMaxSize > 0) && !pData) || (pos() < 0) || (pos() > size())) return -1;
     nMaxSize = qMin(nMaxSize, size() - pos());
+
+    const qint64 nAbsolutePosition = (qint64)getInitLocation() + pos();
+    if ((m_pDevice->pos() != nAbsolutePosition) && !m_pDevice->seek(nAbsolutePosition)) return -1;
 
     return m_pDevice->write(pData, nMaxSize);
 }

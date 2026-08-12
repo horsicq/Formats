@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstring>
 #include <limits>
+#include <new>
 #include <QDebug>
 #include <QFileDevice>
 #include <QSaveFile>
@@ -726,7 +727,7 @@ QMap<XBinary::UNPACK_PROP, QVariant> XBinary::getDefaultUnpackProperties()
             }
         }
 
-        finishUnpack(&state, &pdStruct);
+        finishUnpack(&state, nullptr);
     }
 
     return result;
@@ -830,7 +831,7 @@ qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
 
     // Initialize the streaming archive state.
     if (initUnpack(&state, mapProperties, pPdStruct)) {
-        nResult = state.nNumberOfRecords;
+        nResult = qMax((qint32)0, state.nNumberOfRecords);
 
         // A successful initUnpack() owns its context until finishUnpack(),
         // even when the caller was canceled while initialization completed.
@@ -843,6 +844,13 @@ qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
 QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::ARCHIVERECORD> listResult;
+
+    // -1 is the only unbounded sentinel.  A zero limit has no records to
+    // enumerate, and values below -1 are invalid rather than implicit one-item
+    // limits.
+    if (nLimit < -1 || nLimit == 0) {
+        return listResult;
+    }
 
     PDSTRUCT pdStructEmpty = createPdStruct();
     if (!pPdStruct) {
@@ -977,7 +985,11 @@ static qint64 readDeviceWithBoundedProgress(QIODevice *pDevice, char *pBuffer, q
         if (i != 2) pDevice->waitForReadyRead(10);
     }
 
-    return 0;
+    // A persistent zero read while atEnd() is false is a no-progress failure,
+    // not EOF.  Returning zero here made unbounded decoders (notably STORE)
+    // accept a silently truncated stream because they have no declared limit
+    // against which to distinguish the two cases.
+    return pDevice->atEnd() ? 0 : -1;
 }
 
 qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
@@ -1937,6 +1949,10 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
     // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
 
+    if (!pDevice || (nPos < 0) || (nMaxLen < 0) || ((nMaxLen > 0) && !pData)) {
+        return nResult;
+    }
+
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
     if ((pDevice->size() > nPos) && (nPos >= 0)) {
@@ -2010,6 +2026,10 @@ qint64 XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qi
     // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
 
+    if (!pDevice || (nPos < 0) || (nMaxLen < 0) || ((nMaxLen > 0) && !pData)) {
+        return nResult;
+    }
+
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
     if ((pDevice->size() > nPos) && (nPos >= 0)) {
@@ -2053,6 +2073,10 @@ QByteArray XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, qint64 nSiz
 qint64 XBinary::_writeDataSimple(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen)
 {
     qint64 nResult = 0;
+
+    if (!pDevice || (nPos < 0) || (nLen < 0) || ((nLen > 0) && !pData)) {
+        return nResult;
+    }
 
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
@@ -2325,9 +2349,15 @@ QDateTime XBinary::winFileTimeToQDateTime(quint64 nWinFileTime)
         return QDateTime();
     }
 
-    quint64 nMsecsSinceEpoch = (nWinFileTime - nEpochDelta) / Q_UINT64_C(10000);
+    const quint64 nDiffSinceEpoch = nWinFileTime - nEpochDelta;
+    const quint64 nMsecsSinceEpoch = nDiffSinceEpoch / Q_UINT64_C(10000);
 
-    return QDateTime::fromMSecsSinceEpoch((qint64)nMsecsSinceEpoch, Qt::UTC);
+    if (nMsecsSinceEpoch > (quint64)(std::numeric_limits<qint64>::max)()) {
+        return QDateTime();
+    }
+
+    QDateTime dateTime = QDateTime::fromMSecsSinceEpoch((qint64)nMsecsSinceEpoch, Qt::UTC);
+    return dateTime.isValid() ? dateTime : QDateTime();
 }
 
 bool XBinary::setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties, const QString &sFileName)
@@ -14041,12 +14071,24 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
     QDateTime result;
 
     if (type == DT_TYPE_POSIX) {
-        result.setMSecsSinceEpoch(nValue * 1000);
+        if (nValue > (quint64)((std::numeric_limits<qint64>::max)() / 1000)) {
+            return result;
+        }
+
+        result.setMSecsSinceEpoch((qint64)nValue * 1000);
     } else if (type == DT_TYPE_UNIXTIME) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-        result = QDateTime::fromSecsSinceEpoch((quint32)nValue, Qt::UTC);
+        if (nValue > (quint64)(std::numeric_limits<qint64>::max)()) {
+            return result;
+        }
+
+        result = QDateTime::fromSecsSinceEpoch((qint64)nValue, Qt::UTC);
 #else
-        result = QDateTime::fromMSecsSinceEpoch((quint32)nValue * 1000, Qt::UTC);
+        if (nValue > (quint64)((std::numeric_limits<qint64>::max)() / 1000)) {
+            return result;
+        }
+
+        result = QDateTime::fromMSecsSinceEpoch((qint64)nValue * 1000, Qt::UTC);
 #endif
     } else if (type == DT_TYPE_DOSTIME) {
         // MS-DOS time is always a 16-bit packed value; mask higher bits explicitly.
@@ -14061,7 +14103,7 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
         result = winFileTimeToQDateTime(nValue);
     }
 
-    return result;
+    return result.isValid() ? result : QDateTime();
 }
 
 QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
@@ -17866,25 +17908,32 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                         // Set file datetime if provided by the archive record
                         if (bResult && !bSkipFile) {
                             QVariant vDateTime = record.mapProperties.value(XBinary::FPART_PROP_DATETIME);
-                            if (vDateTime.isValid() && !vDateTime.isNull()) {
-                                QDateTime dt;
-                                if (vDateTime.canConvert<QDateTime>()) {
-                                    dt = vDateTime.toDateTime();
-                                } else if (vDateTime.canConvert<quint64>()) {
-                                    quint64 t = vDateTime.toULongLong();
+                                if (vDateTime.isValid() && !vDateTime.isNull()) {
+                                    QDateTime dt;
+                                    if (vDateTime.canConvert<QDateTime>()) {
+                                        dt = vDateTime.toDateTime();
+                                    } else if (vDateTime.canConvert<quint64>()) {
+                                        quint64 t = vDateTime.toULongLong();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-                                    dt = QDateTime::fromSecsSinceEpoch((qint64)t);
+                                        if (t <= (quint64)(std::numeric_limits<qint64>::max)()) {
+                                            dt = QDateTime::fromSecsSinceEpoch((qint64)t);
+                                        }
 #else
-                                    dt = QDateTime::fromMSecsSinceEpoch((qint64)t * 1000);
+                                        if (t <= (quint64)((std::numeric_limits<qint64>::max)() / 1000)) {
+                                            dt = QDateTime::fromMSecsSinceEpoch((qint64)t * 1000);
+                                        }
 #endif
-                                } else if (vDateTime.canConvert<qint64>()) {
-                                    qint64 t = vDateTime.toLongLong();
+                                    } else if (vDateTime.canConvert<qint64>()) {
+                                        qint64 t = vDateTime.toLongLong();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-                                    dt = QDateTime::fromSecsSinceEpoch(t);
+                                        dt = QDateTime::fromSecsSinceEpoch(t);
 #else
-                                    dt = QDateTime::fromMSecsSinceEpoch(t * 1000);
+                                        if ((t >= ((std::numeric_limits<qint64>::min)() / 1000)) &&
+                                            (t <= ((std::numeric_limits<qint64>::max)() / 1000))) {
+                                            dt = QDateTime::fromMSecsSinceEpoch(t * 1000);
+                                        }
 #endif
-                                }
+                                    }
 
                                 if (dt.isValid()) {
                                     XBinary::setFileDateTime(sFilePath, dt);
@@ -18210,42 +18259,39 @@ qint32 XBinary::getFileBufferSize(PDSTRUCT *pPdStruct)
 
 QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    QIODevice *pResult = nullptr;
+    if (nSize < 0) return nullptr;
 
-    qint32 nFileBufferSize = 0;
-
-    if (pPdStruct) {
-        nFileBufferSize = pPdStruct->nFileBufferSize;
-    }
-
-    if (nFileBufferSize == 0) {
-        nFileBufferSize = 0x1000000;  // 16 MB
-    }
+    qint32 nFileBufferSize = pPdStruct ? pPdStruct->nFileBufferSize : 0;
+    if (nFileBufferSize <= 0) nFileBufferSize = 0x1000000;  // 16 MB
 
     if (nSize < nFileBufferSize) {
-        QBuffer *pBuffer = new QBuffer();
+        QBuffer *pBuffer = new (std::nothrow) QBuffer();
+        if (!pBuffer) return nullptr;
 
-        if (pBuffer->open(QIODevice::ReadWrite)) {
-            QByteArray ba(nSize, '\0');
-            pBuffer->write(ba);
-            pBuffer->seek(0);  // FIX: Reset position to beginning after pre-allocating
-            pResult = pBuffer;
-            pResult->setProperty("Memory", (quint64)pBuffer->buffer().constData());
-        } else {
+        try {
+            pBuffer->buffer().fill('\0', (qint32)nSize);
+        } catch (const std::bad_alloc &) {
             delete pBuffer;
+            return nullptr;
         }
-    } else {
-        QTemporaryFile *pTempFile = new QTemporaryFile();
-        if (pTempFile->open()) {
-            pTempFile->resize(nSize);
-            pResult = pTempFile;
-        } else {
-            delete pTempFile;
+
+        if (!pBuffer->open(QIODevice::ReadWrite) || !pBuffer->seek(0) || (pBuffer->size() != nSize)) {
+            delete pBuffer;
+            return nullptr;
         }
+
+        pBuffer->setProperty("Memory", (quint64)pBuffer->buffer().constData());
+        return pBuffer;
     }
 
-    return pResult;
+    QTemporaryFile *pTempFile = new (std::nothrow) QTemporaryFile();
+    if (!pTempFile) return nullptr;
+    if (!pTempFile->open() || !pTempFile->resize(nSize) || !pTempFile->seek(0) || (pTempFile->size() != nSize)) {
+        delete pTempFile;
+        return nullptr;
+    }
+
+    return pTempFile;
 }
 
 void XBinary::freeFileBuffer(QIODevice **ppBuffer)
