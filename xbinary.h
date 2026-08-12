@@ -36,6 +36,7 @@
 #include <QMap>
 #include <QMutex>
 #include <QPair>
+#include <QPointer>
 #include <QSet>
 #include <QSharedPointer>
 #include <QTemporaryFile>
@@ -2761,7 +2762,10 @@ signals:
     void infoMessage(const QString &sInfoMessage);
 
 private:
-    QIODevice *m_pDevice;
+    // Input devices are normally owned by the caller.  Track their QObject
+    // lifetime so a destroyed external device cannot leave every format parser
+    // with a dangling pointer.
+    QPointer<QIODevice> m_pDevice;
     const char *m_pConstMemory;
     QString m_sFileName;
     QFile *m_pFile;

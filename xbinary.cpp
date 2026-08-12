@@ -13800,7 +13800,7 @@ quint32 XBinary::getStringCustomCRC32(const QString &sString)
 
 QIODevice *XBinary::getDevice()
 {
-    return m_pDevice;
+    return m_pDevice.data();
 }
 
 bool XBinary::isValid(PDSTRUCT *pPdStruct)
