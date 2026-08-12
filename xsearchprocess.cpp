@@ -26,15 +26,19 @@
 #include <QtGlobal>
 
 namespace {
-bool getMSRecordOffset(const XBinary::_MEMORY_MAP &memoryMap, const XBinary::MS_RECORD &record, qint64 *pnOffset)
+bool getMSRecordOffset(const XBinary::_MEMORY_MAP &memoryMap, const XBinary::MS_RECORD &record, qint64 nDeviceSize, qint64 *pnOffset)
 {
-    if (!pnOffset || (record.nRelOffset > (quint64)(std::numeric_limits<qint64>::max)())) {
+    if (!pnOffset || (nDeviceSize < 0) || (record.nRelOffset > (quint64)(std::numeric_limits<qint64>::max)())) {
         return false;
     }
 
     const qint64 nRelOffset = (qint64)record.nRelOffset;
+    const qint64 nRecordSize = (qint64)record.nSize;
 
     if (record.nRegionIndex == -1) {
+        if ((nRelOffset > nDeviceSize) || (nRecordSize > (nDeviceSize - nRelOffset))) {
+            return false;
+        }
         *pnOffset = nRelOffset;
         return true;
     }
@@ -45,13 +49,32 @@ bool getMSRecordOffset(const XBinary::_MEMORY_MAP &memoryMap, const XBinary::MS_
         return false;
     }
 
-    const qint64 nRegionOffset = memoryMap.listRecords.at(nRegionIndex).nOffset;
+    const XBinary::_MEMORY_RECORD &memoryRecord = memoryMap.listRecords.at(nRegionIndex);
+    const qint64 nRegionOffset = memoryRecord.nOffset;
+    const qint64 nRegionSize = memoryRecord.nSize;
 
-    if ((nRegionOffset < 0) || (nRelOffset > (std::numeric_limits<qint64>::max)() - nRegionOffset)) {
+    if (memoryRecord.bIsVirtual || (nRegionOffset < 0) || (nRegionSize < 0) || (nRelOffset > nRegionSize) ||
+        (nRecordSize > (nRegionSize - nRelOffset)) || (nRelOffset > (std::numeric_limits<qint64>::max)() - nRegionOffset)) {
         return false;
     }
 
     *pnOffset = nRegionOffset + nRelOffset;
+    return (*pnOffset <= nDeviceSize) && (nRecordSize <= (nDeviceSize - *pnOffset));
+}
+
+bool isValidMemoryMap(const XBinary::_MEMORY_MAP &memoryMap, qint64 nDeviceSize)
+{
+    if (nDeviceSize < 0) {
+        return false;
+    }
+
+    for (const XBinary::_MEMORY_RECORD &record : memoryMap.listRecords) {
+        if (!record.bIsVirtual && ((record.nOffset < 0) || (record.nSize < 0) || (record.nOffset > nDeviceSize) ||
+                                   (record.nSize > (nDeviceSize - record.nOffset)))) {
+            return false;
+        }
+    }
+
     return true;
 }
 }  // namespace
@@ -67,6 +90,11 @@ XSearchProcess::XSearchProcess(QObject *pParent) : XThreadObject(pParent)
     m_pPdStruct = nullptr;
 }
 
+XSearchProcess::~XSearchProcess()
+{
+    clearPdStructCallback();
+}
+
 void XSearchProcess::setData(const XBinary::INDATA &inData, XBinary::XLOC location, qint64 nSize, const XBinary::XFSS_OPTIONS &ssOptions,
                              XBinary::_MEMORY_MAP *pMemoryMap, QVector<XBinary::MS_RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
@@ -77,15 +105,12 @@ void XSearchProcess::setData(const XBinary::INDATA &inData, XBinary::XLOC locati
     m_pMemoryMap = pMemoryMap;
     m_pListRecords = pListRecords;
     m_pPdStruct = pPdStruct;
-
-    if (m_pPdStruct) {
-        m_pPdStruct->pCallback = XSearchProcess::pdStructCallback;
-        m_pPdStruct->pCallbackUserData = this;
-    }
 }
 
 void XSearchProcess::process()
 {
+    clearPdStructCallback();
+
     if (m_pListRecords) {
         m_pListRecords->clear();
     }
@@ -95,6 +120,13 @@ void XSearchProcess::process()
         return;
     }
 
+    // Subscribe independently for the synchronous processing interval.  This
+    // leaves an arbitrary caller-supplied legacy callback untouched and gives
+    // destruction a drainable in-flight registration rather than a raw chain.
+    if (m_pPdStruct) {
+        m_pdCallbackSubscription = XBinary::subscribePdStructCallback(m_pPdStruct, XSearchProcess::pdStructCallback, this);
+    }
+
     XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
     XBinary::PDSTRUCT *pPdStruct = m_pPdStruct;
 
@@ -102,40 +134,65 @@ void XSearchProcess::process()
         pPdStruct = &pdStructEmpty;
     }
 
-    QIODevice *pDevice = XFormats::createDevice(m_inData);
-
-    if (!pDevice) {
+    if (!XBinary::isPdStructNotCanceled(pPdStruct) || (m_nSize < -1)) {
         clearPdStructCallback();
         return;
     }
+
+    QIODevice *pDevice = XFormats::createDevice(m_inData);
+
+    if (!pDevice || !pDevice->isOpen() || !pDevice->isReadable() || pDevice->isSequential()) {
+        XFormats::removeDevice(pDevice, m_inData);
+        clearPdStructCallback();
+        return;
+    }
+
+    const qint64 nOriginalPosition = pDevice->pos();
+    const qint64 nDeviceSize = pDevice->size();
 
     XBinary *pBinary = XFormats::createClass(m_inData.fileType, pDevice, m_inData.bIsImage, m_inData.nModuleAddress);
 
     if (pBinary) {
         connect(pBinary, SIGNAL(errorMessage(QString)), this, SIGNAL(errorMessage(QString)));
 
-        if (m_pMemoryMap->listRecords.isEmpty()) {
-            *m_pMemoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
+        XBinary::_MEMORY_MAP memoryMap = *m_pMemoryMap;
+        if (memoryMap.listRecords.isEmpty()) {
+            memoryMap = pBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
         }
 
-        qint64 nOffset = XBinary::locToOffset(m_pMemoryMap, m_location);
-        *m_pListRecords = pBinary->multiSearch_strings(m_pMemoryMap, nOffset, m_nSize, m_ssOptions, pPdStruct);
+        const qint64 nOffset = XBinary::locToOffset(&memoryMap, m_location);
+        const bool bRangeValid = XBinary::isPdStructNotCanceled(pPdStruct) && isValidMemoryMap(memoryMap, nDeviceSize) && (nOffset >= 0) && (nOffset <= nDeviceSize) &&
+                                 ((m_nSize == -1) || (m_nSize <= (nDeviceSize - nOffset)));
+        QVector<XBinary::MS_RECORD> listRecords;
 
-        // Prefetch the string values. Honor cancellation: on a big result set this loop
-        // would otherwise keep the worker busy long after Cancel, so the dialog cannot close.
-        // Records left with an empty sValue are read back lazily by the model when displayed.
-        for (qint32 i = 0; (i < m_pListRecords->count()) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-            XBinary::MS_RECORD *pRecord = &((*m_pListRecords)[i]);
+        if (bRangeValid) {
+            listRecords = pBinary->multiSearch_strings(&memoryMap, nOffset, m_nSize, m_ssOptions, pPdStruct);
+        }
+
+        bool bRecordsValid = bRangeValid;
+        for (qint32 i = 0; bRecordsValid && (i < listRecords.count()) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+            XBinary::MS_RECORD *pRecord = &(listRecords[i]);
 
             if (pRecord->sValue.isEmpty()) {
                 qint64 nRecordOffset = -1;
-                if (getMSRecordOffset(*m_pMemoryMap, *pRecord, &nRecordOffset)) {
+                if (getMSRecordOffset(memoryMap, *pRecord, nDeviceSize, &nRecordOffset)) {
                     pRecord->sValue = pBinary->read_msRecordString(*pRecord, nRecordOffset);
+                } else {
+                    bRecordsValid = false;
                 }
             }
         }
 
+        if (bRecordsValid && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            *m_pMemoryMap = memoryMap;
+            *m_pListRecords = listRecords;
+        }
+
         delete pBinary;
+    }
+
+    if (nOriginalPosition >= 0) {
+        pDevice->seek(nOriginalPosition);
     }
 
     XFormats::removeDevice(pDevice, m_inData);
@@ -159,9 +216,10 @@ void XSearchProcess::pdStructCallback(void *pUserData, XBinary::PDSTRUCT *pPdStr
     qint64 nCurrent = 0;
     qint64 nTotal = 0;
     QString sStatus;
+    XBinary::PDSTRUCT snapshot = XBinary::getPdStructSnapshot(pPdStruct);
 
     for (qint32 i = 0; i < XBinary::N_NUMBER_PDRECORDS; i++) {
-        const XBinary::PDRECORD *pRecord = &(pPdStruct->_pdRecord[i]);
+        const XBinary::PDRECORD *pRecord = &(snapshot._pdRecord[i]);
 
         if (pRecord->bIsValid && pRecord->nTotal) {
             nCurrent = pRecord->nCurrent;
@@ -171,7 +229,7 @@ void XSearchProcess::pdStructCallback(void *pUserData, XBinary::PDSTRUCT *pPdStr
         }
     }
 
-    qint32 nValue = XBinary::getPdStructPercentage(pPdStruct);
+    qint32 nValue = XBinary::getPdStructPercentage(&snapshot);
     nValue = qBound(0, nValue, 100);
 
     emit pSearchProcess->progressChanged(nValue, nCurrent, nTotal, sStatus);
@@ -179,8 +237,5 @@ void XSearchProcess::pdStructCallback(void *pUserData, XBinary::PDSTRUCT *pPdStr
 
 void XSearchProcess::clearPdStructCallback()
 {
-    if (m_pPdStruct && (m_pPdStruct->pCallbackUserData == this)) {
-        m_pPdStruct->pCallback = nullptr;
-        m_pPdStruct->pCallbackUserData = nullptr;
-    }
+    XBinary::unsubscribePdStructCallback(&m_pdCallbackSubscription);
 }

@@ -21,6 +21,7 @@
 #ifndef SUBDEVICE_H
 #define SUBDEVICE_H
 
+#include <QPointer>
 #include <QVariant>
 
 #include "xiodevice.h"
@@ -34,6 +35,8 @@ public:
 
     QIODevice *getOrigDevice();
 
+    bool open(OpenMode mode) override;
+    void close() override;
     bool seek(qint64 nPos) override;
     bool reset() override;
 
@@ -42,7 +45,10 @@ protected:
     qint64 writeData(const char *pData, qint64 nMaxSize) override;
 
 private:
-    QIODevice *m_pDevice;
+    void handleBackingDeviceDestroyed();
+
+    QPointer<QIODevice> m_pDevice;
+    bool m_bIsRangeValid;
 };
 
 #endif  // SUBDEVICE_H

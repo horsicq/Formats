@@ -239,6 +239,13 @@ public:
         STRUCTID_dyld_info_command,
         STRUCTID_nlist,
         STRUCTID_nlist_64,
+        STRUCTID_string_table,
+        STRUCTID_indirect_symbol,
+        STRUCTID_function_starts,
+        STRUCTID_data_in_code,
+        STRUCTID_chained_fixups_header,
+        STRUCTID_chained_import,
+        STRUCTID_export,
     };
 
     XMACH(QIODevice *pDevice = nullptr, bool bIsImage = false, XADDR nModuleAddress = -1);
@@ -365,6 +372,10 @@ public:
     static bool isLibraryRecordNamePresent(const QString &sName, QList<LIBRARY_RECORD> *pListLibraryRecords);
 
     LIBRARY_RECORD _readLibraryRecord(qint64 nOffset, bool bIsBigEndian);
+    // Dylib names in dyld ordinal order (all dylib-loading commands), and the
+    // library-ordinal -> display-name mapping used to attribute imports.
+    QStringList _getDylibNamesOrdered();
+    QString _libraryOrdinalToName(qint32 nOrdinal, const QStringList &listNames);
 
     QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(qint32 nType = XMACH_DEF::S_LC_LOAD_DYLIB);
     QList<FVM_LIBRARY_RECORD> getFvmLibraryRecords(QList<COMMAND_RECORD> *pListCommandRecords, qint32 nType = XMACH_DEF::S_LC_LOADFVMLIB);
@@ -834,6 +845,16 @@ public:
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct);
     void _appendTypedLoadCommand(QList<XFHEADER> &listResult, const XFSTRUCT &xfStruct, qint64 nCommandOffset, quint32 nCmd, const QString &sParentTag,
                                  PDSTRUCT *pPdStruct);
+    // __LINKEDIT sub-structures. Each derives its own file offsets from the owning
+    // load command (which appears at most once), so both the tree emission and the
+    // -S reconstruct path can call these with only the parent tag.
+    bool _makeStringTable(XFHEADER *pResult, FT fileType, const QString &sParentTag);
+    bool _makeIndirectSymbolTable(XFHEADER *pResult, FT fileType, const QString &sParentTag);
+    bool _makeFunctionStarts(XFHEADER *pResult, FT fileType, const QString &sParentTag);
+    bool _makeDataInCode(XFHEADER *pResult, FT fileType, const QString &sParentTag);
+    bool _makeChainedFixupsHeader(XFHEADER *pResult, FT fileType, const QString &sParentTag);
+    bool _makeChainedImports(XFHEADER *pResult, FT fileType, const QString &sParentTag);
+    bool _makeExportTable(XFHEADER *pResult, FT fileType, const QString &sParentTag);
     // virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
 
     virtual QString getMIMEString();

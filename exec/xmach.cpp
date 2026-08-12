@@ -21,6 +21,21 @@
 #include "xmach.h"
 
 namespace {
+bool xmachAreOpcodeArgumentsValid(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes,
+                                  XBinary::OPCODE_STATUS *pOpcodeStatus)
+{
+    if (!pOpcodeStatus) {
+        return false;
+    }
+
+    if (!pData || !pListOpcodes || (nSize <= 0) || ((XADDR)nSize > (std::numeric_limits<XADDR>::max)() - nAddress)) {
+        *pOpcodeStatus = XBinary::OPCODE_STATUS_END;
+        return false;
+    }
+
+    return true;
+}
+
 const XMACH::COMMAND_RECORD *xmachFindCommandRecord(quint32 nCommandID, qint32 nIndex, const QList<XMACH::COMMAND_RECORD> *pListCommandRecords)
 {
     const XMACH::COMMAND_RECORD *pResult = nullptr;
@@ -73,6 +88,13 @@ XBinary::XCONVERT _TABLE_XMACH_STRUCTID[] = {
     {XMACH::STRUCTID_dyld_info_command, "dyld_info_command", QString("dyld_info_command")},
     {XMACH::STRUCTID_nlist, "nlist", QString("nlist")},
     {XMACH::STRUCTID_nlist_64, "nlist_64", QString("nlist_64")},
+    {XMACH::STRUCTID_string_table, "string_table", QString("string_table")},
+    {XMACH::STRUCTID_indirect_symbol, "indirect_symbol", QString("indirect_symbol")},
+    {XMACH::STRUCTID_function_starts, "function_starts", QString("function_starts")},
+    {XMACH::STRUCTID_data_in_code, "data_in_code", QString("data_in_code")},
+    {XMACH::STRUCTID_chained_fixups_header, "chained_fixups_header", QString("chained_fixups_header")},
+    {XMACH::STRUCTID_chained_import, "chained_import", QString("chained_import")},
+    {XMACH::STRUCTID_export, "export", QString("export")},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_HeaderMagics[] = {
@@ -1615,26 +1637,159 @@ QVector<XBinary::XSYMBOL_STRUCT> XMACH::getSymbolStructs()
     return _getSymbolStructs();
 }
 
+QStringList XMACH::_getDylibNamesOrdered()
+{
+    // dyld assigns a 1-based ordinal to every dylib-loading command in the order
+    // it appears among all load commands, so collect them in that order.
+    QStringList listResult;
+
+    bool bIsBigEndian = isBigEndian();
+    QList<COMMAND_RECORD> listCommands = getCommandRecords();
+    qint32 nNumberOfCommands = listCommands.count();
+
+    for (qint32 i = 0; i < nNumberOfCommands; i++) {
+        quint32 nId = listCommands.at(i).nId;
+
+        if ((nId == XMACH_DEF::S_LC_LOAD_DYLIB) || (nId == XMACH_DEF::S_LC_LOAD_WEAK_DYLIB) || (nId == XMACH_DEF::S_LC_REEXPORT_DYLIB) ||
+            (nId == XMACH_DEF::S_LC_LOAD_UPWARD_DYLIB) || (nId == XMACH_DEF::S_LC_LAZY_LOAD_DYLIB)) {
+            LIBRARY_RECORD record = _readLibraryRecord(listCommands.at(i).nStructOffset, bIsBigEndian);
+            listResult.append(record.sName);
+        }
+    }
+
+    return listResult;
+}
+
+QString XMACH::_libraryOrdinalToName(qint32 nOrdinal, const QStringList &listNames)
+{
+    QString sResult;
+
+    if ((nOrdinal >= 1) && (nOrdinal <= listNames.count())) {
+        sResult = listNames.at(nOrdinal - 1);
+        // The Library column is narrow, so show the leaf name, not the full path.
+        qint32 nSlash = sResult.lastIndexOf(QChar('/'));
+        if (nSlash >= 0) {
+            sResult = sResult.mid(nSlash + 1);
+        }
+    } else if (nOrdinal == 0) {
+        sResult = QString("(self)");
+    } else if ((nOrdinal == 0xFF) || (nOrdinal == 0xFFFF) || (nOrdinal == -1)) {
+        sResult = QString("(main executable)");
+    } else if ((nOrdinal == 0xFE) || (nOrdinal == 0xFFFE) || (nOrdinal == -2)) {
+        sResult = QString("(flat lookup)");
+    } else if ((nOrdinal == 0xFD) || (nOrdinal == 0xFFFD) || (nOrdinal == -3)) {
+        sResult = QString("(weak lookup)");
+    }
+
+    return sResult;
+}
+
 QVector<XBinary::XIMPORT_STRUCT> XMACH::getImportStructs()
 {
     QVector<XIMPORT_STRUCT> listResult;
 
-    QVector<XSYMBOL_STRUCT> listSymbols = _getSymbolStructs();
+    QStringList listDylibNames = _getDylibNamesOrdered();
 
-    qint32 nNumberOfSymbols = listSymbols.count();
+    // Preferred source: LC_DYLD_CHAINED_FIXUPS imports (modern binaries). Each
+    // import carries its library ordinal + symbol name, so we get real library
+    // attribution that the plain nlist undefined-symbol list lacks.
+    XMACH_DEF::linkedit_data_command led = get_linkedit_data(XMACH_DEF::S_LC_DYLD_CHAINED_FIXUPS);
+
+    if ((led.dataoff != 0) && (led.datasize != 0) && checkOffsetSize(led.dataoff, (qint64)sizeof(XMACH_DEF::dyld_chained_fixups_header))) {
+        XMACH_DEF::dyld_chained_fixups_header header = _read_dyld_chained_fixups_header(led.dataoff);
+
+        if (header.imports_count > 0) {
+            qint32 nImportSize = 4;
+            bool bIsAddend64 = (header.imports_format == XMACH_DEF::S_DYLD_CHAINED_IMPORT_ADDEND64);
+            if (header.imports_format == XMACH_DEF::S_DYLD_CHAINED_IMPORT_ADDEND) {
+                nImportSize = 8;
+            } else if (bIsAddend64) {
+                nImportSize = 16;
+            }
+
+            qint64 nImportsOffset = led.dataoff + header.imports_offset;
+            qint64 nSymbolsOffset = led.dataoff + header.symbols_offset;
+            qint32 nCount = (qint32)qMin(header.imports_count, (quint32)0x10000);
+
+            if (checkOffsetSize(nImportsOffset, (qint64)nCount * nImportSize)) {
+                bool bIsBigEndian = (getEndian() == ENDIAN_BIG);
+
+                for (qint32 i = 0; i < nCount; i++) {
+                    qint64 nRowOffset = nImportsOffset + (qint64)i * nImportSize;
+                    quint32 nEntry = read_uint32(nRowOffset, bIsBigEndian);
+                    qint32 nLibOrdinal = 0;
+                    quint32 nNameOffset = 0;
+
+                    if (bIsAddend64) {
+                        // {lib_ordinal:16, weak:1, reserved:15, name_offset:32}
+                        nLibOrdinal = (qint32)(nEntry & 0xFFFF);
+                        nNameOffset = read_uint32(nRowOffset + 4, bIsBigEndian);
+                    } else {
+                        // {lib_ordinal:8, weak:1, name_offset:23}
+                        nLibOrdinal = (qint32)(nEntry & 0xFF);
+                        nNameOffset = nEntry >> 9;
+                    }
+
+                    QString sName;
+                    if (checkOffsetSize(nSymbolsOffset + nNameOffset, 1)) {
+                        sName = read_ansiString(nSymbolsOffset + nNameOffset, 256);
+                    }
+
+                    if (!sName.isEmpty()) {
+                        XIMPORT_STRUCT record = {};
+                        record.nOffset = nRowOffset;
+                        record.nSize = nImportSize;
+                        record.nAddress = -1;
+                        record.sLibrary = _libraryOrdinalToName(nLibOrdinal, listDylibNames);
+                        record.sFunction = sName;
+                        record.nOrdinal = nLibOrdinal;
+
+                        listResult.append(record);
+                    }
+                }
+
+                return listResult;
+            }
+        }
+    }
+
+    // Fallback: undefined external nlist symbols. Two-level-namespace binaries
+    // store the source library ordinal in the high byte of n_desc.
+    QList<NLIST_RECORD> listNlist = getNlistRecords();
+    XBinary::OFFSETSIZE osStringTable = getStringTableOffsetSize();
+
+    const quint8 N_STAB = 0xe0;
+    const quint8 N_TYPE = 0x0e;
+    const quint8 N_EXT = 0x01;
+    const quint8 N_UNDF = 0x00;
+
+    qint32 nNumberOfSymbols = listNlist.count();
 
     for (qint32 i = 0; i < nNumberOfSymbols; i++) {
-        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+        const NLIST_RECORD &nlistRecord = listNlist.at(i);
 
-        if ((symbol.symbolType == SYMBOL_TYPE_IMPORT) && (!symbol.sName.isEmpty())) {
-            XIMPORT_STRUCT record = {};
-            record.nOffset = symbol.nOffset;
-            record.nSize = symbol.nSize;
-            record.nAddress = symbol.nAddress;
-            record.sFunction = symbol.sName;
-            record.nOrdinal = -1;
+        quint32 nStrx = nlistRecord.bIs64 ? nlistRecord.s.nlist64.n_strx : nlistRecord.s.nlist32.n_strx;
+        quint8 nType = nlistRecord.bIs64 ? nlistRecord.s.nlist64.n_type : nlistRecord.s.nlist32.n_type;
+        quint16 nDesc = nlistRecord.bIs64 ? nlistRecord.s.nlist64.n_desc : nlistRecord.s.nlist32.n_desc;
 
-            listResult.append(record);
+        // A real import is an UNDEFINED EXTERNAL symbol; skip debug (STAB) entries
+        // whose n_type also happens to have the UNDF type bits clear.
+        if (((nType & N_STAB) == 0) && ((nType & N_TYPE) == N_UNDF) && (nType & N_EXT)) {
+            QString sName = getStringFromIndex(osStringTable.nOffset, osStringTable.nSize, nStrx);
+
+            if (!sName.isEmpty()) {
+                qint32 nLibOrdinal = (qint32)((nDesc >> 8) & 0xFF);
+
+                XIMPORT_STRUCT record = {};
+                record.nOffset = nlistRecord.nStructOffset;
+                record.nSize = nlistRecord.bIs64 ? (qint64)sizeof(XMACH_DEF::nlist_64) : (qint64)sizeof(XMACH_DEF::nlist);
+                record.nAddress = -1;
+                record.sLibrary = _libraryOrdinalToName(nLibOrdinal, listDylibNames);
+                record.sFunction = sName;
+                record.nOrdinal = nLibOrdinal;
+
+                listResult.append(record);
+            }
         }
     }
 
@@ -4861,7 +5016,7 @@ XBinary::OFFSETSIZE XMACH::getStringTableOffsetSize(QList<XMACH::COMMAND_RECORD>
         XMACH_DEF::symtab_command symtab = _read_symtab_command(nOffset);
 
         osResult.nOffset = symtab.stroff;
-        osResult.nSize = symtab.stroff;
+        osResult.nSize = symtab.strsize;
     }
 
     return osResult;
@@ -5612,6 +5767,32 @@ QList<XBinary::XFRECORD> XMACH::getXFRecords(FT fileType, quint32 nStructID, con
         listResult.append({"n_sect", (qint32)offsetof(XMACH_DEF::nlist_64, n_sect), 1, XFRECORD_FLAG_NONE, VT_UINT8});
         listResult.append({"n_desc", (qint32)offsetof(XMACH_DEF::nlist_64, n_desc), 2, XFRECORD_FLAG_NONE, VT_UINT16});
         listResult.append({"n_value", (qint32)offsetof(XMACH_DEF::nlist_64, n_value), 8, XFRECORD_FLAG_ADDRESS, VT_UINT64});
+    } else if (nStructID == STRUCTID_string_table) {
+        // Each row is one NUL-terminated string; the resolved text is also in listRowNames.
+        listResult.append({"string", 0, 256, XFRECORD_FLAG_NONE, VT_ANSI});
+    } else if (nStructID == STRUCTID_indirect_symbol) {
+        // 32-bit index into the symbol table (top bits: LOCAL 0x80000000 / ABS 0x40000000).
+        listResult.append({"symbol_index", 0, 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_function_starts) {
+        // Rows are variable-length ULEB128 deltas with no fixed columns; the decoded
+        // absolute address is provided as an extra column instead.
+    } else if (nStructID == STRUCTID_data_in_code) {
+        listResult.append({"offset", (qint32)offsetof(XMACH_DEF::data_in_code_entry, offset), 4, XFRECORD_FLAG_OFFSET, VT_UINT32});
+        listResult.append({"length", (qint32)offsetof(XMACH_DEF::data_in_code_entry, length), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"kind", (qint32)offsetof(XMACH_DEF::data_in_code_entry, kind), 2, XFRECORD_FLAG_NONE, VT_UINT16});
+    } else if (nStructID == STRUCTID_chained_fixups_header) {
+        listResult.append({"fixups_version", (qint32)offsetof(XMACH_DEF::dyld_chained_fixups_header, fixups_version), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"starts_offset", (qint32)offsetof(XMACH_DEF::dyld_chained_fixups_header, starts_offset), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"imports_offset", (qint32)offsetof(XMACH_DEF::dyld_chained_fixups_header, imports_offset), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"symbols_offset", (qint32)offsetof(XMACH_DEF::dyld_chained_fixups_header, symbols_offset), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"imports_count", (qint32)offsetof(XMACH_DEF::dyld_chained_fixups_header, imports_count), 4, XFRECORD_FLAG_COUNT, VT_UINT32});
+        listResult.append({"imports_format", (qint32)offsetof(XMACH_DEF::dyld_chained_fixups_header, imports_format), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+        listResult.append({"symbols_format", (qint32)offsetof(XMACH_DEF::dyld_chained_fixups_header, symbols_format), 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_chained_import) {
+        // Packed bitfield {lib_ordinal:8, weak_import:1, name_offset:23}; symbol name is in listRowNames.
+        listResult.append({"import", 0, 4, XFRECORD_FLAG_NONE, VT_UINT32});
+    } else if (nStructID == STRUCTID_export) {
+        // Synthetic rows from the export trie: name in listRowNames, address in an extra column.
     }
 
     return listResult;
@@ -5679,6 +5860,11 @@ void XMACH::_appendTypedLoadCommand(QList<XFHEADER> &listResult, const XFSTRUCT 
     xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(nChildStructID), xfHeader.sParentTag);
     listResult.append(xfHeader);
 
+    // The sub-tables below re-derive their offsets from the first matching load
+    // command, so only attach them to that first command; a malformed file with a
+    // duplicate LC would otherwise get a second, identical (colliding-tag) node.
+    bool bIsFirstOfCmd = (getCommandRecordOffset(nCmd, 0) == nCommandOffset);
+
     if (nChildStructID == STRUCTID_symtab_command) {
         // Symbol table child
         quint32 nSymOff = read_uint32(nCommandOffset + offsetof(XMACH_DEF::symtab_command, symoff), bIsBigEndian);
@@ -5706,7 +5892,359 @@ void XMACH::_appendTypedLoadCommand(QList<XFHEADER> &listResult, const XFSTRUCT 
             xfSymbolTable.sTag = xfHeaderToTag(xfSymbolTable, structIDToString(nSymbolStructID), xfSymbolTable.sParentTag);
             listResult.append(xfSymbolTable);
         }
+
+        // String table (symbol name pool) referenced by symoff/stroff.
+        XFHEADER xfStringTable = {};
+        if (bIsFirstOfCmd && _makeStringTable(&xfStringTable, xfStruct.fileType, xfHeader.sTag)) {
+            listResult.append(xfStringTable);
+        }
+    } else if (nChildStructID == STRUCTID_dysymtab_command) {
+        // Indirect symbol table (used by __stubs/__got to name imports).
+        XFHEADER xfIndirect = {};
+        if (bIsFirstOfCmd && _makeIndirectSymbolTable(&xfIndirect, xfStruct.fileType, xfHeader.sTag)) {
+            listResult.append(xfIndirect);
+        }
+    } else if ((nChildStructID == STRUCTID_linkedit_data_command) && bIsFirstOfCmd) {
+        // Decode the __LINKEDIT payload that this specific command points at.
+        if (nCmd == XMACH_DEF::S_LC_FUNCTION_STARTS) {
+            XFHEADER xfFunctionStarts = {};
+            if (_makeFunctionStarts(&xfFunctionStarts, xfStruct.fileType, xfHeader.sTag)) {
+                listResult.append(xfFunctionStarts);
+            }
+        } else if (nCmd == XMACH_DEF::S_LC_DATA_IN_CODE) {
+            XFHEADER xfDataInCode = {};
+            if (_makeDataInCode(&xfDataInCode, xfStruct.fileType, xfHeader.sTag)) {
+                listResult.append(xfDataInCode);
+            }
+        } else if (nCmd == XMACH_DEF::S_LC_DYLD_CHAINED_FIXUPS) {
+            XFHEADER xfChainedHeader = {};
+            if (_makeChainedFixupsHeader(&xfChainedHeader, xfStruct.fileType, xfHeader.sTag)) {
+                listResult.append(xfChainedHeader);
+            }
+            XFHEADER xfChainedImports = {};
+            if (_makeChainedImports(&xfChainedImports, xfStruct.fileType, xfHeader.sTag)) {
+                listResult.append(xfChainedImports);
+            }
+        } else if (nCmd == XMACH_DEF::S_LC_DYLD_EXPORTS_TRIE) {
+            XFHEADER xfExport = {};
+            if (_makeExportTable(&xfExport, xfStruct.fileType, xfHeader.sTag)) {
+                listResult.append(xfExport);
+            }
+        }
+    } else if ((nChildStructID == STRUCTID_dyld_info_command) && bIsFirstOfCmd) {
+        // Classic dyld info: surface its export trie the same way.
+        XFHEADER xfExport = {};
+        if (_makeExportTable(&xfExport, xfStruct.fileType, xfHeader.sTag)) {
+            listResult.append(xfExport);
+        }
     }
+}
+
+bool XMACH::_makeStringTable(XFHEADER *pResult, FT fileType, const QString &sParentTag)
+{
+    OFFSETSIZE osStr = getStringTableOffsetSize();
+
+    if ((osStr.nOffset <= 0) || (osStr.nSize <= 0) || !checkOffsetSize(osStr.nOffset, 1)) {
+        return false;
+    }
+
+    qint64 nBlobEnd = qMin(osStr.nOffset + osStr.nSize, getSize());
+    qint64 nBlobSize = nBlobEnd - osStr.nOffset;
+
+    if (nBlobSize <= 0) {
+        return false;
+    }
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_string_table);
+    xfHeader.xLoc = offsetToLoc(osStr.nOffset);
+    xfHeader.nSize = 1;  // variable-length rows; stride is nominal
+    xfHeader.xfType = XFTYPE_TABLE;
+    xfHeader.listFields = getXFRecords(fileType, STRUCTID_string_table, xfHeader.xLoc);
+
+    QByteArray baBlob = read_array(osStr.nOffset, nBlobSize);
+
+    const qint32 nMaxRows = 0x10000;
+    qint32 nPos = 0;
+    qint32 nCount = 0;
+
+    while ((nPos < baBlob.size()) && (nCount < nMaxRows)) {
+        qint32 nZero = baBlob.indexOf('\0', nPos);
+
+        if (nZero < 0) {
+            nZero = baBlob.size();
+        }
+
+        QString sString = QString::fromLatin1(baBlob.constData() + nPos, nZero - nPos);
+        xfHeader.listRowLocations.append(osStr.nOffset + nPos);
+        xfHeader.listRowNames.append(sString);
+
+        nPos = nZero + 1;
+        nCount++;
+    }
+
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_string_table), xfHeader.sParentTag);
+    *pResult = xfHeader;
+
+    return true;
+}
+
+bool XMACH::_makeIndirectSymbolTable(XFHEADER *pResult, FT fileType, const QString &sParentTag)
+{
+    XMACH_DEF::dysymtab_command dysymtab = get_dysymtab();
+
+    if ((dysymtab.indirectsymoff == 0) || (dysymtab.nindirectsyms == 0)) {
+        return false;
+    }
+
+    qint32 nCount = (qint32)qMin(dysymtab.nindirectsyms, (quint32)0x10000);
+
+    if (!checkOffsetSize(dysymtab.indirectsymoff, (qint64)nCount * 4)) {
+        return false;
+    }
+
+    bool bIs64 = is64();
+    OFFSETSIZE osStr = getStringTableOffsetSize();
+    QList<NLIST_RECORD> listNlist = getNlistRecords();
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_indirect_symbol);
+    xfHeader.xLoc = offsetToLoc(dysymtab.indirectsymoff);
+    xfHeader.nSize = 4;
+    xfHeader.xfType = XFTYPE_TABLE;
+    xfHeader.listFields = getXFRecords(fileType, STRUCTID_indirect_symbol, xfHeader.xLoc);
+    Q_UNUSED(bIs64)
+
+    bool bIsBigEndian = (getEndian() == ENDIAN_BIG);
+    XFCOLUMN columnSymbol;
+    columnSymbol.sName = tr("Symbol");
+
+    for (qint32 i = 0; i < nCount; i++) {
+        qint64 nRowOffset = dysymtab.indirectsymoff + (qint64)i * 4;
+        quint32 nValue = read_uint32(nRowOffset, bIsBigEndian);
+        xfHeader.listRowLocations.append(nRowOffset);
+        columnSymbol.listValues.append(getIndexSymbolName(nValue, &listNlist, osStr.nOffset, osStr.nSize));
+    }
+
+    xfHeader.listExtraColumns.append(columnSymbol);
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_indirect_symbol), xfHeader.sParentTag);
+    *pResult = xfHeader;
+
+    return true;
+}
+
+bool XMACH::_makeFunctionStarts(XFHEADER *pResult, FT fileType, const QString &sParentTag)
+{
+    XMACH_DEF::linkedit_data_command led = get_linkedit_data(XMACH_DEF::S_LC_FUNCTION_STARTS);
+
+    if ((led.dataoff == 0) || (led.datasize == 0) || !checkOffsetSize(led.dataoff, led.datasize)) {
+        return false;
+    }
+
+    // Bound the ULEB walk: a real function-starts blob is a few KB, so cap the
+    // parsed span to keep a crafted multi-MB __LINKEDIT from exhausting memory.
+    qint64 nParseSize = qMin((qint64)led.datasize, (qint64)0x100000);
+    QList<FUNCTION_RECORD> listFunctions = getFunctionRecords(led.dataoff, nParseSize);
+
+    if (listFunctions.isEmpty()) {
+        return false;
+    }
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_function_starts);
+    xfHeader.xLoc = offsetToLoc(led.dataoff);
+    xfHeader.nSize = 1;  // variable-length ULEB rows
+    xfHeader.xfType = XFTYPE_TABLE;
+    xfHeader.listFields = getXFRecords(fileType, STRUCTID_function_starts, xfHeader.xLoc);
+
+    XFCOLUMN columnAddress;
+    columnAddress.sName = tr("Address");
+
+    qint32 nCount = qMin(listFunctions.count(), 0x10000);
+
+    for (qint32 i = 0; i < nCount; i++) {
+        xfHeader.listRowLocations.append(listFunctions.at(i).nDataOffset);
+        columnAddress.listValues.append(valueToHexEx((quint64)listFunctions.at(i).nFunctionAddress));
+    }
+
+    xfHeader.listExtraColumns.append(columnAddress);
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_function_starts), xfHeader.sParentTag);
+    *pResult = xfHeader;
+
+    return true;
+}
+
+bool XMACH::_makeDataInCode(XFHEADER *pResult, FT fileType, const QString &sParentTag)
+{
+    XMACH_DEF::linkedit_data_command led = get_linkedit_data(XMACH_DEF::S_LC_DATA_IN_CODE);
+
+    if ((led.dataoff == 0) || (led.datasize == 0) || !checkOffsetSize(led.dataoff, led.datasize)) {
+        return false;
+    }
+
+    qint32 nEntrySize = (qint32)sizeof(XMACH_DEF::data_in_code_entry);
+    qint32 nCount = (qint32)qMin((qint64)led.datasize / nEntrySize, (qint64)0x10000);
+
+    if (nCount <= 0) {
+        return false;
+    }
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_data_in_code);
+    xfHeader.xLoc = offsetToLoc(led.dataoff);
+    xfHeader.nSize = nEntrySize;
+    xfHeader.xfType = XFTYPE_TABLE;
+    xfHeader.listFields = getXFRecords(fileType, STRUCTID_data_in_code, xfHeader.xLoc);
+    xfHeader.listDataSt.append({2, 0, XFDATASTYPE_LIST, _TABLE_XMACH_DICEKinds, sizeof(_TABLE_XMACH_DICEKinds) / sizeof(XBinary::XIDSTRING)});
+
+    for (qint32 i = 0; i < nCount; i++) {
+        xfHeader.listRowLocations.append(led.dataoff + (qint64)i * nEntrySize);
+    }
+
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_data_in_code), xfHeader.sParentTag);
+    *pResult = xfHeader;
+
+    return true;
+}
+
+bool XMACH::_makeChainedFixupsHeader(XFHEADER *pResult, FT fileType, const QString &sParentTag)
+{
+    XMACH_DEF::linkedit_data_command led = get_linkedit_data(XMACH_DEF::S_LC_DYLD_CHAINED_FIXUPS);
+
+    if ((led.dataoff == 0) || (led.datasize == 0) || !checkOffsetSize(led.dataoff, (qint64)sizeof(XMACH_DEF::dyld_chained_fixups_header))) {
+        return false;
+    }
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_chained_fixups_header);
+    xfHeader.xLoc = offsetToLoc(led.dataoff);
+    xfHeader.nSize = (qint64)sizeof(XMACH_DEF::dyld_chained_fixups_header);
+    xfHeader.xfType = XFTYPE_HEADER;
+    xfHeader.listFields = getXFRecords(fileType, STRUCTID_chained_fixups_header, xfHeader.xLoc);
+    xfHeader.listDataSt.append({5, 0, XFDATASTYPE_LIST, _TABLE_XMACH_DyldChainedImports, sizeof(_TABLE_XMACH_DyldChainedImports) / sizeof(XBinary::XIDSTRING)});
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_chained_fixups_header), xfHeader.sParentTag);
+    *pResult = xfHeader;
+
+    return true;
+}
+
+bool XMACH::_makeChainedImports(XFHEADER *pResult, FT fileType, const QString &sParentTag)
+{
+    XMACH_DEF::linkedit_data_command led = get_linkedit_data(XMACH_DEF::S_LC_DYLD_CHAINED_FIXUPS);
+
+    if ((led.dataoff == 0) || (led.datasize == 0) || !checkOffsetSize(led.dataoff, (qint64)sizeof(XMACH_DEF::dyld_chained_fixups_header))) {
+        return false;
+    }
+
+    XMACH_DEF::dyld_chained_fixups_header header = _read_dyld_chained_fixups_header(led.dataoff);
+
+    if (header.imports_count == 0) {
+        return false;
+    }
+
+    // Row stride and name-offset layout depend on imports_format:
+    //  IMPORT       (1,  4B): {lib_ordinal:8,  weak:1, name_offset:23}
+    //  IMPORT_ADDEND(2,  8B): same low word + qint32 addend
+    //  ADDEND64     (3, 16B): {lib_ordinal:16, weak:1, reserved:15, name_offset:32} + quint64 addend
+    // so for format 3 name_offset is the HIGH 32-bit word (bits 32..63), read unshifted.
+    qint32 nImportSize = 4;
+    bool bIsAddend64 = (header.imports_format == XMACH_DEF::S_DYLD_CHAINED_IMPORT_ADDEND64);
+    if (header.imports_format == XMACH_DEF::S_DYLD_CHAINED_IMPORT_ADDEND) {
+        nImportSize = 8;
+    } else if (bIsAddend64) {
+        nImportSize = 16;
+    }
+
+    qint64 nImportsOffset = led.dataoff + header.imports_offset;
+    qint64 nSymbolsOffset = led.dataoff + header.symbols_offset;
+    qint32 nCount = (qint32)qMin(header.imports_count, (quint32)0x10000);
+
+    if (!checkOffsetSize(nImportsOffset, (qint64)nCount * nImportSize)) {
+        return false;
+    }
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_chained_import);
+    xfHeader.xLoc = offsetToLoc(nImportsOffset);
+    xfHeader.nSize = nImportSize;
+    xfHeader.xfType = XFTYPE_TABLE;
+    xfHeader.listFields = getXFRecords(fileType, STRUCTID_chained_import, xfHeader.xLoc);
+
+    bool bIsBigEndian = (getEndian() == ENDIAN_BIG);
+    XFCOLUMN columnSymbol;
+    columnSymbol.sName = tr("Symbol");
+
+    for (qint32 i = 0; i < nCount; i++) {
+        qint64 nRowOffset = nImportsOffset + (qint64)i * nImportSize;
+        quint32 nNameOffset = 0;
+
+        if (bIsAddend64) {
+            nNameOffset = read_uint32(nRowOffset + 4, bIsBigEndian);
+        } else {
+            nNameOffset = read_uint32(nRowOffset, bIsBigEndian) >> 9;
+        }
+
+        xfHeader.listRowLocations.append(nRowOffset);
+
+        QString sSymbol;
+        if (checkOffsetSize(nSymbolsOffset + nNameOffset, 1)) {
+            sSymbol = read_ansiString(nSymbolsOffset + nNameOffset, 256);
+        }
+        columnSymbol.listValues.append(sSymbol);
+    }
+
+    xfHeader.listExtraColumns.append(columnSymbol);
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_chained_import), xfHeader.sParentTag);
+    *pResult = xfHeader;
+
+    return true;
+}
+
+bool XMACH::_makeExportTable(XFHEADER *pResult, FT fileType, const QString &sParentTag)
+{
+    QVector<XEXPORT_STRUCT> listExports = getExportStructs();
+
+    if (listExports.isEmpty()) {
+        return false;
+    }
+
+    XFHEADER xfHeader = {};
+    xfHeader.sParentTag = sParentTag;
+    xfHeader.fileType = fileType;
+    xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_export);
+    xfHeader.xLoc = offsetToLoc(listExports.at(0).nOffset);
+    xfHeader.nSize = 0;  // synthetic rows
+    xfHeader.xfType = XFTYPE_TABLE;
+    xfHeader.listFields = getXFRecords(fileType, STRUCTID_export, xfHeader.xLoc);
+
+    XFCOLUMN columnAddress;
+    columnAddress.sName = tr("Address");
+
+    qint32 nCount = listExports.count();
+
+    for (qint32 i = 0; i < nCount; i++) {
+        xfHeader.listRowLocations.append(listExports.at(i).nOffset);
+        xfHeader.listRowNames.append(listExports.at(i).sFunction);
+        columnAddress.listValues.append(valueToHexEx((quint64)listExports.at(i).nAddress));
+    }
+
+    xfHeader.listExtraColumns.append(columnAddress);
+    xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_export), xfHeader.sParentTag);
+    *pResult = xfHeader;
+
+    return true;
 }
 
 QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
@@ -5974,6 +6512,42 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
             xfSymbolTable.sTag = xfHeaderToTag(xfSymbolTable, structIDToString(nStructID), xfSymbolTable.sParentTag);
             listResult.append(xfSymbolTable);
         }
+    } else if (nStructID == STRUCTID_string_table) {
+        // Reconstruct path for -S (each of these derives its own offsets).
+        XFHEADER xfHeader = {};
+        if (_makeStringTable(&xfHeader, xfStruct.fileType, xfStruct.sParent)) {
+            listResult.append(xfHeader);
+        }
+    } else if (nStructID == STRUCTID_indirect_symbol) {
+        XFHEADER xfHeader = {};
+        if (_makeIndirectSymbolTable(&xfHeader, xfStruct.fileType, xfStruct.sParent)) {
+            listResult.append(xfHeader);
+        }
+    } else if (nStructID == STRUCTID_function_starts) {
+        XFHEADER xfHeader = {};
+        if (_makeFunctionStarts(&xfHeader, xfStruct.fileType, xfStruct.sParent)) {
+            listResult.append(xfHeader);
+        }
+    } else if (nStructID == STRUCTID_data_in_code) {
+        XFHEADER xfHeader = {};
+        if (_makeDataInCode(&xfHeader, xfStruct.fileType, xfStruct.sParent)) {
+            listResult.append(xfHeader);
+        }
+    } else if (nStructID == STRUCTID_chained_fixups_header) {
+        XFHEADER xfHeader = {};
+        if (_makeChainedFixupsHeader(&xfHeader, xfStruct.fileType, xfStruct.sParent)) {
+            listResult.append(xfHeader);
+        }
+    } else if (nStructID == STRUCTID_chained_import) {
+        XFHEADER xfHeader = {};
+        if (_makeChainedImports(&xfHeader, xfStruct.fileType, xfStruct.sParent)) {
+            listResult.append(xfHeader);
+        }
+    } else if (nStructID == STRUCTID_export) {
+        XFHEADER xfHeader = {};
+        if (_makeExportTable(&xfHeader, xfStruct.fileType, xfStruct.sParent)) {
+            listResult.append(xfHeader);
+        }
     }
 
     return listResult;
@@ -5988,16 +6562,20 @@ XADDR XMACH::readOpcodes(quint32 nType, char *pData, XADDR nAddress, qint64 nSiz
 {
     XADDR nResult = 0;
 
-    if (nType == OPCODE_TYPE_REBASE) {
-        nResult = readOpcodesInterface_rebase(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus);
-    } else if (nType == OPCODE_TYPE_BIND) {
-        nResult = readOpcodesInterface_bind(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus, true);
-    } else if (nType == OPCODE_TYPE_LAZY_BIND) {
-        nResult = readOpcodesInterface_bind(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus, false);
-    } else if (nType == OPCODE_TYPE_WEAK_BIND) {
-        nResult = readOpcodesInterface_bind(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus, true);
-    } else if (nType == OPCODE_TYPE_EXPORT) {
-        nResult = readOpcodesInterface_export(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus);
+    if (xmachAreOpcodeArgumentsValid(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus)) {
+        if (nType == OPCODE_TYPE_REBASE) {
+            nResult = readOpcodesInterface_rebase(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus);
+        } else if (nType == OPCODE_TYPE_BIND) {
+            nResult = readOpcodesInterface_bind(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus, true);
+        } else if (nType == OPCODE_TYPE_LAZY_BIND) {
+            nResult = readOpcodesInterface_bind(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus, false);
+        } else if (nType == OPCODE_TYPE_WEAK_BIND) {
+            nResult = readOpcodesInterface_bind(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus, true);
+        } else if (nType == OPCODE_TYPE_EXPORT) {
+            nResult = readOpcodesInterface_export(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus);
+        } else {
+            *pOpcodeStatus = OPCODE_STATUS_END;
+        }
     }
 
     return nResult;
@@ -6007,7 +6585,7 @@ XADDR XMACH::readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSi
 {
     XADDR nResult = 0;
 
-    if (nSize > 0) {
+    if (xmachAreOpcodeArgumentsValid(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus)) {
         OPCODE opcodeMain = {};
         OPCODE opcodeUleb1 = {};
         OPCODE opcodeUleb2 = {};
@@ -6020,6 +6598,15 @@ XADDR XMACH::readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSi
         bool bImm = false;
 
         switch (nByte & XMACH_DEF::S_REBASE_OPCODE_MASK) {
+            case XMACH_DEF::S_REBASE_OPCODE_DONE:
+                if (nByte == XMACH_DEF::S_REBASE_OPCODE_DONE) {
+                    opcodeMain.sName = QString("REBASE_OPCODE_DONE");
+                    *pOpcodeStatus = OPCODE_STATUS_END;
+                } else {
+                    bSuccess = false;
+                    *pOpcodeStatus = OPCODE_STATUS_END;
+                }
+                break;
             case XMACH_DEF::S_REBASE_OPCODE_SET_TYPE_IMM:
                 opcodeMain.sName = QString("REBASE_OPCODE_SET_TYPE_IMM");
                 bImm = true;
@@ -6032,6 +6619,7 @@ XADDR XMACH::readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSi
             case XMACH_DEF::S_REBASE_OPCODE_ADD_ADDR_ULEB:
                 opcodeMain.sName = QString("REBASE_OPCODE_ADD_ADDR_ULEB");
                 bUleb1 = true;
+                bSuccess = (nByte & XMACH_DEF::S_REBASE_IMMEDIATE_MASK) == 0;
                 break;
             case XMACH_DEF::S_REBASE_OPCODE_ADD_ADDR_IMM_SCALED:
                 opcodeMain.sName = QString("REBASE_OPCODE_ADD_ADDR_IMM_SCALED");
@@ -6044,21 +6632,23 @@ XADDR XMACH::readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSi
             case XMACH_DEF::S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES:
                 opcodeMain.sName = QString("REBASE_OPCODE_DO_REBASE_ULEB_TIMES");
                 bUleb1 = true;
+                bSuccess = (nByte & XMACH_DEF::S_REBASE_IMMEDIATE_MASK) == 0;
                 break;
             case XMACH_DEF::S_REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB:
                 opcodeMain.sName = QString("REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB");
                 bUleb1 = true;
+                bSuccess = (nByte & XMACH_DEF::S_REBASE_IMMEDIATE_MASK) == 0;
                 break;
             case XMACH_DEF::S_REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB:
                 opcodeMain.sName = QString("REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB");
                 bUleb1 = true;
                 bUleb2 = true;
+                bSuccess = (nByte & XMACH_DEF::S_REBASE_IMMEDIATE_MASK) == 0;
                 break;
-            default: *pOpcodeStatus = OPCODE_STATUS_END;
-        }
-
-        if (nByte == XMACH_DEF::S_REBASE_OPCODE_DONE) {
-            opcodeMain.sName = QString("REBASE_OPCODE_DONE");
+            default:
+                bSuccess = false;
+                *pOpcodeStatus = OPCODE_STATUS_END;
+                break;
         }
 
         opcodeMain.nAddress = nAddress;
@@ -6087,6 +6677,7 @@ XADDR XMACH::readOpcodesInterface_rebase(char *pData, XADDR nAddress, qint64 nSi
             if (bUleb1) pListOpcodes->append(opcodeUleb1);
             if (bUleb2) pListOpcodes->append(opcodeUleb2);
         } else {
+            *pOpcodeStatus = OPCODE_STATUS_END;
             nResult = 0;
         }
     }
@@ -6098,7 +6689,7 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
 {
     XADDR nResult = 0;
 
-    if (nSize > 0) {
+    if (xmachAreOpcodeArgumentsValid(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus)) {
         OPCODE opcodeMain = {};
         OPCODE opcodeUleb1 = {};
         OPCODE opcodeUleb2 = {};
@@ -6113,6 +6704,15 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
         bool bImm = false;
 
         switch (nByte & XMACH_DEF::S_BIND_OPCODE_MASK) {
+            case XMACH_DEF::S_BIND_OPCODE_DONE:
+                if (nByte == XMACH_DEF::S_BIND_OPCODE_DONE) {
+                    opcodeMain.sName = QString("BIND_OPCODE_DONE");
+                    *pOpcodeStatus = bNullEnd ? OPCODE_STATUS_END : OPCODE_STATUS_SUCCESS;
+                } else {
+                    bSuccess = false;
+                    *pOpcodeStatus = OPCODE_STATUS_END;
+                }
+                break;
             case XMACH_DEF::S_BIND_OPCODE_SET_DYLIB_ORDINAL_IMM:
                 opcodeMain.sName = QString("BIND_OPCODE_SET_DYLIB_ORDINAL_IMM");
                 bImm = true;
@@ -6120,6 +6720,7 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
             case XMACH_DEF::S_BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB:
                 opcodeMain.sName = QString("BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB");
                 bUleb1 = true;
+                bSuccess = (nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) == 0;
                 break;
             case XMACH_DEF::S_BIND_OPCODE_SET_DYLIB_SPECIAL_IMM:
                 opcodeMain.sName = QString("BIND_OPCODE_SET_DYLIB_SPECIAL_IMM");
@@ -6137,6 +6738,7 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
             case XMACH_DEF::S_BIND_OPCODE_SET_ADDEND_SLEB:
                 opcodeMain.sName = QString("BIND_OPCODE_SET_ADDEND_SLEB");
                 bUleb1 = true;
+                bSuccess = (nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) == 0;
                 break;
             case XMACH_DEF::S_BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB:
                 opcodeMain.sName = QString("BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB");
@@ -6146,11 +6748,16 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
             case XMACH_DEF::S_BIND_OPCODE_ADD_ADDR_ULEB:
                 opcodeMain.sName = QString("BIND_OPCODE_ADD_ADDR_ULEB");
                 bUleb1 = true;
+                bSuccess = (nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) == 0;
                 break;
-            case XMACH_DEF::S_BIND_OPCODE_DO_BIND: opcodeMain.sName = QString("BIND_OPCODE_DO_BIND"); break;
+            case XMACH_DEF::S_BIND_OPCODE_DO_BIND:
+                opcodeMain.sName = QString("BIND_OPCODE_DO_BIND");
+                bSuccess = (nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) == 0;
+                break;
             case XMACH_DEF::S_BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB:
                 opcodeMain.sName = QString("BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB");
                 bUleb1 = true;
+                bSuccess = (nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) == 0;
                 break;
             case XMACH_DEF::S_BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED:
                 opcodeMain.sName = QString("BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED");
@@ -6160,22 +6767,24 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
                 opcodeMain.sName = QString("BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB");
                 bUleb1 = true;
                 bUleb2 = true;
+                bSuccess = (nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) == 0;
                 break;
             case XMACH_DEF::S_BIND_OPCODE_THREADED:
                 opcodeMain.sName = QString("BIND_OPCODE_THREADED");
                 bImm = true;
+                if ((nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) ==
+                    XMACH_DEF::S_BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB) {
+                    bUleb1 = true;
+                } else if ((nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) !=
+                           XMACH_DEF::S_BIND_SUBOPCODE_THREADED_APPLY) {
+                    bSuccess = false;
+                    *pOpcodeStatus = OPCODE_STATUS_END;
+                }
                 break;
-            default: *pOpcodeStatus = OPCODE_STATUS_END;
-        }
-
-        if (nByte == XMACH_DEF::S_BIND_OPCODE_DONE) {
-            opcodeMain.sName = QString("BIND_OPCODE_DONE");
-
-            if (bNullEnd) {
+            default:
+                bSuccess = false;
                 *pOpcodeStatus = OPCODE_STATUS_END;
-            } else {
-                *pOpcodeStatus = OPCODE_STATUS_SUCCESS;
-            }
+                break;
         }
 
         opcodeMain.nAddress = nAddress;
@@ -6209,6 +6818,7 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
             if (bUleb1) pListOpcodes->append(opcodeUleb1);
             if (bUleb2) pListOpcodes->append(opcodeUleb2);
         } else {
+            *pOpcodeStatus = OPCODE_STATUS_END;
             nResult = 0;
         }
     }
@@ -6218,11 +6828,9 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
 
 XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, OPCODE_STATUS *pOpcodeStatus)
 {
-    Q_UNUSED(pOpcodeStatus)
-
     XADDR nResult = 0;
 
-    if (nSize > 0) {
+    if (xmachAreOpcodeArgumentsValid(pData, nAddress, nSize, pListOpcodes, pOpcodeStatus)) {
         bool bSuccess = false;
 
         OPCODE opcodeTerminalSize = {};
@@ -6236,7 +6844,7 @@ XADDR XMACH::readOpcodesInterface_export(char *pData, XADDR nAddress, qint64 nSi
 
         PACKED_UINT uTerminalSize = _read_uleb128(pData, nSize);
 
-        if ((qint64)uTerminalSize.nValue < nSize) {
+        if (uTerminalSize.bIsValid && (uTerminalSize.nByteSize > 0) && (uTerminalSize.nValue < (quint64)nSize)) {
             bSuccess = _read_opcode_uleb128(&opcodeTerminalSize, &pData, &nSize, &nAddress, &nResult, "Terminal size");
 
             if (uTerminalSize.nValue > 0) {

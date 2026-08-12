@@ -20,6 +20,13 @@
  */
 #include "xtiff.h"
 
+#include <QSet>
+
+namespace {
+const qint32 XTIFF_MAX_IFD_TABLES = 4096;
+const quint64 XTIFF_MAX_IFD_ENTRIES = 256 * 1024;
+}
+
 static XBinary::XCONVERT _TABLE_XTIFF_STRUCTID[] = {
     {XTiff::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XTiff::STRUCTID_SIGNATURE, "Signature", QString("Signature")},
@@ -37,29 +44,22 @@ XTiff::~XTiff()
 
 bool XTiff::isValid(PDSTRUCT *pPdStruct)
 {
-    bool bIsValid = false;
+    if (!isPdStructNotCanceled(pPdStruct) || (getSize() < 14) || (getEndian() == ENDIAN_UNKNOWN)) return false;
+    if (!isPdStructNotCanceled(pPdStruct)) return false;
 
-    if (getSize() >= 8) {
-        _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-        if (compareSignature(&memoryMap, "'MM'002A", 0, pPdStruct) || compareSignature(&memoryMap, "'II'2A00", 0, pPdStruct)) {
-            bool bIsBigEndian = isBigEndian();
+    QList<IFD_INFO> listInfo;
+    if (!getIFDChain(&listInfo, pPdStruct) || !isPdStructNotCanceled(pPdStruct) || listInfo.isEmpty()) return false;
 
-            quint32 nOffset = read_uint32(4, bIsBigEndian);
-
-            if ((nOffset > 0) && (nOffset < getSize())) {
-                bIsValid = true;
-            }
-        }
-    }
-
-    return bIsValid;
+    return true;
 }
 
 bool XTiff::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
+    if (!pDevice || !isPdStructNotCanceled(pPdStruct)) return false;
+
     XTiff xtiff(pDevice);
 
-    return xtiff.isValid();
+    return xtiff.isValid(pPdStruct);
 }
 
 XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
@@ -73,90 +73,63 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         pPdStruct = &pdStructEmpty;
     }
 
-    qint32 nIndex = 0;
-
     _MEMORY_MAP result = {};
 
-    qint64 nTotalSize = getSize();
+    qint64 nTotalSize = qMax<qint64>(0, getSize());
 
     result.nBinarySize = nTotalSize;
+    result.endian = ENDIAN_UNKNOWN;
+    if (!isPdStructNotCanceled(pPdStruct)) return result;
     result.endian = getEndian();
 
-    bool bIsBigEndian = (result.endian == ENDIAN_BIG);
+    if (!isPdStructNotCanceled(pPdStruct) || (nTotalSize < 8) || (result.endian == ENDIAN_UNKNOWN)) return result;
 
-    if (result.nBinarySize > 8) {
-        {
-            _MEMORY_RECORD record = {};
+    QList<IFD_INFO> listInfo;
+    if (!getIFDChain(&listInfo, pPdStruct) || !isPdStructNotCanceled(pPdStruct)) return result;
 
-            record.nIndex = nIndex++;
-            record.filePart = FILEPART_HEADER;
-            record.nOffset = 0;
-            record.nSize = 8;
-            record.nAddress = -1;
-            record.sName = tr("Header");
+    qint32 nIndex = 0;
+    _MEMORY_RECORD header = {};
+    header.nIndex = nIndex++;
+    header.filePart = FILEPART_HEADER;
+    header.nOffset = 0;
+    header.nSize = 8;
+    header.nAddress = -1;
+    header.sName = tr("Header");
+    result.listRecords.append(header);
 
-            result.listRecords.append(record);
+    const bool bIsBigEndian = (result.endian == ENDIAN_BIG);
+    for (const IFD_INFO &info : listInfo) {
+        if (!isPdStructNotCanceled(pPdStruct)) {
+            result.listRecords.clear();
+            return result;
         }
 
-        qint64 nTableOffset = read_uint32(4, bIsBigEndian);
+        _MEMORY_RECORD table = {};
+        table.nIndex = nIndex++;
+        table.filePart = FILEPART_TABLE;
+        table.nOffset = info.nOffset;
+        table.nSize = info.nSize;
+        table.nAddress = -1;
+        table.sName = tr("Table");
+        result.listRecords.append(table);
 
-        while (nTableOffset) {
-            quint16 nTableCount = read_uint16(nTableOffset, bIsBigEndian);
-
-            {
-                _MEMORY_RECORD record = {};
-
-                record.nIndex = nIndex++;
-                record.filePart = FILEPART_TABLE;
-                record.nOffset = nTableOffset;
-                record.nSize = sizeof(quint16) + sizeof(IFD_ENTRY) * nTableCount;
-                record.nAddress = -1;
-                record.sName = tr("Table");
-
-                result.listRecords.append(record);
+        qint64 nEntryOffset = info.nOffset + (qint64)sizeof(quint16);
+        for (quint32 i = 0; i < info.nCount; i++, nEntryOffset += (qint64)sizeof(IFD_ENTRY)) {
+            CHUNK chunk = {};
+            quint16 nType = 0;
+            if (getIFDChunk(nEntryOffset, bIsBigEndian, nTotalSize, &chunk, &nType, pPdStruct) && (chunk.nSize > 4)) {
+                _MEMORY_RECORD region = {};
+                region.nIndex = nIndex++;
+                region.filePart = FILEPART_REGION;
+                region.nOffset = chunk.nOffset;
+                region.nSize = chunk.nSize;
+                region.nAddress = -1;
+                region.sName = QString("%1-%2").arg(XBinary::valueToHex(chunk.nTag)).arg(XBinary::valueToHex(nType));
+                result.listRecords.append(region);
             }
-
-            qint64 nCurrentOffset = nTableOffset + sizeof(quint16);
-
-            for (qint32 i = 0; i < nTableCount; i++) {
-                quint16 nTag = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nTag), bIsBigEndian);
-                quint16 nType = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nType), bIsBigEndian);
-                quint32 nCount = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nCount), bIsBigEndian);
-
-                qint32 nBaseTypeSize = getBaseTypeSize(nType);
-
-                qint64 nDataSize = nBaseTypeSize * nCount;
-
-                if (nDataSize > 4) {
-                    quint32 nOffset = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nOffset), bIsBigEndian);
-
-                    _MEMORY_RECORD record = {};
-
-                    record.nIndex = nIndex++;
-                    record.filePart = FILEPART_REGION;
-                    record.nOffset = nOffset;
-                    record.nSize = nDataSize;
-                    record.nAddress = -1;
-                    record.sName = QString("%1-%2").arg(XBinary::valueToHex(nTag)).arg(XBinary::valueToHex(nType));
-
-                    result.listRecords.append(record);
-                }
-
-                nCurrentOffset += sizeof(IFD_ENTRY);
-            }
-
-            nTableOffset = read_uint32(nCurrentOffset, bIsBigEndian);
-
-            {
-                _MEMORY_RECORD record = {};
-
-                record.nIndex = nIndex++;
-                record.filePart = FILEPART_DATA;
-                record.nOffset = nCurrentOffset;
-                record.nSize = sizeof(quint32);
-                record.nAddress = -1;
-
-                result.listRecords.append(record);
+            if (!isPdStructNotCanceled(pPdStruct)) {
+                result.listRecords.clear();
+                return result;
             }
         }
     }
@@ -190,11 +163,14 @@ XBinary::ENDIAN XTiff::getEndian()
 {
     ENDIAN result = ENDIAN_UNKNOWN;
 
-    quint32 nData = read_uint32(0);
+    if (getSize() < 4) return result;
 
-    if (nData == 0x4D4D002A) {
+    char signature[4] = {};
+    if (read_array(0, signature, (qint64)sizeof(signature)) != (qint64)sizeof(signature)) return result;
+
+    if ((signature[0] == 'I') && (signature[1] == 'I') && ((quint8)signature[2] == 0x2A) && (signature[3] == 0)) {
         result = ENDIAN_LITTLE;
-    } else if (nData == 0x2A004D4D) {
+    } else if ((signature[0] == 'M') && (signature[1] == 'M') && (signature[2] == 0) && ((quint8)signature[3] == 0x2A)) {
         result = ENDIAN_BIG;
     }
 
@@ -235,46 +211,22 @@ QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
     // 213 YCbCrPositioning 1
 
     QList<XTiff::CHUNK> listResult;
+    if (!isPdStructNotCanceled(pPdStruct) || (getEndian() == ENDIAN_UNKNOWN)) return listResult;
 
-    bool bIsBigEndian = isBigEndian();
+    QList<IFD_INFO> listInfo;
+    if (!getIFDChain(&listInfo, pPdStruct) || !isPdStructNotCanceled(pPdStruct)) return listResult;
 
-    qint64 nTableOffset = read_uint32(4, bIsBigEndian);
-
-    while ((nTableOffset) && isPdStructNotCanceled(pPdStruct)) {
-        quint16 nTableCount = read_uint16(nTableOffset, bIsBigEndian);
-
-        qint64 nCurrentOffset = nTableOffset + sizeof(quint16);
-
-        for (qint32 i = 0; i < nTableCount; i++) {
-            XTiff::CHUNK record = {};
-
-            quint16 nTag = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nTag), bIsBigEndian);
-            quint16 nType = read_uint16(nCurrentOffset + offsetof(IFD_ENTRY, nType), bIsBigEndian);
-            quint32 nCount = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nCount), bIsBigEndian);
-
-            qint32 nBaseTypeSize = getBaseTypeSize(nType);
-
-            qint64 nDataSize = nBaseTypeSize * nCount;
-
-            if (nDataSize > 4) {
-                record.nOffset = read_uint32(nCurrentOffset + offsetof(IFD_ENTRY, nOffset), bIsBigEndian);
-            } else {
-                record.nOffset = nCurrentOffset + offsetof(IFD_ENTRY, nOffset);
+    const bool bIsBigEndian = (getEndian() == ENDIAN_BIG);
+    const qint64 nTotalSize = getSize();
+    for (const IFD_INFO &info : listInfo) {
+        qint64 nEntryOffset = info.nOffset + (qint64)sizeof(quint16);
+        for (quint32 i = 0; i < info.nCount; i++, nEntryOffset += (qint64)sizeof(IFD_ENTRY)) {
+            CHUNK chunk = {};
+            if (getIFDChunk(nEntryOffset, bIsBigEndian, nTotalSize, &chunk, nullptr, pPdStruct)) listResult.append(chunk);
+            if (!isPdStructNotCanceled(pPdStruct)) {
+                listResult.clear();
+                return listResult;
             }
-
-            record.nSize = nDataSize;
-            record.nTag = nTag;
-
-            nCurrentOffset += sizeof(IFD_ENTRY);
-
-            listResult.append(record);
-        }
-
-        qint64 nTempTableOffset = read_uint32(nCurrentOffset, bIsBigEndian);
-        if (nTempTableOffset < (qint64)(nTableOffset + sizeof(quint16) + nTableCount * sizeof(IFD_ENTRY) + sizeof(quint64))) {
-            break;
-        } else {
-            nTableOffset = nTempTableOffset;
         }
     }
 
@@ -284,6 +236,8 @@ QList<XTiff::CHUNK> XTiff::getChunks(PDSTRUCT *pPdStruct)
 QList<XTiff::CHUNK> XTiff::_getChunksByTag(QList<CHUNK> *pListChunks, quint16 nTag)
 {
     QList<XTiff::CHUNK> listResult;
+
+    if (!pListChunks) return listResult;
 
     qint32 nNumberOfRecords = pListChunks->count();
 
@@ -300,7 +254,7 @@ QString XTiff::getExifCameraName(QIODevice *pDevice, OFFSETSIZE osExif, QList<CH
 {
     QString sResult;
 
-    if (osExif.nSize) {
+    if (pDevice && pListChunks && (osExif.nOffset >= 0) && (osExif.nSize > 0)) {
         SubDevice sd(pDevice, osExif.nOffset, osExif.nSize);
 
         if (sd.open(QIODevice::ReadOnly)) {
@@ -335,7 +289,7 @@ QList<XTiff::CHUNK> XTiff::getExifChunks(QIODevice *pDevice, OFFSETSIZE osExif, 
 {
     QList<XTiff::CHUNK> listResult;
 
-    if (osExif.nSize) {
+    if (pDevice && (osExif.nOffset >= 0) && (osExif.nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
         SubDevice sd(pDevice, osExif.nOffset, osExif.nSize);
 
         if (sd.open(QIODevice::ReadOnly)) {
@@ -376,6 +330,8 @@ QList<XBinary::XFHEADER> XTiff::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
 {
     QList<XBinary::XFHEADER> listResult;
 
+    if (!isPdStructNotCanceled(pPdStruct) || (getEndian() == ENDIAN_UNKNOWN)) return listResult;
+
     quint32 nStructID = xfStruct.nStructID;
 
     bool bIsBigEndian = (getEndian() == ENDIAN_BIG);
@@ -386,6 +342,8 @@ QList<XBinary::XFHEADER> XTiff::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
         _xfStruct.xLoc = offsetToLoc(0);
         listResult.append(getXFHeaders(_xfStruct, pPdStruct));
     } else if (nStructID == STRUCTID_SIGNATURE) {
+        if (getSize() < 8) return listResult;
+
         XLOC headerLoc = xfStruct.xLoc;
         if (headerLoc.locType == LT_UNKNOWN) {
             headerLoc = offsetToLoc(0);
@@ -406,34 +364,35 @@ QList<XBinary::XFHEADER> XTiff::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
             XFSTRUCT _xfStruct = xfStruct;
             _xfStruct.sParent = xfHeader.sTag;
             _xfStruct.nStructID = STRUCTID_IFD_TABLE;
-            _xfStruct.xLoc = offsetToLoc(read_uint32(4, bIsBigEndian));
+            quint32 nIfdOffset = 0;
+            if (!readUInt32Exact(4, bIsBigEndian, &nIfdOffset, pPdStruct)) return QList<XBinary::XFHEADER>();
+            _xfStruct.xLoc = offsetToLoc(nIfdOffset);
             listResult.append(getXFHeaders(_xfStruct, pPdStruct));
         }
     } else if (nStructID == STRUCTID_IFD_TABLE) {
         qint64 nIfdOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
 
         if (nIfdOffset == -1) {
-            nIfdOffset = read_uint32(4, bIsBigEndian);
+            quint32 nIfdOffset32 = 0;
+            if (!readUInt32Exact(4, bIsBigEndian, &nIfdOffset32, pPdStruct)) return listResult;
+            nIfdOffset = nIfdOffset32;
         }
 
-        qint64 nFileSize = getSize();
-
-        if ((nIfdOffset > 0) && ((nIfdOffset + 2) <= nFileSize)) {
-            quint16 nCount = read_uint16(nIfdOffset, bIsBigEndian);
+        IFD_INFO info = {};
+        if (getIFDInfo(nIfdOffset, bIsBigEndian, getSize(), &info, pPdStruct)) {
 
             XFHEADER xfHeader = {};
             xfHeader.sParentTag = xfStruct.sParent;
             xfHeader.fileType = xfStruct.fileType;
             xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_IFD_TABLE);
             xfHeader.xLoc = offsetToLoc(nIfdOffset + 2);
+            xfHeader.nSize = (qint64)sizeof(IFD_ENTRY) * info.nCount;
             xfHeader.xfType = XFTYPE_TABLE;
             xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_IFD_ENTRY, xfHeader.xLoc);
 
             qint64 nCurrentOffset = nIfdOffset + 2;
-            for (qint32 i = 0; i < nCount; i++) {
-                if ((nCurrentOffset + (qint64)sizeof(IFD_ENTRY)) > nFileSize) {
-                    break;
-                }
+            for (quint32 i = 0; i < info.nCount; i++) {
+                if (!isPdStructNotCanceled(pPdStruct)) return QList<XBinary::XFHEADER>();
                 xfHeader.listRowLocations.append(nCurrentOffset);
                 nCurrentOffset += sizeof(IFD_ENTRY);
             }
@@ -516,53 +475,236 @@ QList<XBinary::XFRECORD> XTiff::getXFRecords(FT fileType, quint32 nStructID, con
 QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<FPART> listResult;
-    Q_UNUSED(nLimit)
 
-    qint64 nTotal = getSize();
+    if ((nLimit < -1) || (nLimit == 0) || !isPdStructNotCanceled(pPdStruct)) return listResult;
 
-    if (nFileParts & FILEPART_HEADER) {
-        FPART rec = {};
-        rec.filePart = FILEPART_HEADER;
-        rec.nFileOffset = 0;
-        rec.nFileSize = 8;
-        rec.nVirtualAddress = -1;
-        rec.sName = tr("Header");
-        listResult.append(rec);
+    const qint64 nTotal = getSize();
+    const ENDIAN endian = getEndian();
+    if ((nTotal < 8) || (endian == ENDIAN_UNKNOWN) || !isPdStructNotCanceled(pPdStruct)) return listResult;
+
+    QList<IFD_INFO> listInfo;
+    if (!getIFDChain(&listInfo, pPdStruct) || !isPdStructNotCanceled(pPdStruct)) return listResult;
+
+    const auto canAppend = [&]() -> bool { return (nLimit == -1) || (listResult.count() < nLimit); };
+    const bool bIsBigEndian = (endian == ENDIAN_BIG);
+    qint64 nParsedEnd = 8;
+
+    if ((nFileParts & FILEPART_HEADER) && canAppend()) {
+        FPART record = {};
+        record.filePart = FILEPART_HEADER;
+        record.nFileOffset = 0;
+        record.nFileSize = 8;
+        record.nVirtualAddress = -1;
+        record.sName = tr("Header");
+        listResult.append(record);
     }
 
-    if (nFileParts & (FILEPART_TABLE | FILEPART_REGION)) {
-        QList<CHUNK> chunks = getChunks(pPdStruct);
-        for (int i = 0; i < chunks.size(); ++i) {
-            const CHUNK &c = chunks.at(i);
-            if (c.nSize <= 4) continue;  // small inline values
-            FPART rec = {};
-            rec.filePart = (nFileParts & FILEPART_REGION) ? FILEPART_REGION : FILEPART_TABLE;
-            rec.nFileOffset = c.nOffset;
-            rec.nFileSize = qMin<qint64>(c.nSize, nTotal - c.nOffset);
-            rec.nVirtualAddress = -1;
-            rec.sName = tr("Data");
-            listResult.append(rec);
+    for (const IFD_INFO &info : listInfo) {
+        nParsedEnd = qMax(nParsedEnd, info.nOffset + info.nSize);
+
+        if ((nFileParts & FILEPART_TABLE) && canAppend()) {
+            FPART record = {};
+            record.filePart = FILEPART_TABLE;
+            record.nFileOffset = info.nOffset;
+            record.nFileSize = info.nSize;
+            record.nVirtualAddress = -1;
+            record.sName = tr("IFD table");
+            listResult.append(record);
+        }
+
+        qint64 nEntryOffset = info.nOffset + (qint64)sizeof(quint16);
+        for (quint32 i = 0; i < info.nCount; i++, nEntryOffset += (qint64)sizeof(IFD_ENTRY)) {
+            CHUNK chunk = {};
+            quint16 nType = 0;
+            if (getIFDChunk(nEntryOffset, bIsBigEndian, nTotal, &chunk, &nType, pPdStruct) && (chunk.nSize > 4)) {
+                // Referenced values may intentionally alias.  Keep each tag's extent, but use a maximum end
+                // rather than summing extents so overlap cannot inflate overlay accounting.
+                nParsedEnd = qMax(nParsedEnd, chunk.nOffset + chunk.nSize);
+                if ((nFileParts & FILEPART_REGION) && canAppend()) {
+                    FPART record = {};
+                    record.filePart = FILEPART_REGION;
+                    record.nFileOffset = chunk.nOffset;
+                    record.nFileSize = chunk.nSize;
+                    record.nVirtualAddress = -1;
+                    record.sName = QString("%1-%2").arg(XBinary::valueToHex(chunk.nTag)).arg(XBinary::valueToHex(nType));
+                    listResult.append(record);
+                }
+            }
+            if (!isPdStructNotCanceled(pPdStruct)) {
+                listResult.clear();
+                return listResult;
+            }
         }
     }
 
-    if (nFileParts & FILEPART_OVERLAY) {
-        qint64 nMax = 0;
-        for (int i = 0; i < listResult.size(); ++i) {
-            const FPART &p = listResult.at(i);
-            nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
-        }
-        if (nMax < nTotal) {
-            FPART rec = {};
-            rec.filePart = FILEPART_OVERLAY;
-            rec.nFileOffset = nMax;
-            rec.nFileSize = nTotal - nMax;
-            rec.nVirtualAddress = -1;
-            rec.sName = tr("Overlay");
-            listResult.append(rec);
-        }
+    if ((nFileParts & FILEPART_OVERLAY) && (nParsedEnd < nTotal) && canAppend()) {
+        FPART record = {};
+        record.filePart = FILEPART_OVERLAY;
+        record.nFileOffset = nParsedEnd;
+        record.nFileSize = nTotal - nParsedEnd;
+        record.nVirtualAddress = -1;
+        record.sName = tr("Overlay");
+        listResult.append(record);
     }
 
+    if (!isPdStructNotCanceled(pPdStruct)) listResult.clear();
     return listResult;
+}
+
+bool XTiff::getIFDInfo(qint64 nOffset, bool bIsBigEndian, qint64 nTotalSize, IFD_INFO *pInfo, PDSTRUCT *pPdStruct)
+{
+    if (!pInfo) return false;
+    *pInfo = IFD_INFO();
+
+    if (!isPdStructNotCanceled(pPdStruct) || (nOffset < 8) || (nTotalSize < 14) || (nOffset > nTotalSize - 6)) return false;
+
+    quint16 nCount = 0;
+    if (!readUInt16Exact(nOffset, bIsBigEndian, &nCount, pPdStruct)) return false;
+
+    const qint64 nTableSize = (qint64)sizeof(quint16) + (qint64)sizeof(IFD_ENTRY) * nCount + (qint64)sizeof(quint32);
+    if (nOffset > nTotalSize - nTableSize) return false;
+
+    const qint64 nNextOffsetField = nOffset + (qint64)sizeof(quint16) + (qint64)sizeof(IFD_ENTRY) * nCount;
+    quint32 nNextOffset = 0;
+    if (!readUInt32Exact(nNextOffsetField, bIsBigEndian, &nNextOffset, pPdStruct)) return false;
+
+    pInfo->nOffset = nOffset;
+    pInfo->nSize = nTableSize;
+    pInfo->nCount = nCount;
+    pInfo->nNextOffset = nNextOffset;
+    return true;
+}
+
+bool XTiff::getIFDChain(QList<IFD_INFO> *pListInfo, PDSTRUCT *pPdStruct)
+{
+    if (!pListInfo) return false;
+    pListInfo->clear();
+    if (!isPdStructNotCanceled(pPdStruct)) return false;
+
+    const qint64 nTotalSize = getSize();
+    const ENDIAN endian = getEndian();
+    if ((nTotalSize < 14) || (endian == ENDIAN_UNKNOWN)) return true;
+    const bool bIsBigEndian = (endian == ENDIAN_BIG);
+
+    quint32 nTableOffset = 0;
+    if (!readUInt32Exact(4, bIsBigEndian, &nTableOffset, pPdStruct)) return false;
+
+    QSet<quint32> setVisited;
+    quint64 nTotalEntries = 0;
+    while ((nTableOffset != 0) && (pListInfo->count() < XTIFF_MAX_IFD_TABLES)) {
+        if (!isPdStructNotCanceled(pPdStruct)) {
+            pListInfo->clear();
+            return false;
+        }
+        if (setVisited.contains(nTableOffset)) break;
+
+        IFD_INFO info = {};
+        if (!getIFDInfo(nTableOffset, bIsBigEndian, nTotalSize, &info, pPdStruct)) {
+            if (!isPdStructNotCanceled(pPdStruct)) {
+                pListInfo->clear();
+                return false;
+            }
+            break;
+        }
+        if (nTotalEntries > XTIFF_MAX_IFD_ENTRIES - info.nCount) break;
+
+        bool bOverlapsTable = false;
+        for (const IFD_INFO &previousInfo : *pListInfo) {
+            if ((info.nOffset < previousInfo.nOffset + previousInfo.nSize) &&
+                (previousInfo.nOffset < info.nOffset + info.nSize)) {
+                bOverlapsTable = true;
+                break;
+            }
+        }
+        // Distinct IFDs cannot share structural bytes.  Reject an overlapping link while still allowing
+        // a legitimate backward link to an earlier, disjoint table.
+        if (bOverlapsTable) break;
+
+        setVisited.insert(nTableOffset);
+        pListInfo->append(info);
+        nTotalEntries += info.nCount;
+        nTableOffset = info.nNextOffset;
+    }
+
+    return isPdStructNotCanceled(pPdStruct);
+}
+
+bool XTiff::getIFDChunk(qint64 nEntryOffset, bool bIsBigEndian, qint64 nTotalSize, CHUNK *pChunk, quint16 *pType,
+                        PDSTRUCT *pPdStruct)
+{
+    if (!pChunk) return false;
+    *pChunk = CHUNK();
+    if (pType) *pType = 0;
+
+    if (!isPdStructNotCanceled(pPdStruct) || (nEntryOffset < 0) || (nTotalSize < (qint64)sizeof(IFD_ENTRY)) ||
+        (nEntryOffset > nTotalSize - (qint64)sizeof(IFD_ENTRY))) {
+        return false;
+    }
+
+    quint16 nTag = 0;
+    quint16 nType = 0;
+    quint32 nCount = 0;
+    if (!readUInt16Exact(nEntryOffset + offsetof(IFD_ENTRY, nTag), bIsBigEndian, &nTag, pPdStruct) ||
+        !readUInt16Exact(nEntryOffset + offsetof(IFD_ENTRY, nType), bIsBigEndian, &nType, pPdStruct) ||
+        !readUInt32Exact(nEntryOffset + offsetof(IFD_ENTRY, nCount), bIsBigEndian, &nCount, pPdStruct)) {
+        return false;
+    }
+
+    const qint32 nBaseTypeSize = getBaseTypeSize(nType);
+    if ((nBaseTypeSize <= 0) || (nCount == 0)) return false;
+    const qint64 nDataSize = (qint64)nBaseTypeSize * (qint64)nCount;
+
+    qint64 nDataOffset = nEntryOffset + offsetof(IFD_ENTRY, nOffset);
+    if (nDataSize > 4) {
+        quint32 nExternalOffset = 0;
+        if (!readUInt32Exact(nDataOffset, bIsBigEndian, &nExternalOffset, pPdStruct)) return false;
+        nDataOffset = nExternalOffset;
+        if ((nDataOffset < 0) || (nDataSize > nTotalSize) || (nDataOffset > nTotalSize - nDataSize)) return false;
+    }
+
+    pChunk->nTag = nTag;
+    pChunk->nOffset = nDataOffset;
+    pChunk->nSize = nDataSize;
+    if (pType) *pType = nType;
+    return true;
+}
+
+bool XTiff::readUInt16Exact(qint64 nOffset, bool bIsBigEndian, quint16 *pValue, PDSTRUCT *pPdStruct)
+{
+    if (!pValue || !isPdStructNotCanceled(pPdStruct)) return false;
+    *pValue = 0;
+
+    quint8 data[2] = {};
+    if ((read_array_process(nOffset, (char *)data, (qint64)sizeof(data), pPdStruct) != (qint64)sizeof(data)) ||
+        !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
+    if (bIsBigEndian) {
+        *pValue = ((quint16)data[0] << 8) | data[1];
+    } else {
+        *pValue = data[0] | ((quint16)data[1] << 8);
+    }
+    return true;
+}
+
+bool XTiff::readUInt32Exact(qint64 nOffset, bool bIsBigEndian, quint32 *pValue, PDSTRUCT *pPdStruct)
+{
+    if (!pValue || !isPdStructNotCanceled(pPdStruct)) return false;
+    *pValue = 0;
+
+    quint8 data[4] = {};
+    if ((read_array_process(nOffset, (char *)data, (qint64)sizeof(data), pPdStruct) != (qint64)sizeof(data)) ||
+        !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
+    if (bIsBigEndian) {
+        *pValue = ((quint32)data[0] << 24) | ((quint32)data[1] << 16) | ((quint32)data[2] << 8) | data[3];
+    } else {
+        *pValue = data[0] | ((quint32)data[1] << 8) | ((quint32)data[2] << 16) | ((quint32)data[3] << 24);
+    }
+    return true;
 }
 
 qint32 XTiff::getBaseTypeSize(quint16 nType)

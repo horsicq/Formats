@@ -54,7 +54,7 @@ bool XMP4::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XMP4 mp4(pDevice);
 
-    return mp4.isValid();
+    return mp4.isValid(pPdStruct);
 }
 
 QString XMP4::getFileFormatExt()
@@ -128,11 +128,16 @@ bool XMP4::isTagValid(const QString &sTagName)
 
 QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     QList<FPART> list;
-    const qint64 nTotal = getSize();
 
-    if (nFileParts & FILEPART_HEADER) {
+    if ((nLimit < -1) || (nLimit == 0) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return list;
+    }
+
+    const qint64 nTotal = getSize();
+    const auto canAppend = [&]() -> bool { return (nLimit == -1) || (list.size() < nLimit); };
+
+    if ((nFileParts & FILEPART_HEADER) && canAppend()) {
         FPART h = {};
         h.filePart = FILEPART_HEADER;
         h.nFileOffset = 0;
@@ -142,62 +147,55 @@ QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         list.append(h);
     }
 
-    if (nFileParts & FILEPART_REGION) {
+    qint64 nParsedEnd = 0;
+    if ((nFileParts & (FILEPART_REGION | FILEPART_OVERLAY)) && canAppend()) {
         qint64 nOffset = 0;
-        while ((nOffset + 8 <= nTotal) && XBinary::isPdStructNotCanceled(pPdStruct)) {
-            quint32 size = read_uint32(nOffset, true);
-            QString type = read_ansiString(nOffset + 4, 4);
+        while ((nOffset <= (nTotal - 8)) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            const quint32 nSize32 = read_uint32(nOffset, true);
+            const QString sType = read_ansiString(nOffset + 4, 4);
+            const qint64 nRemaining = nTotal - nOffset;
+            quint64 nBoxSize = nSize32;
+            bool bExtendsToEnd = false;
 
-            if (size == 0) {
-                // box extends to EOF
-                size = (quint32)(nTotal - nOffset);
-            }
-            if (size == 1) {
-                // 64-bit largesize follows
-                if (nOffset + 16 > nTotal) break;
-                quint64 largesize = read_uint64(nOffset + 8, true);
-                if (largesize < 16) break;
-                // Cap to file size
-                if ((qint64)largesize > nTotal - nOffset) largesize = (quint64)(nTotal - nOffset);
-                FPART f = {};
-                f.filePart = FILEPART_REGION;
-                f.nFileOffset = nOffset;
-                f.nFileSize = (qint64)largesize;
-                f.nVirtualAddress = -1;
-                f.sName = type;
-                list.append(f);
-                nOffset += (qint64)largesize;
-                continue;
-            }
-
-            if (size < 8 || (nOffset + size > nTotal) || !isTagValid(type)) {
+            if (!isTagValid(sType)) {
                 break;
             }
 
-            FPART f = {};
-            f.filePart = FILEPART_REGION;
-            f.nFileOffset = nOffset;
-            f.nFileSize = size;
-            f.nVirtualAddress = -1;
-            f.sName = type;
-            list.append(f);
+            if (nSize32 == 0) {
+                nBoxSize = (quint64)nRemaining;
+                bExtendsToEnd = true;
+            } else if (nSize32 == 1) {
+                if (nRemaining < 16) break;
+                nBoxSize = read_uint64(nOffset + 8, true);
+                if (nBoxSize < 16) break;
+            }
 
-            nOffset += size;
+            if ((nBoxSize < 8) || (nBoxSize > (quint64)nRemaining)) break;
+
+            if ((nFileParts & FILEPART_REGION) && canAppend()) {
+                FPART f = {};
+                f.filePart = FILEPART_REGION;
+                f.nFileOffset = nOffset;
+                f.nFileSize = (qint64)nBoxSize;
+                f.nVirtualAddress = -1;
+                f.sName = sType;
+                list.append(f);
+            }
+
+            nOffset += (qint64)nBoxSize;
+            nParsedEnd = nOffset;
+            if (!canAppend() || bExtendsToEnd) break;
         }
     }
 
-    if (nFileParts & FILEPART_OVERLAY) {
-        // Overlay is anything past the last parsed box
-        qint64 nMax = 0;
-        for (int i = 0; i < list.size(); ++i) {
-            const FPART &p = list.at(i);
-            nMax = qMax(nMax, p.nFileOffset + p.nFileSize);
-        }
-        if (nMax < nTotal) {
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) return QList<FPART>();
+
+    if ((nFileParts & FILEPART_OVERLAY) && canAppend()) {
+        if (nParsedEnd < nTotal) {
             FPART ov = {};
             ov.filePart = FILEPART_OVERLAY;
-            ov.nFileOffset = nMax;
-            ov.nFileSize = nTotal - nMax;
+            ov.nFileOffset = nParsedEnd;
+            ov.nFileSize = nTotal - nParsedEnd;
             ov.nVirtualAddress = -1;
             ov.sName = tr("Overlay");
             list.append(ov);

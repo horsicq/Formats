@@ -43,7 +43,7 @@ bool XCOM::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDST
 {
     XCOM xcom(pDevice, bIsImage, nModuleAddress);
 
-    return xcom.isValid();
+    return xcom.isValid(pPdStruct);
 }
 
 bool XCOM::isExecutable()
@@ -111,15 +111,15 @@ XBinary::_MEMORY_MAP XCOM::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pPdS
     qint64 nVirtualSize = static_cast<qint64>(XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN) - nTotalSize;
 
     if (nVirtualSize > 0) {
-        _MEMORY_RECORD record = {};
-        record.nAddress = XCOM_DEF::ADDRESS_BEGIN + nCodeSize;
+        _MEMORY_RECORD recordTail = {};
+        recordTail.nAddress = XCOM_DEF::ADDRESS_BEGIN + nCodeSize;
 
-        record.nOffset = -1;
-        record.nSize = nVirtualSize;
-        record.nIndex++;
-        record.bIsVirtual = true;
+        recordTail.nOffset = -1;
+        recordTail.nSize = nVirtualSize;
+        recordTail.nIndex++;
+        recordTail.bIsVirtual = true;
 
-        result.listRecords.append(record);
+        result.listRecords.append(recordTail);
     }
 
     _handleOverlay(&result);
@@ -334,10 +334,13 @@ QList<XBinary::XFRECORD> XCOM::getXFRecords(FT fileType, quint32 nStructID, cons
 
 QList<XBinary::FPART> XCOM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     Q_UNUSED(pPdStruct)
 
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     qint64 nTotalSize = getSize();
 
@@ -351,6 +354,7 @@ QList<XBinary::FPART> XCOM::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.sName = tr("Header");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     return listResult;

@@ -82,19 +82,25 @@ bool XIODevice::reset()
 
 bool XIODevice::open(OpenMode mode)
 {
-    setOpenMode(mode);
+    if (((mode & QIODevice::ReadWrite) == QIODevice::NotOpen) ||
+        (mode & (QIODevice::Append | QIODevice::Truncate))) {
+        return false;
+    }
 
-    return true;
+    return QIODevice::open(mode);
 }
 
 bool XIODevice::atEnd() const
 {
-    return (bytesAvailable() == 0);
+    const qint64 nPosition = pos();
+    const qint64 nDeviceSize = size();
+
+    return !isOpen() || (nPosition < 0) || (nDeviceSize < 0) || (nPosition >= nDeviceSize);
 }
 
 void XIODevice::close()
 {
-    setOpenMode(NotOpen);
+    QIODevice::close();
 }
 
 qint64 XIODevice::pos() const

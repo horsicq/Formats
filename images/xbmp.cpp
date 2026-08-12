@@ -32,23 +32,90 @@ XBMP::XBMP(QIODevice *pDevice) : XBinary(pDevice)
 
 bool XBMP::isValid(PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
+    const qint64 nTotalSize = getSize();
+
+    if ((nTotalSize < 54) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
 
     _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
 
-    if (compareSignature(&memoryMap, "'BM'..................000000", 0, pPdStruct)) {
-        quint32 nSize = read_uint32(2);
+    if (!compareSignature(&memoryMap, "'BM'", 0, pPdStruct) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
 
-        if ((nSize > 0) && (nSize <= getSize())) {
-            quint32 nDBISize = read_uint32(0x0E);
+    const BMPFILEHEADER fileHeader = getFileHeader();
+    const BMPINFOHEADER infoHeader = getInfoHeader();
+    const bool bKnownInfoHeader = (infoHeader.biSize == 40) || (infoHeader.biSize == 108) || (infoHeader.biSize == 124);
+    const qint64 nHeaderSize = 14 + (qint64)infoHeader.biSize;
 
-            if (nDBISize == 40) {
-                bResult = true;
-            } else if (nDBISize == 108) {
-                bResult = true;
-            } else if (nDBISize == 124) {
-                bResult = true;
-            }
+    if (!bKnownInfoHeader || (nHeaderSize > nTotalSize) || (fileHeader.bfSize < (quint64)nHeaderSize) ||
+        (fileHeader.bfSize > (quint64)nTotalSize) || (fileHeader.bfOffBits < (quint64)nHeaderSize) ||
+        (fileHeader.bfOffBits > fileHeader.bfSize) || (fileHeader.bfReserved1 != 0) || (fileHeader.bfReserved2 != 0) ||
+        (infoHeader.biPlanes != 1) || (infoHeader.biWidth <= 0) || (infoHeader.biHeight == 0)) {
+        return false;
+    }
+
+    const qint64 nDataSize = (qint64)fileHeader.bfSize - fileHeader.bfOffBits;
+    const qint64 nHeight = (infoHeader.biHeight < 0) ? -(qint64)infoHeader.biHeight : (qint64)infoHeader.biHeight;
+    const bool bRgb = infoHeader.biCompression == 0;
+    const bool bRle8 = (infoHeader.biCompression == 1) && (infoHeader.biBitCount == 8);
+    const bool bRle4 = (infoHeader.biCompression == 2) && (infoHeader.biBitCount == 4);
+    const bool bBitFields = ((infoHeader.biCompression == 3) || (infoHeader.biCompression == 6)) &&
+                            ((infoHeader.biBitCount == 16) || (infoHeader.biBitCount == 32));
+    const bool bEmbedded = ((infoHeader.biCompression == 4) || (infoHeader.biCompression == 5)) && (infoHeader.biBitCount == 0);
+    const bool bKnownBitCount = (infoHeader.biBitCount == 1) || (infoHeader.biBitCount == 4) || (infoHeader.biBitCount == 8) ||
+                                (infoHeader.biBitCount == 16) || (infoHeader.biBitCount == 24) || (infoHeader.biBitCount == 32);
+
+    if ((!bRgb || !bKnownBitCount) && !bRle8 && !bRle4 && !bBitFields && !bEmbedded) {
+        return false;
+    }
+
+    if ((infoHeader.biHeight < 0) && !bRgb && !bBitFields) {
+        return false;
+    }
+
+    qint64 nRequiredBeforePixels = nHeaderSize;
+
+    if ((infoHeader.biSize == 40) && bBitFields) {
+        nRequiredBeforePixels += (infoHeader.biCompression == 6) ? 16 : 12;
+    }
+
+    if ((infoHeader.biBitCount > 0) && (infoHeader.biBitCount <= 8)) {
+        const quint32 nMaximumColors = 1U << infoHeader.biBitCount;
+        const quint32 nColorCount = infoHeader.biClrUsed ? infoHeader.biClrUsed : nMaximumColors;
+
+        if (nColorCount > nMaximumColors) {
+            return false;
+        }
+
+        nRequiredBeforePixels += (qint64)nColorCount * 4;
+    }
+
+    if ((nRequiredBeforePixels > fileHeader.bfOffBits) || (infoHeader.biSizeImage > (quint64)nDataSize)) {
+        return false;
+    }
+
+    if (bRgb || bBitFields) {
+        const qint64 nRowSize = ((((qint64)infoHeader.biWidth * infoHeader.biBitCount) + 31) / 32) * 4;
+
+        if ((nRowSize <= 0) || (nHeight <= 0) || (nRowSize > nDataSize / nHeight)) {
+            return false;
+        }
+    } else if ((bRle8 || bRle4 || bEmbedded) && (infoHeader.biSizeImage == 0)) {
+        return false;
+    }
+
+    if (bEmbedded) {
+        const qint64 nEmbeddedOffset = fileHeader.bfOffBits;
+        if ((infoHeader.biCompression == 4) &&
+            ((nDataSize < 2) || (read_uint16(nEmbeddedOffset, false) != 0xD8FF))) {
+            return false;
+        }
+        if ((infoHeader.biCompression == 5) &&
+            ((nDataSize < 8) || (read_uint32(nEmbeddedOffset, false) != 0x474E5089) ||
+             (read_uint32(nEmbeddedOffset + 4, false) != 0x0A1A0A0D))) {
+            return false;
         }
     }
 
@@ -60,7 +127,7 @@ bool XBMP::isValid(PDSTRUCT *pPdStruct)
     //    IC OS/2 struct icon
     //    PT OS/2 pointer
 
-    return bResult;
+    return true;
 }
 
 bool XBMP::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
@@ -107,22 +174,16 @@ QString XBMP::getFileFormatExtsString()
 
 qint64 XBMP::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-
-    qint64 nResult = 0;
-
-    BMPFILEHEADER fileHeader = getFileHeader();
-
-    if (fileHeader.bfSize > 0 && fileHeader.bfSize <= static_cast<quint64>(getSize())) {
-        nResult = fileHeader.bfSize;
+    if (!isValid(pPdStruct)) {
+        return 0;
     }
 
-    return nResult;
+    return getFileHeader().bfSize;
 }
 
 XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
+    Q_UNUSED(mapMode)
 
     _MEMORY_MAP result = {};
     result.fileType = getFileType();
@@ -137,12 +198,17 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     BMPFILEHEADER fileHeader = getFileHeader();
     BMPINFOHEADER infoHeader = getInfoHeader();
+    const qint64 nTotalSize = getSize();
+    const qint64 nHeaderSize = 14 + (qint64)infoHeader.biSize;
+    if (!isValid(pPdStruct)) {
+        return result;
+    }
 
     // Add Header
     _MEMORY_RECORD headerRecord = {};
     headerRecord.nOffset = 0;
     headerRecord.nAddress = -1;
-    headerRecord.nSize = 14 + infoHeader.biSize;
+    headerRecord.nSize = fileHeader.bfOffBits;
     headerRecord.filePart = FILEPART_HEADER;
     headerRecord.sName = "Header";
     headerRecord.nIndex = 0;
@@ -152,7 +218,7 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     _MEMORY_RECORD objectRecord = {};
     objectRecord.nOffset = fileHeader.bfOffBits;
     objectRecord.nAddress = -1;
-    objectRecord.nSize = fileHeader.bfSize - fileHeader.bfOffBits;
+    objectRecord.nSize = (qint64)fileHeader.bfSize - (qint64)fileHeader.bfOffBits;
     objectRecord.filePart = FILEPART_DATA;
     objectRecord.sName = "Bitmap Data";
     objectRecord.nIndex = 1;
@@ -199,6 +265,10 @@ QList<XBinary::XFHEADER> XBMP::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
 {
     QList<XBinary::XFHEADER> listResult;
 
+    if (!isValid(pPdStruct)) {
+        return listResult;
+    }
+
     quint32 nStructID = xfStruct.nStructID;
 
     if (nStructID == STRUCTID_UNKNOWN) {
@@ -238,13 +308,20 @@ QList<XBinary::XFHEADER> XBMP::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
 
         qint64 nHeaderOffset = locToOffset(xfStruct.pMemoryMap, headerLoc);
 
-        if (nHeaderOffset != -1) {
+        if ((nHeaderOffset >= 0) && (nHeaderOffset <= getSize() - 4)) {
+            const quint32 nInfoHeaderSize = read_uint32(nHeaderOffset);
+
+            if (((nInfoHeaderSize != 40) && (nInfoHeaderSize != 108) && (nInfoHeaderSize != 124)) ||
+                (nInfoHeaderSize > (quint64)getSize() - nHeaderOffset)) {
+                return listResult;
+            }
+
             XFHEADER xfHeader = {};
             xfHeader.sParentTag = xfStruct.sParent;
             xfHeader.fileType = xfStruct.fileType;
             xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_BMPINFOHEADER);
             xfHeader.xLoc = headerLoc;
-            xfHeader.nSize = read_uint32(nHeaderOffset);
+            xfHeader.nSize = nInfoHeaderSize;
             xfHeader.xfType = XFTYPE_HEADER;
             xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_BMPINFOHEADER, headerLoc);
             xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_BMPINFOHEADER), xfHeader.sParentTag);
@@ -379,36 +456,45 @@ XBMP::BMPFILEHEADER XBMP::getFileHeader()
 
 QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-    Q_UNUSED(pPdStruct)
-
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     BMPFILEHEADER fh = getFileHeader();
     BMPINFOHEADER ih = getInfoHeader();
 
     qint64 nTotal = getSize();
-    qint64 nMaxOffset = 14 + ih.biSize;
+    qint64 nHeaderSize = 14 + (qint64)ih.biSize;
+
+    if (!isValid(pPdStruct) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
+
+    qint64 nMaxOffset = fh.bfOffBits;
 
     if (nFileParts & FILEPART_HEADER) {
         FPART rec = {};
         rec.filePart = FILEPART_HEADER;
         rec.nFileOffset = 0;
-        rec.nFileSize = 14 + ih.biSize;
+        rec.nFileSize = fh.bfOffBits;
         rec.nVirtualAddress = -1;
         rec.sName = tr("Header");
         listResult.append(rec);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
-    if ((fh.bfOffBits > 0) && (fh.bfOffBits < nTotal) && (fh.bfSize <= static_cast<quint64>(nTotal))) {
+    if ((fh.bfOffBits >= (quint64)nHeaderSize) && (fh.bfOffBits <= fh.bfSize) && (fh.bfSize <= static_cast<quint64>(nTotal))) {
         if (nFileParts & FILEPART_DATA) {
             FPART rec = {};
             rec.filePart = FILEPART_DATA;
             rec.nFileOffset = fh.bfOffBits;
-            rec.nFileSize = qMin<qint64>(fh.bfSize - fh.bfOffBits, nTotal - fh.bfOffBits);
+            rec.nFileSize = qMin<qint64>((qint64)fh.bfSize - (qint64)fh.bfOffBits, nTotal - (qint64)fh.bfOffBits);
             rec.nVirtualAddress = -1;
             rec.sName = tr("Bitmap Data");
             listResult.append(rec);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
 
         nMaxOffset = qMax(nMaxOffset, static_cast<qint64>(fh.bfSize));
@@ -423,6 +509,7 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             rec.nVirtualAddress = -1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

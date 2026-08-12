@@ -3976,10 +3976,10 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             qint32 nSectionIndex = getSectionIndexByName(".strtab");
 
             if (nSectionIndex != -1) {
-                XBinary::OFFSETSIZE osStringTable = getSectionOffsetSize(nSectionIndex);
+                XBinary::OFFSETSIZE osSymbolStringTable = getSectionOffsetSize(nSectionIndex);
 
-                dataset.nStringTableOffset = osStringTable.nOffset;
-                dataset.nStringTableSize = osStringTable.nSize;
+                dataset.nStringTableOffset = osSymbolStringTable.nOffset;
+                dataset.nStringTableSize = osSymbolStringTable.nSize;
             }
 
             listResult.append(dataset);
@@ -3996,10 +3996,10 @@ QList<XBinary::DATASET> XELF::getDatasetsFromSections(QList<XELF_DEF::Elf_Shdr> 
             qint32 nSectionIndex = getSectionIndexByName(".dynstr");
 
             if (nSectionIndex != -1) {
-                XBinary::OFFSETSIZE osStringTable = getSectionOffsetSize(nSectionIndex);
+                XBinary::OFFSETSIZE osDynamicStringTable = getSectionOffsetSize(nSectionIndex);
 
-                dataset.nStringTableOffset = osStringTable.nOffset;
-                dataset.nStringTableSize = osStringTable.nSize;
+                dataset.nStringTableOffset = osDynamicStringTable.nOffset;
+                dataset.nStringTableSize = osDynamicStringTable.nSize;
             }
 
             listResult.append(dataset);

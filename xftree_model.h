@@ -25,6 +25,11 @@
 #include <QAbstractItemModel>
 #include "xformats.h"
 
+#ifdef QT_GUI_LIB
+#include <QHash>
+#include <QIcon>
+#endif
+
 class XFTreeModel : public QAbstractItemModel {
     Q_OBJECT
 
@@ -90,8 +95,15 @@ private:
     static QString jsonEscape(const QString &s);
     static QString svQuote(const QString &s, QChar cSep);
 
+#ifdef QT_GUI_LIB
+    QIcon getItemIcon(const TREEITEM *pItem) const;
+#endif
+
     TREEITEM *m_pRootItem;
     XBinary::INDATA m_inData;
+#ifdef QT_GUI_LIB
+    mutable QHash<qint32, QIcon> m_hashIcons;
+#endif
 };
 
 #endif  // XFTREE_MODEL_H

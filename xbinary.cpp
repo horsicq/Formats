@@ -19,16 +19,103 @@
  * SOFTWARE.
  */
 #include "xbinary.h"
+#include "subdevice.h"
 #include <algorithm>
 #include <cstring>
 #include <limits>
-#include <new>
 #include <QDebug>
 #include <QFileDevice>
 #include <QSaveFile>
+#include <QWaitCondition>
 #ifdef Q_OS_WIN
+#include <io.h>
 #include <windows.h>
+#elif defined(Q_OS_UNIX)
+#include <sys/stat.h>
+#ifdef Q_OS_MACOS
+#include <fcntl.h>
+#include <limits.h>
 #endif
+#endif
+
+struct XBinary::PDSTRUCT_CALLBACK_STATE {
+    struct ENTRY {
+        PDSTRUCT_CALLBACK pCallback = nullptr;
+        void *pUserData = nullptr;
+        qint32 nInFlight = 0;
+        bool bActive = true;
+    };
+
+    QMutex mutex;
+    QWaitCondition drained;
+    QMap<quint64, QSharedPointer<ENTRY>> mapSubscribers;
+    QSharedPointer<ENTRY> pLegacyEntry;
+    quint64 nNextToken = 1;
+    qint32 nInvocations = 0;
+    bool bInvoking = false;
+    bool bDestroying = false;
+};
+
+namespace {
+thread_local QList<const XBinary::PDSTRUCT_CALLBACK_STATE *> g_listActivePdCallbackStates;
+thread_local QList<const XBinary::PDSTRUCT_CALLBACK_STATE::ENTRY *> g_listActivePdCallbackEntries;
+
+bool isCurrentPdCallbackState(const XBinary::PDSTRUCT_CALLBACK_STATE *pState)
+{
+    return g_listActivePdCallbackStates.contains(pState);
+}
+
+bool isCurrentPdCallbackEntry(const XBinary::PDSTRUCT_CALLBACK_STATE::ENTRY *pEntry)
+{
+    return g_listActivePdCallbackEntries.contains(pEntry);
+}
+
+class PD_CALLBACK_INVOCATION_GUARD {
+public:
+    explicit PD_CALLBACK_INVOCATION_GUARD(const QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE> &pState) : m_pState(pState)
+    {
+        g_listActivePdCallbackStates.append(m_pState.data());
+    }
+
+    ~PD_CALLBACK_INVOCATION_GUARD()
+    {
+        const qint32 nIndex = g_listActivePdCallbackStates.lastIndexOf(m_pState.data());
+        if (nIndex >= 0) g_listActivePdCallbackStates.removeAt(nIndex);
+
+        QMutexLocker locker(&m_pState->mutex);
+        if (m_pState->nInvocations > 0) m_pState->nInvocations--;
+        m_pState->bInvoking = false;
+        m_pState->drained.wakeAll();
+    }
+
+private:
+    QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE> m_pState;
+};
+
+class PD_CALLBACK_ENTRY_GUARD {
+public:
+    PD_CALLBACK_ENTRY_GUARD(const QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE> &pState,
+                            const QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE::ENTRY> &pEntry)
+        : m_pState(pState), m_pEntry(pEntry)
+    {
+        g_listActivePdCallbackEntries.append(m_pEntry.data());
+    }
+
+    ~PD_CALLBACK_ENTRY_GUARD()
+    {
+        const qint32 nIndex = g_listActivePdCallbackEntries.lastIndexOf(m_pEntry.data());
+        if (nIndex >= 0) g_listActivePdCallbackEntries.removeAt(nIndex);
+
+        QMutexLocker locker(&m_pState->mutex);
+        if (m_pEntry->nInFlight > 0) m_pEntry->nInFlight--;
+        m_pState->drained.wakeAll();
+    }
+
+private:
+    QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE> m_pState;
+    QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE::ENTRY> m_pEntry;
+};
+}  // namespace
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
 {
@@ -63,13 +150,129 @@ bool compareMS_RECORD(const XBinary::MS_RECORD &a, const XBinary::MS_RECORD &b)
     }
 }
 
+static bool writeAllToDevice(QIODevice *pDevice, const char *pData, qint64 nSize)
+{
+    if (!pDevice || !pDevice->isWritable() || (nSize < 0) || ((nSize > 0) && !pData)) {
+        return false;
+    }
+
+    qint64 nWrittenTotal = 0;
+    while (nWrittenTotal < nSize) {
+        const qint64 nWritten = pDevice->write(pData + nWrittenTotal, nSize - nWrittenTotal);
+        if ((nWritten <= 0) || (nWritten > (nSize - nWrittenTotal))) {
+            return false;
+        }
+        nWrittenTotal += nWritten;
+    }
+
+    return true;
+}
+
+static Qt::CaseSensitivity fileSystemPathCaseSensitivity()
+{
+#ifdef Q_OS_WIN
+    return Qt::CaseInsensitive;
+#else
+    return Qt::CaseSensitive;
+#endif
+}
+
+static bool isDirectCanonicalPath(const QFileInfo &fileInfo)
+{
+    if (!fileInfo.exists()) return false;
+
+    const QString sAbsolutePath = QDir::fromNativeSeparators(QDir::cleanPath(fileInfo.absoluteFilePath()));
+    const QString sCanonicalPath = QDir::fromNativeSeparators(QDir::cleanPath(fileInfo.canonicalFilePath()));
+
+    return !sCanonicalPath.isEmpty() &&
+           (sAbsolutePath.compare(sCanonicalPath, fileSystemPathCaseSensitivity()) == 0);
+}
+
+static QString getOpenQFilePath(const QFile *pFile)
+{
+    if (!pFile || !pFile->isOpen() || (pFile->handle() < 0)) return QString();
+
+#ifdef Q_OS_WIN
+    const intptr_t nHandle = _get_osfhandle(pFile->handle());
+    if (nHandle == -1) return QString();
+
+    const HANDLE hFile = reinterpret_cast<HANDLE>(nHandle);
+    const DWORD nLength = GetFinalPathNameByHandleW(hFile, nullptr, 0, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+    if (!nLength || (nLength > (DWORD)(std::numeric_limits<qint32>::max)() - 1)) return QString();
+
+    QVector<wchar_t> buffer((qint32)nLength + 1);
+    const DWORD nWritten = GetFinalPathNameByHandleW(hFile, buffer.data(), (DWORD)buffer.size(), FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+    if (!nWritten || (nWritten >= (DWORD)buffer.size())) return QString();
+
+    QString sResult = QString::fromWCharArray(buffer.constData(), (qint32)nWritten);
+    if (sResult.startsWith(QLatin1String("\\\\?\\UNC\\"), Qt::CaseInsensitive)) {
+        sResult = QLatin1String("\\\\") + sResult.mid(8);
+    } else if (sResult.startsWith(QLatin1String("\\\\?\\"), Qt::CaseInsensitive)) {
+        sResult.remove(0, 4);
+    }
+
+    return QDir::cleanPath(QDir::fromNativeSeparators(sResult));
+#elif defined(Q_OS_LINUX)
+    const QString sResult = QFileInfo(QStringLiteral("/proc/self/fd/%1").arg(pFile->handle())).symLinkTarget();
+    return sResult.endsWith(QLatin1String(" (deleted)")) ? QString() : QDir::cleanPath(sResult);
+#elif defined(Q_OS_MACOS)
+    char szPath[PATH_MAX] = {};
+    if (fcntl(pFile->handle(), F_GETPATH, szPath) == -1) return QString();
+    return QDir::cleanPath(QFile::decodeName(szPath));
+#else
+    return QString();
+#endif
+}
+
+static bool areDistinctOpenFiles(QFile *pFirst, QFile *pSecond)
+{
+    if (!pFirst || !pSecond || !pFirst->isOpen() || !pSecond->isOpen() ||
+        (pFirst->handle() < 0) || (pSecond->handle() < 0)) {
+        return false;
+    }
+
+#ifdef Q_OS_WIN
+    const intptr_t nFirstHandle = _get_osfhandle(pFirst->handle());
+    const intptr_t nSecondHandle = _get_osfhandle(pSecond->handle());
+    if ((nFirstHandle == -1) || (nSecondHandle == -1)) return false;
+
+    BY_HANDLE_FILE_INFORMATION firstInformation = {};
+    BY_HANDLE_FILE_INFORMATION secondInformation = {};
+    if (!GetFileInformationByHandle(reinterpret_cast<HANDLE>(nFirstHandle), &firstInformation) ||
+        !GetFileInformationByHandle(reinterpret_cast<HANDLE>(nSecondHandle), &secondInformation)) {
+        return false;
+    }
+
+    return (firstInformation.dwVolumeSerialNumber != secondInformation.dwVolumeSerialNumber) ||
+           (firstInformation.nFileIndexHigh != secondInformation.nFileIndexHigh) ||
+           (firstInformation.nFileIndexLow != secondInformation.nFileIndexLow);
+#elif defined(Q_OS_UNIX)
+    struct stat firstStatus = {};
+    struct stat secondStatus = {};
+    if ((fstat(pFirst->handle(), &firstStatus) != 0) || (fstat(pSecond->handle(), &secondStatus) != 0)) return false;
+
+    return (firstStatus.st_dev != secondStatus.st_dev) || (firstStatus.st_ino != secondStatus.st_ino);
+#else
+    return false;
+#endif
+}
+
+static bool areDistinctRegularFiles(const QString &sFirstFileName, const QString &sSecondFileName)
+{
+    QFile firstFile(sFirstFileName);
+    QFile secondFile(sSecondFileName);
+    if (!firstFile.open(QIODevice::ReadOnly) || !secondFile.open(QIODevice::ReadOnly)) return false;
+
+    return areDistinctOpenFiles(&firstFile, &secondFile);
+}
+
 static bool _retainBestMSRecords(QVector<XBinary::MS_RECORD> *pListRecords, qint32 nLimit)
 {
     if ((!pListRecords) || (nLimit <= 0)) {
         return false;
     }
 
-    const bool bLimitReached = pListRecords->size() >= nLimit;
+    const bool bLimitReached = pListRecords->size() > nLimit;
     const qint64 nTrimThreshold =
         qMin((qint64)(std::numeric_limits<qint32>::max)(), (qint64)nLimit * 2);
 
@@ -179,6 +382,42 @@ static bool _addRelativeOffset(qint64 nBaseOffset, quint64 nRelativeOffset, qint
     return true;
 }
 
+static bool _addSignedOffset(qint64 nBaseOffset, qint64 nDelta, qint64 *pnOffset)
+{
+    if (!pnOffset) {
+        return false;
+    }
+
+    if ((nDelta > 0) && (nBaseOffset > (std::numeric_limits<qint64>::max)() - nDelta)) {
+        return false;
+    }
+    if ((nDelta < 0) && (nBaseOffset < (std::numeric_limits<qint64>::min)() - nDelta)) {
+        return false;
+    }
+
+    *pnOffset = nBaseOffset + nDelta;
+    return true;
+}
+
+static bool _addSignedAddress(XADDR nBaseAddress, qint64 nDelta, XADDR *pnAddress)
+{
+    if (!pnAddress || (nBaseAddress == (XADDR)-1)) {
+        return false;
+    }
+
+    if (nDelta >= 0) {
+        return _addRelativeAddress(nBaseAddress, nDelta, pnAddress);
+    }
+
+    const quint64 nMagnitude = (quint64)(-(nDelta + 1)) + 1;
+    if (nMagnitude > nBaseAddress) {
+        return false;
+    }
+
+    *pnAddress = nBaseAddress - nMagnitude;
+    return true;
+}
+
 const quint32 _crc32_EDB88320_tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b,
     0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7, 0x136c9856, 0x646ba8c0,
@@ -255,6 +494,9 @@ XBinary::XCONVERT _TABLE_XBINARY_STRUCTID[] = {
     {XBinary::STRUCTID_EXTRACTOR, "extractor", QObject::tr("Extractor")},
     {XBinary::STRUCTID_SEARCH, "search", QObject::tr("Search")},
     {XBinary::STRUCTID_OVERLAY, "overlay", QObject::tr("Overlay")},
+    {XBinary::STRUCTID_INFO, "info", QObject::tr("Info")},
+    {XBinary::STRUCTID_TOOLS, "tools", QObject::tr("Tools")},
+    {XBinary::STRUCTID_DEMANGLE, "demangle", QObject::tr("Demangle")},
 };
 
 XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
@@ -319,7 +561,7 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_ARJ_FASTEST, "ARJ_FASTEST", QString("ARJ Fastest")},
     {XBinary::HANDLE_METHOD_BROTLI, "BROTLI", QString("Brotli")},
     {XBinary::HANDLE_METHOD_ACE, "ACE", QString("ACE")},
-    {XBinary::HANDLE_METHOD_ACE_DELTA, "ACE_DELTA", QString("ACE Delta")},
+    {XBinary::HANDLE_METHOD_ACE_DELTA, "ACE_BLOCKED_1", QString("ACE BLOCKED_1 (unsupported)")},
     {XBinary::HANDLE_METHOD_DELTA, "DELTA", QString("Delta")},
     {XBinary::HANDLE_METHOD_ARM_BCJ, "ARM_BCJ", QString("ARM BCJ")},
     {XBinary::HANDLE_METHOD_ARMT_BCJ, "ARMT_BCJ", QString("ARMT BCJ")},
@@ -727,7 +969,7 @@ QMap<XBinary::UNPACK_PROP, QVariant> XBinary::getDefaultUnpackProperties()
             }
         }
 
-        finishUnpack(&state, nullptr);
+        finishUnpack(&state, &pdStruct);
     }
 
     return result;
@@ -831,7 +1073,7 @@ qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
 
     // Initialize the streaming archive state.
     if (initUnpack(&state, mapProperties, pPdStruct)) {
-        nResult = qMax((qint32)0, state.nNumberOfRecords);
+        nResult = state.nNumberOfRecords;
 
         // A successful initUnpack() owns its context until finishUnpack(),
         // even when the caller was canceled while initialization completed.
@@ -845,16 +1087,13 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
 {
     QList<XBinary::ARCHIVERECORD> listResult;
 
-    // -1 is the only unbounded sentinel.  A zero limit has no records to
-    // enumerate, and values below -1 are invalid rather than implicit one-item
-    // limits.
-    if (nLimit < -1 || nLimit == 0) {
-        return listResult;
-    }
-
     PDSTRUCT pdStructEmpty = createPdStruct();
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
+    }
+
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
     }
 
     // Initialize unpack state
@@ -863,11 +1102,19 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
 
     if (initUnpack(&state, mapProperties, pPdStruct)) {
         qint32 nCount = 0;
+        bool bEnumerationValid = (state.nCurrentIndex >= 0) && (state.nNumberOfRecords >= 0) &&
+                                 (state.nCurrentIndex <= state.nNumberOfRecords);
 
         // Iterate through records using streaming API
-        while (isPdStructNotCanceled(pPdStruct) && (state.nCurrentIndex < state.nNumberOfRecords)) {
+        while (bEnumerationValid && isPdStructNotCanceled(pPdStruct) && (state.nCurrentIndex < state.nNumberOfRecords)) {
             // Get current record info
             ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+
+            if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
+                (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+                bEnumerationValid = false;
+                break;
+            }
 
             listResult.append(record);
             nCount++;
@@ -878,13 +1125,25 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
             }
 
             // Move to next record
+            const qint32 nPreviousIndex = state.nCurrentIndex;
             if (!moveToNext(&state, pPdStruct)) {
+                if ((nPreviousIndex + 1) < state.nNumberOfRecords) {
+                    bEnumerationValid = false;
+                }
+                break;
+            }
+            if ((state.nCurrentIndex <= nPreviousIndex) || (state.nCurrentIndex < 0) ||
+                (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+                bEnumerationValid = false;
                 break;
             }
         }
 
         // Cleanup must not inherit a canceled enumeration token.
-        finishUnpack(&state, nullptr);
+        const bool bFinished = finishUnpack(&state, nullptr);
+        if (!bEnumerationValid || !bFinished || !isPdStructNotCanceled(pPdStruct)) {
+            listResult.clear();
+        }
     }
 
     return listResult;
@@ -941,14 +1200,27 @@ QList<QString> XBinary::getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVar
         pPdStruct = &pdStructEmpty;
     }
 
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
+
     // Initialize unpack state
     UNPACK_STATE state = {};
 
     if (initUnpack(&state, mapProperties, pPdStruct)) {
+        bool bEnumerationValid = (state.nCurrentIndex >= 0) && (state.nNumberOfRecords >= 0) &&
+                                 (state.nCurrentIndex <= state.nNumberOfRecords);
+
         // Iterate through records using streaming API
-        while (isPdStructNotCanceled(pPdStruct) && (state.nCurrentIndex < state.nNumberOfRecords)) {
+        while (bEnumerationValid && isPdStructNotCanceled(pPdStruct) && (state.nCurrentIndex < state.nNumberOfRecords)) {
             // Get current record info
             ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+
+            if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
+                (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+                bEnumerationValid = false;
+                break;
+            }
 
             // Extract the record name from properties
             if (record.mapProperties.contains(FPART_PROP_ORIGINALNAME)) {
@@ -959,13 +1231,25 @@ QList<QString> XBinary::getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVar
             }
 
             // Move to next record
+            const qint32 nPreviousIndex = state.nCurrentIndex;
             if (!moveToNext(&state, pPdStruct)) {
+                if ((nPreviousIndex + 1) < state.nNumberOfRecords) {
+                    bEnumerationValid = false;
+                }
+                break;
+            }
+            if ((state.nCurrentIndex <= nPreviousIndex) || (state.nCurrentIndex < 0) ||
+                (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+                bEnumerationValid = false;
                 break;
             }
         }
 
         // Cleanup must not inherit a canceled enumeration token.
-        finishUnpack(&state, nullptr);
+        const bool bFinished = finishUnpack(&state, nullptr);
+        if (!bEnumerationValid || !bFinished || !isPdStructNotCanceled(pPdStruct)) {
+            listResult.clear();
+        }
     }
 
     return listResult;
@@ -985,11 +1269,7 @@ static qint64 readDeviceWithBoundedProgress(QIODevice *pDevice, char *pBuffer, q
         if (i != 2) pDevice->waitForReadyRead(10);
     }
 
-    // A persistent zero read while atEnd() is false is a no-progress failure,
-    // not EOF.  Returning zero here made unbounded decoders (notably STORE)
-    // accept a silently truncated stream because they have no declared limit
-    // against which to distinguish the two cases.
-    return pDevice->atEnd() ? 0 : -1;
+    return 0;
 }
 
 qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
@@ -1603,6 +1883,10 @@ bool XBinary::_isFlagPresentInRecords(const QList<DATA_RECORD> *pListRecords, qu
 {
     bool bResult = false;
 
+    if (!pListRecords) {
+        return bResult;
+    }
+
     qint32 nNumberOfRecords = pListRecords->count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
@@ -1707,13 +1991,25 @@ QList<QVariant> XBinary::getXFRecordValues(const QList<XFRECORD> &listXFRecords,
 {
     QList<QVariant> listResult;
 
-    qint64 nBaseOffset = xLoc.nLocation;
+    _MEMORY_MAP memoryMap = getMemoryMap();
+    qint64 nBaseOffset = locToOffset(&memoryMap, xLoc);
     qint32 nCount = listXFRecords.count();
     bool bIsBigEndian = isBigEndian();
 
+    if ((nBaseOffset < 0) || (nBaseOffset > getSize())) {
+        return listResult;
+    }
+
     for (qint32 i = 0; i < nCount; i++) {
         XFRECORD xfRecord = listXFRecords.at(i);
-        qint64 nOffset = nBaseOffset + xfRecord.nOffset;
+        const qint64 nRelativeOffset = (qint64)xfRecord.nOffset;
+        if (((nRelativeOffset > 0) && (nBaseOffset > (std::numeric_limits<qint64>::max)() - nRelativeOffset)) ||
+            ((nRelativeOffset < 0) && (nBaseOffset < (std::numeric_limits<qint64>::min)() - nRelativeOffset))) {
+            listResult.append(QVariant());
+            continue;
+        }
+
+        qint64 nOffset = nBaseOffset + nRelativeOffset;
         QVariant varValue;
 
         bool _bIsBigEndian = bIsBigEndian;
@@ -1722,6 +2018,24 @@ QList<QVariant> XBinary::getXFRecordValues(const QList<XFRECORD> &listXFRecords,
             _bIsBigEndian = false;
         } else if (xfRecord.nFlags & XFRECORD_FLAG_BE) {
             _bIsBigEndian = true;
+        }
+
+        qint64 nRequiredSize = xfRecord.nSize;
+        if ((xfRecord.valueType == VT_UINT8) || (xfRecord.valueType == VT_INT8)) {
+            nRequiredSize = 1;
+        } else if ((xfRecord.valueType == VT_UINT16) || (xfRecord.valueType == VT_INT16)) {
+            nRequiredSize = 2;
+        } else if ((xfRecord.valueType == VT_UINT32) || (xfRecord.valueType == VT_INT32) || (xfRecord.valueType == VT_FLOAT)) {
+            nRequiredSize = 4;
+        } else if ((xfRecord.valueType == VT_UINT64) || (xfRecord.valueType == VT_INT64) || (xfRecord.valueType == VT_DOUBLE)) {
+            nRequiredSize = 8;
+        }
+
+        const qint64 nDeviceSize = getSize();
+        if ((nOffset < 0) || (nRequiredSize < 0) || (nOffset > nDeviceSize) ||
+            (nRequiredSize > (nDeviceSize - nOffset))) {
+            listResult.append(QVariant());
+            continue;
         }
 
         if (xfRecord.valueType == VT_UINT8) {
@@ -1816,14 +2130,20 @@ QString XBinary::xfHeaderToString(const XFHEADER &xfHeader, const QString &sStru
 
         for (qint32 i = 0; i < nNumberOfFields; i++) {
             const XFRECORD &record = xfHeader.listFields.at(i);
-            nSize = qMax(nSize, (qint64)record.nOffset + record.nSize);
+            if ((record.nOffset >= 0) && (record.nSize >= 0)) {
+                nSize = qMax(nSize, (qint64)record.nOffset + (qint64)record.nSize);
+            }
         }
     }
 
     qint32 nNumberOfRows = xfHeader.listRowLocations.count();
 
     if ((xfHeader.xfType == XFTYPE_TABLE) && (nSize > 0) && (nNumberOfRows > 0)) {
-        nSize *= nNumberOfRows;
+        if (nSize > (std::numeric_limits<qint64>::max)() / nNumberOfRows) {
+            nSize = (std::numeric_limits<qint64>::max)();
+        } else {
+            nSize *= nNumberOfRows;
+        }
     }
 
     if (nSize > 0) {
@@ -1915,14 +2235,10 @@ void XBinary::setDevice(QIODevice *pDevice)
     setInternalInfo(nullptr);
 
     if (m_pDevice) {
-        QBuffer *pBuffer = dynamic_cast<QBuffer *>(pDevice);
-
-        if (pBuffer) {
-            m_pConstMemory = pBuffer->buffer().constData();
-        } else {
-            m_pConstMemory = (const char *)(pDevice->property("Memory").toULongLong());
-        }
-
+        // Do not cache pointers obtained from QBuffer::buffer().  Even a buffer
+        // opened read-only can have its backing QByteArray replaced or detached
+        // by its owner without going through this XBinary instance.  Device
+        // reads preserve the same semantics without retaining borrowed storage.
         if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
         // qDebug("%s",XBinary::valueToHex((quint64)m_pDevice).toLatin1().data());
@@ -1946,25 +2262,28 @@ void XBinary::setFileName(const QString &sFileName)
 
 qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct)
 {
-    // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
 
-    if (!pDevice || (nPos < 0) || (nMaxLen < 0) || ((nMaxLen > 0) && !pData)) {
+    if (!pDevice || !pDevice->isReadable() || (nPos < 0) || (nMaxLen < 0) || ((nMaxLen > 0) && !pData) || !isPdStructNotCanceled(pPdStruct)) {
         return nResult;
     }
 
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+
+    if (nRequestedBufferSize <= 0) {
+        return nResult;
+    }
+
+    const qint64 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
-    if ((pDevice->size() > nPos) && (nPos >= 0)) {
+    if ((nMaxLen == 0) || (pDevice->size() > nPos)) {
         if (pDevice->seek(nPos)) {
-            qint64 nBufferSize = getBufferSize(pPdStruct);
-
             while ((nMaxLen > 0) && isPdStructNotCanceled(pPdStruct)) {
-                qint64 nCurrentSize = qMin(nMaxLen, nBufferSize);
+                const qint64 nRequestedSize = qMin(nMaxLen, nBufferSize);
+                const qint64 nCurrentSize = pDevice->read(pData, nRequestedSize);
 
-                nCurrentSize = pDevice->read(pData, nCurrentSize);
-
-                if (nCurrentSize <= 0) {
+                if ((nCurrentSize <= 0) || (nCurrentSize > nRequestedSize)) {
                     break;
                 }
 
@@ -1993,26 +2312,40 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 {
     qint64 nResult = 0;
 
+    if (!pDevice || !pDevice->isWritable() || (nPos < 0) || (nLen < 0) || ((nLen > 0) && !pData) || !isPdStructNotCanceled(pPdStruct)) {
+        return nResult;
+    }
+
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+
+    if (nRequestedBufferSize <= 0) {
+        return nResult;
+    }
+
+    const qint64 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
-    if (pDevice && pData && (nLen >= 0) && (pDevice->size() > nPos)) {
-        if (pDevice->seek(nPos)) {
-            qint64 nBufferSize = getBufferSize(pPdStruct);
+    const qint64 nDeviceSize = pDevice->size();
 
-            while ((nLen > 0) && isPdStructNotCanceled(pPdStruct)) {
-                qint64 nCurrentSize = qMin(nLen, nBufferSize);
+    if ((nDeviceSize < 0) || (nPos > nDeviceSize) || (nLen > nDeviceSize - nPos)) {
+        if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
+        return nResult;
+    }
 
-                nCurrentSize = pDevice->write(pData, nCurrentSize);
+    if (pDevice->seek(nPos)) {
+        while ((nLen > 0) && isPdStructNotCanceled(pPdStruct)) {
+            const qint64 nRequestedSize = qMin(nLen, nBufferSize);
+            const qint64 nCurrentSize = pDevice->write(pData, nRequestedSize);
 
-                if (nCurrentSize <= 0) {
-                    setPdStructErrorString(pPdStruct, tr("Write error"));
-                    break;
-                }
-
-                nLen -= nCurrentSize;
-                pData += nCurrentSize;
-                nResult += nCurrentSize;
+            if ((nCurrentSize <= 0) || (nCurrentSize > nRequestedSize)) {
+                setPdStructErrorString(pPdStruct, tr("Write error"));
+                break;
             }
+
+            nLen -= nCurrentSize;
+            pData += nCurrentSize;
+            nResult += nCurrentSize;
         }
     }
 
@@ -2025,10 +2358,6 @@ qint64 XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qi
 {
     // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
-
-    if (!pDevice || (nPos < 0) || (nMaxLen < 0) || ((nMaxLen > 0) && !pData)) {
-        return nResult;
-    }
 
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
@@ -2051,18 +2380,38 @@ qint64 XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qi
     return nResult;
 }
 
+static bool resizeByteArrayForRead(QByteArray *pData, qint64 nSize)
+{
+    if (!pData || (nSize <= 0) || (nSize > (std::numeric_limits<qint32>::max)())) {
+        return false;
+    }
+
+    try {
+        pData->resize((qint32)nSize);
+    } catch (const std::bad_alloc &) {
+        pData->clear();
+        return false;
+    }
+
+    return pData->size() == nSize;
+}
+
 QByteArray XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, qint64 nSize)
 {
     QByteArray baResult;
 
-    XBinary::OFFSETSIZE osRegion = convertOffsetAndSize(nPos, nSize);
+    // This overload explicitly accepts a device and must derive its bounds from
+    // that device, not from the XBinary instance's possibly unrelated device.
+    // QByteArray is qint32-sized in Qt 5, so reject a wider request before
+    // narrowing the allocation while still passing a qint64 length to read().
+    XBinary::OFFSETSIZE osRegion = XBinary::convertOffsetAndSize(pDevice, nPos, nSize);
 
-    if (osRegion.nOffset != -1) {
-        baResult.resize((qint32)osRegion.nSize);
+    if ((osRegion.nOffset != -1) && resizeByteArrayForRead(&baResult, osRegion.nSize)) {
+        const qint64 nBytes = _readDataSimple(pDevice, osRegion.nOffset, baResult.data(), osRegion.nSize);
 
-        qint64 nBytes = _readDataSimple(pDevice, osRegion.nOffset, baResult.data(), osRegion.nSize);
-
-        if (osRegion.nSize != nBytes) {
+        if ((nBytes < 0) || (nBytes > osRegion.nSize)) {
+            baResult.clear();
+        } else if (osRegion.nSize != nBytes) {
             baResult.resize((qint32)nBytes);
         }
     }
@@ -2074,15 +2423,25 @@ qint64 XBinary::_writeDataSimple(QIODevice *pDevice, qint64 nPos, const char *pD
 {
     qint64 nResult = 0;
 
-    if (!pDevice || (nPos < 0) || (nLen < 0) || ((nLen > 0) && !pData)) {
+    if (!pDevice || !pDevice->isWritable() || (nPos < 0) || (nLen < 0) || ((nLen > 0) && !pData)) {
         return nResult;
     }
 
     if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
 
-    if (pDevice->size() > nPos) {
+    const qint64 nDeviceSize = pDevice->size();
+
+    if ((nDeviceSize >= 0) && (nPos <= nDeviceSize) && (nLen <= (nDeviceSize - nPos))) {
         if (pDevice->seek(nPos)) {
-            nResult = pDevice->write(pData, nLen);
+            while (nResult < nLen) {
+                const qint64 nWritten = pDevice->write(pData + nResult, nLen - nResult);
+
+                if ((nWritten <= 0) || (nWritten > (nLen - nResult))) {
+                    break;
+                }
+
+                nResult += nWritten;
+            }
         } else {
 #ifdef QT_DEBUG
             qDebug("Cannot seek");
@@ -2239,6 +2598,10 @@ QString XBinary::getArch()
 
 QString XBinary::getFileFormatString(const FILEFORMATINFO *pFileFormatInfo)
 {
+    if (!pFileFormatInfo) {
+        return QString();
+    }
+
     QString sResult = fileTypeIdToString(pFileFormatInfo->fileType);
 
     if (pFileFormatInfo->sVersion != "") {
@@ -2257,6 +2620,10 @@ QString XBinary::getFileFormatString(const FILEFORMATINFO *pFileFormatInfo)
 QString XBinary::getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo)
 {
     QString sResult;
+
+    if (!pFileFormatInfo) {
+        return sResult;
+    }
 
     if (pFileFormatInfo->bIsEncrypted) {
         sResult = appendText(sResult, QObject::tr("Encrypted"), ", ");
@@ -2277,12 +2644,12 @@ QString XBinary::getFileFormatInfoString(const FILEFORMATINFO *pFileFormatInfo)
 
 QString XBinary::getOperationSystemInfoString(const FILEFORMATINFO *pFileFormatInfo)
 {
-    return QString("%1, %2").arg(pFileFormatInfo->sArch).arg(modeIdToString(pFileFormatInfo->mode));
+    return pFileFormatInfo ? QString("%1, %2").arg(pFileFormatInfo->sArch).arg(modeIdToString(pFileFormatInfo->mode)) : QString();
 }
 
 XBinary::OSNAME XBinary::getOsName(const FILEFORMATINFO *pFileFormatInfo)
 {
-    return pFileFormatInfo->osName;
+    return pFileFormatInfo ? pFileFormatInfo->osName : OSNAME_UNKNOWN;
 }
 
 void XBinary::setFileFormatExt(const QString &sFileFormatExt)
@@ -2349,15 +2716,9 @@ QDateTime XBinary::winFileTimeToQDateTime(quint64 nWinFileTime)
         return QDateTime();
     }
 
-    const quint64 nDiffSinceEpoch = nWinFileTime - nEpochDelta;
-    const quint64 nMsecsSinceEpoch = nDiffSinceEpoch / Q_UINT64_C(10000);
+    quint64 nMsecsSinceEpoch = (nWinFileTime - nEpochDelta) / Q_UINT64_C(10000);
 
-    if (nMsecsSinceEpoch > (quint64)(std::numeric_limits<qint64>::max)()) {
-        return QDateTime();
-    }
-
-    QDateTime dateTime = QDateTime::fromMSecsSinceEpoch((qint64)nMsecsSinceEpoch, Qt::UTC);
-    return dateTime.isValid() ? dateTime : QDateTime();
+    return QDateTime::fromMSecsSinceEpoch((qint64)nMsecsSinceEpoch, Qt::UTC);
 }
 
 bool XBinary::setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties, const QString &sFileName)
@@ -2827,14 +3188,25 @@ XBinary::OS_STRING XBinary::getOsAnsiString(qint64 nOffset, qint64 nSize)
 
 void XBinary::findFiles(const QString &sDirectoryName, XBinary::FFOPTIONS *pFFOption, qint32 nLevel)
 {
+    static const qint32 MAX_DIRECTORY_RECURSION = 256;
+    if (!pFFOption || !pFFOption->pnNumberOfFiles || !pFFOption->pListFileNames || !pFFOption->pbIsStop ||
+        (nLevel < 0) || (nLevel > MAX_DIRECTORY_RECURSION)) {
+        return;
+    }
+
     *(pFFOption->pnNumberOfFiles) = pFFOption->pListFileNames->count();
 
     if (!(*pFFOption->pbIsStop)) {
         QFileInfo fi(sDirectoryName);
 
-        if (fi.isFile()) {
+        if (!isDirectCanonicalPath(fi)) return;
+
+        if (!fi.isSymLink() && fi.isFile()) {
             pFFOption->pListFileNames->append(fi.absoluteFilePath());
-        } else if (fi.isDir() && ((pFFOption->bSubdirectories) || (nLevel == 0))) {
+        // Do not follow symlinks. Besides creating directory cycles, following
+        // file or directory links can silently include content outside the root
+        // selected by the caller.
+        } else if (fi.isDir() && !fi.isSymLink() && ((pFFOption->bSubdirectories) || (nLevel == 0))) {
             QDir dir(sDirectoryName);
 
             QFileInfoList eil = dir.entryInfoList();
@@ -2844,63 +3216,63 @@ void XBinary::findFiles(const QString &sDirectoryName, XBinary::FFOPTIONS *pFFOp
             for (qint32 i = 0; (i < nNumberOfFiles) && (!(*(pFFOption->pbIsStop))); i++) {
                 QString sFN = eil.at(i).fileName();
 
-                if ((sFN != ".") && (sFN != "..")) {
+                if ((sFN != ".") && (sFN != "..") && (nLevel < MAX_DIRECTORY_RECURSION)) {
                     findFiles(eil.at(i).absoluteFilePath(), pFFOption, nLevel + 1);
                 }
             }
         }
     }
+
+    *(pFFOption->pnNumberOfFiles) = pFFOption->pListFileNames->count();
 }
 
 void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames, PDSTRUCT *pPdStruct)
 {
-    QFileInfo fi(sDirectoryName);
-
-    if (fi.isFile()) {
-        pListFileNames->append(fi.absoluteFilePath());
-    } else if (fi.isDir()) {
-        QDir dir(sDirectoryName);
-
-        QFileInfoList eil = dir.entryInfoList();
-
-        qint32 nNumberOfFiles = eil.count();
-
-        for (qint32 i = 0; (i < nNumberOfFiles) && isPdStructNotCanceled(pPdStruct); i++) {
-            QString sFN = eil.at(i).fileName();
-
-            if ((sFN != ".") && (sFN != "..")) {
-                findFiles(eil.at(i).absoluteFilePath(), pListFileNames, pPdStruct);
-            }
-        }
-    }
+    findFiles(sDirectoryName, pListFileNames, true, 0, pPdStruct);
 }
 
 void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFileNames, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct)
 {
+    static const qint32 MAX_DIRECTORY_RECURSION = 256;
+    if (!pListFileNames || (nLevel < 0) || (nLevel > MAX_DIRECTORY_RECURSION)) {
+        return;
+    }
+
+    PDSTRUCT pdStructEmpty = createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     qint32 _nFreeIndex = 0;
 
     if (nLevel == 0) {
-        _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, 0);
+        _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, 0);
     }
 
-    if (!(pPdStruct->bIsStop)) {
+    if (isPdStructNotCanceled(pPdStruct)) {
         QFileInfo fi(sDirectoryName);
 
-        if (fi.isFile()) {
+        if (!isDirectCanonicalPath(fi)) {
+            if (nLevel == 0) XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            return;
+        }
+
+        if (!fi.isSymLink() && fi.isFile()) {
             pListFileNames->append(fi.absoluteFilePath());
-        } else if (fi.isDir() && ((bSubDirectories) || (nLevel == 0))) {
+        } else if (fi.isDir() && !fi.isSymLink() && ((bSubDirectories) || (nLevel == 0))) {
             QDir dir(sDirectoryName);
 
             QFileInfoList eil = dir.entryInfoList();
 
             qint32 nNumberOfFiles = eil.count();
 
-            for (qint32 i = 0; (i < nNumberOfFiles) && (!(pPdStruct->bIsStop)); i++) {
+            for (qint32 i = 0; (i < nNumberOfFiles) && isPdStructNotCanceled(pPdStruct); i++) {
                 QString sFN = eil.at(i).fileName();
 
                 if ((sFN != ".") && (sFN != "..")) {
-                    findFiles(eil.at(i).absoluteFilePath(), pListFileNames, bSubDirectories, nLevel + 1, pPdStruct);
+                    if (nLevel < MAX_DIRECTORY_RECURSION) {
+                        findFiles(eil.at(i).absoluteFilePath(), pListFileNames, bSubDirectories, nLevel + 1, pPdStruct);
+                    }
                 }
             }
         }
@@ -2913,21 +3285,35 @@ void XBinary::findFiles(const QString &sDirectoryName, QList<QString> *pListFile
 
 qint32 XBinary::getNumberOfFiles(const QString &sDirectoryName, bool bSubDirectories, qint32 nLevel, PDSTRUCT *pPdStruct)
 {
+    static const qint32 MAX_DIRECTORY_RECURSION = 256;
+    if ((nLevel < 0) || (nLevel > MAX_DIRECTORY_RECURSION)) {
+        return 0;
+    }
+
+    PDSTRUCT pdStructEmpty = createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
     qint32 nResult = 0;
 
     qint32 _nFreeIndex = 0;
 
     if (nLevel == 0) {
-        _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, 0);
+        _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, 0);
     }
 
     if (isPdStructNotCanceled(pPdStruct)) {
         QFileInfo fi(sDirectoryName);
 
-        if (fi.isFile()) {
-            _nFreeIndex++;
-        } else if (fi.isDir() && ((bSubDirectories) || (nLevel == 0))) {
+        if (!isDirectCanonicalPath(fi)) {
+            if (nLevel == 0) XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            return 0;
+        }
+
+        if (!fi.isSymLink() && fi.isFile()) {
+            nResult = 1;
+        } else if (fi.isDir() && !fi.isSymLink() && ((bSubDirectories) || (nLevel == 0))) {
             QDir dir(sDirectoryName);
 
             QFileInfoList eil = dir.entryInfoList();
@@ -2937,8 +3323,13 @@ qint32 XBinary::getNumberOfFiles(const QString &sDirectoryName, bool bSubDirecto
             for (qint32 i = 0; (i < nNumberOfFiles) && isPdStructNotCanceled(pPdStruct); i++) {
                 QString sFN = eil.at(i).fileName();
 
-                if ((sFN != ".") && (sFN != "..")) {
-                    nResult += getNumberOfFiles(eil.at(i).absoluteFilePath(), bSubDirectories, nLevel + 1, pPdStruct);
+                if ((sFN != ".") && (sFN != "..") && (nLevel < MAX_DIRECTORY_RECURSION)) {
+                    const qint32 nChildCount = getNumberOfFiles(eil.at(i).absoluteFilePath(), bSubDirectories, nLevel + 1, pPdStruct);
+                    if (nChildCount > ((std::numeric_limits<qint32>::max)() - nResult)) {
+                        nResult = (std::numeric_limits<qint32>::max)();
+                        break;
+                    }
+                    nResult += nChildCount;
                 }
             }
         }
@@ -3053,12 +3444,12 @@ QByteArray XBinary::read_array(qint64 nOffset, qint64 nSize)
 
     XBinary::OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
 
-    if (osRegion.nOffset != -1) {
-        baResult.resize((qint32)osRegion.nSize);
+    if ((osRegion.nOffset != -1) && resizeByteArrayForRead(&baResult, osRegion.nSize)) {
+        const qint64 nBytes = read_array(osRegion.nOffset, baResult.data(), osRegion.nSize);
 
-        qint64 nBytes = read_array(osRegion.nOffset, baResult.data(), osRegion.nSize);
-
-        if (osRegion.nSize != nBytes) {
+        if ((nBytes < 0) || (nBytes > osRegion.nSize)) {
+            baResult.clear();
+        } else if (osRegion.nSize != nBytes) {
             baResult.resize((qint32)nBytes);
         }
     }
@@ -3072,12 +3463,12 @@ QByteArray XBinary::read_array_process(qint64 nOffset, qint64 nSize, PDSTRUCT *p
 
     XBinary::OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
 
-    if (osRegion.nOffset != -1) {
-        baResult.resize((qint32)osRegion.nSize);
+    if ((osRegion.nOffset != -1) && resizeByteArrayForRead(&baResult, osRegion.nSize)) {
+        const qint64 nBytes = read_array_process(osRegion.nOffset, baResult.data(), osRegion.nSize, pPdStruct);
 
-        qint64 nBytes = read_array_process(osRegion.nOffset, baResult.data(), osRegion.nSize, pPdStruct);
-
-        if (osRegion.nSize != nBytes) {
+        if ((nBytes < 0) || (nBytes > osRegion.nSize)) {
+            baResult.clear();
+        } else if (osRegion.nSize != nBytes) {
             baResult.resize((qint32)nBytes);
         }
     }
@@ -3095,9 +3486,9 @@ qint64 XBinary::write_array_process(qint64 nOffset, const char *pBuffer, qint64 
 
     qint64 nResult = 0;
 
-    qint64 _nTotalSize = getSize();
+    const qint64 nTotalSize = getSize();
 
-    if ((nSize <= (_nTotalSize - nOffset)) && (nOffset >= 0)) {
+    if (m_pDevice && (nOffset >= 0) && (nSize >= 0) && (nOffset <= nTotalSize) && (nSize <= nTotalSize - nOffset)) {
         nResult = safeWriteData(m_pDevice, nOffset, pBuffer, nSize, pPdStruct);
     }
 
@@ -3113,9 +3504,9 @@ qint64 XBinary::write_array(qint64 nOffset, const char *pBuffer, qint64 nSize)
 {
     qint64 nResult = 0;
 
-    qint64 _nTotalSize = getSize();
+    const qint64 nTotalSize = getSize();
 
-    if ((nSize <= (_nTotalSize - nOffset)) && (nOffset >= 0)) {
+    if (m_pDevice && (nOffset >= 0) && (nSize >= 0) && (nOffset <= nTotalSize) && (nSize <= nTotalSize - nOffset)) {
         nResult = _writeDataSimple(m_pDevice, nOffset, pBuffer, nSize);
     }
 
@@ -3325,7 +3716,11 @@ float XBinary::read_float16(qint64 nOffset, bool bIsBigEndian)
         float32_value = (sign << 31) | ((exponent + (127 - 15)) << 23) | (fraction << 13);
     }
 
-    return *((float *)&float32_value);
+    float result = 0;
+    static_assert(sizeof(result) == sizeof(float32_value), "float32 storage size mismatch");
+    memcpy(&result, &float32_value, sizeof(result));
+
+    return result;
 }
 
 float XBinary::read_float(qint64 nOffset, bool bIsBigEndian)
@@ -3367,44 +3762,60 @@ quint32 XBinary::read_uint24(qint64 nOffset, bool bIsBigEndian)
 
 qint32 XBinary::read_int24(qint64 nOffset, bool bIsBigEndian)
 {
-    return (qint32)(read_uint24(nOffset, bIsBigEndian));
+    quint32 nValue = read_uint24(nOffset, bIsBigEndian);
+
+    if (nValue & 0x800000) {
+        nValue |= 0xFF000000;
+    }
+
+    return (qint32)nValue;
 }
 
 XBinary::PACKED_UINT XBinary::read_packedNumber(qint64 nOffset, qint64 nSize)
 {
+    PACKED_UINT result = {};
+
+    if (nSize <= 0) {
+        return result;
+    }
+
     nSize = qMin((qint64)9, nSize);
 
     QByteArray baData = read_array(nOffset, nSize);
 
-    return XBinary::_read_packedNumber(baData.data(), nSize);
+    return XBinary::_read_packedNumber(baData.data(), baData.size());
 }
 
 qint64 XBinary::write_ansiString(qint64 nOffset, const QString &sString, qint64 nMaxSize)
 {
-    qint64 _nMaxSize = sString.length() + 1;
-    if ((nMaxSize == -1) || (nMaxSize > _nMaxSize)) {
-        nMaxSize = _nMaxSize;
+    if ((nOffset < 0) || (nMaxSize < -1)) {
+        return 0;
     }
 
-    return write_array(nOffset, sString.toLatin1().data(), nMaxSize);
+    const QByteArray baString = sString.toLatin1();
+    const qint64 nTerminatedSize = (qint64)baString.size() + 1;
+    const qint64 nWriteSize = (nMaxSize == -1) ? nTerminatedSize : qMin(nMaxSize, nTerminatedSize);
+
+    return write_array_process(nOffset, baString.constData(), nWriteSize);
 }
 
 void XBinary::write_ansiStringFix(qint64 nOffset, qint64 nSize, const QString &sString)
 {
-    QString _sString = sString;
-    char *pBuffer = new char[nSize + 1];  // mb TODO Check
-
-    _zeroMemory(pBuffer, nSize + 1);
-
-    if (_sString.size() > nSize) {
-        _sString.resize(nSize);
+    if ((nOffset < 0) || (nSize <= 0)) {
+        return;
     }
 
-    _copyMemory(pBuffer, _sString.toLatin1().data(), _sString.size());
+    const QByteArray baString = sString.toLatin1();
 
-    XBinary::write_array(nOffset, pBuffer, nSize);
+    if (!zeroFill(nOffset, nSize)) {
+        return;
+    }
 
-    delete[] pBuffer;
+    const qint64 nStringSize = qMin(nSize, (qint64)baString.size());
+
+    if (nStringSize > 0) {
+        write_array_process(nOffset, baString.constData(), nStringSize);
+    }
 }
 
 qint64 XBinary::write_unicodeString(qint64 nOffset, const QString &sString, qint64 nMaxSize, bool bIsBigEndian)
@@ -3455,9 +3866,8 @@ QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize, bool bIsBig
     if ((nMaxSize > 0) && (nMaxSize < 0x10000)) {
         QByteArray baBuffer = read_array(nOffset, nMaxSize * 2);
         qint32 nActualWords = (qint32)(baBuffer.size() / 2);
-        quint16 *pBuffer = new quint16[nActualWords + 1];
         const char *pData = baBuffer.constData();
-        qint32 nLen = 0;
+        sResult.reserve(nActualWords);
 
         for (qint32 i = 0; i < nActualWords; i++) {
             quint16 nWord;
@@ -3468,13 +3878,8 @@ QString XBinary::read_unicodeString(qint64 nOffset, qint64 nMaxSize, bool bIsBig
             if (nWord == 0) {
                 break;
             }
-            pBuffer[nLen++] = nWord;
+            sResult.append(QChar(nWord));
         }
-        pBuffer[nLen] = 0;
-
-        sResult = QString::fromUtf16(pBuffer, nLen);
-
-        delete[] pBuffer;
     }
 
     return sResult;
@@ -3533,29 +3938,20 @@ QString XBinary::read_ucsdString(qint64 nOffset)
 
     qint32 nSize = read_uint8(nOffset);
 
-    if (nSize > 0x10000) {
-        nSize = 0x10000;
-    }
-
     if (nSize > 0) {
-        nOffset++;
-        quint8 *pBuffer = new quint8[nSize + 1];
+        QByteArray baData = read_array(nOffset + 1, nSize);
+
+        if (baData.size() != nSize) {
+            return sResult;
+        }
 
         for (qint32 i = 0; i < nSize; i++) {
-            pBuffer[i] = read_uint8(nOffset + i);
-
-            if (pBuffer[i] == 0) {
-                pBuffer[i] = 0x20;  // Space
-            }
-
-            if (i == nSize - 1) {
-                pBuffer[nSize] = 0;
+            if (baData[i] == '\0') {
+                baData[i] = 0x20;
             }
         }
 
-        sResult.append((char *)pBuffer);
-
-        delete[] pBuffer;
+        sResult = QString::fromLatin1(baData.constData(), baData.size());
     }
 
     return sResult;
@@ -3588,10 +3984,26 @@ QString XBinary::_read_utf8String(qint64 nOffset, qint64 nMaxSize)
 {
     QString sResult;
 
+    const qint64 nDeviceSize = getSize();
+    if ((nOffset < 0) || (nMaxSize <= 0) || (nOffset >= nDeviceSize)) {
+        return sResult;
+    }
+
+    nMaxSize = qMin(nMaxSize, nDeviceSize - nOffset);
     PACKED_UINT ulebSize = read_uleb128(nOffset, nMaxSize);
 
-    sResult = read_utf8String(nOffset + ulebSize.nByteSize,
-                              ulebSize.nValue);  // TODO mutf8
+    if (!ulebSize.bIsValid || (ulebSize.nByteSize > (quint64)nMaxSize) ||
+        (ulebSize.nValue > (quint64)(nMaxSize - (qint64)ulebSize.nByteSize)) ||
+        (ulebSize.nValue > (quint64)(std::numeric_limits<qint32>::max)())) {
+        return sResult;
+    }
+
+    const qint64 nStringOffset = nOffset + (qint64)ulebSize.nByteSize;
+    const QByteArray baString = read_array(nStringOffset, (qint64)ulebSize.nValue);
+
+    if (baString.size() == (qint64)ulebSize.nValue) {
+        sResult = QString::fromUtf8(baString.constData(), baString.size());  // TODO mutf8
+    }
 
     return sResult;
 }
@@ -3600,13 +4012,21 @@ QString XBinary::_read_utf8String(char *pData, qint64 nMaxSize)
 {
     QString sResult;
 
+    if (!pData || (nMaxSize <= 0)) {
+        return sResult;
+    }
+
     PACKED_UINT ulebSize = _read_uleb128(pData, nMaxSize);
 
-    qint32 nStringSize = qMin((qint64)ulebSize.nValue, nMaxSize - ulebSize.nByteSize);
-
-    if (nStringSize > 0) {
-        sResult = QString::fromUtf8(pData + ulebSize.nByteSize, nStringSize);
+    if (!ulebSize.bIsValid || (ulebSize.nByteSize > (quint64)nMaxSize) ||
+        (ulebSize.nValue > (quint64)(nMaxSize - (qint64)ulebSize.nByteSize)) ||
+        (ulebSize.nValue > (quint64)(std::numeric_limits<qint32>::max)())) {
+        return sResult;
     }
+
+    const qint32 nStringSize = (qint32)ulebSize.nValue;
+
+    sResult = QString::fromUtf8(pData + ulebSize.nByteSize, nStringSize);
 
     return sResult;
 }
@@ -3615,9 +4035,19 @@ QString XBinary::_read_utf8String(qint64 nOffset, char *pData, qint32 nDataSize,
 {
     QString sResult;
 
-    if ((nOffset >= nDataOffset) && (nOffset < (nDataOffset + nDataSize))) {
-        char *pStringData = pData + (nOffset - nDataOffset);
-        qint32 nStringSize = nDataSize - (nOffset - nDataOffset);
+    if (!pData || (nDataSize <= 0) || (nDataOffset < 0)) {
+        return sResult;
+    }
+
+    if (nOffset < (qint64)nDataOffset) {
+        return sResult;
+    }
+
+    const qint64 nRelativeOffset = nOffset - (qint64)nDataOffset;
+
+    if (nRelativeOffset < (qint64)nDataSize) {
+        char *pStringData = pData + nRelativeOffset;
+        qint32 nStringSize = nDataSize - (qint32)nRelativeOffset;
         sResult = XBinary::_read_utf8String(pStringData, nStringSize);
     }
 
@@ -4542,22 +4972,21 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         return -1;
     }
 
-    if (nArraySize <= 0) {
+    if ((nArraySize <= 0) || (nArraySize > 0x100000) || !isPdStructNotCanceled(pPdStruct)) {
         return -1;
     }
 
-    // TODO CheckSize function
-    qint64 _nSize = getSize();
+    const qint64 _nSize = getSize();
+
+    if ((nOffset < 0) || (nOffset > _nSize)) {
+        return -1;
+    }
 
     if (nSize == -1) {
         nSize = _nSize - nOffset;
     }
 
-    if (nSize <= 0) {
-        return -1;
-    }
-
-    if (nOffset + nSize > _nSize) {
+    if ((nSize <= 0) || (nSize > _nSize - nOffset)) {
         return -1;
     }
 
@@ -4565,23 +4994,30 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
         return -1;
     }
 
-    if (nOffset < 0) {
-        return -1;
-    }
-
     qint64 nTemp = 0;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
     qint64 nStartOffset = nOffset;
 
     char *pBuffer = nullptr;
 
-    const qint32 nBufferSize = qBound((qint32)0x1000, getBufferSize(pPdStruct), (qint32)0x100000);
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+
+    if (nRequestedBufferSize <= 0) {
+        setPdStructFinished(pPdStruct, _nFreeIndex);
+        return -1;
+    }
+
+    const qint32 nBufferSize = qMax((qint32)nArraySize, qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000));
 
     if (!m_pConstMemory) {
-        pBuffer = new char[nBufferSize];
+        pBuffer = new (std::nothrow) char[nBufferSize];
+
+        if (!pBuffer) {
+            setPdStructFinished(pPdStruct, _nFreeIndex);
+            return -1;
+        }
     }
 
     // Precompute BMH shift table for byte-compare mode
@@ -4608,7 +5044,7 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
 
     const char nLastSearchChar = (st == ST_COMPAREBYTES) ? pArray[nArraySize - 1] : 0;
 
-    while ((nSize > nArraySize - 1) && (!(pPdStruct->bIsStop))) {
+    while ((nSize >= nArraySize) && isPdStructNotCanceled(pPdStruct)) {
         nTemp = (nSize < nBufferSize) ? nSize : nBufferSize;
 
         if (m_pConstMemory) {
@@ -4675,6 +5111,10 @@ qint64 XBinary::_find_array(ST st, qint64 nOffset, qint64 nSize, const char *pAr
     }
 
     setPdStructFinished(pPdStruct, _nFreeIndex);
+
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        nResult = -1;
+    }
 
     return nResult;
 }
@@ -4916,7 +5356,15 @@ QByteArray XBinary::_signatureToSigBytes(const QString &sSignature, PDSTRUCT *pP
 {
     QByteArray baResult;
 
+    if (!isSignatureValid(sSignature, pPdStruct)) {
+        return baResult;
+    }
+
     QString _sSignature = convertSignature(sSignature);
+    if (_sSignature.contains(QChar('$')) || _sSignature.contains(QChar('#')) || _sSignature.contains(QChar('+')) ||
+        _sSignature.contains(QChar('[')) || _sSignature.contains(QChar(']'))) {
+        return baResult;
+    }
     qint32 nSignatureSize = _sSignature.size();
 
     for (qint32 i = 0; (i < nSignatureSize) && isPdStructNotCanceled(pPdStruct);) {
@@ -4995,7 +5443,8 @@ bool XBinary::_compareSigBytes(const char *pSigBytes, qint64 nSigBytesSize, cons
 {
     // SigBytes format: pairs of {type:quint8, value:quint8}
     // So nSigBytesSize must be even and represent nSigBytesSize/2 bytes to match
-    if ((nSigBytesSize % 2) != 0) {
+    if (!pSigBytes || !pData || (nSigBytesSize <= 0) || (nDataSize < 0) || ((nSigBytesSize % 2) != 0) ||
+        !isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
 
@@ -5083,7 +5532,7 @@ bool XBinary::_compareSigBytes(const char *pSigBytes, qint64 nSigBytesSize, cons
 qint64 XBinary::_findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigBytes, qint64 nSigBytesSize, PDSTRUCT *pPdStruct)
 {
     // Validate inputs
-    if (!pSigBytes || nSigBytesSize <= 0) {
+    if (!pSigBytes || (nSigBytesSize <= 0) || (nSigBytesSize > 0x200000)) {
         return -1;
     }
 
@@ -5097,11 +5546,15 @@ qint64 XBinary::_findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigByte
     // Validate region
     qint64 nFileSize = getSize();
 
+    if ((nFileSize < 0) || (nOffset < 0) || (nOffset > nFileSize) || (nSize < -1) || !isPdStructNotCanceled(pPdStruct)) {
+        return -1;
+    }
+
     if (nSize == -1) {
         nSize = nFileSize - nOffset;
     }
 
-    if (nSize <= 0 || nOffset < 0 || nOffset + nSize > nFileSize) {
+    if ((nSize <= 0) || (nSize > (nFileSize - nOffset))) {
         return -1;
     }
 
@@ -5134,7 +5587,7 @@ qint64 XBinary::_findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigByte
         }
     } else {
         // Buffered read path
-        qint32 nBufferSize = 0x10000;  // 64KB buffer
+        const qint32 nBufferSize = qMax((qint32)0x10000, (qint32)nPatternLength);
         QByteArray baBuffer;
 
         for (qint64 i = nOffset; (i < nSearchEnd) && isPdStructNotCanceled(pPdStruct);) {
@@ -5204,12 +5657,18 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         pnResultSize = &nResultSize;
     }
 
+    *pnResultSize = 0;
+
+    if (!pMemoryMap || (_nSize < 0) || (nOffset < 0) || (nOffset > _nSize) ||
+        (nSize < -1) || !isPdStructNotCanceled(pPdStruct)) {
+        return -1;
+    }
+
     if (nSize == -1) {
         nSize = _nSize - nOffset;
     }
 
-    if (nOffset + nSize > _nSize) {
-        // return -1;
+    if (nSize > (_nSize - nOffset)) {
         nSize = _nSize - nOffset;
     }
 
@@ -5218,6 +5677,10 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
     }
 
     QString _sSignature = convertSignature(sSignature);
+
+    if (_sSignature.isEmpty() || (_sSignature.size() > 0x200000) || !isSignatureValid(_sSignature, pPdStruct)) {
+        return -1;
+    }
 
     if (_sSignature.contains(QChar('$')) || _sSignature.contains(QChar('#')) || _sSignature.contains(QChar('+'))) {
         *pnResultSize = 1;
@@ -5234,7 +5697,7 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bIsValid, pPdStruct);
 
         if (listSignatureRecords.count()) {
-            qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+            qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, 0);
 
             qint32 nSearchFirstIndex = 0;
             qint64 nDelta = 0;
@@ -5269,6 +5732,10 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
             }
 
             if (nSearchFirstIndex > 0) {
+                if ((nDelta < 0) || (nDelta > nSize) || (nDelta > (_nSize - nOffset))) {
+                    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+                    return -1;
+                }
                 qint64 nTmpOffset = nOffset + nDelta;
                 qint64 nTmpSize = nSize - nDelta;
 
@@ -5434,51 +5901,13 @@ qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 n
         }
 
     } else {
-        QByteArray baData = QByteArray::fromHex(QByteArray(_sSignature.toLatin1().data()));
+        const QByteArray baData = QByteArray::fromHex(_sSignature.toLatin1());
 
         if (baData.size()) {
+            *pnResultSize = baData.size();
             nResult = find_array(nOffset, nSize, baData.data(), baData.size(), pPdStruct);
         }
     }
-
-    return nResult;
-}
-
-static qint64 _x_find_ansi_string_i(char *pBuffer, qint64 nTemp, qint64 nStringSize, const quint8 *pUpperData, const quint8 *pLowerData, qint64 nOffset)
-{
-    qint64 nResult = -1;
-    qint64 nSearchEnd = nTemp - (nStringSize - 1);
-
-#ifdef USE_XSIMD
-    nResult = xsimd_find_ansi_string_i(pBuffer, nTemp, (const char *)pUpperData, nStringSize, nOffset);
-    if (nResult != -1) return nResult;
-#else
-    quint8 *pData = (quint8 *)pBuffer;
-    for (qint64 i = 0; i < nSearchEnd; i++) {
-        // Inline comparison for better performance
-        bool bMatch = true;
-        quint8 *pCurrent = pData + i;
-        const quint8 *pUpper = pUpperData;
-        const quint8 *pLower = pLowerData;
-        qint64 nRemaining = nStringSize;
-
-        while (nRemaining > 0) {
-            if ((*pCurrent != *pUpper) && (*pCurrent != *pLower)) {
-                bMatch = false;
-                break;
-            }
-            pCurrent++;
-            pUpper++;
-            pLower++;
-            nRemaining--;
-        }
-
-        if (bMatch) {
-            nResult = nOffset + i;
-            break;
-        }
-    }
-#endif
 
     return nResult;
 }
@@ -5491,57 +5920,128 @@ qint64 XBinary::find_ansiStringI(qint64 nOffset, qint64 nSize, const QString &sS
         pPdStruct = &pdStructEmpty;
     }
 
-    qint64 nResult = -1;
-    // TODO CheckSize function
-    qint64 nStringSize = sString.size();
-    qint64 _nSize = getSize();
+    const qint64 nTotalSize = getSize();
 
-    if (nSize == -1) {
-        nSize = _nSize - nOffset;
+    // Enforce the public search-pattern ceiling before duplicating the input.
+    if (!isPdStructNotCanceled(pPdStruct) || (nOffset < 0) || (nOffset > nTotalSize) || sString.isEmpty() || (sString.size() > 0x100000)) {
+        return -1;
     }
 
-    if ((nSize > 0) && (nOffset + nSize <= _nSize) && (nStringSize <= nSize)) {
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    QByteArray baNeedle;
+    try {
+        baNeedle = sString.toLatin1();
+    } catch (const std::bad_alloc &) {
+        return -1;
+    }
+    const qint32 nStringSize = baNeedle.size();
 
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    if (nSize == -1) {
+        nSize = nTotalSize - nOffset;
+    }
 
-        qint64 nTemp = 0;
+    if ((nSize < nStringSize) || (nSize > nTotalSize - nOffset)) {
+        return -1;
+    }
 
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
 
-        QByteArray baUpper = sString.toUpper().toLatin1();
-        QByteArray baLower = sString.toLower().toLatin1();
+    if (nRequestedBufferSize <= 0) {
+        return -1;
+    }
 
-        const quint8 *pUpperData = (const quint8 *)baUpper.constData();
-        const quint8 *pLowerData = (const quint8 *)baLower.constData();
+    qint32 nBufferSize = nRequestedBufferSize;
+    if (nBufferSize < 0x1000) {
+        nBufferSize = 0x1000;
+    } else if (nBufferSize > 0x100000) {
+        nBufferSize = 0x100000;
+    }
 
-        qint64 nStartOffset = nOffset;
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
+    if (!pBuffer) {
+        return -1;
+    }
 
-        while ((nSize > nStringSize - 1) && isPdStructNotCanceled(pPdStruct)) {
-            nTemp = qMin((qint64)nBufferSize, nSize);
+    qint32 *pFailure = new (std::nothrow) qint32[nStringSize];
+    if (!pFailure) {
+        delete[] pBuffer;
+        return -1;
+    }
 
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                setPdStructErrorString(pPdStruct, tr("Read error"));
+    const auto foldByte = [](quint8 nValue) -> quint8 {
+        const char cFolded = QChar(nValue).toLower().toLatin1();
+        return cFolded ? (quint8)cFolded : nValue;
+    };
 
-                break;
-            }
+    for (qint32 i = 0; i < nStringSize; i++) {
+        baNeedle[i] = (char)foldByte((quint8)baNeedle.at(i));
+    }
 
-            nResult = _x_find_ansi_string_i(pBuffer, nTemp, nStringSize, pUpperData, pLowerData, nOffset);
+    pFailure[0] = 0;
+    for (qint32 i = 1, j = 0; (i < nStringSize) && isPdStructNotCanceled(pPdStruct); i++) {
+        while ((j > 0) && (baNeedle.at(i) != baNeedle.at(j))) {
+            j = pFailure[j - 1];
+        }
+        if (baNeedle.at(i) == baNeedle.at(j)) {
+            j++;
+        }
+        pFailure[i] = j;
+    }
 
-            if (nResult != -1) {
-                break;
-            }
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        delete[] pBuffer;
+        delete[] pFailure;
+        return -1;
+    }
 
-            nSize -= nTemp - (nStringSize - 1);
-            nOffset += nTemp - (nStringSize - 1);
+    qint64 nResult = -1;
+    const qint64 nStartOffset = nOffset;
+    const qint64 nTotalSearchSize = nSize;
+    const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
+    qint32 nMatched = 0;
 
-            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - nStartOffset);
+    while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
+        qint32 nTemp = nBufferSize;
+        if (nSize < nTemp) {
+            nTemp = (qint32)nSize;
         }
 
-        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+        if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
+            if (isPdStructNotCanceled(pPdStruct)) {
+                setPdStructErrorString(pPdStruct, tr("Read error"));
+            }
+            break;
+        }
 
-        delete[] pBuffer;
+        for (qint32 i = 0; (i < nTemp) && isPdStructNotCanceled(pPdStruct); i++) {
+            const char cValue = (char)foldByte((quint8)pBuffer[i]);
+
+            while ((nMatched > 0) && (cValue != baNeedle.at(nMatched))) {
+                nMatched = pFailure[nMatched - 1];
+            }
+            if (cValue == baNeedle.at(nMatched)) {
+                nMatched++;
+            }
+            if (nMatched == nStringSize) {
+                nResult = nOffset + i - nStringSize + 1;
+                break;
+            }
+        }
+
+        if (nResult != -1) {
+            break;
+        }
+
+        nSize -= nTemp;
+        nOffset += nTemp;
+        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset - nStartOffset);
+    }
+
+    XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+    delete[] pBuffer;
+    delete[] pFailure;
+
+    if (!isPdStructNotCanceled(pPdStruct) || ((nResult == -1) && (nSize != 0) && ((nOffset - nStartOffset) < nTotalSearchSize))) {
+        nResult = -1;
     }
 
     return nResult;
@@ -5555,93 +6055,234 @@ qint64 XBinary::find_unicodeStringI(qint64 nOffset, qint64 nSize, const QString 
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
-    // TODO CheckSize function
-    qint64 nStringSize = sString.size();
-    qint64 _nSize = getSize();
+    const qint64 nTotalSize = getSize();
+
+    if (!isPdStructNotCanceled(pPdStruct) || (nOffset < 0) || (nOffset > nTotalSize) || sString.isEmpty() || (sString.size() > 0x80000)) {
+        return -1;
+    }
 
     if (nSize == -1) {
-        nSize = _nSize - nOffset;
+        nSize = nTotalSize - nOffset;
     }
 
-    if (nSize <= 0) {
+    if ((nSize < 2) || (nSize > nTotalSize - nOffset)) {
         return -1;
     }
 
-    if (nOffset + nSize > _nSize) {
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+    if (nRequestedBufferSize <= 0) {
         return -1;
     }
 
-    if (nStringSize > nSize) {
+    qint32 nBufferSize = nRequestedBufferSize;
+    if (nBufferSize < 0x1000) {
+        nBufferSize = 0x1000;
+    } else if (nBufferSize > 0x100000) {
+        nBufferSize = 0x100000;
+    }
+
+    const qint32 nPatternCapacity = sString.size() * 2;
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
+    if (!pBuffer) {
         return -1;
     }
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    quint16 *pPattern = new (std::nothrow) quint16[nPatternCapacity];
+    if (!pPattern) {
+        delete[] pBuffer;
+        return -1;
+    }
 
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    qint32 *pFailure = new (std::nothrow) qint32[nPatternCapacity];
+    if (!pFailure) {
+        delete[] pBuffer;
+        delete[] pPattern;
+        return -1;
+    }
 
-    qint64 nTemp = 0;
+    qint32 nPatternSize = 0;
+    for (qint32 i = 0; (i < sString.size()) && isPdStructNotCanceled(pPdStruct); i++) {
+        const quint16 nFirstUnit = sString.at(i).unicode();
+        uint nCodePoint = nFirstUnit;
 
-    qint32 nBufferSize = getBufferSize(pPdStruct);
-    char *pBuffer = new char[nBufferSize];
+        if (QChar::isHighSurrogate(nFirstUnit) && ((i + 1) < sString.size()) && QChar::isLowSurrogate(sString.at(i + 1).unicode())) {
+            nCodePoint = QChar::surrogateToUcs4(nFirstUnit, sString.at(++i).unicode());
+        }
 
-    QByteArray baUpper = getUnicodeString(sString.toUpper(), bIsBigEndian);
-    QByteArray baLower = getUnicodeString(sString.toLower(), bIsBigEndian);
+        uint nFoldedCodePoint = QChar::toCaseFolded(nCodePoint);
+        if (nFoldedCodePoint > 0x10FFFF) {
+            nFoldedCodePoint = nCodePoint;
+        }
 
-    const quint16 *pUpperData = (const quint16 *)baUpper.constData();
-    const quint16 *pLowerData = (const quint16 *)baLower.constData();
+        if (nFoldedCodePoint > 0xFFFF) {
+            pPattern[nPatternSize++] = QChar::highSurrogate(nFoldedCodePoint);
+            pPattern[nPatternSize++] = QChar::lowSurrogate(nFoldedCodePoint);
+        } else {
+            pPattern[nPatternSize++] = (quint16)nFoldedCodePoint;
+        }
+    }
 
-    qint64 nStartOffset = nOffset;
-    qint64 nByteStringSize = 2 * nStringSize;
+    pFailure[0] = 0;
+    for (qint32 i = 1, j = 0; (i < nPatternSize) && isPdStructNotCanceled(pPdStruct); i++) {
+        while ((j > 0) && (pPattern[i] != pPattern[j])) {
+            j = pFailure[j - 1];
+        }
+        if (pPattern[i] == pPattern[j]) {
+            j++;
+        }
+        pFailure[i] = j;
+    }
 
-    while ((nSize > 2 * (nStringSize - 1)) && (!(pPdStruct->bIsStop))) {
-        nTemp = qMin((qint64)nBufferSize, nSize);
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        delete[] pBuffer;
+        delete[] pPattern;
+        delete[] pFailure;
+        return -1;
+    }
 
-        if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-            setPdStructErrorString(pPdStruct, tr("Read error"));
+    qint64 *pSourceOffsets = new (std::nothrow) qint64[(size_t)nPatternSize * 2];
+    if (!pSourceOffsets) {
+        delete[] pBuffer;
+        delete[] pPattern;
+        delete[] pFailure;
+        return -1;
+    }
+
+    const qint64 nStartOffset = nOffset;
+    const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
+    qint32 nMatched[2] = {0, 0};
+    qint32 nRingPosition[2] = {0, 0};
+    bool bPendingHighSurrogate[2] = {false, false};
+    quint16 nPendingHighSurrogate[2] = {0, 0};
+    qint64 nPendingHighOffset[2] = {0, 0};
+    bool bHavePreviousByte = false;
+    quint8 nPreviousByte = 0;
+
+    const auto feedFoldedUnit = [&](qint32 nLane, quint16 nFoldedUnit, qint64 nSourceOffset) -> bool {
+        pSourceOffsets[(qint64)nLane * nPatternSize + nRingPosition[nLane]] = nSourceOffset;
+        nRingPosition[nLane]++;
+        if (nRingPosition[nLane] == nPatternSize) {
+            nRingPosition[nLane] = 0;
+        }
+
+        while ((nMatched[nLane] > 0) && (nFoldedUnit != pPattern[nMatched[nLane]])) {
+            nMatched[nLane] = pFailure[nMatched[nLane] - 1];
+        }
+        if (nFoldedUnit == pPattern[nMatched[nLane]]) {
+            nMatched[nLane]++;
+        }
+        if (nMatched[nLane] == nPatternSize) {
+            nResult = pSourceOffsets[(qint64)nLane * nPatternSize + nRingPosition[nLane]];
+            return true;
+        }
+
+        return false;
+    };
+
+    const auto feedCodePoint = [&](qint32 nLane, uint nCodePoint, qint64 nSourceOffset) -> bool {
+        uint nFoldedCodePoint = QChar::toCaseFolded(nCodePoint);
+        if (nFoldedCodePoint > 0x10FFFF) {
+            nFoldedCodePoint = nCodePoint;
+        }
+
+        if (nFoldedCodePoint > 0xFFFF) {
+            return feedFoldedUnit(nLane, QChar::highSurrogate(nFoldedCodePoint), nSourceOffset) ||
+                   feedFoldedUnit(nLane, QChar::lowSurrogate(nFoldedCodePoint), nSourceOffset);
+        }
+
+        return feedFoldedUnit(nLane, (quint16)nFoldedCodePoint, nSourceOffset);
+    };
+
+    while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
+        qint32 nTemp = nBufferSize;
+        if (nSize < nTemp) {
+            nTemp = (qint32)nSize;
+        }
+
+        if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
+            if (isPdStructNotCanceled(pPdStruct)) {
+                setPdStructErrorString(pPdStruct, tr("Read error"));
+            }
             break;
         }
 
-        quint16 *pData = (quint16 *)pBuffer;
-        qint64 nSearchEnd = nTemp - 2 * (nStringSize - 1);
+        for (qint32 i = 0; (i < nTemp) && isPdStructNotCanceled(pPdStruct); i++) {
+            const quint8 nCurrentByte = (quint8)pBuffer[i];
 
-        for (qint64 i = 0; i < nSearchEnd; i++) {
-            // Inline comparison for better performance
-            bool bMatch = true;
-            quint16 *pCurrent = (quint16 *)(pBuffer + i);
-            const quint16 *pUpper = pUpperData;
-            const quint16 *pLower = pLowerData;
-            qint64 nRemaining = nStringSize;
+            if (bHavePreviousByte) {
+                const qint64 nPairOffset = nOffset + i - 1;
+                const qint32 nLane = (qint32)((nPairOffset - nStartOffset) & 1);
+                const quint16 nCode = bIsBigEndian ? (quint16)(((quint16)nPreviousByte << 8) | nCurrentByte)
+                                                   : (quint16)(nPreviousByte | ((quint16)nCurrentByte << 8));
 
-            while (nRemaining > 0) {
-                if ((*pCurrent != *pUpper) && (*pCurrent != *pLower)) {
-                    bMatch = false;
+                if (bPendingHighSurrogate[nLane]) {
+                    if (QChar::isLowSurrogate(nCode)) {
+                        const uint nCodePoint = QChar::surrogateToUcs4(nPendingHighSurrogate[nLane], nCode);
+                        bPendingHighSurrogate[nLane] = false;
+                        if (feedCodePoint(nLane, nCodePoint, nPendingHighOffset[nLane])) {
+                            break;
+                        }
+                        nPreviousByte = nCurrentByte;
+                        bHavePreviousByte = true;
+                        continue;
+                    }
+
+                    bPendingHighSurrogate[nLane] = false;
+                    if (feedCodePoint(nLane, nPendingHighSurrogate[nLane], nPendingHighOffset[nLane])) {
+                        break;
+                    }
+                }
+
+                if (QChar::isHighSurrogate(nCode)) {
+                    bPendingHighSurrogate[nLane] = true;
+                    nPendingHighSurrogate[nLane] = nCode;
+                    nPendingHighOffset[nLane] = nPairOffset;
+                } else if (feedCodePoint(nLane, nCode, nPairOffset)) {
                     break;
                 }
-                pCurrent++;
-                pUpper++;
-                pLower++;
-                nRemaining--;
             }
 
-            if (bMatch) {
-                nResult = nOffset + i;
-                break;
-            }
+            nPreviousByte = nCurrentByte;
+            bHavePreviousByte = true;
         }
 
         if (nResult != -1) {
             break;
         }
 
-        nSize -= nTemp - 2 * (nStringSize - 1);
-        nOffset += nTemp - 2 * (nStringSize - 1);
+        nSize -= nTemp;
+        nOffset += nTemp;
 
-        XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - nStartOffset);
+        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset - nStartOffset);
     }
 
-    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    if ((nResult == -1) && (nSize == 0) && isPdStructNotCanceled(pPdStruct)) {
+        qint64 nEarliestPendingResult = -1;
+
+        for (qint32 nLane = 0; nLane < 2; nLane++) {
+            if (bPendingHighSurrogate[nLane]) {
+                feedCodePoint(nLane, nPendingHighSurrogate[nLane], nPendingHighOffset[nLane]);
+
+                if ((nResult != -1) && ((nEarliestPendingResult == -1) || (nResult < nEarliestPendingResult))) {
+                    nEarliestPendingResult = nResult;
+                }
+                nResult = -1;
+            }
+        }
+
+        nResult = nEarliestPendingResult;
+    }
+
+    XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
 
     delete[] pBuffer;
+    delete[] pPattern;
+    delete[] pFailure;
+    delete[] pSourceOffsets;
+
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        nResult = -1;
+    }
 
     return nResult;
 }
@@ -5655,91 +6296,47 @@ qint64 XBinary::find_utf8StringI(qint64 nOffset, qint64 nSize, const QString &sS
 
 quint8 XBinary::getBits_uint8(quint8 nValue, qint32 nBitOffset, qint32 nBitSize)
 {
-    quint8 nResult = nValue;
-
-    if (nBitSize) {
-        quint8 nMask = 0xFF;
-
-        for (qint32 i = 0; i < nBitOffset; i++) {
-            nResult = nResult >> 1;
-        }
-
-        for (qint32 i = 0; i < nBitSize; i++) {
-            nMask = nMask << 1;
-        }
-
-        nResult = nResult & (~nMask);
-    }
-
-    return nResult;
+    if (nBitSize == 0) return nValue;
+    if ((nBitOffset < 0) || (nBitSize < 0) || (nBitOffset >= 8)) return 0;
+    nBitSize = qMin(nBitSize, 8 - nBitOffset);
+    const quint8 nMask = (nBitSize == 8) ? 0xFF : (quint8)((quint16(1) << nBitSize) - 1);
+    return (quint8)((nValue >> nBitOffset) & nMask);
 }
 
 quint16 XBinary::getBits_uint16(quint16 nValue, qint32 nBitOffset, qint32 nBitSize)
 {
-    quint16 nResult = nValue;
-
-    if (nBitSize) {
-        quint16 nMask = 0xFFFF;
-
-        for (qint32 i = 0; i < nBitOffset; i++) {
-            nResult = nResult >> 1;
-        }
-
-        for (qint32 i = 0; i < nBitSize; i++) {
-            nMask = nMask << 1;
-        }
-
-        nResult = nResult & (~nMask);
-    }
-
-    return nResult;
+    if (nBitSize == 0) return nValue;
+    if ((nBitOffset < 0) || (nBitSize < 0) || (nBitOffset >= 16)) return 0;
+    nBitSize = qMin(nBitSize, 16 - nBitOffset);
+    const quint16 nMask = (nBitSize == 16) ? 0xFFFF : (quint16)((quint32(1) << nBitSize) - 1);
+    return (quint16)((nValue >> nBitOffset) & nMask);
 }
 
 quint32 XBinary::getBits_uint32(quint32 nValue, qint32 nBitOffset, qint32 nBitSize)
 {
-    quint32 nResult = nValue;
-
-    if (nBitSize) {
-        quint32 nMask = 0xFFFFFFFF;
-
-        for (qint32 i = 0; i < nBitOffset; i++) {
-            nResult = nResult >> 1;
-        }
-
-        for (qint32 i = 0; i < nBitSize; i++) {
-            nMask = nMask << 1;
-        }
-
-        nResult = nResult & (~nMask);
-    }
-
-    return nResult;
+    if (nBitSize == 0) return nValue;
+    if ((nBitOffset < 0) || (nBitSize < 0) || (nBitOffset >= 32)) return 0;
+    nBitSize = qMin(nBitSize, 32 - nBitOffset);
+    const quint32 nMask = (nBitSize == 32) ? 0xFFFFFFFFU : (quint32)((quint64(1) << nBitSize) - 1);
+    return (nValue >> nBitOffset) & nMask;
 }
 
 quint64 XBinary::getBits_uint64(quint64 nValue, qint32 nBitOffset, qint32 nBitSize)
 {
-    quint64 nResult = nValue;
-
-    if (nBitSize) {
-        quint64 nMask = 0xFFFFFFFFFFFFFFFF;
-
-        for (qint32 i = 0; i < nBitOffset; i++) {
-            nResult = nResult >> 1;
-        }
-
-        for (qint32 i = 0; i < nBitSize; i++) {
-            nMask = nMask << 1;
-        }
-
-        nResult = nResult & (~nMask);
-    }
-
-    return nResult;
+    if (nBitSize == 0) return nValue;
+    if ((nBitOffset < 0) || (nBitSize < 0) || (nBitOffset >= 64)) return 0;
+    nBitSize = qMin(nBitSize, 64 - nBitOffset);
+    const quint64 nMask = (nBitSize == 64) ? (std::numeric_limits<quint64>::max)() : ((quint64(1) << nBitSize) - 1);
+    return (nValue >> nBitOffset) & nMask;
 }
 
 bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, QString sString, STRINGSEARCH_OPTIONS *pSsOptions)
 {
     bool bResult = false;
+
+    if (!pList || !pRecord || !pSsOptions) {
+        return bResult;
+    }
 
     bool bAdd = true;
 
@@ -5767,8 +6364,12 @@ bool XBinary::_addMultiSearchStringRecord(QVector<MS_RECORD> *pList, MS_RECORD *
 
 // Optimized version that accepts pre-compiled regex to avoid creating QRegularExpression repeatedly
 bool XBinary::_addMultiSearchStringRecordOptimized(QVector<MS_RECORD> *pList, MS_RECORD *pRecord, const QString &sString, STRINGSEARCH_OPTIONS *pSsOptions,
-                                                   QRegularExpression *pRegex)
+                                                    QRegularExpression *pRegex)
 {
+    if (!pList || !pRecord || !pSsOptions) {
+        return false;
+    }
+
     bool bAdd = true;
 
     if (pSsOptions->bLinks) {
@@ -5816,7 +6417,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
         ssOptions.nMaxLenght = 128;  // TODO Check
     }
 
-    if ((nOffset == -1) || (nSize <= 0)) {
+    if ((nOffset == -1) || (nSize <= 0) || !isPdStructNotCanceled(pPdStruct)) {
         return listResult;
     }
 
@@ -5841,12 +6442,46 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
     bool bReadError = false;
 
-    const qint32 nBufferSize = qBound((qint32)0x1000, getBufferSize(pPdStruct), (qint32)0x100000);
-    char *pBuffer = new char[nBufferSize];
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
 
-    char *pAnsiBuffer = new char[ssOptions.nMaxLenght + 1];
+    if ((nRequestedBufferSize <= 0) || !isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
 
-    quint16 *pUnicodeBuffer[2] = {new quint16[ssOptions.nMaxLenght + 1], new quint16[ssOptions.nMaxLenght + 1]};
+    qint32 nBufferSize = nRequestedBufferSize;
+    if (nBufferSize < 0x1000) {
+        nBufferSize = 0x1000;
+    } else if (nBufferSize > 0x100000) {
+        nBufferSize = 0x100000;
+    }
+
+    const qint32 nStringCapacity = (qint32)ssOptions.nMaxLenght + 1;
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
+    if (!pBuffer) {
+        return listResult;
+    }
+
+    char *pAnsiBuffer = new (std::nothrow) char[nStringCapacity];
+    if (!pAnsiBuffer) {
+        delete[] pBuffer;
+        return listResult;
+    }
+
+    quint16 *pUnicodeBuffer[2] = {nullptr, nullptr};
+    pUnicodeBuffer[0] = new (std::nothrow) quint16[nStringCapacity];
+    if (!pUnicodeBuffer[0]) {
+        delete[] pBuffer;
+        delete[] pAnsiBuffer;
+        return listResult;
+    }
+
+    pUnicodeBuffer[1] = new (std::nothrow) quint16[nStringCapacity];
+    if (!pUnicodeBuffer[1]) {
+        delete[] pBuffer;
+        delete[] pAnsiBuffer;
+        delete[] pUnicodeBuffer[0];
+        return listResult;
+    }
     qint64 nCurrentUnicodeSize[2] = {0, 0};
     qint64 nCurrentUnicodeOffset[2] = {0, 0};
 
@@ -5856,9 +6491,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
     bool bIsStart = true;
     char cPrevSymbol = 0;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
     bool bLimitReached = false;
 
@@ -5872,14 +6505,13 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
             break;
         }
 
-        for (qint64 i = 0; i < nCurrentSize; i++) {
+        for (qint64 i = 0; (i < nCurrentSize) && isPdStructNotCanceled(pPdStruct); i++) {
             bool bIsEnd = ((i == (nCurrentSize - 1)) && (_nSize == nCurrentSize));
             qint32 nParity = (_nOffset + i) % 2;
 
             char cSymbol = *(pBuffer + i);
 
             bool bIsAnsiSymbol = false;
-            bool bLongString = false;
 
             if (ssOptions.bAnsi) {
                 bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
@@ -5892,32 +6524,17 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                 if (nCurrentAnsiSize < ssOptions.nMaxLenght) {
                     *(pAnsiBuffer + nCurrentAnsiSize) = cSymbol;
-                } else {
-                    bIsAnsiSymbol = false;
-                    bLongString = true;
+                    nCurrentAnsiSize++;
                 }
-
-                nCurrentAnsiSize++;
             }
 
-            if ((!bIsAnsiSymbol) || (bIsEnd)) {
+            if (((!bIsAnsiSymbol) || bIsEnd) && (nCurrentAnsiSize > 0)) {
                 if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
-                    if (nCurrentAnsiSize - 1 < ssOptions.nMaxLenght) {
-                        pAnsiBuffer[nCurrentAnsiSize] = 0;
-                    } else {
-                        pAnsiBuffer[ssOptions.nMaxLenght] = 0;
-                    }
+                    pAnsiBuffer[nCurrentAnsiSize] = 0;
 
                     if (ssOptions.bAnsi) {
-                        QString sString;
-
-                        sString = pAnsiBuffer;
-
-                        bool bAdd = true;
-
-                        if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
-                            bAdd = false;
-                        }
+                        const QString sString = QString::fromLatin1(pAnsiBuffer, (qint32)nCurrentAnsiSize);
+                        const bool bAdd = !ssOptions.bNullTerminated || ((!bIsAnsiSymbol) && (cSymbol == 0));
 
                         if (bAdd) {
                             MS_RECORD record = {};
@@ -5938,16 +6555,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
             if (!bIsStart) {
                 quint16 nCode = (quint8)cPrevSymbol | ((quint16)(quint8)cSymbol << 8);  // TODO BE/LE
 
-                bool bIsUnicodeSymbol = false;
-
-                if (ssOptions.bUnicode) {
-                    bIsUnicodeSymbol = isUnicodeSymbol(nCode, true);
-                }
-
-                if (nCurrentUnicodeSize[nParity] >= ssOptions.nMaxLenght) {
-                    bIsUnicodeSymbol = false;
-                    bLongString = true;
-                }
+                const bool bIsUnicodeSymbol = ssOptions.bUnicode && isUnicodeSymbol(nCode, true);
 
                 if (bIsUnicodeSymbol) {
                     if (nCurrentUnicodeSize[nParity] == 0) {
@@ -5956,27 +6564,17 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
                     if (nCurrentUnicodeSize[nParity] < ssOptions.nMaxLenght) {
                         *(pUnicodeBuffer[nParity] + nCurrentUnicodeSize[nParity]) = nCode;
+                        nCurrentUnicodeSize[nParity]++;
                     }
-
-                    nCurrentUnicodeSize[nParity]++;
                 }
 
-                if ((!bIsUnicodeSymbol) || (bIsEnd)) {
+                if (((!bIsUnicodeSymbol) || bIsEnd) && (nCurrentUnicodeSize[nParity] > 0)) {
                     if (nCurrentUnicodeSize[nParity] >= ssOptions.nMinLenght) {
-                        if (nCurrentUnicodeSize[nParity] - 1 < ssOptions.nMaxLenght) {
-                            pUnicodeBuffer[nParity][nCurrentUnicodeSize[nParity]] = 0;
-                        } else {
-                            pUnicodeBuffer[nParity][ssOptions.nMaxLenght] = 0;
-                        }
+                        pUnicodeBuffer[nParity][nCurrentUnicodeSize[nParity]] = 0;
 
                         if (ssOptions.bUnicode) {
-                            QString sString = QString::fromUtf16(pUnicodeBuffer[nParity]);  // TODO Check Qt6
-
-                            bool bAdd = true;
-
-                            if (ssOptions.bNullTerminated && nCode && (!bLongString)) {
-                                bAdd = false;
-                            }
+                            const QString sString = QString::fromUtf16(pUnicodeBuffer[nParity], (qint32)nCurrentUnicodeSize[nParity]);  // TODO Check Qt6
+                            const bool bAdd = !ssOptions.bNullTerminated || ((!bIsUnicodeSymbol) && (nCode == 0));
 
                             if (bAdd) {
                                 MS_RECORD record = {};
@@ -5991,37 +6589,30 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                         }
                     }
 
-                    if (bIsEnd) {
-                        qint32 nO = (nParity == 1) ? (0) : (1);
+                    nCurrentUnicodeSize[nParity] = 0;
+                }
 
-                        if (nCurrentUnicodeSize[nO] >= ssOptions.nMinLenght) {
-                            if (nCurrentUnicodeSize[nO] - 1 < ssOptions.nMaxLenght) {
-                                pUnicodeBuffer[nO][nCurrentUnicodeSize[nO]] = 0;
-                            } else {
-                                pUnicodeBuffer[nO][ssOptions.nMaxLenght] = 0;
-                            }
+                if (bIsEnd) {
+                    const qint32 nO = (nParity == 1) ? 0 : 1;
 
-                            if (ssOptions.bUnicode) {
-                                QString sString = QString::fromUtf16(pUnicodeBuffer[nO]);  // TODO Check Qt6
+                    if ((!ssOptions.bNullTerminated) && (nCurrentUnicodeSize[nO] >= ssOptions.nMinLenght)) {
+                        pUnicodeBuffer[nO][nCurrentUnicodeSize[nO]] = 0;
 
-                                bool bAdd = true;
+                        if (ssOptions.bUnicode) {
+                            const QString sString = QString::fromUtf16(pUnicodeBuffer[nO], (qint32)nCurrentUnicodeSize[nO]);  // TODO Check Qt6
 
-                                if (bAdd) {
-                                    MS_RECORD record = {};
-                                    record.nValueType = VT_U;
-                                    _setMSRecordSize(&record, nCurrentUnicodeSize[nO] * 2, VT_U, true);
-                                    _setMSRecordLocation(&record, pMemoryMap, nCurrentUnicodeOffset[nO]);
-                                    // record.sString = sString;
+                            MS_RECORD record = {};
+                            record.nValueType = VT_U;
+                            _setMSRecordSize(&record, nCurrentUnicodeSize[nO] * 2, VT_U, true);
+                            _setMSRecordLocation(&record, pMemoryMap, nCurrentUnicodeOffset[nO]);
 
-                                    if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
-                                        bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
-                                    }
-                                }
+                            if (_addMultiSearchStringRecord(&listResult, &record, sString, &ssOptions)) {
+                                bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                             }
                         }
                     }
 
-                    nCurrentUnicodeSize[nParity] = 0;
+                    nCurrentUnicodeSize[nO] = 0;
                 }
             }
 
@@ -6057,6 +6648,10 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
+    if (bReadError || !isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+    }
+
     return listResult;
 }
 
@@ -6083,6 +6678,11 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
 
         QVector<XBinary::MS_RECORD> listAnsi = multiSearch_ansiStrings(pMemoryMap, nOffset, nSize, ansiOptions, pPdStruct);
         listResult.append(listAnsi);
+
+        if (!isPdStructNotCanceled(pPdStruct)) {
+            listResult.clear();
+            return listResult;
+        }
     }
 
     // Each enabled encoding gets the full limit. The best N results of the
@@ -6095,6 +6695,11 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
 
         QVector<XBinary::MS_RECORD> listUnicode = multiSearch_unicodeStrings(pMemoryMap, nOffset, nSize, unicodeOptions, pPdStruct);
         listResult.append(listUnicode);
+
+        if (!isPdStructNotCanceled(pPdStruct)) {
+            listResult.clear();
+            return listResult;
+        }
     }
 
     // Sort results by region index first, then by relative offset within region
@@ -6109,18 +6714,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings2(_MEMORY_MAP *pMemor
     }
 
     return listResult;
-}
-
-static qint32 _x_get_simd_threshold()
-{
-    qint32 nSimdThreshold = 4;
-
-#ifdef USE_XSIMD
-    // Pre-calculate SIMD threshold once based on available features
-    nSimdThreshold = xsimd_is_avx2_enabled() ? 8 : 4;
-#endif
-
-    return nSimdThreshold;
 }
 
 QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, STRINGSEARCH_OPTIONS ssOptions, PDSTRUCT *pPdStruct)
@@ -6167,22 +6760,35 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
 
     const qint32 BUFFER_SIZE = 0x10000;  // 64KB chunks for efficient processing
 
-    char *pBuffer = new char[BUFFER_SIZE];
-    char *pAnsiBuffer = new char[ssOptions.nMaxLenght + 1];
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
+
+    char *pBuffer = new (std::nothrow) char[BUFFER_SIZE];
+    if (!pBuffer) {
+        return listResult;
+    }
+
+    const qint32 nStringCapacity = (qint32)ssOptions.nMaxLenght + 1;
+    char *pAnsiBuffer = new (std::nothrow) char[nStringCapacity];
+    if (!pAnsiBuffer) {
+        delete[] pBuffer;
+        return listResult;
+    }
 
     qint64 nCurrentAnsiSize = 0;
     qint64 nCurrentAnsiOffset = 0;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
     bool bLimitReached = false;
 
     // OPTIMIZATION: Pre-compile regex once instead of creating it for every string!
+    QRegularExpression regex;
     QRegularExpression *pRegex = nullptr;
     if (ssOptions.sMask != "") {
-        pRegex = new QRegularExpression(ssOptions.sMask);
+        regex = QRegularExpression(ssOptions.sMask);
+        pRegex = &regex;
         // Optimize regex for repeated matching
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         pRegex->optimize();
@@ -6190,7 +6796,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
     }
 
     const bool bNeedStringFilter = ssOptions.bLinks || (pRegex != nullptr);
-    qint32 nSimdThreshold = _x_get_simd_threshold();
 
     while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
         qint64 nCurrentSize = qMin((qint64)BUFFER_SIZE, _nSize);
@@ -6200,7 +6805,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
             break;
         }
 
-#ifdef USE_XSIMD
+#if 0  // The bounded scalar state machine below is used for identical semantics in every build.
         // SIMD-optimized: aggressively use xsimd for maximum performance
         // Process entire buffer with SIMD acceleration
         qint64 i = 0;
@@ -6374,12 +6979,13 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
             }
         }
 #else
-        // Fallback: non-SIMD implementation
+        // Keep one capped record for an overlong run and consume the rest of
+        // that run before finalizing it. This prevents split records and lost
+        // bytes while keeping MS_RECORD::nSize within its configured maximum.
         for (qint64 i = 0; (i < nCurrentSize) && isPdStructNotCanceled(pPdStruct); i++) {
-            bool bIsEnd = ((i == (nCurrentSize - 1)) && (_nSize == nCurrentSize));
-            char cSymbol = *(pBuffer + i);
-            bool bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
-            bool bLongString = false;
+            const bool bIsEnd = ((i == (nCurrentSize - 1)) && (_nSize == nCurrentSize));
+            const char cSymbol = *(pBuffer + i);
+            const bool bIsAnsiSymbol = isAnsiSymbol((quint8)cSymbol);
 
             if (bIsAnsiSymbol) {
                 if (nCurrentAnsiSize == 0) {
@@ -6388,27 +6994,14 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
 
                 if (nCurrentAnsiSize < ssOptions.nMaxLenght) {
                     *(pAnsiBuffer + nCurrentAnsiSize) = cSymbol;
-                } else {
-                    bIsAnsiSymbol = false;
-                    bLongString = true;
+                    nCurrentAnsiSize++;
                 }
-
-                nCurrentAnsiSize++;
             }
 
-            if ((!bIsAnsiSymbol) || (bIsEnd)) {
+            if (((!bIsAnsiSymbol) || bIsEnd) && (nCurrentAnsiSize > 0)) {
                 if (nCurrentAnsiSize >= ssOptions.nMinLenght) {
-                    if (nCurrentAnsiSize - 1 < ssOptions.nMaxLenght) {
-                        pAnsiBuffer[nCurrentAnsiSize] = 0;
-                    } else {
-                        pAnsiBuffer[ssOptions.nMaxLenght] = 0;
-                    }
-
-                    bool bAdd = true;
-
-                    if (ssOptions.bNullTerminated && cSymbol && (!bLongString)) {
-                        bAdd = false;
-                    }
+                    pAnsiBuffer[nCurrentAnsiSize] = 0;
+                    const bool bAdd = !ssOptions.bNullTerminated || ((!bIsAnsiSymbol) && (cSymbol == 0));
 
                     if (bAdd) {
                         MS_RECORD record = {};
@@ -6420,7 +7013,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
                             listResult.append(record);
                             bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                         } else {
-                            QString sString = pAnsiBuffer;
+                            const QString sString = QString::fromLatin1(pAnsiBuffer, (qint32)nCurrentAnsiSize);
                             if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                                 bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                             }
@@ -6447,11 +7040,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
     delete[] pBuffer;
     delete[] pAnsiBuffer;
 
-    // Clean up pre-compiled regex
-    if (pRegex) {
-        delete pRegex;
-    }
-
     _finalizeBestMSRecords(&listResult, ssOptions.nLimit);
 
     if (bLimitReached) {
@@ -6459,6 +7047,10 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_ansiStrings(_MEMORY_MAP *pMemor
     }
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+    if (bReadError || !isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+    }
 
     return listResult;
 }
@@ -6508,25 +7100,36 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
 
     const qint32 BUFFER_SIZE = 0x10000;  // 64KB chunks for efficient processing
 
-    char *pBuffer = new char[BUFFER_SIZE];
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
+
+    char *pBuffer = new (std::nothrow) char[BUFFER_SIZE];
     quint16 *pUnicodeBuffer[2];  // Two buffers for even/odd parity
-    pUnicodeBuffer[0] = new quint16[ssOptions.nMaxLenght + 1];
-    pUnicodeBuffer[1] = new quint16[ssOptions.nMaxLenght + 1];
+    pUnicodeBuffer[0] = new (std::nothrow) quint16[ssOptions.nMaxLenght + 1];
+    pUnicodeBuffer[1] = new (std::nothrow) quint16[ssOptions.nMaxLenght + 1];
+
+    if (!pBuffer || !pUnicodeBuffer[0] || !pUnicodeBuffer[1]) {
+        delete[] pBuffer;
+        delete[] pUnicodeBuffer[0];
+        delete[] pUnicodeBuffer[1];
+        return listResult;
+    }
 
     qint64 nCurrentUnicodeSize[2] = {0, 0};  // Track both parities
     qint64 nCurrentUnicodeOffset[2] = {0, 0};
     char cPrevSymbol = 0;  // For building 16-bit Unicode characters
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
     bool bLimitReached = false;
 
     // OPTIMIZATION: Pre-compile regex once instead of creating it for every string!
+    QRegularExpression regex;
     QRegularExpression *pRegex = nullptr;
     if (ssOptions.sMask != "") {
-        pRegex = new QRegularExpression(ssOptions.sMask);
+        regex = QRegularExpression(ssOptions.sMask);
+        pRegex = &regex;
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         pRegex->optimize();
 #endif
@@ -6554,9 +7157,8 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
                 // Build 16-bit Unicode character (little-endian by default)
                 quint16 nCode = (quint8)cPrevSymbol + ((quint8)cSymbol << 8);
 
-                // Check if this is a valid Unicode character
-                bool bIsUnicodeSymbol = isUnicodeSymbol(nCode, true);
-                bool bLongString = false;
+                // Check if this is a valid Unicode character.
+                const bool bIsUnicodeSymbol = isUnicodeSymbol(nCode, true);
 
                 if (bIsUnicodeSymbol) {
                     if (nCurrentUnicodeSize[nParity] == 0) {
@@ -6567,55 +7169,14 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
                     if (nCurrentUnicodeSize[nParity] < ssOptions.nMaxLenght) {
                         *(pUnicodeBuffer[nParity] + nCurrentUnicodeSize[nParity]) = nCode;
                         nCurrentUnicodeSize[nParity]++;
-                    } else {
-                        // String too long - save it
-                        bIsUnicodeSymbol = false;
-                        bLongString = true;
-
-                        if (nCurrentUnicodeSize[nParity] >= ssOptions.nMinLenght) {
-                            pUnicodeBuffer[nParity][ssOptions.nMaxLenght] = 0;
-
-                            MS_RECORD record = {};
-                            record.nValueType = VT_U;
-                            _setMSRecordSize(&record, ssOptions.nMaxLenght * 2, VT_U, true);
-                            _setMSRecordLocation(&record, pMemoryMap, nCurrentUnicodeOffset[nParity]);
-
-                            if (!bNeedStringFilter) {
-                                listResult.append(record);
-                                bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
-                            } else {
-                                QString sString = QString::fromUtf16(pUnicodeBuffer[nParity], ssOptions.nMaxLenght);
-                                if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
-                                    bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
-                                }
-                            }
-                        }
-
-                        nCurrentUnicodeSize[nParity] = 0;
                     }
                 }
 
                 // Check if string ended
-                if ((!bIsUnicodeSymbol) || (bIsEnd)) {
+                if (((!bIsUnicodeSymbol) || bIsEnd) && (nCurrentUnicodeSize[nParity] > 0)) {
                     if (nCurrentUnicodeSize[nParity] >= ssOptions.nMinLenght) {
                         pUnicodeBuffer[nParity][nCurrentUnicodeSize[nParity]] = 0;
-                        bool bAdd = true;
-
-                        if (ssOptions.bNullTerminated && !bLongString) {
-                            // For Unicode, check if followed by 0x0000 (two zero bytes)
-                            // The current position is at the byte that broke the string
-                            // We need to check if this byte and the previous byte form 0x0000
-                            if (!bIsEnd) {
-                                // Check if the Unicode character that broke the string is 0x0000
-                                quint16 nBreakCode = (quint8)cPrevSymbol + ((quint8)cSymbol << 8);
-                                if (nBreakCode != 0) {
-                                    bAdd = false;
-                                }
-                            } else {
-                                // At end of buffer - assume not null-terminated unless we can verify
-                                bAdd = false;
-                            }
-                        }
+                        const bool bAdd = !ssOptions.bNullTerminated || ((!bIsUnicodeSymbol) && (nCode == 0));
 
                         if (bAdd) {
                             MS_RECORD record = {};
@@ -6627,31 +7188,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
                                 listResult.append(record);
                                 bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                             } else {
-                                QString sString = QString::fromUtf16(pUnicodeBuffer[nParity], nCurrentUnicodeSize[nParity]);
-                                if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
-                                    bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
-                                }
-                            }
-                        }
-                    }
-
-                    // Handle the other parity at end of file
-                    if (bIsEnd) {
-                        qint32 nOtherParity = (nParity == 1) ? 0 : 1;
-
-                        if (nCurrentUnicodeSize[nOtherParity] >= ssOptions.nMinLenght) {
-                            pUnicodeBuffer[nOtherParity][nCurrentUnicodeSize[nOtherParity]] = 0;
-
-                            MS_RECORD record = {};
-                            record.nValueType = VT_U;
-                            _setMSRecordSize(&record, nCurrentUnicodeSize[nOtherParity] * 2, VT_U, true);
-                            _setMSRecordLocation(&record, pMemoryMap, nCurrentUnicodeOffset[nOtherParity]);
-
-                            if (!bNeedStringFilter) {
-                                listResult.append(record);
-                                bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
-                            } else {
-                                QString sString = QString::fromUtf16(pUnicodeBuffer[nOtherParity], nCurrentUnicodeSize[nOtherParity]);
+                                const QString sString = QString::fromUtf16(pUnicodeBuffer[nParity], (qint32)nCurrentUnicodeSize[nParity]);
                                 if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                                     bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                                 }
@@ -6660,6 +7197,35 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
                     }
 
                     nCurrentUnicodeSize[nParity] = 0;
+                }
+
+                // Handle the other parity at end of file. It cannot be
+                // considered null-terminated because no complete delimiter
+                // code unit was observed for that lane.
+                if (bIsEnd) {
+                    const qint32 nOtherParity = (nParity == 1) ? 0 : 1;
+
+                    if ((!ssOptions.bNullTerminated) && (nCurrentUnicodeSize[nOtherParity] >= ssOptions.nMinLenght)) {
+                        pUnicodeBuffer[nOtherParity][nCurrentUnicodeSize[nOtherParity]] = 0;
+
+                        MS_RECORD record = {};
+                        record.nValueType = VT_U;
+                        _setMSRecordSize(&record, nCurrentUnicodeSize[nOtherParity] * 2, VT_U, true);
+                        _setMSRecordLocation(&record, pMemoryMap, nCurrentUnicodeOffset[nOtherParity]);
+
+                        if (!bNeedStringFilter) {
+                            listResult.append(record);
+                            bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
+                        } else {
+                            const QString sString =
+                                QString::fromUtf16(pUnicodeBuffer[nOtherParity], (qint32)nCurrentUnicodeSize[nOtherParity]);
+                            if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
+                                bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
+                            }
+                        }
+                    }
+
+                    nCurrentUnicodeSize[nOtherParity] = 0;
                 }
             }
 
@@ -6682,11 +7248,6 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
     delete[] pUnicodeBuffer[0];
     delete[] pUnicodeBuffer[1];
 
-    // Clean up pre-compiled regex
-    if (pRegex) {
-        delete pRegex;
-    }
-
     _finalizeBestMSRecords(&listResult, ssOptions.nLimit);
 
     if (bLimitReached) {
@@ -6694,6 +7255,10 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
     }
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+    if (bReadError || !isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+    }
 
     return listResult;
 }
@@ -6714,26 +7279,38 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryM
         pPdStruct = &pdStructEmpty;
     }
 
+    QVector<XBinary::MS_RECORD> listResult;
+
+    const qint64 nFileSize = getSize();
+    if (!pMemoryMap || !isPdStructNotCanceled(pPdStruct) || (nFileSize < 0) || (nOffset < 0) || (nOffset > nFileSize) || (nSize < -1)) {
+        return listResult;
+    }
     if (nSize == -1) {
-        nSize = getSize() - nOffset;
+        nSize = nFileSize - nOffset;
+    }
+    if ((nSize <= 0) || (nSize > (nFileSize - nOffset))) {
+        return listResult;
     }
 
-    QVector<XBinary::MS_RECORD> listResult;
+    const qint64 nEndOffset = nOffset + nSize;
 
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
     qint32 nCurrentRecords = 0;
 
-    while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
+    while ((_nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
         qint64 nSignatureSize = 0;
         qint64 nSignatureOffset = find_signature(pMemoryMap, _nOffset, _nSize, sSignature, &nSignatureSize, pPdStruct);
 
         if (nSignatureOffset == -1) {
+            break;
+        }
+        if ((nSignatureOffset < _nOffset) || (nSignatureOffset > nEndOffset) || (nSignatureSize <= 0) ||
+            (nSignatureSize > (nEndOffset - nSignatureOffset))) {
+            setPdStructErrorString(pPdStruct, tr("Invalid search result"));
             break;
         }
 
@@ -6752,7 +7329,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryM
 
         nCurrentRecords++;
 
-        if (nCurrentRecords >= nLimit) {
+        if ((nLimit > 0) && (nCurrentRecords >= nLimit)) {
             setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nCurrentRecords)));
 
             break;
@@ -6765,6 +7342,10 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_signature(_MEMORY_MAP *pMemoryM
     }
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+    }
 
     return listResult;
 }
@@ -6786,29 +7367,40 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
         pPdStruct = &pdStructEmpty;
     }
 
-    if (nSize == -1) {
-        nSize = getSize() - nOffset;
-    }
-
     // QString sValuePrefix = valueTypeToString(valueType);
     // QString sValue = getValueString(varValue, valueType);
     qint64 nValSize = getValueSize(varValue, valueType);
 
     QVector<XBinary::MS_RECORD> listResult;
 
+    const qint64 nFileSize = getSize();
+    if (!pMemoryMap || !isPdStructNotCanceled(pPdStruct) || (nFileSize < 0) || (nOffset < 0) || (nOffset > nFileSize) || (nSize < -1) || (nValSize <= 0)) {
+        return listResult;
+    }
+    if (nSize == -1) {
+        nSize = nFileSize - nOffset;
+    }
+    if ((nSize <= 0) || (nSize > (nFileSize - nOffset))) {
+        return listResult;
+    }
+
+    const qint64 nEndOffset = nOffset + nSize;
+
     qint64 _nSize = nSize;
     qint64 _nOffset = nOffset;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
     qint32 nCurrentRecords = 0;
 
-    while ((_nSize > 0) && (!(pPdStruct->bIsStop))) {
+    while ((_nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
         qint64 nValOffset = find_value(pMemoryMap, _nOffset, _nSize, varValue, valueType, bIsBigEndian, &nValSize, pPdStruct);
 
         if (nValOffset == -1) {
+            break;
+        }
+        if ((nValOffset < _nOffset) || (nValOffset > nEndOffset) || (nValSize <= 0) || (nValSize > (nEndOffset - nValOffset))) {
+            setPdStructErrorString(pPdStruct, tr("Invalid search result"));
             break;
         }
 
@@ -6842,7 +7434,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
 
         nCurrentRecords++;
 
-        if (nCurrentRecords >= nLimit) {
+        if ((nLimit > 0) && (nCurrentRecords >= nLimit)) {
             setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nCurrentRecords)));
 
             break;
@@ -6855,6 +7447,10 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_value(_MEMORY_MAP *pMemoryMap, 
     }
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+    }
 
     return listResult;
 }
@@ -7205,27 +7801,30 @@ QByteArray XBinary::getUnicodeString(const QString &sString, bool bIsBigEndian)
 {
     QByteArray baResult;
 
-    qint32 nSize = sString.size() * 2;
+    if (sString.size() > (std::numeric_limits<qint32>::max)() / 2) {
+        return baResult;
+    }
 
-    baResult.resize(nSize);
+    const qint32 nSize = sString.size() * 2;
 
-    baResult.fill(0);
+    try {
+        baResult.resize(nSize);
+    } catch (const std::bad_alloc &) {
+        baResult.clear();
+        return baResult;
+    }
 
     char *pData = baResult.data();
 
-    _copyMemory(pData, (char *)sString.utf16(), nSize);
+    for (qint32 i = 0; i < sString.size(); i++) {
+        const quint16 nValue = sString.at(i).unicode();
 
-    for (qint32 i = 0; i < nSize; i++) {
-        if ((i % 2) == 0) {
-            quint16 nValue = *(quint16 *)(pData + i);
-
-            if (bIsBigEndian) {
-                nValue = qFromBigEndian(nValue);
-            } else {
-                nValue = qFromLittleEndian(nValue);
-            }
-
-            *(quint16 *)(pData + i) = nValue;
+        if (bIsBigEndian) {
+            pData[2 * i] = (char)(nValue >> 8);
+            pData[2 * i + 1] = (char)(nValue & 0xFF);
+        } else {
+            pData[2 * i] = (char)(nValue & 0xFF);
+            pData[2 * i + 1] = (char)(nValue >> 8);
         }
     }
 
@@ -7282,10 +7881,11 @@ bool XBinary::isSignatureValid(const QString &sSignature, PDSTRUCT *pPdStruct)
 
     if (sSignature.size()) {
         QString _sSignature = convertSignature(sSignature);
-
-        bResult = true;
-
-        QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bResult, pPdStruct);
+        if (!_sSignature.isEmpty()) {
+            bResult = true;
+            const QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bResult, pPdStruct);
+            bResult = bResult && !listSignatureRecords.isEmpty();
+        }
     }
 
     return bResult;
@@ -7293,22 +7893,21 @@ bool XBinary::isSignatureValid(const QString &sSignature, PDSTRUCT *pPdStruct)
 
 bool XBinary::createFile(const QString &sFileName, qint64 nFileSize)
 {
-    bool bResult = false;
-
-    QFile file;
-    file.setFileName(sFileName);
-
-    if (file.open(QIODevice::ReadWrite)) {
-        bResult = true;
-
-        if (nFileSize) {
-            bResult = file.resize(nFileSize);
-        }
-
-        file.close();
+    if (sFileName.trimmed().isEmpty() || (nFileSize < 0)) {
+        return false;
     }
 
-    return bResult;
+    QSaveFile file(sFileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
+    }
+
+    if (!file.resize(nFileSize)) {
+        file.cancelWriting();
+        return false;
+    }
+
+    return file.commit();
 }
 
 bool XBinary::isFileExists(const QString &sFileName, bool bTryToOpen)
@@ -7332,15 +7931,30 @@ bool XBinary::isFileExists(const QString &sFileName, bool bTryToOpen)
 
 bool XBinary::removeFile(const QString &sFileName)
 {
-#ifdef Q_OS_WIN
-    QFile::Permissions perm = QFile::permissions(sFileName);
+    if (sFileName.trimmed().isEmpty()) {
+        return false;
+    }
 
-    if (!(perm & QFile::WriteOther)) {
-        QFile::setPermissions(sFileName, (QFile::Permissions)0x6666);
+#ifdef Q_OS_WIN
+    const QFileInfo targetInfo(sFileName);
+    const QFile::Permissions originalPermissions = QFile::permissions(sFileName);
+    bool bPermissionsChanged = false;
+
+    const QFile::Permissions writePermissions = QFileDevice::WriteOwner | QFileDevice::WriteUser;
+    if (targetInfo.exists() && targetInfo.isFile() && !targetInfo.isSymLink() && !(originalPermissions & writePermissions)) {
+        bPermissionsChanged = QFile::setPermissions(sFileName, originalPermissions | writePermissions);
     }
 #endif
 
-    return QFile::remove(sFileName);
+    const bool bResult = QFile::remove(sFileName);
+
+#ifdef Q_OS_WIN
+    if (!bResult && bPermissionsChanged) {
+        QFile::setPermissions(sFileName, originalPermissions);
+    }
+#endif
+
+    return bResult;
 }
 
 bool XBinary::copyFile(const QString &sSrcFileName, const QString &sDestFileName)
@@ -7366,9 +7980,23 @@ bool XBinary::moveFile(const QString &sSrcFileName, const QString &sDestFileName
 
 bool XBinary::moveFileToDirectory(const QString &sSrcFileName, const QString &sDestDirectory)
 {
-    QFileInfo fi(sSrcFileName);
+    const QFileInfo sourceInfo(sSrcFileName);
+    const QFileInfo destinationInfo(sDestDirectory);
+    if (sSrcFileName.trimmed().isEmpty() || sDestDirectory.trimmed().isEmpty() ||
+        !sourceInfo.exists() || !sourceInfo.isFile() || sourceInfo.isSymLink() || !destinationInfo.exists() ||
+        !destinationInfo.isDir() || destinationInfo.isSymLink() || !isDirectCanonicalPath(sourceInfo) ||
+        !isDirectCanonicalPath(destinationInfo)) {
+        return false;
+    }
 
-    return moveFile(sSrcFileName, sDestDirectory + QDir::separator() + fi.fileName());
+    const QString sDestinationAbsolute = QDir::cleanPath(destinationInfo.absoluteFilePath());
+    const QString sDestinationCanonical = QDir::cleanPath(destinationInfo.canonicalFilePath());
+    const Qt::CaseSensitivity pathCaseSensitivity = fileSystemPathCaseSensitivity();
+    if (sDestinationCanonical.isEmpty() || (sDestinationAbsolute.compare(sDestinationCanonical, pathCaseSensitivity) != 0)) {
+        return false;
+    }
+
+    return moveFile(sSrcFileName, QDir(sDestinationCanonical).filePath(sourceInfo.fileName()));
 }
 
 QString XBinary::convertFileNameSymbols(const QString &sFileName, const QString &sDefaultString)
@@ -7480,7 +8108,10 @@ QString XBinary::fixFileName(const QString &sFileName)
         // filesystem component limits. Preserve a short extension when possible.
         const qint32 nMaxComponentLength = 240;
 
-        if (sFixedPart.length() > nMaxComponentLength) {
+        const qint32 nMaxComponentUtf8Bytes = 240;
+
+        if ((sFixedPart.length() > nMaxComponentLength) ||
+            (sFixedPart.toUtf8().size() > nMaxComponentUtf8Bytes)) {
             qint32 nDotPosition = sFixedPart.lastIndexOf(QLatin1Char('.'));
             QString sExtension;
 
@@ -7488,11 +8119,20 @@ QString XBinary::fixFileName(const QString &sFileName)
                 sExtension = sFixedPart.mid(nDotPosition);
             }
 
-            qint32 nBaseLength = nMaxComponentLength - sExtension.length();
-            QString sBase = sFixedPart.left(nBaseLength);
+            const qint32 nBaseLength = nMaxComponentLength - sExtension.length();
+            const qint32 nBaseUtf8Bytes = nMaxComponentUtf8Bytes - sExtension.toUtf8().size();
+            QString sBase = sFixedPart.left(qMax(0, nBaseLength));
 
-            if (!sBase.isEmpty() && (sBase.at(sBase.length() - 1).unicode() >= 0xD800) && (sBase.at(sBase.length() - 1).unicode() <= 0xDBFF)) {
-                sBase.chop(1);
+            while ((sBase.toUtf8().size() > qMax(0, nBaseUtf8Bytes)) ||
+                   (sBase.length() > nBaseLength)) {
+                if (sBase.isEmpty()) break;
+                const qint32 nLast = sBase.length() - 1;
+                if (sBase.at(nLast).isLowSurrogate() && (nLast > 0) &&
+                    sBase.at(nLast - 1).isHighSurrogate()) {
+                    sBase.chop(2);
+                } else {
+                    sBase.chop(1);
+                }
             }
 
             sFixedPart = sBase + sExtension;
@@ -7519,7 +8159,7 @@ QString XBinary::getBaseFileName(const QString &sFileName)
 
 bool XBinary::createDirectory(const QString &sDirectoryName)
 {
-    return QDir().mkpath(sDirectoryName);
+    return !sDirectoryName.trimmed().isEmpty() && QDir().mkpath(sDirectoryName);
 }
 
 bool XBinary::isDirectoryExists(const QString &sDirectoryName)
@@ -7531,35 +8171,65 @@ bool XBinary::isDirectoryExists(const QString &sDirectoryName)
 
 bool XBinary::removeDirectory(const QString &sDirectoryName)
 {
-    bool bResult = false;
+    if (sDirectoryName.trimmed().isEmpty()) {
+        return false;
+    }
 
-    QDir dir(sDirectoryName);
+    QFileInfo fileInfo(sDirectoryName);
+    if (!fileInfo.exists() || !fileInfo.isDir() || fileInfo.isSymLink()) {
+        return false;
+    }
+
+    const QString sCanonicalPath = QDir::cleanPath(fileInfo.canonicalFilePath());
+    const QString sCurrentPath = QDir::cleanPath(QDir::current().canonicalPath());
+    const QString sRootPath = QDir::cleanPath(QDir(fileInfo.absolutePath()).rootPath());
+    const Qt::CaseSensitivity pathCaseSensitivity = fileSystemPathCaseSensitivity();
+    if (!isDirectCanonicalPath(fileInfo) ||
+        (sCanonicalPath.compare(sRootPath, pathCaseSensitivity) == 0)) {
+        return false;
+    }
+
+    const QString sCurrentRelative = QDir::fromNativeSeparators(QDir(sCanonicalPath).relativeFilePath(sCurrentPath));
+    const bool bDifferentVolume = QDir::isAbsolutePath(sCurrentRelative);
+    if (!bDifferentVolume && ((sCurrentRelative == QLatin1String(".")) ||
+        (!sCurrentRelative.startsWith(QLatin1String("../")) && (sCurrentRelative != QLatin1String(".."))))) {
+        return false;
+    }
+
+    QDir dir(sCanonicalPath);
 
 #if (QT_VERSION_MAJOR > 4)
-    bResult = dir.removeRecursively();
+    return dir.removeRecursively();
 #else
-    bResult = dir.remove(sDirectoryName);
+    return dir.remove(sCanonicalPath);
 #endif
-
-    return bResult;
 }
 
 bool XBinary::isDirectoryEmpty(const QString &sDirectoryName)
 {
-    return (QDir(sDirectoryName).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() == 0);
+    return !sDirectoryName.trimmed().isEmpty() && isDirectoryExists(sDirectoryName) &&
+           (QDir(sDirectoryName).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() == 0);
 }
 
 QDateTime XBinary::getDirectoryLatestModificationDate(const QString &sDirectoryName)
 {
-    QDateTime latestMod;
+    const QFileInfo rootInfo(sDirectoryName);
+    if (sDirectoryName.trimmed().isEmpty() || !rootInfo.exists() || !rootInfo.isDir() || rootInfo.isSymLink() ||
+        !isDirectCanonicalPath(rootInfo)) {
+        return QDateTime();
+    }
+
+    QDateTime latestMod = rootInfo.lastModified();
     QDir dir(sDirectoryName);
 
-    QFileInfoList entries = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    QFileInfoList entries = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
 
     qint32 nNumberOfEntries = entries.size();
 
     for (qint32 i = 0; i < nNumberOfEntries; i++) {
         const QFileInfo &entry = entries.at(i);
+        const QDateTime entryModification = entry.lastModified();
+        if (entryModification.isValid() && entryModification > latestMod) latestMod = entryModification;
         if (entry.isDir()) {
             QDateTime subDirMod = getDirectoryLatestModificationDate(entry.absoluteFilePath());
             if (subDirMod.isValid() && subDirMod > latestMod) latestMod = subDirMod;
@@ -7578,16 +8248,58 @@ bool XBinary::createEmptyFile(const QString &sFileName)
 
 QByteArray XBinary::readFile(const QString &sFileName, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    // TODO PDSTRUCT
-
     QByteArray baResult;
+
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return baResult;
+    }
 
     QFile file;
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        baResult = file.readAll();
+        const qint64 nExpectedSize = file.size();
+        const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+
+        if ((nExpectedSize < 0) || (nExpectedSize > (std::numeric_limits<qint32>::max)()) ||
+            (nRequestedBufferSize <= 0)) {
+            return baResult;
+        }
+
+        try {
+            baResult.resize((qint32)nExpectedSize);
+        } catch (const std::bad_alloc &) {
+            baResult.clear();
+            return baResult;
+        }
+        if (baResult.size() != nExpectedSize) {
+            baResult.clear();
+            return baResult;
+        }
+
+        const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+        const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nExpectedSize);
+
+        qint64 nOffset = 0;
+        while ((nOffset < nExpectedSize) && isPdStructNotCanceled(pPdStruct)) {
+            const qint64 nToRead = qMin((qint64)nBufferSize, nExpectedSize - nOffset);
+            const qint64 nRead = file.read(baResult.data() + nOffset, nToRead);
+            if ((nRead <= 0) || (nRead > nToRead)) {
+                break;
+            }
+            nOffset += nRead;
+            XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+        }
+
+        XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+
+        if ((nOffset != nExpectedSize) || (file.size() != nExpectedSize) || !isPdStructNotCanceled(pPdStruct)) {
+            baResult.clear();
+        }
 
         file.close();
     }
@@ -7605,33 +8317,46 @@ bool XBinary::readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PD
         pPdStruct = &pdStructEmpty;
     }
 
+    if ((nSize < 0) || ((nSize > 0) && !pBuffer) || !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
     QFile file;
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+        const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+        if ((nRequestedBufferSize <= 0) || (file.size() < nSize)) {
+            return false;
+        }
+
+        qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
         qint64 nOffset = 0;
 
         bResult = true;
-        qint32 nBufferSize = getBufferSize(pPdStruct);
+        const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
 
-        while ((nSize > 0) && !(pPdStruct->bIsStop)) {
+        while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
             qint64 nCurrentSize = qMin(nSize, (qint64)nBufferSize);
 
-            if (nCurrentSize != file.read(pBuffer, nCurrentSize)) {
+            const qint64 nRead = file.read(pBuffer, nCurrentSize);
+            if ((nRead <= 0) || (nRead > nCurrentSize)) {
                 bResult = false;
                 break;
             }
 
-            nSize -= nCurrentSize;
-            pBuffer += nCurrentSize;
-            nOffset += nCurrentSize;
+            nSize -= nRead;
+            pBuffer += nRead;
+            nOffset += nRead;
 
             XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset);
         }
 
         XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+        if (!isPdStructNotCanceled(pPdStruct) || (nSize != 0)) {
+            bResult = false;
+        }
 
         file.close();
     }
@@ -7641,43 +8366,24 @@ bool XBinary::readFile(const QString &sFileName, char *pBuffer, qint64 nSize, PD
 
 void XBinary::_copyMemory(char *pDest, const char *pSource, qint64 nSize)
 {
-    while (nSize > 0) {
-        if (nSize >= 8) {
-            *((quint64 *)pDest) = *((quint64 *)pSource);
-            pDest += 8;
-            pSource += 8;
-            nSize -= 8;
-        } else if (nSize >= 4) {
-            *((quint32 *)pDest) = *((quint32 *)pSource);
-            pDest += 4;
-            pSource += 4;
-            nSize -= 4;
-        } else if (nSize >= 2) {
-            *((quint16 *)pDest) = *((quint16 *)pSource);
-            pDest += 2;
-            pSource += 2;
-            nSize -= 2;
-        } else {
-            *(pDest) = *(pSource);
-            pDest++;
-            pSource++;
-            nSize--;
-        }
+    if (pDest && pSource && (nSize > 0)) {
+        memmove(pDest, pSource, (size_t)nSize);
     }
 }
 
 void XBinary::_zeroMemory(char *pDest, qint64 nSize)
 {
-    // TODO optimize
-    while (nSize) {
-        *pDest = 0;
-        pDest++;
-        nSize--;
+    if (pDest && (nSize > 0)) {
+        memset(pDest, 0, (size_t)nSize);
     }
 }
 
 bool XBinary::_isMemoryZeroFilled(char *pSource, qint64 nSize)
 {
+    if (nSize < 0) return false;
+    if (nSize == 0) return true;
+    if (!pSource) return false;
+
     // Check in 8-byte chunks for better performance
     while (nSize >= 8) {
         quint64 nValue = 0;
@@ -7704,29 +8410,18 @@ bool XBinary::_isMemoryZeroFilled(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
 {
+    if (nSize < 0) return false;
+    if (nSize == 0) return true;
+    if (!pSource) return false;
+
 #ifdef USE_XSIMD
     return xsimd_is_not_null(pSource, nSize) != 0;
 #else
-    // Fallback: 64-bit processing
-    const char *pCurrent = pSource;
-    while (nSize >= 8) {
-        quint64 v = 0;
-        memcpy(&v, pCurrent, sizeof(v));
-        if (((v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL) != 0) {
+    const quint8 *pCurrent = reinterpret_cast<const quint8 *>(pSource);
+    while (nSize-- > 0) {
+        if (*pCurrent++ == 0) {
             return false;
         }
-        pCurrent += 8;
-        nSize -= 8;
-    }
-
-    // Process remaining bytes
-    const char *pRemaining = pCurrent;
-    while (nSize > 0) {
-        if (*pRemaining == 0) {
-            return false;
-        }
-        pRemaining++;
-        nSize--;
     }
 
     return true;
@@ -7735,34 +8430,19 @@ bool XBinary::_isMemoryNotNull(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
 {
+    if (nSize < 0) return false;
+    if (nSize == 0) return true;
+    if (!pSource) return false;
+
 #ifdef USE_XSIMD
     return xsimd_is_ansi(pSource, nSize) != 0;
 #else
-    // Fallback: 64-bit processing
-    const char *pCurrent = pSource;
-    while (nSize >= 8) {
-        quint64 v = 0;
-        memcpy(&v, pCurrent, sizeof(v));
-        if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) != 0) {
-            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pCurrent);
-            for (qint32 i = 0; i < 8; i++) {
-                if (pCheck[i] < 0x20 || pCheck[i] >= 0x80) {
-                    return false;
-                }
-            }
-        }
-        pCurrent += 8;
-        nSize -= 8;
-    }
-
-    // Process remaining bytes
-    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pCurrent);
-    while (nSize > 0) {
-        if (*pRemaining < 0x20 || *pRemaining >= 0x80) {
+    const quint8 *pCurrent = reinterpret_cast<const quint8 *>(pSource);
+    while (nSize-- > 0) {
+        if ((*pCurrent < 0x20) || (*pCurrent >= 0x80)) {
             return false;
         }
-        pRemaining++;
-        nSize--;
+        pCurrent++;
     }
 
     return true;
@@ -7771,34 +8451,19 @@ bool XBinary::_isMemoryAnsi(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
 {
+    if (nSize < 0) return false;
+    if (nSize == 0) return true;
+    if (!pSource) return false;
+
 #ifdef USE_XSIMD
     return xsimd_is_not_ansi(pSource, nSize) != 0;
 #else
-    // Fallback: 64-bit processing
-    const char *pCurrent = pSource;
-    while (nSize >= 8) {
-        quint64 v = 0;
-        memcpy(&v, pCurrent, sizeof(v));
-        if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) == 0) {
-            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pCurrent);
-            for (qint32 i = 0; i < 8; i++) {
-                if (pCheck[i] >= 0x20 && pCheck[i] < 0x80) {
-                    return false;
-                }
-            }
-        }
-        pCurrent += 8;
-        nSize -= 8;
-    }
-
-    // Process remaining bytes
-    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pCurrent);
-    while (nSize > 0) {
-        if (*pRemaining >= 0x20 && *pRemaining < 0x80) {
+    const quint8 *pCurrent = reinterpret_cast<const quint8 *>(pSource);
+    while (nSize-- > 0) {
+        if ((*pCurrent >= 0x20) && (*pCurrent < 0x80)) {
             return false;
         }
-        pRemaining++;
-        nSize--;
+        pCurrent++;
     }
 
     return true;
@@ -7807,37 +8472,19 @@ bool XBinary::_isMemoryNotAnsi(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
 {
+    if (nSize < 0) return false;
+    if (nSize == 0) return true;
+    if (!pSource) return false;
+
 #ifdef USE_XSIMD
     return xsimd_is_not_ansi_and_null(pSource, nSize) ? true : false;
 #else
-    // Fallback: 64-bit processing
-    const char *pCurrent = pSource;
-    while (nSize >= 8) {
-        quint64 v = 0;
-        memcpy(&v, pCurrent, sizeof(v));
-        if (((v - 0x0101010101010101ULL) & ~v & 0x8080808080808080ULL) != 0) {
+    const quint8 *pCurrent = reinterpret_cast<const quint8 *>(pSource);
+    while (nSize-- > 0) {
+        if ((*pCurrent == 0) || ((*pCurrent >= 0x20) && (*pCurrent < 0x80))) {
             return false;
         }
-        if ((((v - 0x2020202020202020ULL) | v) & 0x8080808080808080ULL) == 0) {
-            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pCurrent);
-            for (qint32 i = 0; i < 8; i++) {
-                if (pCheck[i] >= 0x20 && pCheck[i] < 0x80) {
-                    return false;
-                }
-            }
-        }
-        pCurrent += 8;
-        nSize -= 8;
-    }
-
-    // Process remaining bytes
-    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pCurrent);
-    while (nSize > 0) {
-        if (*pRemaining == 0 || (*pRemaining >= 0x20 && *pRemaining < 0x80)) {
-            return false;
-        }
-        pRemaining++;
-        nSize--;
+        pCurrent++;
     }
 
     return true;
@@ -7846,35 +8493,19 @@ bool XBinary::_isMemoryNotAnsiAndNull(char *pSource, qint64 nSize)
 
 bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
 {
+    if (nSize < 0) return false;
+    if (nSize == 0) return true;
+    if (!pSource) return false;
+
 #ifdef USE_XSIMD
     return xsimd_is_ansi_number(pSource, nSize) ? true : false;
 #else
-    // Fallback: 64-bit processing
-    const char *pCurrent = pSource;
-    while (nSize >= 8) {
-        quint64 v = 0;
-        memcpy(&v, pCurrent, sizeof(v));
-        quint64 v_minus_0x30 = v - 0x3030303030303030ULL;
-        if (((v_minus_0x30 | (v_minus_0x30 >> 4)) & 0xF0F0F0F0F0F0F0F0ULL) != 0) {
-            const quint8 *pCheck = reinterpret_cast<const quint8 *>(pCurrent);
-            for (qint32 i = 0; i < 8; i++) {
-                if (pCheck[i] < 0x30 || pCheck[i] > 0x39) {
-                    return false;
-                }
-            }
-        }
-        pCurrent += 8;
-        nSize -= 8;
-    }
-
-    // Process remaining bytes
-    const quint8 *pRemaining = reinterpret_cast<const quint8 *>(pCurrent);
-    while (nSize > 0) {
-        if (*pRemaining < 0x30 || *pRemaining > 0x39) {
+    const quint8 *pCurrent = reinterpret_cast<const quint8 *>(pSource);
+    while (nSize-- > 0) {
+        if ((*pCurrent < 0x30) || (*pCurrent > 0x39)) {
             return false;
         }
-        pRemaining++;
-        nSize--;
+        pCurrent++;
     }
 
     return true;
@@ -7883,32 +8514,89 @@ bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
 
 bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    // TODO optimize
-    if ((!pSourceDevice->seek(nSourceOffset)) || (!pDestDevice->seek(nDestOffset))) {
+    const qint64 nMax = (std::numeric_limits<qint64>::max)();
+    if (!pSourceDevice || !pDestDevice || !pSourceDevice->isReadable() || !pDestDevice->isWritable() ||
+        (nSourceOffset < 0) || (nDestOffset < 0) || (nSize < 0) ||
+        (nSourceOffset > (nMax - nSize)) || (nDestOffset > (nMax - nSize)) ||
+        !isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
 
-    qint32 nBufferSize = getBufferSize(pPdStruct);
+    const qint64 nSourceSize = pSourceDevice->size();
+    if ((nSourceSize < 0) || (nSourceOffset > nSourceSize) || (nSize > (nSourceSize - nSourceOffset))) {
+        return false;
+    }
 
-    char *pBuffer = new char[nBufferSize];
+    if (nSize == 0 || ((pSourceDevice == pDestDevice) && (nSourceOffset == nDestOffset))) {
+        return true;
+    }
 
-    while ((nSize > 0) && (isPdStructNotCanceled(pPdStruct))) {
-        qint64 nCurrentBufferSize = qMin(nSize, (qint64)nBufferSize);
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+    if (nRequestedBufferSize <= 0) {
+        return false;
+    }
+    const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
 
-        if (nCurrentBufferSize != pSourceDevice->read(pBuffer, nCurrentBufferSize)) {
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
+    if (!pBuffer) {
+        return false;
+    }
+
+    const bool bReverse = (pSourceDevice == pDestDevice) && (nDestOffset > nSourceOffset) &&
+                          (nDestOffset < (nSourceOffset + nSize));
+    const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
+
+    qint64 nRemaining = nSize;
+    qint64 nProcessed = 0;
+    bool bResult = true;
+
+    while ((nRemaining > 0) && isPdStructNotCanceled(pPdStruct)) {
+        const qint64 nChunkSize = qMin(nRemaining, (qint64)nBufferSize);
+        const qint64 nChunkSourceOffset = bReverse ? (nSourceOffset + nRemaining - nChunkSize) : (nSourceOffset + nProcessed);
+        const qint64 nChunkDestOffset = bReverse ? (nDestOffset + nRemaining - nChunkSize) : (nDestOffset + nProcessed);
+
+        if (!pSourceDevice->seek(nChunkSourceOffset)) {
+            bResult = false;
             break;
         }
 
-        if (nCurrentBufferSize != pDestDevice->write(pBuffer, nCurrentBufferSize)) {
+        qint64 nReadTotal = 0;
+        while ((nReadTotal < nChunkSize) && isPdStructNotCanceled(pPdStruct)) {
+            const qint64 nRead = pSourceDevice->read(pBuffer + nReadTotal, nChunkSize - nReadTotal);
+            if ((nRead <= 0) || (nRead > (nChunkSize - nReadTotal))) {
+                bResult = false;
+                break;
+            }
+            nReadTotal += nRead;
+        }
+        if (!bResult || (nReadTotal != nChunkSize) || !pDestDevice->seek(nChunkDestOffset)) {
+            bResult = false;
             break;
         }
 
-        nSize -= nCurrentBufferSize;
+        qint64 nWrittenTotal = 0;
+        while ((nWrittenTotal < nChunkSize) && isPdStructNotCanceled(pPdStruct)) {
+            const qint64 nWritten = pDestDevice->write(pBuffer + nWrittenTotal, nChunkSize - nWrittenTotal);
+            if ((nWritten <= 0) || (nWritten > (nChunkSize - nWrittenTotal))) {
+                bResult = false;
+                break;
+            }
+            nWrittenTotal += nWritten;
+        }
+        if (!bResult || (nWrittenTotal != nChunkSize)) {
+            bResult = false;
+            break;
+        }
+
+        nRemaining -= nChunkSize;
+        nProcessed += nChunkSize;
+        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nProcessed);
     }
 
     delete[] pBuffer;
+    XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
 
-    return (bool)(nSize == 0);
+    return bResult && (nRemaining == 0) && isPdStructNotCanceled(pPdStruct);
 }
 
 bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize, bool bReverse)
@@ -7928,18 +8616,21 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
         return false;
     }
 
-    if (nDestOffset == nSourceOffset) {
-        return true;
-    }
-
-    qint64 nMaxSize = getSize();
+    const qint64 nMaxSize = getSize();
 
     if ((nDestOffset > nMaxSize) || (nSourceOffset > nMaxSize) || (nSize > (nMaxSize - nDestOffset)) || (nSize > (nMaxSize - nSourceOffset))) {
         return false;
     }
 
+    if ((nSize == 0) || (nDestOffset == nSourceOffset)) {
+        return true;
+    }
+
     // TODO
-    char *pBuffer = new char[nBufferSize];
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
+    if (!pBuffer) {
+        return false;
+    }
 
     if (bReverse) {
         nSourceOffset += nSize;
@@ -7947,6 +8638,8 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
     }
 
     bResult = true;
+    PDSTRUCT pdStruct = XBinary::createPdStruct();
+    pdStruct.nBufferSize = (qint32)nBufferSize;
 
     while (nSize > 0) {
         qint64 nTempSize = qMin(nSize, (qint64)nBufferSize);
@@ -7956,7 +8649,8 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
             nDestOffset -= nTempSize;
         }
 
-        if ((read_array(nSourceOffset, pBuffer, nTempSize) != nTempSize) || (write_array(nDestOffset, pBuffer, nTempSize) != nTempSize)) {
+        if ((read_array_process(nSourceOffset, pBuffer, nTempSize, &pdStruct) != nTempSize) ||
+            (write_array_process(nDestOffset, pBuffer, nTempSize, &pdStruct) != nTempSize)) {
             bResult = false;
             break;
         }
@@ -7976,12 +8670,11 @@ bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize,
 
 bool XBinary::zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    // TODO optimize
     if (nSize == 0) {
         return false;
     }
 
-    if ((nOffset < 0) || (nSize < 0)) {
+    if ((nOffset < 0) || (nSize < 0) || !isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
 
@@ -7992,11 +8685,18 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
         return false;
     }
 
-    qint32 nBufferSize = getBufferSize(pPdStruct);
-    char *pZero = new char[nBufferSize];
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+    if (nRequestedBufferSize <= 0) {
+        return false;
+    }
+    const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+    char *pZero = new (std::nothrow) char[nBufferSize];
+    if (!pZero) {
+        return false;
+    }
+    memset(pZero, 0, (size_t)nBufferSize);
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
     qint64 nProcessed = 0;
     bool bSuccess = true;
@@ -8004,7 +8704,7 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
     while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
         qint64 nWrite = qMin(nSize, (qint64)nBufferSize);
 
-        if (write_array(nOffset, pZero, nWrite) != nWrite) {
+        if (write_array_process(nOffset, pZero, nWrite, pPdStruct) != nWrite) {
             bSuccess = false;
             break;
         }
@@ -8020,20 +8720,32 @@ bool XBinary::zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 
     delete[] pZero;
 
-    return bSuccess && (nSize == 0);
+    return bSuccess && (nSize == 0) && isPdStructNotCanceled(pPdStruct);
 }
 
 bool XBinary::compareMemory(const char *pMemory1, const char *pMemory2, qint64 nSize)
 {
+    if ((nSize < 0) || ((nSize > 0) && (!pMemory1 || !pMemory2))) {
+        return false;
+    }
+
+    if (nSize == 0) {
+        return true;
+    }
+
 #ifdef USE_XSIMD
     return xsimd_compare_memory(const_cast<char *>(pMemory1), pMemory2, nSize) != 0;
 #else
-    return (pMemory1 && pMemory2 && (nSize >= 0) && (memcmp(pMemory1, pMemory2, (size_t)nSize) == 0));
+    return memcmp(pMemory1, pMemory2, (size_t)nSize) == 0;
 #endif
 }
 
 bool XBinary::compareMemoryByteI(quint8 *pMemory, const quint8 *pMemoryU, const quint8 *pMemoryL, qint64 nSize)
 {
+    if ((nSize < 0) || ((nSize > 0) && (!pMemory || !pMemoryU || !pMemoryL))) {
+        return false;
+    }
+
     bool bResult = true;
 
     while (nSize > 0) {
@@ -8053,6 +8765,10 @@ bool XBinary::compareMemoryByteI(quint8 *pMemory, const quint8 *pMemoryU, const 
 
 bool XBinary::compareMemoryWordI(quint16 *pMemory, const quint16 *pMemoryU, const quint16 *pMemoryL, qint64 nSize)
 {
+    if ((nSize < 0) || ((nSize > 0) && (!pMemory || !pMemoryU || !pMemoryL))) {
+        return false;
+    }
+
     bool bResult = true;
 
     while (nSize > 0) {
@@ -8164,13 +8880,40 @@ bool XBinary::isOffsetAndSizeValid(qint64 nOffset, qint64 nSize)
 
 bool XBinary::isOffsetAndSizeValid(XBinary::_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize)
 {
-    if (!pMemoryMap || (nOffset < 0) || (nSize <= 0) || ((nSize - 1) > (std::numeric_limits<qint64>::max)() - nOffset)) {
+    if (!pMemoryMap || (nOffset < 0) || (nSize <= 0) || (nSize > (std::numeric_limits<qint64>::max)() - nOffset)) {
         return false;
     }
 
-    const qint64 nLastOffset = nOffset + nSize - 1;
+    if (pMemoryMap->nBinarySize > 0) {
+        return (nOffset < pMemoryMap->nBinarySize) && (nSize <= (pMemoryMap->nBinarySize - nOffset));
+    }
 
-    return isOffsetValid(pMemoryMap, nOffset) && isOffsetValid(pMemoryMap, nLastOffset);
+    const qint64 nEndOffset = nOffset + nSize;
+    qint64 nCoveredOffset = nOffset;
+
+    while (nCoveredOffset < nEndOffset) {
+        qint64 nNextCoveredOffset = nCoveredOffset;
+        const qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
+        for (qint32 i = 0; i < nNumberOfRecords; ++i) {
+            const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
+            if ((record.nOffset < 0) || (record.nSize <= 0) || (record.nOffset > nCoveredOffset) ||
+                (record.nSize > (std::numeric_limits<qint64>::max)() - record.nOffset)) {
+                continue;
+            }
+
+            const qint64 nRecordEnd = record.nOffset + record.nSize;
+            if ((nCoveredOffset < nRecordEnd) && (nRecordEnd > nNextCoveredOffset)) {
+                nNextCoveredOffset = qMin(nRecordEnd, nEndOffset);
+            }
+        }
+
+        if (nNextCoveredOffset <= nCoveredOffset) {
+            return false;
+        }
+        nCoveredOffset = nNextCoveredOffset;
+    }
+
+    return true;
 }
 
 bool XBinary::isOffsetAndSizeValid(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
@@ -8319,7 +9062,7 @@ qint64 XBinary::addressToOffset(XBinary::_MEMORY_MAP *pMemoryMap, XADDR nAddress
     for (qint32 i = nNumberOfRecords - 1; i >= 0; i--) {
         const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
 
-        if (_containsMemoryAddress(record, nAddress) && _addRelativeOffset(record.nOffset, nAddress - record.nAddress, &nResult)) {
+        if (!record.bIsVirtual && _containsMemoryAddress(record, nAddress) && _addRelativeOffset(record.nOffset, nAddress - record.nAddress, &nResult)) {
             break;
         }
     }
@@ -8449,7 +9192,7 @@ qint32 XBinary::getMemoryIndexByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset)
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    for (qint32 i = nNumberOfRecords - 1; i >= 0; i--) {
         const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
 
         if (_containsMemoryOffset(record, nOffset)) {
@@ -8471,7 +9214,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByOffset(XBinary::_MEMORY_MAP *p
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    for (qint32 i = nNumberOfRecords - 1; i >= 0; i--) {
         const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
 
         if (_containsMemoryOffset(record, nOffset)) {
@@ -8493,7 +9236,7 @@ XBinary::_MEMORY_RECORD XBinary::getMemoryRecordByAddress(XBinary::_MEMORY_MAP *
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    for (qint32 i = nNumberOfRecords - 1; i >= 0; i--) {
         if (_containsMemoryAddress(pMemoryMap->listRecords.at(i), nAddress)) {
             result = pMemoryMap->listRecords.at(i);
             break;
@@ -8750,7 +9493,9 @@ QString XBinary::getMemoryRecordName(XBinary::_MEMORY_RECORD *pMemoryRecord)
 {
     QString sRecord;
 
-    sRecord = pMemoryRecord->sName;  // TODO
+    if (pMemoryRecord) {
+        sRecord = pMemoryRecord->sName;  // TODO
+    }
 
     return sRecord;
 }
@@ -8775,9 +9520,15 @@ QString XBinary::mapModeToString(MAPMODE mapMode)
 
 bool XBinary::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
+    if (!pMemoryMap || !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
 
     qint64 nTotalSize = getSize();
+
+    if (nTotalSize < 0) {
+        return false;
+    }
 
     pMemoryMap->nModuleAddress = getModuleAddress();
     pMemoryMap->bIsImage = isImage();
@@ -8795,6 +9546,10 @@ bool XBinary::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 
 void XBinary::_processMemoryMap(_MEMORY_MAP *pMemoryMap, QList<FPART> *pListFParts, PDSTRUCT *pPdStruct)
 {
+    if (!pMemoryMap || !pListFParts || !isPdStructNotCanceled(pPdStruct)) {
+        return;
+    }
+
     std::sort(pListFParts->begin(), pListFParts->end(), compareFileParts);
 
     XADDR nMaxAddress = 0;
@@ -8804,6 +9559,18 @@ void XBinary::_processMemoryMap(_MEMORY_MAP *pMemoryMap, QList<FPART> *pListFPar
 
     for (qint32 i = 0; i < nNumberOfParts && isPdStructNotCanceled(pPdStruct); i++) {
         FPART fpart = pListFParts->at(i);
+
+        if ((fpart.nFileSize < 0) || (fpart.nVirtualSize < 0) || (fpart.nFileOffset < -1)) {
+            continue;
+        }
+
+        quint64 nVirtualEnd = 0;
+        if (fpart.nVirtualAddress != (XADDR)-1) {
+            if ((quint64)fpart.nVirtualSize > (std::numeric_limits<XADDR>::max)() - fpart.nVirtualAddress) {
+                continue;
+            }
+            nVirtualEnd = fpart.nVirtualAddress + (quint64)fpart.nVirtualSize;
+        }
 
         _MEMORY_RECORD record = {};
         record.nAddress = fpart.nVirtualAddress;
@@ -8817,10 +9584,10 @@ void XBinary::_processMemoryMap(_MEMORY_MAP *pMemoryMap, QList<FPART> *pListFPar
 
         pMemoryMap->listRecords.append(record);
 
-        if (fpart.nVirtualSize > fpart.nFileSize) {
+        if ((fpart.nVirtualAddress != (XADDR)-1) && (fpart.nVirtualSize > fpart.nFileSize)) {
             // Add virtual size
             _MEMORY_RECORD virtualRecord = {};
-            virtualRecord.nAddress = fpart.nVirtualAddress + fpart.nFileSize;
+            virtualRecord.nAddress = fpart.nVirtualAddress + (quint64)fpart.nFileSize;
             virtualRecord.nOffset = -1;
             virtualRecord.nSize = fpart.nVirtualSize - fpart.nFileSize;
             virtualRecord.nIndex = nIndex++;
@@ -8832,17 +9599,22 @@ void XBinary::_processMemoryMap(_MEMORY_MAP *pMemoryMap, QList<FPART> *pListFPar
             pMemoryMap->listRecords.append(virtualRecord);
         }
 
-        if (fpart.nVirtualAddress != -1) {
+        if (fpart.nVirtualAddress != (XADDR)-1) {
             if (nMinAddress == -1) {
                 nMinAddress = fpart.nVirtualAddress;
             }
 
             nMinAddress = qMin(nMinAddress, fpart.nVirtualAddress);
-            nMaxAddress = qMax(nMaxAddress, (XADDR)(fpart.nVirtualAddress + fpart.nVirtualSize));
+            nMaxAddress = qMax(nMaxAddress, (XADDR)nVirtualEnd);
         }
     }
     pMemoryMap->nModuleAddress = nMinAddress;
-    pMemoryMap->nImageSize = nMaxAddress - nMinAddress;
+    if ((nMinAddress != (XADDR)-1) && (nMaxAddress >= nMinAddress) &&
+        ((nMaxAddress - nMinAddress) <= (XADDR)(std::numeric_limits<qint64>::max)())) {
+        pMemoryMap->nImageSize = (qint64)(nMaxAddress - nMinAddress);
+    } else {
+        pMemoryMap->nImageSize = 0;
+    }
 }
 
 XBinary::_MEMORY_MAP XBinary::_getSimpleMemoryMap(quint32 nFileParts, PDSTRUCT *pPdStruct)
@@ -8965,6 +9737,10 @@ qint32 XBinary::getNumberOfPhysicalRecords(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     qint32 nResult = 0;
 
+    if (!pMemoryMap) {
+        return nResult;
+    }
+
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
@@ -8979,6 +9755,10 @@ qint32 XBinary::getNumberOfPhysicalRecords(XBinary::_MEMORY_MAP *pMemoryMap)
 qint32 XBinary::getNumberOfVirtualRecords(_MEMORY_MAP *pMemoryMap)
 {
     qint32 nResult = 0;
+
+    if (!pMemoryMap) {
+        return nResult;
+    }
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
@@ -8995,6 +9775,10 @@ qint32 XBinary::getNumberOfMemoryMapFileParts(_MEMORY_MAP *pMemoryMap, FILEPART 
 {
     qint32 nResult = 0;
 
+    if (!pMemoryMap) {
+        return nResult;
+    }
+
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
@@ -9010,11 +9794,19 @@ qint64 XBinary::getRecordsTotalRowSize(_MEMORY_MAP *pMemoryMap)
 {
     qint64 nResult = 0;
 
+    if (!pMemoryMap) {
+        return nResult;
+    }
+
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (!pMemoryMap->listRecords.at(i).bIsVirtual) {
-            nResult += pMemoryMap->listRecords.at(i).nSize;
+        const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
+        if (!record.bIsVirtual && (record.nSize >= 0)) {
+            if (record.nSize > (std::numeric_limits<qint64>::max)() - nResult) {
+                return (std::numeric_limits<qint64>::max)();
+            }
+            nResult += record.nSize;
         }
     }
 
@@ -9070,7 +9862,7 @@ bool XBinary::compareSignature(_MEMORY_MAP *pMemoryMap, const QString &sSignatur
 
     QList<SIGNATURE_RECORD> listSignatureRecords = getSignatureRecords(_sSignature, &bValid, pPdStruct);
 
-    if (listSignatureRecords.count()) {
+    if (bValid && listSignatureRecords.count()) {
         bResult = _compareSignature(pMemoryMap, &listSignatureRecords, nOffset, pPdStruct);
     } else {
         setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Invalid signature")).arg(sOrigin));
@@ -9083,16 +9875,17 @@ bool XBinary::_compareByteArrayWithSignature(const QByteArray &baData, const QSt
 {
     bool bResult = false;
 
-    QString sHex = baData.toHex().data();
+    const QString sHex = QString::fromLatin1(baData.toHex());
+    const QString sNormalizedSignature = convertSignature(sSignature);
 
-    if (sHex.size() == sSignature.size()) {
+    if (!sNormalizedSignature.isEmpty() && isSignatureValid(sNormalizedSignature) && (sHex.size() == sNormalizedSignature.size())) {
         bResult = true;
 
-        qint32 nNumberOfSymbols = sSignature.size();
+        qint32 nNumberOfSymbols = sNormalizedSignature.size();
 
         for (qint32 i = 0; i < nNumberOfSymbols; i++) {
-            if (sSignature.at(i) != QChar('.')) {
-                if (sSignature.at(i) != sHex.at(i)) {
+            if (sNormalizedSignature.at(i) != QChar('.')) {
+                if (sNormalizedSignature.at(i) != sHex.at(i)) {
                     bResult = false;
                     break;
                 }
@@ -9107,12 +9900,15 @@ QString XBinary::_createSignature(const QString &sSignature1, const QString &sSi
 {
     QString sResult;
 
-    qint32 nSize = sSignature1.size();
+    const QString sNormalizedSignature1 = convertSignature(sSignature1);
+    const QString sNormalizedSignature2 = convertSignature(sSignature2);
+    const qint32 nSize = sNormalizedSignature1.size();
 
-    if (sSignature1.size() == sSignature2.size()) {
+    if (!sNormalizedSignature1.isEmpty() && (nSize == sNormalizedSignature2.size()) && ((nSize & 1) == 0) &&
+        isSignatureValid(sNormalizedSignature1) && isSignatureValid(sNormalizedSignature2)) {
         for (qint32 i = 0; i < nSize; i += 2) {
-            if (sSignature1.mid(i, 2) == sSignature2.mid(i, 2)) {
-                sResult.append(sSignature1.mid(i, 2));
+            if (sNormalizedSignature1.mid(i, 2) == sNormalizedSignature2.mid(i, 2)) {
+                sResult.append(sNormalizedSignature1.mid(i, 2));
             } else {
                 sResult.append("..");
             }
@@ -9151,7 +9947,7 @@ qint64 XBinary::_getEntryPointOffset()
 
 qint64 XBinary::getEntryPointOffset(_MEMORY_MAP *pMemoryMap)
 {
-    return addressToOffset(pMemoryMap, pMemoryMap->nEntryPointAddress);
+    return pMemoryMap ? addressToOffset(pMemoryMap, pMemoryMap->nEntryPointAddress) : -1;
 }
 
 void XBinary::setEntryPointOffset(qint64 nEntryPointOffset)
@@ -9168,7 +9964,7 @@ XADDR XBinary::getEntryPointAddress()
 
 XADDR XBinary::getEntryPointAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return pMemoryMap->nEntryPointAddress;
+    return pMemoryMap ? pMemoryMap->nEntryPointAddress : (XADDR)-1;
 }
 
 XADDR XBinary::_getEntryPointAddress()
@@ -9185,12 +9981,23 @@ qint64 XBinary::getEntryPointRVA()
 
 qint64 XBinary::getEntryPointRVA(_MEMORY_MAP *pMemoryMap)
 {
-    return (pMemoryMap->nEntryPointAddress) - pMemoryMap->nModuleAddress;
+    if (!pMemoryMap || (pMemoryMap->nEntryPointAddress == (XADDR)-1) ||
+        (pMemoryMap->nModuleAddress == (XADDR)-1) ||
+        (pMemoryMap->nEntryPointAddress < pMemoryMap->nModuleAddress) ||
+        ((pMemoryMap->nEntryPointAddress - pMemoryMap->nModuleAddress) > (XADDR)(std::numeric_limits<qint64>::max)())) {
+        return -1;
+    }
+
+    return (qint64)(pMemoryMap->nEntryPointAddress - pMemoryMap->nModuleAddress);
 }
 
 XADDR XBinary::getLowestAddress(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     XADDR nResult = -1;
+
+    if (!pMemoryMap) {
+        return nResult;
+    }
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
@@ -9211,12 +10018,19 @@ qint64 XBinary::getTotalVirtualSize(XBinary::_MEMORY_MAP *pMemoryMap)
 {
     qint64 nResult = 0;
 
+    if (!pMemoryMap) {
+        return nResult;
+    }
+
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (pMemoryMap->listRecords.at(i).filePart != FILEPART_OVERLAY)  // TODO Check ELF, MachO -1
-        {
-            nResult += pMemoryMap->listRecords.at(i).nSize;
+        const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
+        if ((record.filePart != FILEPART_OVERLAY) && (record.nSize >= 0)) {  // TODO Check ELF, MachO -1
+            if (record.nSize > (std::numeric_limits<qint64>::max)() - nResult) {
+                return (std::numeric_limits<qint64>::max)();
+            }
+            nResult += record.nSize;
         }
     }
 
@@ -9227,16 +10041,31 @@ quint64 XBinary::positionToVirtualAddress(_MEMORY_MAP *pMemoryMap, qint64 nPosit
 {
     XADDR nResult = -1;
 
+    if (!pMemoryMap || (nPosition < 0)) {
+        return nResult;
+    }
+
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     qint64 _nSize = 0;
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if ((_nSize <= nPosition) && (nPosition < _nSize + pMemoryMap->listRecords.at(i).nSize)) {
-            nResult = pMemoryMap->listRecords.at(i).nAddress + (nPosition - _nSize);
+        const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
+        if (record.nSize < 0) {
+            return (XADDR)-1;
         }
 
-        _nSize += pMemoryMap->listRecords.at(i).nSize;
+        if ((_nSize <= nPosition) && ((nPosition - _nSize) < record.nSize)) {
+            if (_addRelativeAddress(record.nAddress, nPosition - _nSize, &nResult)) {
+                return nResult;
+            }
+            return (XADDR)-1;
+        }
+
+        if (record.nSize > (std::numeric_limits<qint64>::max)() - _nSize) {
+            return (XADDR)-1;
+        }
+        _nSize += record.nSize;
     }
 
     return nResult;
@@ -9269,33 +10098,49 @@ bool XBinary::compareEntryPoint(const QString &sSignature, qint64 nOffset)
 
 bool XBinary::compareEntryPoint(XBinary::_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset)
 {
-    qint64 nEPOffset = getEntryPointOffset(pMemoryMap) + nOffset;
+    if (!pMemoryMap) {
+        return false;
+    }
+
+    const qint64 nBaseOffset = getEntryPointOffset(pMemoryMap);
+    if ((nBaseOffset < 0) || (nOffset < 0) || (nBaseOffset > (std::numeric_limits<qint64>::max)() - nOffset)) {
+        return false;
+    }
+
+    const qint64 nEPOffset = nBaseOffset + nOffset;
 
     return compareSignature(pMemoryMap, sSignature, nEPOffset);
 }
 
 bool XBinary::moveMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize)
 {
-    bool bResult = false;
+    const qint64 nMaxSize = getSize();
 
-    if (nDestOffset == nSourceOffset) {
-        return true;
-    }
-
-    qint64 nMaxSize = getSize();
-
-    if ((nDestOffset + nSize > nMaxSize) || (nSourceOffset + nSize > nMaxSize)) {
+    if (!m_pDevice || !m_pDevice->isWritable() || (nMaxSize < 0) ||
+        (nSourceOffset < 0) || (nDestOffset < 0) || (nSize < 0) ||
+        (nSourceOffset > nMaxSize) || (nDestOffset > nMaxSize) ||
+        (nSize > (nMaxSize - nSourceOffset)) || (nSize > (nMaxSize - nDestOffset))) {
         return false;
     }
 
-    qint64 nDelta = nDestOffset - nSourceOffset;
+    if ((nSize == 0) || (nDestOffset == nSourceOffset)) {
+        return true;
+    }
+
+    const qint64 nDelta = nDestOffset - nSourceOffset;
+    const quint32 nBufferSize = (quint32)qMin<qint64>((nDelta > 0) ? nDelta : -nDelta, 0x1000);
+    bool bResult = false;
 
     if (nDelta > 0) {
-        bResult = copyMemory(nSourceOffset, nDestOffset, nSize, nDelta, true);
-        zeroFill(nSourceOffset, nDelta);
+        bResult = copyMemory(nSourceOffset, nDestOffset, nSize, nBufferSize, true);
+        if (bResult) {
+            bResult = zeroFill(nSourceOffset, nDelta);
+        }
     } else {
-        bResult = copyMemory(nSourceOffset, nDestOffset, nSize, -nDelta, false);
-        zeroFill(nDestOffset + nSize, -nDelta);
+        bResult = copyMemory(nSourceOffset, nDestOffset, nSize, nBufferSize, false);
+        if (bResult) {
+            bResult = zeroFill(nDestOffset + nSize, -nDelta);
+        }
     }
 
     return bResult;
@@ -9310,17 +10155,21 @@ bool XBinary::moveMemory(QIODevice *pDevice, qint64 nSourceOffset, qint64 nDestO
 
 bool XBinary::dumpToFile(const QString &sFileName, const char *pData, qint64 nDataSize)
 {
-    bool bResult = false;
-
-    QFile file;
-    file.setFileName(sFileName);
-
-    if ((nDataSize >= 0) && file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        bResult = (file.write(pData, nDataSize) == nDataSize);
-        file.close();
+    if ((nDataSize < 0) || ((nDataSize > 0) && !pData)) {
+        return false;
     }
 
-    return bResult;
+    QSaveFile file(sFileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
+    }
+
+    if (!writeAllToDevice(&file, pData, nDataSize)) {
+        file.cancelWriting();
+        return false;
+    }
+
+    return file.commit();
 }
 
 bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct)
@@ -9333,31 +10182,44 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
         pPdStruct = &pdStructEmpty;
     }
 
-    if (nDataSize == -1) {
-        qint64 _nSize = getSize();
-        nDataSize = _nSize - nDataOffset;
+    const qint64 nSourceSize = getSize();
+    if (!m_pDevice || (nSourceSize < 0) || (nDataOffset < 0) || (nDataOffset > nSourceSize) ||
+        (nDataSize < -1) || !isPdStructNotCanceled(pPdStruct)) {
+        return false;
     }
 
-    QFile file;
-    file.setFileName(sFileName);
+    if (nDataSize == -1) {
+        nDataSize = nSourceSize - nDataOffset;
+    }
+    if ((nDataSize < 0) || (nDataSize > (nSourceSize - nDataOffset))) {
+        return false;
+    }
 
-    if (file.open(QIODevice::ReadWrite)) {
-        file.resize(0);
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+    const qint32 nBufferSize = (nRequestedBufferSize > 0)
+                                   ? qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000)
+                                   : 0;
+    if ((nDataSize > 0) && (nBufferSize <= 0)) return false;
 
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];  // TODO const
+    char *pBuffer = nullptr;
+    if (nDataSize > 0) {
+        pBuffer = new (std::nothrow) char[nBufferSize];
+        if (!pBuffer) return false;
+    }
 
+    QSaveFile file(sFileName);
+
+    if (file.open(QIODevice::WriteOnly)) {
         qint64 nSourceOffset = nDataOffset;
-        qint64 nDestOffset = 0;
+        qint64 nRemaining = nDataSize;
+        qint64 nProcessed = 0;
 
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nDataSize);
+        qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nDataSize);
 
         bResult = true;
 
-        while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {
-            qint64 nTempSize = qMin(nDataSize, (qint64)0x1000);  // TODO const
+        while ((nRemaining > 0) && isPdStructNotCanceled(pPdStruct)) {
+            const qint64 nTempSize = qMin(nRemaining, (qint64)nBufferSize);
 
             if (read_array_process(nSourceOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
                 setPdStructErrorString(pPdStruct, tr("Read error"));
@@ -9365,112 +10227,152 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
                 break;
             }
 
-            if (!((file.seek(nDestOffset)) && (file.write(pBuffer, nTempSize) == nTempSize))) {
+            if (!writeAllToDevice(&file, pBuffer, nTempSize)) {
                 setPdStructErrorString(pPdStruct, tr("Write error"));
                 bResult = false;
                 break;
             }
 
             nSourceOffset += nTempSize;
-            nDestOffset += nTempSize;
+            nProcessed += nTempSize;
+            nRemaining -= nTempSize;
 
-            nDataSize -= nTempSize;
-
-            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nDestOffset);
+            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nProcessed);
         }
 
         XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
-        delete[] pBuffer;
-
-        file.close();
+        bResult = bResult && (nRemaining == 0) && isPdStructNotCanceled(pPdStruct);
+        if (bResult) {
+            bResult = file.commit();
+        } else {
+            file.cancelWriting();
+        }
     } else {
         _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file")).arg(sFileName));
     }
+
+    delete[] pBuffer;
 
     return bResult;
 }
 
 bool XBinary::dumpToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
-
-    QFile file;
-    file.setFileName(sFileName);
-
-    if (file.open(QIODevice::ReadWrite)) {
-        file.resize(0);
-        bResult = copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), pPdStruct);
-        file.close();
+    if (!pDevice || (pDevice->size() < 0)) {
+        return false;
     }
 
-    return bResult;
+    XBinary binary(pDevice);
+
+    return binary.dumpToFile(sFileName, 0, pDevice->size(), pPdStruct);
 }
 
 bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
-
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
 
+    if (!m_pDevice || !m_pDevice->isWritable() || (nDataOffset < 0) || !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
+    // A second QFile object hides same-device overlap from copyDeviceMemory.
+    // Reject aliases up front so a forward patch cannot overwrite source data
+    // that a later chunk still has to read.
+    const QFile *pDestinationFile = dynamic_cast<const QFile *>(m_pDevice);
+
+    if (pDestinationFile) {
+        const QFileInfo destinationInfo(pDestinationFile->fileName());
+        const QFileInfo sourceInfo(sFileName);
+        QString sDestinationPath = destinationInfo.canonicalFilePath();
+        QString sSourcePath = sourceInfo.canonicalFilePath();
+
+        if (sDestinationPath.isEmpty()) {
+            sDestinationPath = QDir::cleanPath(destinationInfo.absoluteFilePath());
+        }
+        if (sSourcePath.isEmpty()) {
+            sSourcePath = QDir::cleanPath(sourceInfo.absoluteFilePath());
+        }
+
+#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+        const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+#else
+        const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#endif
+
+        if (!sDestinationPath.isEmpty() && !sSourcePath.isEmpty() &&
+            (QString::compare(QDir::fromNativeSeparators(sDestinationPath), QDir::fromNativeSeparators(sSourcePath), caseSensitivity) == 0)) {
+            return false;
+        }
+    }
+
     if (nDataSize == -1) {
-        qint64 _nSize = getSize();
-        nDataSize = _nSize - nDataOffset;
+        const qint64 nDestinationSize = getSize();
+
+        if ((nDestinationSize < 0) || (nDataOffset > nDestinationSize)) {
+            return false;
+        }
+
+        nDataSize = nDestinationSize - nDataOffset;
+    }
+
+    const qint64 nDestinationSize = getSize();
+
+    if ((nDataSize < 0) || (nDestinationSize < 0) || (nDataOffset > nDestinationSize) ||
+        (nDataSize > nDestinationSize - nDataOffset)) {
+        return false;
     }
 
     QFile file;
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];  // TODO const
+        bool bSameOpenFile = false;
 
-        qint64 nSourceOffset = 0;
-        qint64 nDestOffset = nDataOffset;
+        if (pDestinationFile && (pDestinationFile->handle() >= 0) && (file.handle() >= 0)) {
+#ifdef Q_OS_WIN
+            const intptr_t nDestinationHandle = _get_osfhandle(pDestinationFile->handle());
+            const intptr_t nSourceHandle = _get_osfhandle(file.handle());
 
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+            if ((nDestinationHandle != -1) && (nSourceHandle != -1)) {
+                BY_HANDLE_FILE_INFORMATION destinationFileInformation = {};
+                BY_HANDLE_FILE_INFORMATION sourceFileInformation = {};
 
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nDataSize);
-
-        bResult = true;
-
-        while ((nDataSize > 0) && (!(pPdStruct->bIsStop))) {
-            qint64 nTempSize = qMin(nDataSize, (qint64)0x1000);  // TODO const
-
-            if (safeReadData(&file, nSourceOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
-                setPdStructErrorString(pPdStruct, tr("Read error"));
-                bResult = false;
-                break;
+                if (GetFileInformationByHandle(reinterpret_cast<HANDLE>(nDestinationHandle), &destinationFileInformation) &&
+                    GetFileInformationByHandle(reinterpret_cast<HANDLE>(nSourceHandle), &sourceFileInformation)) {
+                    bSameOpenFile = (destinationFileInformation.dwVolumeSerialNumber == sourceFileInformation.dwVolumeSerialNumber) &&
+                                    (destinationFileInformation.nFileIndexHigh == sourceFileInformation.nFileIndexHigh) &&
+                                    (destinationFileInformation.nFileIndexLow == sourceFileInformation.nFileIndexLow);
+                }
             }
+#elif defined(Q_OS_UNIX)
+            struct stat destinationFileStatus = {};
+            struct stat sourceFileStatus = {};
 
-            if (safeWriteData(m_pDevice, nDestOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
-                setPdStructErrorString(pPdStruct, tr("Write error"));
-                bResult = false;
-                break;
+            if ((fstat(pDestinationFile->handle(), &destinationFileStatus) == 0) && (fstat(file.handle(), &sourceFileStatus) == 0)) {
+                bSameOpenFile = (destinationFileStatus.st_dev == sourceFileStatus.st_dev) &&
+                                (destinationFileStatus.st_ino == sourceFileStatus.st_ino);
             }
-
-            nSourceOffset += nTempSize;
-            nDestOffset += nTempSize;
-
-            nDataSize -= nTempSize;
-
-            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nDestOffset);
+#endif
         }
 
-        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+        if (bSameOpenFile) {
+            file.close();
+            return false;
+        }
 
-        delete[] pBuffer;
-
+        const bool bResult = (file.size() >= nDataSize) && copyDeviceMemory(&file, 0, m_pDevice, nDataOffset, nDataSize, pPdStruct);
         file.close();
-    } else {
-        _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file")).arg(sFileName));
+        return bResult;
     }
 
-    return bResult;
+    _errorMessage(QString("%1: %2").arg(QObject::tr("Cannot open file")).arg(sFileName));
+
+    return false;
 }
 
 QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
@@ -9754,8 +10656,9 @@ QSet<XBinary::FT> XBinary::getFileTypes(bool bExtra)
             // Windows MiniDump format
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_MINIDUMP);
-        } else if (compareSignature(&memoryMap, "'koly'", nSize - 512)) {
-            // Apple Disk Image format (koly block at end)
+        } else if (compareSignature(&memoryMap, "'koly'", nSize - 512) ||
+                   ((nSize > 512) && compareSignature(&memoryMap, "'koly'0000000400000200", 0))) {
+            // Apple Disk Image format (usual terminal KOLY or rare legacy front KOLY)
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_DMG);
         } else if (compareSignature(&memoryMap, "60EA", 0) && nSize >= 34) {
@@ -10064,6 +10967,10 @@ QSet<XBinary::FT> XBinary::getFileTypes(QByteArray *pbaData, bool bExtra)
 
 XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
 {
+    if (!pStFileTypes) {
+        return FT_UNKNOWN;
+    }
+
     if (!pStFileTypes) {
         return FT_UNKNOWN;
     }
@@ -10746,8 +11653,10 @@ QString XBinary::getUnpackedFileName(QIODevice *pDevice, bool bShort)
 
         if (bShort) {
             QFileInfo fi(sResult);
-
-            sResult = fi.completeBaseName() + "." + fi.suffix();
+            sResult = fi.completeBaseName();
+            if (!fi.suffix().isEmpty()) {
+                sResult += QLatin1Char('.') + fi.suffix();
+            }
         }
     }
 
@@ -10757,7 +11666,10 @@ QString XBinary::getUnpackedFileName(QIODevice *pDevice, bool bShort)
 QString XBinary::getUnpackedFileName(const QString &sFileName)
 {
     QFileInfo fileInfo(sFileName);
-    QString sResult = fileInfo.absolutePath() + QDir::separator() + fileInfo.completeBaseName() + ".unp." + fileInfo.suffix();
+    QString sResult = fileInfo.absolutePath() + QDir::separator() + fileInfo.completeBaseName() + ".unp";
+    if (!fileInfo.suffix().isEmpty()) {
+        sResult += QLatin1Char('.') + fileInfo.suffix();
+    }
     //            sResult=fi.absolutePath()+QDir::separator()+fi.baseName()+".unp."+fi.completeSuffix();
 
     return sResult;
@@ -10783,30 +11695,26 @@ QString XBinary::getDumpFileName(QIODevice *pDevice)
 QString XBinary::getDumpFileName(const QString &sFileName)
 {
     QFileInfo fileInfo(sFileName);
-    QString sResult = fileInfo.absolutePath() + QDir::separator() + fileInfo.completeBaseName() + ".dump." + fileInfo.suffix();
+    QString sResult = fileInfo.absolutePath() + QDir::separator() + fileInfo.completeBaseName() + ".dump";
+    if (!fileInfo.suffix().isEmpty()) {
+        sResult += QLatin1Char('.') + fileInfo.suffix();
+    }
 
     return sResult;
 }
 
 QString XBinary::getBackupFileName(QIODevice *pDevice)
 {
-    QString sResult = QString("Backup_%1.BAK").arg(getCurrentBackupDate());
-
-    QFile *pFile = dynamic_cast<QFile *>(pDevice);
-
-    if (pFile) {
-        QString sFileName = pFile->fileName();
-
-        if (sFileName != "") {
-            sResult = getBackupFileName(sFileName);
-        }
-    }
-
-    return sResult;
+    const QString sFileName = getDeviceFileName(pDevice);
+    return sFileName.isEmpty() ? QString() : getBackupFileName(sFileName);
 }
 
 QString XBinary::getBackupFileName(const QString &sFileName)
 {
+    if (sFileName.trimmed().isEmpty()) {
+        return QString();
+    }
+
     QFileInfo fi(sFileName);
     QString sResult;
 
@@ -10861,33 +11769,29 @@ QString XBinary::getResultFileName(const QString &sFileName, const QString &sApp
 
 QString XBinary::getDeviceFileName(QIODevice *pDevice)
 {
-    QString sResult = pDevice->property("FileName").toString();
-
-    if (sResult == "") {
-        QFile *pFile = dynamic_cast<QFile *>(pDevice);
-
-        if (pFile) {
-            sResult = pFile->fileName();
-        }
+    if (!pDevice) {
+        return QString();
     }
 
-    return sResult;
+    QFile *pFile = dynamic_cast<QFile *>(pDevice);
+    if (pFile) {
+        QString sResult = getOpenQFilePath(pFile);
+        if (sResult.isEmpty() && !pFile->fileName().isEmpty()) {
+            sResult = QFileInfo(pFile->fileName()).absoluteFilePath();
+        }
+        return sResult;
+    }
+
+    return pDevice->property("FileName").toString();
 }
 
 QString XBinary::getDeviceFilePath(QIODevice *pDevice)
 {
     QString sResult;
 
-    QFile *pFile = dynamic_cast<QFile *>(pDevice);
-
-    if (pFile) {
-        QString sFileName = pFile->fileName();
-
-        if (sFileName != "") {
-            QFileInfo fi(sFileName);
-
-            sResult = fi.absoluteFilePath();
-        }
+    const QString sFileName = getDeviceFileName(pDevice);
+    if (!sFileName.isEmpty()) {
+        sResult = QFileInfo(sFileName).absoluteFilePath();
     }
 
     return sResult;
@@ -10962,43 +11866,68 @@ QString XBinary::getFileDirectory(const QString &sFileName)
 
 QIODevice *XBinary::getBackupDevice(QIODevice *pDevice)
 {
-    QIODevice *pResult = nullptr;
+    QSet<QIODevice *> visitedDevices;
 
-    pResult = (QIODevice *)pDevice->property("BACKUPDEVICE").toULongLong();
+    while (pDevice) {
+        if (visitedDevices.contains(pDevice)) {
+            return nullptr;
+        }
+        visitedDevices.insert(pDevice);
 
-    if (!pResult) {
-        pResult = pDevice;
+        SubDevice *pSubDevice = dynamic_cast<SubDevice *>(pDevice);
+        if (!pSubDevice) {
+            return pDevice;
+        }
+
+        pDevice = pSubDevice->getOrigDevice();
     }
 
-    return pResult;
+    return nullptr;
 }
 
 bool XBinary::isBackupPresent(QIODevice *pDevice)
 {
-    return XBinary::isFileExists(XBinary::getBackupFileName(pDevice));
+    if (!pDevice) {
+        return false;
+    }
+
+    const QString sSourceFileName = XBinary::getDeviceFileName(pDevice);
+    const QString sBackupFileName = XBinary::getBackupFileName(pDevice);
+    const QFileInfo sourceInfo(sSourceFileName);
+    const QFileInfo backupInfo(sBackupFileName);
+
+    return !sSourceFileName.isEmpty() && !sBackupFileName.isEmpty() && sourceInfo.exists() && sourceInfo.isFile() &&
+           !sourceInfo.isSymLink() && isDirectCanonicalPath(sourceInfo) && backupInfo.exists() && backupInfo.isFile() &&
+           !backupInfo.isSymLink() && isDirectCanonicalPath(backupInfo) &&
+           areDistinctRegularFiles(sSourceFileName, sBackupFileName);
 }
 
 bool XBinary::saveBackup(QIODevice *pDevice)
 {
-    bool bResult = false;
-
-    QString sBackupFileName = XBinary::getBackupFileName(pDevice);
-
-    if (sBackupFileName != "") {
-        if (!QFile::exists(sBackupFileName)) {
-            QString sFileName = XBinary::getDeviceFileName(pDevice);
-
-            if (sFileName != "") {
-                bResult = QFile::copy(sFileName, sBackupFileName);
-            } else {
-                bResult = XBinary::writeToFile(sBackupFileName, pDevice);
-            }
-        } else {
-            bResult = true;
-        }
+    if (!pDevice) {
+        return false;
     }
 
-    return bResult;
+    const QString sSourceFileName = XBinary::getDeviceFileName(pDevice);
+    const QString sBackupFileName = XBinary::getBackupFileName(pDevice);
+    const QFileInfo sourceInfo(sSourceFileName);
+
+    if (sSourceFileName.isEmpty() || sBackupFileName.isEmpty() || !sourceInfo.exists() || !sourceInfo.isFile() ||
+        sourceInfo.isSymLink() || !isDirectCanonicalPath(sourceInfo)) {
+        return false;
+    }
+
+    const QFileInfo backupInfo(sBackupFileName);
+    if (backupInfo.exists() || backupInfo.isSymLink()) {
+        return backupInfo.exists() && backupInfo.isFile() && !backupInfo.isSymLink() &&
+               isDirectCanonicalPath(backupInfo) && areDistinctRegularFiles(sSourceFileName, sBackupFileName);
+    }
+
+    if (!QFile::copy(sSourceFileName, sBackupFileName)) return false;
+
+    const QFileInfo createdBackupInfo(sBackupFileName);
+    return createdBackupInfo.exists() && createdBackupInfo.isFile() && !createdBackupInfo.isSymLink() &&
+           isDirectCanonicalPath(createdBackupInfo) && areDistinctRegularFiles(sSourceFileName, sBackupFileName);
 }
 
 QString XBinary::getCurrentBackupDate()
@@ -11014,49 +11943,90 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
 {
     QList<qint64> listResult;
 
-    qint64 nSize1 = pDevice1->size();
-    qint64 nSize2 = pDevice2->size();
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
-    if (nSize1 == nSize2) {
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+
+    if (!pDevice1 || !pDevice2 || !pDevice1->isReadable() || !pDevice2->isReadable() || pDevice1->isSequential() || pDevice2->isSequential() ||
+        !isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
+
+    const qint64 nSize1 = pDevice1->size();
+    const qint64 nSize2 = pDevice2->size();
+
+    if ((nSize1 >= 0) && (nSize1 == nSize2)) {
         qint64 nSize = nSize1;
-        qint64 nTemp = 0;
+        const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
 
-        qint32 nBufferSize = getBufferSize(pPdStruct);
+        if (nRequestedBufferSize <= 0) {
+            return listResult;
+        }
 
-        char *pBuffer1 = new char[nBufferSize];
-        char *pBuffer2 = new char[nBufferSize];
+        qint32 nBufferSize = nRequestedBufferSize;
+
+        if (nBufferSize < 0x1000) {
+            nBufferSize = 0x1000;
+        } else if (nBufferSize > 0x100000) {
+            nBufferSize = 0x100000;
+        }
+
+        char *pBuffer1 = new (std::nothrow) char[nBufferSize];
+
+        if (!pBuffer1) {
+            return listResult;
+        }
+
+        char *pBuffer2 = new (std::nothrow) char[nBufferSize];
+
+        if (!pBuffer2) {
+            delete[] pBuffer1;
+            return listResult;
+        }
+
         qint64 nOffset = 0;
+        bool bReadError = false;
+        XBinary binary;
+        const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
-        while (nSize > 3) {
-            nTemp = qMin((qint64)nBufferSize, nSize);
+        while ((nSize > 3) && isPdStructNotCanceled(pPdStruct)) {
+            qint32 nTemp = nBufferSize;
 
-            pDevice1->seek(nOffset);
+            if (nSize < nBufferSize) {
+                nTemp = (qint32)nSize;
+            }
 
-            if (pDevice1->read(pBuffer1, nTemp) <= 0) {
+            if ((binary.safeReadData(pDevice1, nOffset, pBuffer1, nTemp, pPdStruct) != nTemp) ||
+                (binary.safeReadData(pDevice2, nOffset, pBuffer2, nTemp, pPdStruct) != nTemp)) {
+                bReadError = true;
                 break;
             }
 
-            pDevice2->seek(nOffset);
+            for (qint32 i = 0; (i <= nTemp - (qint32)sizeof(qint32)) && isPdStructNotCanceled(pPdStruct); i++) {
+                qint32 nValue1 = 0;
+                qint32 nValue2 = 0;
+                memcpy(&nValue1, pBuffer1 + i, sizeof(nValue1));
+                memcpy(&nValue2, pBuffer2 + i, sizeof(nValue2));
 
-            if (pDevice2->read(pBuffer2, nTemp) <= 0) {
-                break;
-            }
-
-            for (quint32 i = 0; i < nTemp - 3; i++) {
-                qint32 nValue1 = *(qint32 *)(pBuffer1 + i);
-                qint32 nValue2 = *(qint32 *)(pBuffer2 + i);
-
-                if (nValue1 + nDelta == nValue2) {
+                if (((qint64)nValue2 - (qint64)nValue1) == nDelta) {
                     listResult.append(nOffset + i);
                 }
             }
 
             nSize -= nTemp - 3;
             nOffset += nTemp - 3;
+            XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
         }
 
         delete[] pBuffer1;
         delete[] pBuffer2;
+        XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+
+        if (bReadError || !isPdStructNotCanceled(pPdStruct)) {
+            listResult.clear();
+        }
     }
 
     return listResult;
@@ -11082,11 +12052,23 @@ QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice, PDSTRUCT *pPdSt
 {
     QString sResult;
 
+    if (!pDevice || !pDevice->isReadable() || pDevice->isSequential()) {
+        return sResult;
+    }
+
+    const qint64 nOriginalPosition = pDevice->pos();
+
+    if (nOriginalPosition < 0) {
+        return sResult;
+    }
+
     XBinary binary(pDevice);
 
     sResult = binary.getHash(hash, 0, -1, pPdStruct);
 
-    pDevice->reset();
+    if (!pDevice->seek(nOriginalPosition)) {
+        sResult.clear();
+    }
 
     return sResult;
 }
@@ -11095,14 +12077,27 @@ QString XBinary::getHash(XBinary::HASH hash, qint64 nOffset, qint64 nSize, PDSTR
 {
     QString sResult;
 
-    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+    const qint64 nTotalSize = getSize();
 
-    if (osRegion.nOffset != -1) {
-        QList<OFFSETSIZE> listOS;
-        listOS.append(osRegion);
-
-        sResult = getHash(hash, &listOS, pPdStruct);
+    if ((nOffset < 0) || (nOffset > nTotalSize) || (nSize < -1)) {
+        return sResult;
     }
+
+    if (nSize == -1) {
+        nSize = nTotalSize - nOffset;
+    }
+
+    if (nSize > nTotalSize - nOffset) {
+        return sResult;
+    }
+
+    QList<OFFSETSIZE> listOS;
+    OFFSETSIZE osRegion = {};
+    osRegion.nOffset = nOffset;
+    osRegion.nSize = nSize;
+    listOS.append(osRegion);
+
+    sResult = getHash(hash, &listOS, pPdStruct);
 
     return sResult;
 }
@@ -11117,18 +12112,19 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
         pPdStruct = &pdStructEmpty;
     }
 
-    qint64 nTemp = 0;
-    qint32 nBufferSize = getBufferSize(pPdStruct);
-    char *pBuffer = new char[nBufferSize];
+    if (!pListOS || !isPdStructNotCanceled(pPdStruct)) {
+        return sResult;
+    }
 
     QCryptographicHash::Algorithm algorithm = QCryptographicHash::Md4;
+    bool bAlgorithmValid = true;
 
     switch (hash)  // TODO Check new versions of Qt
     {
         case HASH_MD4: algorithm = QCryptographicHash::Md4; break;
         case HASH_MD5: algorithm = QCryptographicHash::Md5; break;
         case HASH_SHA1: algorithm = QCryptographicHash::Sha1; break;
-#ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA
+#ifndef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
 #if (QT_VERSION_MAJOR > 4)
         case HASH_SHA224: algorithm = QCryptographicHash::Sha224; break;  // Keccak_224 ?
         case HASH_SHA256: algorithm = QCryptographicHash::Sha256; break;
@@ -11136,54 +12132,81 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
         case HASH_SHA512: algorithm = QCryptographicHash::Sha512; break;
 #endif
 #endif
+        default: bAlgorithmValid = false; break;
+    }
+
+    if (!bAlgorithmValid) {
+        return sResult;
+    }
+
+    const qint64 nDeviceSize = getSize();
+    qint64 nTotalSize = 0;
+
+    for (qint32 i = 0; i < pListOS->count(); i++) {
+        const OFFSETSIZE &osRegion = pListOS->at(i);
+
+        if ((osRegion.nOffset < 0) || (osRegion.nSize < 0) || (osRegion.nOffset > nDeviceSize) || (osRegion.nSize > nDeviceSize - osRegion.nOffset) ||
+            (nTotalSize > (std::numeric_limits<qint64>::max)() - osRegion.nSize)) {
+            return sResult;
+        }
+
+        nTotalSize += osRegion.nSize;
+    }
+
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+
+    if ((nTotalSize > 0) && (nRequestedBufferSize <= 0)) {
+        return sResult;
+    }
+
+    const qint32 nBufferSize = qBound((qint32)0x1000, qMax((qint32)1, nRequestedBufferSize), (qint32)0x100000);
+    char *pBuffer = (nTotalSize > 0) ? new (std::nothrow) char[nBufferSize] : nullptr;
+
+    if ((nTotalSize > 0) && !pBuffer) {
+        return sResult;
     }
 
     QCryptographicHash crypto(algorithm);
 
-    qint32 nNumberOfRecords = pListOS->count();
-
     qint64 nCurrentSize = 0;
-
     bool bReadError = false;
+    const qint32 nFreeIndex = (nTotalSize > 0) ? XBinary::reservePdStructRecord(pPdStruct, nTotalSize) : -1;
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < pListOS->count()) && isPdStructNotCanceled(pPdStruct); i++) {
         qint64 nOffset = pListOS->at(i).nOffset;
         qint64 nSize = pListOS->at(i).nSize;
 
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+        while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
+            const qint64 nTemp = qMin((qint64)nBufferSize, nSize);
 
-        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-            nTemp = qMin((qint64)nBufferSize, nSize);
-
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+            if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
                 setPdStructErrorString(pPdStruct, tr("Read error"));
-
                 bReadError = true;
-
                 break;
             }
 
-            crypto.addData(pBuffer, nTemp);
+            crypto.addData(pBuffer, (int)nTemp);
 
             nSize -= nTemp;
             nOffset += nTemp;
             nCurrentSize += nTemp;
 
-            XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nCurrentSize);
+            XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nCurrentSize);
         }
 
-        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+        if (bReadError) {
+            break;
+        }
     }
 
     delete[] pBuffer;
 
-    if (!bReadError) {
-        sResult = crypto.result().toHex();
+    if (nTotalSize > 0) {
+        XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
     }
 
-    if (pPdStruct->bIsStop) {
-        sResult = "";
+    if (!bReadError && isPdStructNotCanceled(pPdStruct)) {
+        sResult = crypto.result().toHex();
     }
 
     return sResult;
@@ -11279,6 +12302,10 @@ quint32 XBinary::getAdler32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = 0;
 
+    if (!pDevice) {
+        return nResult;
+    }
+
     pDevice->reset();
 
     XBinary binary(pDevice);
@@ -11297,6 +12324,20 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
     // TODO Progress bar
     quint32 nResult = 0;
 
+    if (!isPdStructNotCanceled(pPdStruct) || (nOffset < 0) || (nSize < -1)) {
+        return nResult;
+    }
+
+    // Adler-32 starts at one, so a valid empty region hashes to 1.  The
+    // generic range normalizer intentionally represents empty regions as an
+    // invalid offset, which previously made empty zlib members impossible to
+    // authenticate.
+    const qint64 nTotalSize = getSize();
+    if ((nOffset <= nTotalSize) &&
+        ((nSize == 0) || ((nSize == -1) && (nOffset == nTotalSize)))) {
+        return 1;
+    }
+
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
 
     nOffset = osRegion.nOffset;
@@ -11305,33 +12346,37 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
     const quint32 MOD_ADLER = 65521;
 
     if (nOffset != -1) {
-        qint64 nTemp = 0;
         qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];
+        if (nBufferSize <= 0) {
+            return 0;
+        }
+        char *pBuffer = new (std::nothrow) char[nBufferSize];
+        if (!pBuffer) {
+            return 0;
+        }
 
         quint32 a = 1;
         quint32 b = 0;
 
-        qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+        qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
         while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
-            nTemp = qMin((qint64)nBufferSize, nSize);
+            const qint32 nChunkSize = (nSize < (qint64)nBufferSize) ? (qint32)nSize : nBufferSize;
 
-            if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
+            if (read_array_process(nOffset, pBuffer, nChunkSize, pPdStruct) != nChunkSize) {
                 setPdStructErrorString(pPdStruct, tr("Read error"));
+                XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
                 delete[] pBuffer;
                 return 0;
             }
 
-            for (qint64 i = 0; (i < nTemp) && isPdStructNotCanceled(pPdStruct); i++) {
+            for (qint32 i = 0; (i < nChunkSize) && isPdStructNotCanceled(pPdStruct); i++) {
                 a = (a + (quint8)(pBuffer[i])) % MOD_ADLER;
                 b = (b + a) % MOD_ADLER;
             }
 
-            nSize -= nTemp;
-            nOffset += nTemp;
+            nSize -= nChunkSize;
+            nOffset += nChunkSize;
 
             XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset);
         }
@@ -11340,7 +12385,9 @@ quint32 XBinary::getAdler32(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 
         delete[] pBuffer;
 
-        nResult = (b << 16) | a;
+        if (!XBinary::isPdStructStopped(pPdStruct)) {
+            nResult = (b << 16) | a;
+        }
     }
 
     return nResult;
@@ -11389,6 +12436,10 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = 0;
 
+    if (!pDevice) {
+        return nResult;
+    }
+
     XBinary binary(pDevice);
 
     nResult = binary._getCRC32(0, -1, 0xFFFFFFFF, _getCRC32Table_EDB88320(), pPdStruct);
@@ -11404,25 +12455,40 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, quint32 nInit, quint32 *pCRCTable
 {
     quint32 nResult = nInit;
 
+    if (!pDevice || !pCRCTable) {
+        return nResult;
+    }
+
     XBinary binary(pDevice);
 
     OFFSETSIZE osRegion = binary.convertOffsetAndSize(0, -1);
     qint64 nOffset = osRegion.nOffset;
     qint64 nSize = osRegion.nSize;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    qint32 _nFreeIndex = -1;
 
     if ((nOffset != -1) && (XBinary::isPdStructNotCanceled(pPdStruct))) {
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+        _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
         qint64 nTemp = 0;
-        qint32 nBufferSize = binary.getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];
+        const qint32 nRequestedBufferSize = binary.getBufferSize(pPdStruct);
+        if (nRequestedBufferSize <= 0) {
+            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            pDevice->reset();
+            return 0;
+        }
+        const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+        char *pBuffer = new (std::nothrow) char[nBufferSize];
+        if (!pBuffer) {
+            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            pDevice->reset();
+            return 0;
+        }
 
         while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
             nTemp = qMin((qint64)nBufferSize, nSize);
 
-            if (binary.read_array(nOffset, pBuffer, nTemp) != nTemp) {
+            if (binary.read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
                 XBinary::setPdStructInfoString(pPdStruct, QObject::tr("Read error"));
                 nResult = 0;
                 break;
@@ -11454,6 +12520,13 @@ quint32 XBinary::_getCRC32(const char *pData, qint32 nDataSize, quint32 nInit, q
 {
     quint32 nResult = nInit;
 
+    // This is an incremental primitive: an empty or rejected chunk leaves the
+    // caller's accumulator unchanged.  Never dereference an invalid raw input
+    // or table supplied through the public API.
+    if ((nDataSize <= 0) || !pData || !pCRCTable) {
+        return nResult;
+    }
+
     while (nDataSize > 0) {
         quint8 nIndex = (nResult ^ (((quint8)(*pData)) & 0xFF));
         nResult = (*(pCRCTable + nIndex)) ^ (nResult >> 8);
@@ -11468,6 +12541,11 @@ quint32 XBinary::_getCRC32(const char *pData, qint32 nDataSize, quint32 nInit, q
 quint16 XBinary::_getCRC16(const char *pData, qint32 nDataSize, quint16 nInit, quint16 *pCRCTable)
 {
     quint16 nResult = nInit;
+
+    // Match the CRC32 incremental contract for invalid/empty chunks.
+    if ((nDataSize <= 0) || !pData || !pCRCTable) {
+        return nResult;
+    }
 
     while (nDataSize > 0) {
         quint8 nIndex = (nResult ^ (((quint8)(*pData)) & 0xFF));
@@ -11492,100 +12570,153 @@ quint16 XBinary::_getCRC16(const QByteArray &baData, quint16 nInit, quint16 *pCR
 
 bool XBinary::checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
+    bool bExpectedCRCValid = false;
+    const quint32 nExpectedCRC = value.toUInt(&bExpectedCRCValid);
+    const bool bSupportedType = (crcType == CRC_TYPE_EDB88320) || (crcType == CRC_TYPE_ADLER32) ||
+                                (crcType == CRC_TYPE_FFFFFFFF_EDB88320_00000000) ||
+                                (crcType == CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF) ||
+                                (crcType == CRC_TYPE_CRC16) || (crcType == CRC_TYPE_CRC16ARC) ||
+                                (crcType == CRC_TYPE_RAR14);
 
-    if (!pDevice) {
-        return bResult;
+    if (!pDevice || !pDevice->isReadable() || !bExpectedCRCValid || !bSupportedType ||
+        !isPdStructNotCanceled(pPdStruct)) {
+        return false;
     }
 
-    quint32 nExpectedCRC = value.toUInt();
-    quint32 nCalculatedCRC = 0;
+    // A checksum value of zero is valid for several algorithms (and for an
+    // empty input).  Keep completion state separate from the numeric result so
+    // that a read error or cancellation can never authenticate as CRC zero.
+    const qint64 nExpectedSize = pDevice->size();
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+    if ((nExpectedSize < 0) || (nRequestedBufferSize <= 0) || !pDevice->seek(0)) {
+        return false;
+    }
+
+    qint32 nBufferSize = nRequestedBufferSize;
+
+    if (nBufferSize < 0x1000) {
+        nBufferSize = 0x1000;
+    } else if (nBufferSize > 0x100000) {
+        nBufferSize = 0x100000;
+    }
+
+    QByteArray baBuffer;
+    try {
+        baBuffer.resize(nBufferSize);
+    } catch (const std::bad_alloc &) {
+        return false;
+    }
+    if (baBuffer.size() != nBufferSize) {
+        return false;
+    }
+
+    quint32 nCRC32 = 0xFFFFFFFF;
+    quint16 nCRC16 = 0;
+    quint32 nAdlerA = 1;
+    quint32 nAdlerB = 0;
+    const quint32 nAdlerMod = 65521;
+    qint64 nProcessedSize = 0;
     bool bCRCComputed = true;
 
-    if (crcType == CRC_TYPE_FFFFFFFF_EDB88320_00000000) {
-        nCalculatedCRC = _getCRC32(pDevice, 0xFFFFFFFF, _getCRC32Table_EDB88320(), pPdStruct);
-    } else if (crcType == CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF) {
-        nCalculatedCRC = _getCRC32(pDevice, 0xFFFFFFFF, _getCRC32Table_EDB88320(), pPdStruct);
-        nCalculatedCRC ^= 0xFFFFFFFF;
-    } else if (crcType == CRC_TYPE_EDB88320) {
-        nCalculatedCRC = _getCRC32(pDevice, pPdStruct);
-    } else if (crcType == CRC_TYPE_ADLER32) {
-        nCalculatedCRC = getAdler32(pDevice, pPdStruct);
-    } else if ((crcType == CRC_TYPE_CRC16) || (crcType == CRC_TYPE_CRC16ARC) || (crcType == CRC_TYPE_RAR14)) {
-        quint16 nCRC16 = 0;
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        QByteArray baBuffer(nBufferSize, 0);
+    const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nExpectedSize);
 
-        if (!pDevice->seek(0)) {
+    while ((nProcessedSize < nExpectedSize) && isPdStructNotCanceled(pPdStruct)) {
+        const qint64 nToRead = qMin((qint64)nBufferSize, nExpectedSize - nProcessedSize);
+        const qint64 nRead = pDevice->read(baBuffer.data(), nToRead);
+
+        // Positive short reads are legal; zero before the declared extent,
+        // negative reads, and oversized results are incomplete computations.
+        if ((nRead <= 0) || (nRead > nToRead)) {
+            setPdStructErrorString(pPdStruct, tr("Read error"));
             bCRCComputed = false;
+            break;
         }
 
-        while (bCRCComputed && isPdStructNotCanceled(pPdStruct)) {
-            qint64 nRead = pDevice->read(baBuffer.data(), baBuffer.size());
-
-            if (nRead < 0) {
-                bCRCComputed = false;
-                break;
+        if (crcType == CRC_TYPE_ADLER32) {
+            for (qint64 i = 0; (i < nRead) && isPdStructNotCanceled(pPdStruct); i++) {
+                nAdlerA = (nAdlerA + (quint8)baBuffer.at((qint32)i)) % nAdlerMod;
+                nAdlerB = (nAdlerB + nAdlerA) % nAdlerMod;
             }
-
-            if (nRead == 0) {
-                break;
+        } else if ((crcType == CRC_TYPE_CRC16) || (crcType == CRC_TYPE_CRC16ARC)) {
+            nCRC16 = _getCRC16(baBuffer.constData(), (qint32)nRead, nCRC16, _getCRC16Table());
+        } else if (crcType == CRC_TYPE_RAR14) {
+            for (qint64 i = 0; (i < nRead) && isPdStructNotCanceled(pPdStruct); i++) {
+                nCRC16 = (quint16)(nCRC16 + (quint8)baBuffer.at((qint32)i));
+                nCRC16 = (quint16)((nCRC16 << 1) | (nCRC16 >> 15));
             }
-
-            if ((crcType == CRC_TYPE_CRC16) || (crcType == CRC_TYPE_CRC16ARC)) {
-                nCRC16 = _getCRC16(baBuffer.constData(), (qint32)nRead, nCRC16, _getCRC16Table());
-            } else {
-                for (qint64 i = 0; i < nRead; i++) {
-                    nCRC16 = (quint16)(nCRC16 + (quint8)baBuffer.at((qint32)i));
-                    nCRC16 = (quint16)((nCRC16 << 1) | (nCRC16 >> 15));
-                }
-            }
+        } else {
+            nCRC32 = _getCRC32(baBuffer.constData(), (qint32)nRead, nCRC32, _getCRC32Table_EDB88320());
         }
 
-        if (isPdStructStopped(pPdStruct)) {
-            bCRCComputed = false;
-        }
+        nProcessedSize += nRead;
+        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nProcessedSize);
+    }
 
-        nCalculatedCRC = nCRC16;
-        pDevice->reset();
-    } else {
+    if (!isPdStructNotCanceled(pPdStruct) || (nProcessedSize != nExpectedSize) ||
+        (pDevice->size() != nExpectedSize)) {
         bCRCComputed = false;
     }
 
-    if (bCRCComputed) {
-        bResult = (nCalculatedCRC == nExpectedCRC);
+    XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+    pDevice->reset();
+
+    if (!bCRCComputed) {
+        return false;
     }
 
-    return bResult;
+    quint32 nCalculatedCRC = 0;
+    if (crcType == CRC_TYPE_ADLER32) {
+        nCalculatedCRC = (nAdlerB << 16) | nAdlerA;
+    } else if ((crcType == CRC_TYPE_CRC16) || (crcType == CRC_TYPE_CRC16ARC) || (crcType == CRC_TYPE_RAR14)) {
+        nCalculatedCRC = nCRC16;
+    } else if ((crcType == CRC_TYPE_EDB88320) || (crcType == CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF)) {
+        nCalculatedCRC = nCRC32 ^ 0xFFFFFFFF;
+    } else {
+        nCalculatedCRC = nCRC32;
+    }
+
+    return nCalculatedCRC == nExpectedCRC;
 }
 
 quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 *pCRCTable, PDSTRUCT *pPdStruct)
 {
-    // TODO optimize!!!
-    quint32 nResult = nInit;
+    if (!pCRCTable || !isPdStructNotCanceled(pPdStruct) || (nOffset < 0) || (nSize < -1)) {
+        return 0;
+    }
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
 
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    if ((nOffset == -1) || (nSize <= 0)) {
+        return 0;
+    }
 
-    if ((nOffset != -1) && (isPdStructNotCanceled(pPdStruct))) {
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+    if (nRequestedBufferSize <= 0) {
+        return 0;
+    }
+    const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
+    if (!pBuffer) {
+        return 0;
+    }
 
+    quint32 nResult = nInit;
+    bool bReadError = false;
+
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
+
+    if (isPdStructNotCanceled(pPdStruct)) {
         qint64 nTemp = 0;
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];
 
         while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
             nTemp = qMin((qint64)nBufferSize, nSize);
 
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+            if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
                 setPdStructInfoString(pPdStruct, tr("Read error"));
-
-                nResult = 0;
-
+                bReadError = true;
                 break;
             }
 
@@ -11596,29 +12727,29 @@ quint32 XBinary::_getCRC32(qint64 nOffset, qint64 nSize, quint32 nInit, quint32 
 
             XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset);
         }
-
-        delete[] pBuffer;
     }
 
-    nResult ^= 0xFFFFFFFF;
-
+    delete[] pBuffer;
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
-    if (isPdStructStopped(pPdStruct)) {
-        nResult = 0;
+    if (bReadError || !isPdStructNotCanceled(pPdStruct) || (nSize != 0)) {
+        return 0;
     }
 
-    return nResult;
+    // Preserve this API's historical final-XOR contract for valid ranges.
+    return nResult ^ 0xFFFFFFFF;
 }
 
 quint16 XBinary::_getCRC16(qint64 nOffset, qint64 nSize, quint16 nInit, PDSTRUCT *pPdStruct)
 {
-    quint16 nResult = nInit;
-
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
+    }
+
+    if (!isPdStructNotCanceled(pPdStruct) || (nOffset < 0) || (nSize < -1)) {
+        return 0;
     }
 
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
@@ -11626,22 +12757,37 @@ quint16 XBinary::_getCRC16(qint64 nOffset, qint64 nSize, quint16 nInit, PDSTRUCT
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    // Invalid and empty regions are not successful CRC operations in this
+    // range-oriented API.  In particular, do not return init^0xFFFF for a
+    // range that was never accepted.
+    if ((nOffset == -1) || (nSize <= 0)) {
+        return 0;
+    }
 
-    if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+    if (nRequestedBufferSize <= 0) {
+        return 0;
+    }
+    const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
+    if (!pBuffer) {
+        return 0;
+    }
 
+    quint16 nResult = nInit;
+    bool bReadError = false;
+
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
+
+    if (isPdStructNotCanceled(pPdStruct)) {
         qint64 nTemp = 0;
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];
 
-        while (nSize > 0) {
+        while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
             nTemp = qMin((qint64)nBufferSize, nSize);
 
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+            if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
                 setPdStructErrorString(pPdStruct, tr("Read error"));
-                nResult = 0;
-
+                bReadError = true;
                 break;
             }
 
@@ -11652,19 +12798,19 @@ quint16 XBinary::_getCRC16(qint64 nOffset, qint64 nSize, quint16 nInit, PDSTRUCT
 
             XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset);
         }
-
-        delete[] pBuffer;
     }
 
-    nResult ^= 0xFFFF;
-
+    delete[] pBuffer;
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
-    if (pPdStruct->bIsStop) {
-        nResult = 0;
+    if (bReadError || !isPdStructNotCanceled(pPdStruct) || (nSize != 0)) {
+        if (!bReadError && (nSize != 0)) {
+            setPdStructErrorString(pPdStruct, tr("Incomplete CRC16 read"));
+        }
+        return 0;
     }
 
-    return nResult;
+    return nResult ^ 0xFFFF;
 }
 
 quint32 XBinary::_getCRC32ByFileContent(const QString &sFileName)
@@ -11720,6 +12866,10 @@ double XBinary::getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     double dResult = 0;
 
+    if (!pDevice) {
+        return dResult;
+    }
+
     XBinary binary(pDevice);
 
     dResult = binary.getBinaryStatus(BSTATUS_ENTROPY, 0, -1, pPdStruct);
@@ -11730,6 +12880,24 @@ double XBinary::getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 }
 
 double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
+{
+    return getBinaryStatus(bstatus, nOffset, nSize, pPdStruct, 0);
+}
+
+double XBinary::getEntropy(QIODevice *pDevice, qint32 nBufferSize, PDSTRUCT *pPdStruct)
+{
+    double dResult = 0;
+
+    if (!pDevice || (nBufferSize <= 0)) return dResult;
+
+    XBinary binary(pDevice);
+    dResult = binary.getBinaryStatus(BSTATUS_ENTROPY, 0, -1, pPdStruct, nBufferSize);
+    pDevice->reset();
+
+    return dResult;
+}
+
+double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct, qint32 nExplicitBufferSize)
 {
     double dResult = 0;
 
@@ -11745,29 +12913,36 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
     nSize = osRegion.nSize;
 
     if (nSize == 0) {
-        dResult = 0;
+        return 0;
     }
 
     bool bReadError = false;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    qint32 _nFreeIndex = -1;
 
     if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+        _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
         // Use integer histogram for entropy for better performance
         quint64 counts[256] = {0};
         qint64 nSymbolCount = 0;  // reused for ZEROS/TEXT
         quint64 nSum = 0;         // for GRADIENT
 
-        qint64 nTemp = 0;
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];
+        const qint32 nBufferSize = (nExplicitBufferSize > 0) ? nExplicitBufferSize : getBufferSize(pPdStruct);
+        if (nBufferSize <= 0) {
+            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            return 0;
+        }
+        char *pBuffer = new (std::nothrow) char[nBufferSize];
+        if (!pBuffer) {
+            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            return 0;
+        }
 
         while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-            nTemp = qMin((qint64)nBufferSize, nSize);
+            const qint32 nChunkSize = (nSize < (qint64)nBufferSize) ? (qint32)nSize : nBufferSize;
 
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+            if (read_array(nOffset, pBuffer, nChunkSize) != nChunkSize) {
                 setPdStructErrorString(pPdStruct, tr("Read error"));
                 bReadError = true;
 
@@ -11776,27 +12951,27 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
 
             if (bstatus == BSTATUS_ENTROPY) {
                 const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
-                qint64 i = 0;
+                qint32 i = 0;
 
                 // Simple loop - let compiler optimize (unrolling can hurt cache performance)
-                for (; i < nTemp; i++) {
+                for (; i < nChunkSize; i++) {
                     counts[ptr[i]]++;
                 }
             } else if (bstatus == BSTATUS_ZEROS) {
                 const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
-                for (qint64 i = 0; i < nTemp; i++) {
+                for (qint32 i = 0; i < nChunkSize; i++) {
                     nSymbolCount += (ptr[i] == 0);
                 }
             } else if (bstatus == BSTATUS_GRADIENT) {
                 const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
-                for (qint64 i = 0; i < nTemp; i++) {
+                for (qint32 i = 0; i < nChunkSize; i++) {
                     nSum += ptr[i];
                 }
             } else if (bstatus == BSTATUS_TEXT) {
                 const unsigned char *ptr = reinterpret_cast<const unsigned char *>(pBuffer);
 
                 // Simple loop - compiler optimizes better than manual unrolling for this
-                for (qint64 i = 0; i < nTemp; i++) {
+                for (qint32 i = 0; i < nChunkSize; i++) {
                     unsigned char c = ptr[i];
                     // ASCII printable range [32..126] plus 8(BS),10(LF),13(CR)
                     if ((c >= 32 && c <= 126) || c == 8 || c == 10 || c == 13) {
@@ -11805,8 +12980,8 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
                 }
             }
 
-            nSize -= nTemp;
-            nOffset += nTemp;
+            nSize -= nChunkSize;
+            nOffset += nChunkSize;
 
             XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - osRegion.nOffset);
         }
@@ -11855,22 +13030,38 @@ bool XBinary::isZeroFilled(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
         pPdStruct = &pdStructEmpty;
     }
 
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
     OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    if (nSize == 0) {
+    if ((nOffset == -1) || (nSize <= 0)) {
         return false;
     }
 
     bool bResult = true;
-    qint32 nBufferSize = getBufferSize(pPdStruct);
-    char *pBuffer = new char[nBufferSize];
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+    if (nRequestedBufferSize <= 0) {
+        return false;
+    }
+    const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
 
-    while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
+    if (!pBuffer) {
+        return false;
+    }
+
+    const qint64 nStartOffset = nOffset;
+    const qint64 nTotalSize = nSize;
+    const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nTotalSize);
+
+    while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
         qint64 nTemp = qMin((qint64)nBufferSize, nSize);
 
-        if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+        if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
             bResult = false;
             break;
         }
@@ -11882,11 +13073,13 @@ bool XBinary::isZeroFilled(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 
         nSize -= nTemp;
         nOffset += nTemp;
+        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset - nStartOffset);
     }
 
     delete[] pBuffer;
+    XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
 
-    if (pPdStruct->bIsStop) {
+    if (!isPdStructNotCanceled(pPdStruct) || (nSize != 0)) {
         bResult = false;
     }
 
@@ -11908,23 +13101,30 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRU
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
+    const qint32 nBufferSize = getBufferSize(pPdStruct);
+    if (nBufferSize <= 0) {
+        return result;
+    }
+
     bool bReadError = false;
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
+    qint32 _nFreeIndex = -1;
 
     if ((nOffset != -1) && (!(pPdStruct->bIsStop))) {
         result.nSize = nSize;
 
-        XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nSize);
+        _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
-        qint64 nTemp = 0;
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];
+        char *pBuffer = new (std::nothrow) char[nBufferSize];
+        if (!pBuffer) {
+            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            return BYTE_COUNTS();
+        }
 
         while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-            nTemp = qMin((qint64)nBufferSize, nSize);
+            const qint32 nChunkSize = (nSize < (qint64)nBufferSize) ? (qint32)nSize : nBufferSize;
 
-            if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
+            if (read_array(nOffset, pBuffer, nChunkSize) != nChunkSize) {
                 _errorMessage(tr("Read error"));
 
                 bReadError = true;
@@ -11932,12 +13132,12 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRU
                 break;
             }
 
-            for (qint64 i = 0; i < nTemp; i++) {
+            for (qint32 i = 0; i < nChunkSize; i++) {
                 result.nCount[(unsigned char)pBuffer[i]] += 1;
             }
 
-            nSize -= nTemp;
-            nOffset += nTemp;
+            nSize -= nChunkSize;
+            nOffset += nChunkSize;
 
             XBinary::setPdStructCurrent(pPdStruct, _nFreeIndex, nOffset - osRegion.nOffset);
         }
@@ -11956,48 +13156,70 @@ XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRU
 
 void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    // TODO Optimize
-    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
-
     PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
 
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
 
+    if (!m_pDevice || !m_pDevice->isReadable() || !m_pDevice->isWritable() || !isPdStructNotCanceled(pPdStruct)) {
+        return;
+    }
+
+    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    if (nOffset != -1) {
-        if (nOffset != -1) {
-            qint64 nTemp = 0;
-            qint32 nBufferSize = getBufferSize(pPdStruct);
-            char *pBuffer = new char[nBufferSize];
-
-            while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
-                nTemp = qMin((qint64)nBufferSize, nSize);
-
-                if (read_array(nOffset, pBuffer, nTemp) != nTemp) {
-                    _errorMessage(tr("Read error"));
-                    break;
-                }
-
-                for (qint32 i = 0; i < nTemp; i++) {
-                    *(pBuffer + i) ^= nXorValue;
-                }
-
-                if (!write_array(nOffset, pBuffer, nTemp)) {
-                    _errorMessage(tr("Write error"));
-                    break;
-                }
-
-                nSize -= nTemp;
-                nOffset += nTemp;
-            }
-
-            delete[] pBuffer;
-        }
+    if ((nOffset == -1) || (nSize <= 0)) {
+        return;
     }
+
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+
+    if (nRequestedBufferSize <= 0) {
+        return;
+    }
+
+    const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+    char *pBuffer = new (std::nothrow) char[nBufferSize];
+
+    if (!pBuffer) {
+        return;
+    }
+
+    const qint64 nStartOffset = nOffset;
+    const qint64 nTotalSize = nSize;
+    const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nTotalSize);
+
+    while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
+        qint32 nTemp = nBufferSize;
+
+        if (nSize < nBufferSize) {
+            nTemp = (qint32)nSize;
+        }
+
+        if (read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
+            _errorMessage(tr("Read error"));
+            break;
+        }
+
+        for (qint32 i = 0; i < nTemp; i++) {
+            pBuffer[i] ^= nXorValue;
+        }
+
+        if (write_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
+            _errorMessage(tr("Write error"));
+            break;
+        }
+
+        nSize -= nTemp;
+        nOffset += nTemp;
+        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset - nStartOffset);
+    }
+
+    XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+    delete[] pBuffer;
 }
 
 // quint32 XBinary::_ror32(quint32 nValue, quint32 nShift)
@@ -12049,16 +13271,14 @@ QIODevice *XBinary::getDevice()
 
 bool XBinary::isValid(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-
-    return true;
+    return isPdStructNotCanceled(pPdStruct);
 }
 
 bool XBinary::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTRUCT *pPdStruct)
 {
     XBinary xbinary(pDevice, bIsImage, nModuleAddress);
 
-    return xbinary.isValid();
+    return xbinary.isValid(pPdStruct);
 }
 
 XBinary::MODE XBinary::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
@@ -12108,32 +13328,32 @@ bool XBinary::is64()
 
 bool XBinary::isBigEndian(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return (pMemoryMap->endian == ENDIAN_BIG);
+    return pMemoryMap && (pMemoryMap->endian == ENDIAN_BIG);
 }
 
 bool XBinary::isLittleEndian(_MEMORY_MAP *pMemoryMap)
 {
-    return (pMemoryMap->endian == ENDIAN_LITTLE);
+    return pMemoryMap && (pMemoryMap->endian == ENDIAN_LITTLE);
 }
 
 bool XBinary::is8(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return (pMemoryMap->mode == MODE_8);
+    return pMemoryMap && (pMemoryMap->mode == MODE_8);
 }
 
 bool XBinary::is16(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return (pMemoryMap->mode == MODE_16) || (pMemoryMap->mode == MODE_16SEG);
+    return pMemoryMap && ((pMemoryMap->mode == MODE_16) || (pMemoryMap->mode == MODE_16SEG));
 }
 
 bool XBinary::is32(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return (pMemoryMap->mode == MODE_32);
+    return pMemoryMap && (pMemoryMap->mode == MODE_32);
 }
 
 bool XBinary::is64(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return (pMemoryMap->mode == MODE_64);
+    return pMemoryMap && (pMemoryMap->mode == MODE_64);
 }
 
 void XBinary::setVersion(const QString &sVersion)
@@ -12338,20 +13558,42 @@ qint64 XBinary::_calculateRawSize(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pP
         pPdStruct = &pdStructEmpty;
     }
 
+    if (!pMemoryMap || (pMemoryMap->nBinarySize < 0) || !isPdStructNotCanceled(pPdStruct)) {
+        return 0;
+    }
+
     qint64 nResult = 0;
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     qint64 _nOverlayOffset = -1;
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
-        if ((pMemoryMap->listRecords.at(i).nOffset != -1) && (pMemoryMap->listRecords.at(i).filePart != FILEPART_OVERLAY)) {
-            nResult = qMax(nResult, (qint64)(pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize));
+    for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
+        const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
+
+        if (record.filePart == FILEPART_OVERLAY) {
+            if ((record.nOffset < 0) || (record.nOffset > pMemoryMap->nBinarySize)) {
+                return 0;
+            }
+            _nOverlayOffset = (_nOverlayOffset == -1) ? record.nOffset : qMin(_nOverlayOffset, record.nOffset);
+            continue;
         }
 
-        if (pMemoryMap->listRecords.at(i).filePart == FILEPART_OVERLAY) {
-            _nOverlayOffset = pMemoryMap->listRecords.at(i).nOffset;
+        if (record.nOffset == -1) {
+            continue;
         }
+
+        if ((record.nOffset < 0) || (record.nSize < 0) ||
+            (record.nOffset > pMemoryMap->nBinarySize) ||
+            (record.nSize > (pMemoryMap->nBinarySize - record.nOffset))) {
+            return 0;
+        }
+
+        nResult = qMax(nResult, record.nOffset + record.nSize);
+    }
+
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return 0;
     }
 
     if (_nOverlayOffset != -1) {
@@ -12381,6 +13623,9 @@ QString XBinary::convertSignature(const QString &sSignature)
 
     // Reserve appropriate capacity
     if (bHasQuote) {
+        if (nSignatureSize > ((std::numeric_limits<qint32>::max)() / 2)) {
+            return QString();
+        }
         _sSignature.reserve(nSignatureSize * 2);  // Worst case: all chars become hex
     } else {
         _sSignature.reserve(nSignatureSize);
@@ -12396,7 +13641,11 @@ QString XBinary::convertSignature(const QString &sSignature)
                 bAnsiString = !bAnsiString;
             } else if (bAnsiString) {
                 // Inline hex conversion for better performance
-                quint8 nValue = (quint8)(c.toLatin1());
+                const char cLatin1 = c.toLatin1();
+                if (!cLatin1 && !c.isNull()) {
+                    return QString();
+                }
+                quint8 nValue = (quint8)cLatin1;
                 quint8 nHigh = (nValue >> 4) & 0x0F;
                 quint8 nLow = nValue & 0x0F;
                 _sSignature.append(QChar(nHigh + (nHigh < 10 ? '0' : 'a' - 10)));
@@ -12410,6 +13659,10 @@ QString XBinary::convertSignature(const QString &sSignature)
                     }
                 }
             }
+        }
+
+        if (bAnsiString) {
+            return QString();
         }
     } else {
         // Simpler path when no quotes present
@@ -12484,6 +13737,10 @@ bool XBinary::isFmtMsgCodePresent(const QList<FMT_MSG> *pListFmtMsgs, FMT_MSG_CO
 bool XBinary::_addCheckFormatTest(QList<FMT_MSG> *pListFmtMsgs, bool *pbContinue, FMT_MSG_CODE code, FMT_MSG_TYPE type, const QString &sString, QVariant value,
                                   QString sInfo, bool bFailCase)
 {
+    if (!pListFmtMsgs || !pbContinue) {
+        return false;
+    }
+
     bool bResult = !bFailCase;
 
     if (*pbContinue) {
@@ -12611,7 +13868,13 @@ XBinary::FPART XBinary::getFPART(FILEPART filePart, const QString &sOriginalName
 
 QList<XBinary::FPART> XBinary::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     QList<XBinary::FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     if (nFileParts & FILEPART_REGION) {
         XBinary::FPART fpart = {};
@@ -12643,20 +13906,24 @@ QList<XBinary::FMT_MSG> XBinary::checkFileFormat(bool bDeep, PDSTRUCT *pPdStruct
 
 bool XBinary::isFileFormatValid(bool bDeep, PDSTRUCT *pPdStruct)
 {
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
     bool bResult = true;
 
     QList<FMT_MSG> list = checkFileFormat(bDeep, pPdStruct);
 
     qint32 nNumberOfRecords = list.count();
 
-    for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
         if (list.at(i).type == FMT_MSG_TYPE_ERROR) {
             bResult = false;
             break;
         }
     }
 
-    return bResult;
+    return bResult && isPdStructNotCanceled(pPdStruct);
 }
 
 QList<XBinary::STRINGTABLE_RECORD> XBinary::getStringTable_ANSI(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
@@ -13179,6 +14446,10 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
 
 bool XBinary::tryToOpen(QIODevice *pDevice)
 {
+    if (!pDevice) {
+        return false;
+    }
+
     bool bResult = false;
     bool bCheck = false;
 
@@ -13205,10 +14476,8 @@ bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE osRegion)
 {
     qint64 nTotalSize = getSize();
 
-    bool bOffsetValid = (osRegion.nOffset >= 0) && (osRegion.nOffset < nTotalSize);
-    bool bSizeValid = (osRegion.nSize > 0) && ((osRegion.nOffset + osRegion.nSize - 1) < nTotalSize);
-
-    return (bOffsetValid) && (bSizeValid);
+    return (nTotalSize >= 0) && (osRegion.nOffset >= 0) && (osRegion.nSize > 0) &&
+           (osRegion.nOffset < nTotalSize) && (osRegion.nSize <= (nTotalSize - osRegion.nOffset));
 }
 
 bool XBinary::checkOffsetSize(qint64 nOffset, qint64 nSize)
@@ -13416,30 +14685,63 @@ QString XBinary::read_ASN_OIDString(qint64 nOffset, qint64 nSize)
 {
     QString sResult;
 
-    if (nSize > 0) {
-        quint8 nStart = read_uint8(nOffset);
+    if ((nOffset < 0) || (nSize <= 0) || (nSize > (std::numeric_limits<qint32>::max)())) {
+        return sResult;
+    }
 
-        sResult += QString("%1.%2").arg(QString::number(nStart / 40)).arg(QString::number(nStart % 40));
+    const QByteArray baData = read_array(nOffset, nSize);
+    if (baData.size() != nSize) {
+        return sResult;
+    }
 
-        nOffset++;
-        nSize--;
+    QList<quint64> listSubIdentifiers;
+    qint32 nIndex = 0;
 
+    while (nIndex < baData.size()) {
         quint64 nValue = 0;
+        bool bTerminated = false;
+        bool bFirstByte = true;
 
-        while (nSize > 0) {
-            quint8 nByte = read_uint8(nOffset);
+        while (nIndex < baData.size()) {
+            const quint8 nByte = (quint8)baData.at(nIndex++);
+            const quint8 nPayload = nByte & 0x7F;
 
-            nValue <<= 7;
-            nValue += (nByte & 0x7F);
-
-            if (!(nByte & 0x80)) {
-                sResult += QString(".%1").arg(nValue);
-                nValue = 0;
+            // DER requires the shortest base-128 form.  A leading 0x80 would
+            // otherwise permit arbitrarily many redundant bytes per arc.
+            if (bFirstByte && (nByte == 0x80)) {
+                return QString();
             }
+            bFirstByte = false;
 
-            nOffset++;
-            nSize--;
+            if (nValue > (((std::numeric_limits<quint64>::max)() - nPayload) >> 7)) {
+                return QString();
+            }
+            nValue = (nValue << 7) | nPayload;
+
+            if ((nByte & 0x80) == 0) {
+                bTerminated = true;
+                break;
+            }
         }
+
+        if (!bTerminated) {
+            return QString();
+        }
+
+        listSubIdentifiers.append(nValue);
+    }
+
+    if (listSubIdentifiers.isEmpty()) {
+        return sResult;
+    }
+
+    const quint64 nFirstCombined = listSubIdentifiers.takeFirst();
+    const quint64 nFirstArc = (nFirstCombined < 40) ? 0 : ((nFirstCombined < 80) ? 1 : 2);
+    const quint64 nSecondArc = nFirstCombined - (nFirstArc * 40);
+    sResult = QString("%1.%2").arg(QString::number(nFirstArc)).arg(QString::number(nSecondArc));
+
+    for (quint64 nValue : listSubIdentifiers) {
+        sResult += QString(".%1").arg(QString::number(nValue));
     }
 
     return sResult;
@@ -13460,16 +14762,24 @@ qint64 XBinary::read_ASN_Integer(qint64 nOffset, qint64 nSize)
 
 bool XBinary::read_ASN_Bool(qint64 nOffset, qint64 nSize)
 {
-    if (nSize <= 0) return false;
-    quint8 v = read_uint8(nOffset);
-    return v != 0x00;  // per DER, any non-zero is TRUE
+    if (nSize != 1) return false;
+    char cValue = 0;
+    return (read_array(nOffset, &cValue, 1) == 1) && (cValue != 0);  // per BER, any non-zero is TRUE
 }
 
 QDateTime XBinary::read_ASN_DateTime(qint64 nOffset, qint64 nSize)
 {
     // Try UTCTime (YYMMDDHHMMSSZ) then GeneralizedTime (YYYYMMDDHHMMSSZ)
-    QByteArray bytes = read_array(nOffset, qMax<qint64>(0, nSize));
-    QString s = QString::fromLatin1(bytes);
+    if ((nSize != 11) && (nSize != 13) && (nSize != 15)) {
+        return QDateTime();
+    }
+
+    QByteArray bytes = read_array(nOffset, nSize);
+    if (bytes.size() != nSize) {
+        return QDateTime();
+    }
+
+    QString s = QString::fromLatin1(bytes.constData(), bytes.size());
     QDateTime dt;
     // Ensure ends with 'Z' for UTC; handle missing seconds too
     static const QStringList fmts = {"yyMMddHHmmss'Z'", "yyMMddHHmm'Z'", "yyyyMMddHHmmss'Z'", "yyyyMMddHHmm'Z'"};
@@ -13485,8 +14795,9 @@ QDateTime XBinary::read_ASN_DateTime(qint64 nOffset, qint64 nSize)
 
 QString XBinary::read_ASN_AnsiString(qint64 nOffset, qint64 nSize)
 {
-    if (nSize <= 0) return QString();
+    if ((nSize <= 0) || (nSize > (std::numeric_limits<qint32>::max)())) return QString();
     QByteArray bytes = read_array(nOffset, nSize);
+    if (bytes.size() != nSize) return QString();
     // Trim potential trailing NULs
     int trim = bytes.size();
     while (trim > 0 && bytes.at(trim - 1) == '\0') trim--;
@@ -13497,7 +14808,7 @@ XBinary::PACKED_UINT XBinary::_read_packedNumber(char *pData, qint64 nSize)
 {
     PACKED_UINT result = {};
 
-    if (nSize <= 0) {
+    if (!pData || (nSize <= 0)) {
         return result;
     }
 
@@ -13607,6 +14918,10 @@ bool XBinary::_handleOverlay(_MEMORY_MAP *pMemoryMap)
 {
     bool bResult = false;
 
+    if (!pMemoryMap || (pMemoryMap->nBinarySize < 0)) {
+        return false;
+    }
+
     qint64 nTotalSize = pMemoryMap->nBinarySize;
 
     // get maximal offset
@@ -13614,12 +14929,25 @@ bool XBinary::_handleOverlay(_MEMORY_MAP *pMemoryMap)
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize > nMaxOffset) {
-            nMaxOffset = pMemoryMap->listRecords.at(i).nOffset + pMemoryMap->listRecords.at(i).nSize;
+        const _MEMORY_RECORD &record = pMemoryMap->listRecords.at(i);
+
+        if (record.filePart == FILEPART_OVERLAY) {
+            return false;
         }
+
+        if (record.nOffset == -1) {
+            continue;
+        }
+
+        if ((record.nOffset < 0) || (record.nSize < 0) ||
+            (record.nOffset > nTotalSize) || (record.nSize > (nTotalSize - record.nOffset))) {
+            return false;
+        }
+
+        nMaxOffset = qMax(nMaxOffset, record.nOffset + record.nSize);
     }
 
-    if (nTotalSize - nMaxOffset > 0) {
+    if (nMaxOffset < nTotalSize) {
         // overlay present
         qint64 nOverlayOffset = nMaxOffset;
         qint64 nOverlaySize = nTotalSize - nOverlayOffset;
@@ -13658,15 +14986,18 @@ qint64 XBinary::getOverlaySize(PDSTRUCT *pPdStruct)
 
 qint64 XBinary::getOverlaySize(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
-    qint64 nSize = pMemoryMap->nBinarySize;
-    qint64 nOverlayOffset = getOverlayOffset(pMemoryMap, pPdStruct);
-    qint64 nDelta = 0;
-
-    if (nOverlayOffset > 0) {
-        nDelta = nSize - nOverlayOffset;
+    if (!pMemoryMap || (pMemoryMap->nBinarySize < 0)) {
+        return 0;
     }
 
-    return qMax(nDelta, (qint64)0);
+    qint64 nSize = pMemoryMap->nBinarySize;
+    qint64 nOverlayOffset = getOverlayOffset(pMemoryMap, pPdStruct);
+
+    if ((nOverlayOffset < 0) || (nOverlayOffset > nSize)) {
+        return 0;
+    }
+
+    return nSize - nOverlayOffset;
 }
 
 qint64 XBinary::getOverlayOffset(PDSTRUCT *pPdStruct)
@@ -13684,10 +15015,14 @@ qint64 XBinary::getOverlayOffset(PDSTRUCT *pPdStruct)
 
 qint64 XBinary::getOverlayOffset(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
+    if (!pMemoryMap) {
+        return -1;
+    }
+
     qint64 nResult = -1;
     qint64 nRawSize = _calculateRawSize(pMemoryMap, pPdStruct);
 
-    if (nRawSize) {
+    if ((nRawSize > 0) && (nRawSize <= pMemoryMap->nBinarySize)) {
         nResult = nRawSize;
     }
 
@@ -13709,7 +15044,7 @@ bool XBinary::isOverlayPresent(PDSTRUCT *pPdStruct)
 
 bool XBinary::isOverlayPresent(XBinary::_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
 {
-    return (getOverlaySize(pMemoryMap, pPdStruct) != 0);
+    return (getOverlaySize(pMemoryMap, pPdStruct) > 0);
 }
 
 bool XBinary::compareOverlay(const QString &sSignature, qint64 nOffset, PDSTRUCT *pPdStruct)
@@ -13721,30 +15056,56 @@ bool XBinary::compareOverlay(const QString &sSignature, qint64 nOffset, PDSTRUCT
 
 bool XBinary::compareOverlay(XBinary::_MEMORY_MAP *pMemoryMap, const QString &sSignature, qint64 nOffset, PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
-
-    if (isOverlayPresent(pMemoryMap, pPdStruct)) {
-        qint64 nOverlayOffset = getOverlayOffset(pMemoryMap, pPdStruct) + nOffset;
-
-        bResult = compareSignature(pMemoryMap, sSignature, nOverlayOffset, pPdStruct);
+    if (!pMemoryMap || (nOffset < 0)) {
+        return false;
     }
 
-    return bResult;
+    const qint64 nOverlaySize = getOverlaySize(pMemoryMap, pPdStruct);
+    const qint64 nBaseOffset = getOverlayOffset(pMemoryMap, pPdStruct);
+
+    if ((nOverlaySize <= 0) || (nBaseOffset < 0) || (nOffset >= nOverlaySize) ||
+        (nBaseOffset > (std::numeric_limits<qint64>::max)() - nOffset)) {
+        return false;
+    }
+
+    return compareSignature(pMemoryMap, sSignature, nBaseOffset + nOffset, pPdStruct);
 }
 
 bool XBinary::addOverlay(char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
-
-    qint64 nRawSize = getOverlayOffset(pPdStruct);
-
-    if ((nDataSize >= 0) && resize(getDevice(), nRawSize + nDataSize)) {
-        if (nDataSize == 0) {
-            bResult = true;
-        } else if (pData) {
-            bResult = (write_array(nRawSize, pData, nDataSize) == nDataSize);
-        }
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
     }
+
+    if (!m_pDevice || !m_pDevice->isWritable() || (nDataSize < 0) ||
+        ((nDataSize > 0) && !pData) || !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
+    const qint64 nRawSize = getOverlayOffset(pPdStruct);
+    const qint64 nOldSize = m_pDevice->size();
+
+    if ((nRawSize < 0) || (nOldSize < 0) || (nRawSize > nOldSize) ||
+        (nDataSize > (std::numeric_limits<qint64>::max)() - nRawSize)) {
+        return false;
+    }
+
+    const qint64 nNewSize = nRawSize + nDataSize;
+    if (!resize(m_pDevice, nNewSize)) {
+        return false;
+    }
+
+    bool bResult = (nDataSize == 0) ||
+                   (safeWriteData(m_pDevice, nRawSize, pData, nDataSize, pPdStruct) == nDataSize);
+
+    if (!bResult) {
+        resize(m_pDevice, nOldSize);
+    }
+
+    // resize() operates on the device directly; refresh the cached extent and
+    // invalidate any format-specific parse state before returning to callers.
+    setDevice(m_pDevice);
 
     return bResult;
 }
@@ -13757,25 +15118,57 @@ bool XBinary::addOverlay(const QString &sFileName, PDSTRUCT *pPdStruct)
         pPdStruct = &pdStructEmpty;
     }
 
-    bool bResult = false;
+    if (!m_pDevice || !m_pDevice->isWritable() || !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
 
     QFile file;
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        qint64 nRawSize = getOverlayOffset(pPdStruct);
-        qint64 nDataSize = file.size();
-
-        if (resize(getDevice(), nRawSize + nDataSize)) {
-            if (nDataSize) {
-                bResult = copyDeviceMemory(&file, 0, getDevice(), nRawSize, nDataSize);
+        const QFile *pDestinationFile = dynamic_cast<const QFile *>(m_pDevice);
+        if (pDestinationFile) {
+            QFileInfo destinationInfo(pDestinationFile->fileName());
+            QFileInfo sourceInfo(file.fileName());
+            QString sDestinationPath = destinationInfo.canonicalFilePath();
+            QString sSourcePath = sourceInfo.canonicalFilePath();
+            if (sDestinationPath.isEmpty()) sDestinationPath = QDir::cleanPath(destinationInfo.absoluteFilePath());
+            if (sSourcePath.isEmpty()) sSourcePath = QDir::cleanPath(sourceInfo.absoluteFilePath());
+#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+            const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+#else
+            const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#endif
+            if (!sDestinationPath.isEmpty() && !sSourcePath.isEmpty() &&
+                (QString::compare(QDir::fromNativeSeparators(sDestinationPath),
+                                  QDir::fromNativeSeparators(sSourcePath), caseSensitivity) == 0)) {
+                file.close();
+                return false;
             }
         }
 
+        const qint64 nRawSize = getOverlayOffset(pPdStruct);
+        const qint64 nDataSize = file.size();
+        const qint64 nOldSize = m_pDevice->size();
+
+        if ((nRawSize < 0) || (nDataSize < 0) || (nOldSize < 0) || (nRawSize > nOldSize) ||
+            (nDataSize > (std::numeric_limits<qint64>::max)() - nRawSize) ||
+            !resize(m_pDevice, nRawSize + nDataSize)) {
+            file.close();
+            return false;
+        }
+
+        bool bResult = (nDataSize == 0) || copyDeviceMemory(&file, 0, m_pDevice, nRawSize, nDataSize, pPdStruct);
+        if (!bResult) {
+            resize(m_pDevice, nOldSize);
+        }
+
+        setDevice(m_pDevice);
         file.close();
+        return bResult;
     }
 
-    return bResult;
+    return false;
 }
 
 bool XBinary::removeOverlay()
@@ -13793,6 +15186,10 @@ bool XBinary::isSignatureInFilePartPresent(qint32 nFilePartNumber, const QString
 bool XBinary::isSignatureInFilePartPresent(XBinary::_MEMORY_MAP *pMemoryMap, qint32 nFilePartNumber, const QString &sSignature, PDSTRUCT *pPdStruct)
 {
     bool bResult = false;
+
+    if (!pMemoryMap) {
+        return false;
+    }
 
     qint32 nNumberOfRecords = pMemoryMap->listRecords.count();
 
@@ -13813,6 +15210,10 @@ QString XBinary::getStringCollision(const QList<QString> *pListStrings, const QS
 {
     // TODO Check&optimize
     QString sResult;
+
+    if (!pListStrings) {
+        return sResult;
+    }
 
     qint32 nNumberOfStrings = pListStrings->count();
 
@@ -13842,34 +15243,12 @@ QString XBinary::getStringCollision(const QList<QString> *pListStrings, const QS
 
 bool XBinary::writeToFile(const QString &sFileName, const QByteArray &baData)
 {
-    bool bResult = false;
-
-    QFile file;
-    file.setFileName(sFileName);
-
-    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        bResult = (file.write(baData.constData(), baData.size()) == baData.size());
-        file.close();
-    }
-
-    return bResult;
+    return dumpToFile(sFileName, baData.constData(), baData.size());
 }
 
 bool XBinary::writeToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
-
-    if (createFile(sFileName, pDevice->size())) {
-        QFile file;
-        file.setFileName(sFileName);
-
-        if (file.open(QIODevice::ReadWrite)) {
-            bResult = copyDeviceMemory(pDevice, 0, &file, 0, pDevice->size(), pPdStruct);
-            file.close();
-        }
-    }
-
-    return bResult;
+    return dumpToFile(sFileName, pDevice, pPdStruct);
 }
 
 bool XBinary::appendToFile(const QString &sFileName, const QString &sString)
@@ -13883,7 +15262,7 @@ bool XBinary::appendToFile(const QString &sFileName, const QString &sString)
     if (file.open(QIODevice::ReadWrite | QIODevice::Append)) {
         _sString += "\r\n";  // TODO Linux
         QByteArray baData = _sString.toUtf8();
-        bResult = (file.write(baData.constData(), baData.size()) == baData.size());
+        bResult = writeAllToDevice(&file, baData.constData(), baData.size());
         file.close();
     }
 
@@ -13892,18 +15271,20 @@ bool XBinary::appendToFile(const QString &sFileName, const QString &sString)
 
 bool XBinary::clearFile(const QString &sFileName)
 {
-    bool bResult = false;
+    if (sFileName.trimmed().isEmpty()) {
+        return false;
+    }
 
     QFile file;
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadWrite)) {
-        file.resize(0);
+        const bool bResult = file.resize(0);
         file.close();
-        bResult = true;
+        return bResult;
     }
 
-    return bResult;
+    return false;
 }
 
 qint32 XBinary::getStringNumberFromList(const QList<QString> *pListStrings, const QString &sString, PDSTRUCT *pPdStruct)
@@ -13915,6 +15296,10 @@ qint32 XBinary::getStringNumberFromList(const QList<QString> *pListStrings, cons
     }
 
     qint32 nResult = -1;
+
+    if (!pListStrings) {
+        return nResult;
+    }
 
     qint32 nNumberOfRecords = pListStrings->count();
 
@@ -13938,6 +15323,10 @@ qint32 XBinary::getStringNumberFromListExp(const QList<QString> *pListStrings, c
     }
 
     qint32 nResult = -1;
+
+    if (!pListStrings) {
+        return nResult;
+    }
 
     qint32 nNumberOfRecords = pListStrings->count();
 
@@ -13966,9 +15355,15 @@ QString XBinary::getStringByIndex(const QList<QString> *pListStrings, qint32 nIn
 {
     QString sResult;
 
+    if (!pListStrings) {
+        return sResult;
+    }
+
     if (nNumberOfStrings == -1) {
         nNumberOfStrings = pListStrings->count();
     }
+
+    nNumberOfStrings = qMin(nNumberOfStrings, pListStrings->count());
 
     if ((nIndex >= 0) && (nIndex < nNumberOfStrings)) {
         sResult = pListStrings->at(nIndex);
@@ -14071,24 +15466,12 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
     QDateTime result;
 
     if (type == DT_TYPE_POSIX) {
-        if (nValue > (quint64)((std::numeric_limits<qint64>::max)() / 1000)) {
-            return result;
-        }
-
-        result.setMSecsSinceEpoch((qint64)nValue * 1000);
+        result.setMSecsSinceEpoch(nValue * 1000);
     } else if (type == DT_TYPE_UNIXTIME) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-        if (nValue > (quint64)(std::numeric_limits<qint64>::max)()) {
-            return result;
-        }
-
-        result = QDateTime::fromSecsSinceEpoch((qint64)nValue, Qt::UTC);
+        result = QDateTime::fromSecsSinceEpoch((quint32)nValue, Qt::UTC);
 #else
-        if (nValue > (quint64)((std::numeric_limits<qint64>::max)() / 1000)) {
-            return result;
-        }
-
-        result = QDateTime::fromMSecsSinceEpoch((qint64)nValue * 1000, Qt::UTC);
+        result = QDateTime::fromMSecsSinceEpoch((quint32)nValue * 1000, Qt::UTC);
 #endif
     } else if (type == DT_TYPE_DOSTIME) {
         // MS-DOS time is always a 16-bit packed value; mask higher bits explicitly.
@@ -14103,7 +15486,7 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
         result = winFileTimeToQDateTime(nValue);
     }
 
-    return result.isValid() ? result : QDateTime();
+    return result;
 }
 
 QString XBinary::valueToTimeString(quint64 nValue, XBinary::DT_TYPE type)
@@ -14540,7 +15923,7 @@ XBinary::DM XBinary::getDisasmMode()
 
 XBinary::DM XBinary::getDisasmMode(XBinary::_MEMORY_MAP *pMemoryMap)
 {
-    return getDisasmMode(pMemoryMap->sArch, (pMemoryMap->endian == ENDIAN_BIG), pMemoryMap->mode);
+    return pMemoryMap ? getDisasmMode(pMemoryMap->sArch, (pMemoryMap->endian == ENDIAN_BIG), pMemoryMap->mode) : DM_UNKNOWN;
 }
 
 XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE mode)
@@ -14636,7 +16019,7 @@ XBinary::DM XBinary::getDisasmMode(const QString &sArch, bool bIsBigEndian, MODE
 
 XBinary::DM XBinary::getDisasmMode(FILEFORMATINFO *pFileFormatInfo)
 {
-    return getDisasmMode(pFileFormatInfo->sArch, (pFileFormatInfo->endian == ENDIAN_BIG), pFileFormatInfo->mode);
+    return pFileFormatInfo ? getDisasmMode(pFileFormatInfo->sArch, (pFileFormatInfo->endian == ENDIAN_BIG), pFileFormatInfo->mode) : DM_UNKNOWN;
 }
 
 XBinary::ARCH XBinary::fileFormatInfoToArch(const XBinary::FILEFORMATINFO *pFileFormatInfo)
@@ -14785,6 +16168,10 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
     // TODO Check!
     // TODO optimize! Add new Types!
+    if (!pStFileTypes) {
+        return;
+    }
+
     if (pStFileTypes->contains(XBinary::FT_MSDOS) || pStFileTypes->contains(XBinary::FT_DOS16M) || pStFileTypes->contains(XBinary::FT_DOS4G) ||
         pStFileTypes->contains(XBinary::FT_NE) || pStFileTypes->contains(XBinary::FT_LE) || pStFileTypes->contains(XBinary::FT_LX) ||
         pStFileTypes->contains(XBinary::FT_PE) || pStFileTypes->contains(XBinary::FT_PE32) || pStFileTypes->contains(XBinary::FT_PE64) ||
@@ -14800,12 +16187,14 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes)
 
 void XBinary::removeFileTypes(QSet<XBinary::FT> *pStFileTypes)
 {
-    pStFileTypes->remove(XBinary::FT_BINARY);
+    if (pStFileTypes) {
+        pStFileTypes->remove(XBinary::FT_BINARY);
+    }
 }
 
 void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileType)
 {
-    if (fileType != XBinary::FT_UNKNOWN) {
+    if (pStFileTypes && (fileType != XBinary::FT_UNKNOWN)) {
         QSet<XBinary::FT> stFileTypesNew;
 
         if (fileType == XBinary::FT_PE) {
@@ -14831,6 +16220,10 @@ void XBinary::filterFileTypes(QSet<XBinary::FT> *pStFileTypes, XBinary::FT fileT
 bool XBinary::isFileTypePresent(QSet<XBinary::FT> *pStFileTypes, QSet<XBinary::FT> *pStAvailableFileTypes)
 {
     bool bResult = false;
+
+    if (!pStFileTypes || !pStAvailableFileTypes) {
+        return bResult;
+    }
 
     QSet<XBinary::FT>::iterator i = pStFileTypes->begin();
 
@@ -14876,10 +16269,20 @@ bool XBinary::percentageSetCurrentValue(XBinary::PERCENTAGE *pPercentage, qint64
 {
     bool bResult = false;
 
-    pPercentage->nCurrentValue = nCurrentValue;
+    if (!pPercentage || (pPercentage->nMaxValue <= 0) || (pPercentage->nMaxPercentage <= 0) ||
+        (pPercentage->nCurrentPercentage < 0) || (pPercentage->nCurrentPercentage >= pPercentage->nMaxPercentage)) {
+        return bResult;
+    }
+
+    pPercentage->nCurrentValue = qBound((qint64)0, nCurrentValue, pPercentage->nMaxValue);
 
     if (!(pPercentage->bTimer)) {
-        if (pPercentage->nCurrentValue > ((pPercentage->nCurrentPercentage + 1) * (pPercentage->nMaxValue / pPercentage->nMaxPercentage))) {
+        const qint64 nNext = (qint64)pPercentage->nCurrentPercentage + 1;
+        const qint64 nMaxPercentage = pPercentage->nMaxPercentage;
+        const qint64 nQuotient = pPercentage->nMaxValue / nMaxPercentage;
+        const qint64 nRemainder = pPercentage->nMaxValue % nMaxPercentage;
+        const qint64 nThreshold = nQuotient * nNext + (nRemainder * nNext + nMaxPercentage - 1) / nMaxPercentage;
+        if (pPercentage->nCurrentValue >= nThreshold) {
             pPercentage->nCurrentPercentage++;
             bResult = true;
         }
@@ -14888,7 +16291,8 @@ bool XBinary::percentageSetCurrentValue(XBinary::PERCENTAGE *pPercentage, qint64
         {
             pPercentage->timer.restart();
 
-            qint32 _nCurrent = (pPercentage->nCurrentValue * 100) / (pPercentage->nMaxValue);
+            const long double fCurrent = ((long double)pPercentage->nCurrentValue * pPercentage->nMaxPercentage) / pPercentage->nMaxValue;
+            qint32 _nCurrent = (qint32)qBound((qint64)0, (qint64)fCurrent, (qint64)pPercentage->nMaxPercentage);
 
             pPercentage->nCurrentPercentage = _nCurrent;
             bResult = true;
@@ -14902,10 +16306,18 @@ qint64 XBinary::getTotalOSSize(QList<OFFSETSIZE> *pListOffsetSize)
 {
     qint64 nResult = 0;
 
+    if (!pListOffsetSize) {
+        return nResult;
+    }
+
     qint32 nNumberOfRecords = pListOffsetSize->count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        nResult += pListOffsetSize->at(i).nSize;
+        const qint64 nSize = pListOffsetSize->at(i).nSize;
+        if ((nSize < 0) || (nSize > (std::numeric_limits<qint64>::max)() - nResult)) {
+            return -1;
+        }
+        nResult += nSize;
     }
 
     return nResult;
@@ -14958,7 +16370,20 @@ XBinary::MODE XBinary::getWidthModeFromMemoryMap(XBinary::_MEMORY_MAP *pMemoryMa
 {
     MODE result = MODE_32;
 
-    qint64 nMax = qMax(pMemoryMap->nModuleAddress + pMemoryMap->nImageSize, (XADDR)(pMemoryMap->nBinarySize));
+    if (!pMemoryMap) {
+        return result;
+    }
+
+    quint64 nImageEnd = 0;
+    if ((pMemoryMap->nModuleAddress != (XADDR)-1) && (pMemoryMap->nImageSize > 0)) {
+        const quint64 nImageSize = (quint64)pMemoryMap->nImageSize;
+        nImageEnd = (nImageSize > (std::numeric_limits<XADDR>::max)() - pMemoryMap->nModuleAddress)
+                        ? (std::numeric_limits<XADDR>::max)()
+                        : pMemoryMap->nModuleAddress + nImageSize;
+    }
+
+    const quint64 nBinarySize = (pMemoryMap->nBinarySize > 0) ? (quint64)pMemoryMap->nBinarySize : 0;
+    const quint64 nMax = qMax(nImageEnd, nBinarySize);
 
     result = getWidthModeFromSize(nMax);
 
@@ -15001,29 +16426,32 @@ bool XBinary::isAnsiSymbol(quint8 cCode, bool bExtra)
 
 bool XBinary::isUTF8Symbol(quint8 cCode, qint32 *pnWidth)
 {
-    bool bResult = false;
-
-    if (cCode >= 0x20) {
-        if ((cCode >> 7) == 0) {
-            *pnWidth = 1;
-            bResult = true;
-        } else if ((cCode >> 5) == 0x6) {
-            *pnWidth = 2;
-            bResult = true;
-        } else if ((cCode >> 4) == 0xE) {
-            *pnWidth = 3;
-            bResult = true;
-        } else if ((cCode >> 3) == 0x1E) {
-            *pnWidth = 4;
-            bResult = true;
-        } else if ((cCode >> 6) == 0x2)  // Rest bytes
-        {
-            *pnWidth = 0;
-            bResult = true;
-        }
+    if (!pnWidth) {
+        return false;
     }
 
-    return bResult;
+    *pnWidth = 0;
+    if ((cCode >= 0x20) && (cCode <= 0x7F)) {
+        *pnWidth = 1;
+        return true;
+    }
+    if ((cCode >= 0xC2) && (cCode <= 0xDF)) {
+        *pnWidth = 2;
+        return true;
+    }
+    if ((cCode >= 0xE0) && (cCode <= 0xEF)) {
+        *pnWidth = 3;
+        return true;
+    }
+    if ((cCode >= 0xF0) && (cCode <= 0xF4)) {
+        *pnWidth = 4;
+        return true;
+    }
+    if ((cCode >= 0x80) && (cCode <= 0xBF)) {
+        return true;
+    }
+
+    return false;
 }
 
 bool XBinary::isUnicodeSymbol(quint16 nCode, bool bExtra)
@@ -15050,8 +16478,10 @@ QString XBinary::getStringFromIndex(qint64 nOffset, qint64 nSize, qint32 nIndex)
 {
     QString sResult;
 
-    if (nIndex < nSize) {
-        sResult = read_ansiString(nOffset + nIndex);
+    const qint64 nFileSize = getSize();
+    if ((nOffset >= 0) && (nSize > 0) && (nIndex >= 0) && ((qint64)nIndex < nSize) &&
+        (nOffset <= nFileSize) && (nSize <= (nFileSize - nOffset))) {
+        sResult = read_ansiString(nOffset + nIndex, nSize - nIndex);
     }
 
     return sResult;
@@ -15087,44 +16517,69 @@ QList<XBinary::OPCODE> XBinary::getOpcodes(qint64 nOffset, XADDR nStartAddress, 
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    if (nOffset != -1) {
-        qint32 nBufferSize = getBufferSize(pPdStruct);
-        char *pBuffer = new char[nBufferSize];
+    if ((nOffset != -1) && (nSize > 0) && isPdStructNotCanceled(pPdStruct) &&
+        (nStartAddress <= (std::numeric_limits<XADDR>::max)() - (XADDR)nSize)) {
+        const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
 
-        while ((nSize > 0) && (!(pPdStruct->bIsStop))) {
+        if (nRequestedBufferSize <= 0) {
+            return listResult;
+        }
+
+        const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+        char *pBuffer = new (std::nothrow) char[nBufferSize];
+
+        if (!pBuffer) {
+            return listResult;
+        }
+
+        const qint64 nTotalSize = nSize;
+        qint64 nProcessed = 0;
+        bool bReadError = false;
+        const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nTotalSize);
+
+        while ((nSize > 0) && isPdStructNotCanceled(pPdStruct)) {
             qint64 nTempSize = qMin((qint64)nBufferSize, nSize);
 
-            if (read_array(nOffset, pBuffer, nTempSize) != nTempSize) {
+            if (read_array_process(nOffset, pBuffer, nTempSize, pPdStruct) != nTempSize) {
                 setPdStructErrorString(pPdStruct, tr("Read error"));
-
+                bReadError = true;
                 break;
             }
 
             qint64 nOpcodesSize = 0;
             OPCODE_STATUS opcodeStatus = OPCODE_STATUS_SUCCESS;
 
-            for (qint32 i = 0; i < nTempSize;) {
-                qint64 _nSize = readOpcodes(nType, pBuffer + i, nStartAddress + i, nTempSize - i, &listResult, &opcodeStatus);
+            for (qint32 i = 0; (i < nTempSize) && isPdStructNotCanceled(pPdStruct);) {
+                const XADDR nDecodedSize = readOpcodes(nType, pBuffer + i, nStartAddress + (XADDR)i, nTempSize - i, &listResult, &opcodeStatus);
 
-                i += _nSize;
-                nOpcodesSize += _nSize;
-
-                if ((_nSize == 0) || (opcodeStatus == OPCODE_STATUS_END)) {
+                if ((nDecodedSize == 0) || (nDecodedSize > (XADDR)(nTempSize - i)) || (opcodeStatus == OPCODE_STATUS_END)) {
+                    if ((nDecodedSize > (XADDR)(nTempSize - i)) && (opcodeStatus != OPCODE_STATUS_END)) {
+                        bReadError = true;
+                    }
                     break;
                 }
+
+                i += (qint32)nDecodedSize;
+                nOpcodesSize += (qint64)nDecodedSize;
             }
 
-            if ((nOpcodesSize == 0) || (opcodeStatus == OPCODE_STATUS_END)) {
-                //                _errorMessage(tr("Read error"));
+            if (bReadError || (nOpcodesSize == 0) || (opcodeStatus == OPCODE_STATUS_END)) {
                 break;
             }
 
             nSize -= nOpcodesSize;
             nOffset += nOpcodesSize;
             nStartAddress += nOpcodesSize;
+            nProcessed += nOpcodesSize;
+            XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nProcessed);
         }
 
         delete[] pBuffer;
+        XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+
+        if (bReadError || !isPdStructNotCanceled(pPdStruct)) {
+            listResult.clear();
+        }
     }
 
     return listResult;
@@ -15138,7 +16593,9 @@ XADDR XBinary::readOpcodes(quint32 nType, char *pData, XADDR nStartAddress, qint
     Q_UNUSED(nSize)
     Q_UNUSED(pListOpcodes)
 
-    *pOpcodeStatus = OPCODE_STATUS_END;
+    if (pOpcodeStatus) {
+        *pOpcodeStatus = OPCODE_STATUS_END;
+    }
 
     return false;
 }
@@ -15147,13 +16604,15 @@ bool XBinary::_read_opcode_uleb128(OPCODE *pOpcode, char **ppData, qint64 *pnSiz
 {
     bool bResult = false;
 
-    if (*pnSize > 0) {
+    if (pOpcode && ppData && *ppData && pnSize && pnAddress && pnResult && (*pnSize > 0)) {
         PACKED_UINT uleb128 = _read_uleb128(*ppData, *pnSize);
 
-        if (uleb128.bIsValid) {
+        if (uleb128.bIsValid && (uleb128.nByteSize > 0) && (uleb128.nByteSize <= *pnSize) &&
+            ((XADDR)uleb128.nByteSize <= (std::numeric_limits<XADDR>::max)() - *pnAddress) &&
+            ((XADDR)uleb128.nByteSize <= (std::numeric_limits<XADDR>::max)() - *pnResult)) {
             pOpcode->nAddress = *pnAddress;
             pOpcode->nSize = uleb128.nByteSize;
-            pOpcode->sName = QString("%1(%2)").arg(sPrefix).arg(QString::number((qint64)uleb128.nValue));
+            pOpcode->sName = QString("%1(%2)").arg(sPrefix).arg(QString::number(uleb128.nValue));
 
             *pnSize -= pOpcode->nSize;
             *ppData += pOpcode->nSize;
@@ -15176,7 +16635,9 @@ bool XBinary::_read_opcode_ansiString(XBinary::OPCODE *pOpcode, char **ppData, q
 
         if (pStringEnd) {
             qint64 nStringSize = pStringEnd - *ppData;
-            if (nStringSize <= 0x7fffffff) {
+            const qint64 nConsumedSize = nStringSize + 1;
+            if ((nStringSize <= 0x7fffffff) && ((XADDR)nConsumedSize <= (std::numeric_limits<XADDR>::max)() - *pnAddress) &&
+                ((XADDR)nConsumedSize <= (std::numeric_limits<XADDR>::max)() - *pnResult)) {
                 QString sString = QString::fromLatin1(*ppData, (int)nStringSize);
                 pOpcode->nAddress = *pnAddress;
                 pOpcode->nSize = nStringSize + 1;
@@ -15199,6 +16660,14 @@ QList<quint32> XBinary::get_uint32_list(qint64 nOffset, qint32 nNumberOfRecords,
 {
     QList<quint32> listResult;
 
+    const qint64 nFileSize = getSize();
+    if ((nOffset < 0) || (nNumberOfRecords <= 0) || (nNumberOfRecords > 0x100000) || (nOffset > nFileSize) ||
+        ((qint64)nNumberOfRecords > (nFileSize - nOffset) / (qint64)sizeof(quint32))) {
+        return listResult;
+    }
+
+    listResult.reserve(nNumberOfRecords);
+
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         quint32 nRecord = read_uint32(nOffset + i * sizeof(quint32), bIsBigEndian);
 
@@ -15212,6 +16681,14 @@ QList<quint64> XBinary::get_uint64_list(qint64 nOffset, qint32 nNumberOfRecords,
 {
     QList<quint64> listResult;
 
+    const qint64 nFileSize = getSize();
+    if ((nOffset < 0) || (nNumberOfRecords <= 0) || (nNumberOfRecords > 0x100000) || (nOffset > nFileSize) ||
+        ((qint64)nNumberOfRecords > (nFileSize - nOffset) / (qint64)sizeof(quint64))) {
+        return listResult;
+    }
+
+    listResult.reserve(nNumberOfRecords);
+
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         quint64 nRecord = read_uint64(nOffset + i * sizeof(quint64), bIsBigEndian);
 
@@ -15223,37 +16700,31 @@ QList<quint64> XBinary::get_uint64_list(qint64 nOffset, qint32 nNumberOfRecords,
 
 bool XBinary::_isOffsetsCrossed(qint64 nOffset1, qint64 nSize1, qint64 nOffset2, qint64 nSize2)
 {
-    bool bResult = false;
-
-    if (((nOffset2 >= nOffset1) && ((nOffset1 + nSize1) > nOffset2)) || ((nOffset1 >= nOffset2) && ((nOffset2 + nSize2) > nOffset1))) {
-        bResult = true;
+    if ((nOffset1 < 0) || (nOffset2 < 0) || (nSize1 <= 0) || (nSize2 <= 0) ||
+        (nSize1 > (std::numeric_limits<qint64>::max)() - nOffset1) ||
+        (nSize2 > (std::numeric_limits<qint64>::max)() - nOffset2)) {
+        return false;
     }
 
-    return bResult;
+    return (nOffset1 < (nOffset2 + nSize2)) && (nOffset2 < (nOffset1 + nSize1));
 }
 
 bool XBinary::_isAddressCrossed(XADDR nAddress1, qint64 nSize1, XADDR nAddress2, qint64 nSize2)
 {
-    bool bResult = false;
-
-    // #ifdef QT_DEBUG
-    //     if (nAddress1 == 0x771F8164) {
-    //         bResult = false;
-    //     }
-    // #endif
-
-    if (((nAddress2 >= nAddress1) && ((nAddress1 + nSize1) > nAddress2)) || ((nAddress1 >= nAddress2) && ((nAddress2 + nSize2) > nAddress1))) {
-        bResult = true;
+    if ((nAddress1 == (XADDR)-1) || (nAddress2 == (XADDR)-1) || (nSize1 <= 0) || (nSize2 <= 0) ||
+        ((quint64)nSize1 > (std::numeric_limits<XADDR>::max)() - nAddress1) ||
+        ((quint64)nSize2 > (std::numeric_limits<XADDR>::max)() - nAddress2)) {
+        return false;
     }
 
-    return bResult;
+    return (nAddress1 < (nAddress2 + (quint64)nSize2)) && (nAddress2 < (nAddress1 + (quint64)nSize1));
 }
 
 bool XBinary::_isReplaced(qint64 nOffset, qint64 nSize, QList<XBinary::MEMORY_REPLACE> *pListMemoryReplace)
 {
     bool bResult = false;
 
-    if (nSize) {
+    if (pListMemoryReplace && (nSize > 0)) {
         qint32 nNumberOfRecords = pListMemoryReplace->count();
 
         for (qint32 i = 0; i < nNumberOfRecords; i++) {
@@ -15271,21 +16742,31 @@ bool XBinary::_replaceMemory(qint64 nDataOffset, char *pData, qint64 nDataSize, 
 {
     bool bResult = false;
 
+    if (!pListMemoryReplace || !pData || (nDataOffset < 0) || (nDataSize <= 0) ||
+        (nDataSize > (std::numeric_limits<qint64>::max)() - nDataOffset)) {
+        return bResult;
+    }
+
+    const qint64 nDataEnd = nDataOffset + nDataSize;
     qint32 nNumberOfRecords = pListMemoryReplace->count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (_isOffsetsCrossed(nDataOffset, nDataSize, pListMemoryReplace->at(i).nOffset, pListMemoryReplace->at(i).nSize)) {
-            MEMORY_REPLACE memoryReplace = pListMemoryReplace->at(i);
+        const MEMORY_REPLACE &memoryReplace = pListMemoryReplace->at(i);
+        if ((memoryReplace.nOffset < 0) || (memoryReplace.nSize <= 0) ||
+            (memoryReplace.nSize > (std::numeric_limits<qint64>::max)() - memoryReplace.nOffset) ||
+            (memoryReplace.nSize > memoryReplace.baOriginal.size())) {
+            continue;
+        }
 
-            for (qint32 j = 0; j < memoryReplace.nSize; j++) {
-                bResult = true;
-
-                pData[(memoryReplace.nOffset + j) - nDataOffset] = memoryReplace.baOriginal.data()[j];
-
-                if ((memoryReplace.nOffset + j) > (nDataOffset + nDataSize)) {
-                    break;
-                }
-            }
+        const qint64 nReplaceEnd = memoryReplace.nOffset + memoryReplace.nSize;
+        const qint64 nOverlapStart = qMax(nDataOffset, memoryReplace.nOffset);
+        const qint64 nOverlapEnd = qMin(nDataEnd, nReplaceEnd);
+        if (nOverlapStart < nOverlapEnd) {
+            const qint64 nCopySize = nOverlapEnd - nOverlapStart;
+            memcpy(pData + (nOverlapStart - nDataOffset),
+                   memoryReplace.baOriginal.constData() + (nOverlapStart - memoryReplace.nOffset),
+                   (size_t)nCopySize);
+            bResult = true;
         }
     }
 
@@ -15296,21 +16777,30 @@ bool XBinary::_updateReplaces(qint64 nDataOffset, char *pData, qint64 nDataSize,
 {
     bool bResult = false;
 
+    if (!pListMemoryReplace || !pData || (nDataOffset < 0) || (nDataSize <= 0) ||
+        (nDataSize > (std::numeric_limits<qint64>::max)() - nDataOffset)) {
+        return bResult;
+    }
+
+    const qint64 nDataEnd = nDataOffset + nDataSize;
     qint32 nNumberOfRecords = pListMemoryReplace->count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
-        if (_isOffsetsCrossed(nDataOffset, nDataSize, pListMemoryReplace->at(i).nOffset, pListMemoryReplace->at(i).nSize)) {
-            MEMORY_REPLACE memoryReplace = pListMemoryReplace->at(i);
+        MEMORY_REPLACE &memoryReplace = (*pListMemoryReplace)[i];
+        if ((memoryReplace.nOffset < 0) || (memoryReplace.nSize <= 0) ||
+            (memoryReplace.nSize > (std::numeric_limits<qint64>::max)() - memoryReplace.nOffset) ||
+            (memoryReplace.nSize > memoryReplace.baOriginal.size())) {
+            continue;
+        }
 
-            for (qint32 j = 0; j < memoryReplace.nSize; j++) {
-                bResult = true;
-
-                memoryReplace.baOriginal.data()[j] = pData[(memoryReplace.nOffset + j) - nDataOffset];
-
-                if ((memoryReplace.nOffset + j) > (nDataOffset + nDataSize)) {
-                    break;
-                }
-            }
+        const qint64 nReplaceEnd = memoryReplace.nOffset + memoryReplace.nSize;
+        const qint64 nOverlapStart = qMax(nDataOffset, memoryReplace.nOffset);
+        const qint64 nOverlapEnd = qMin(nDataEnd, nReplaceEnd);
+        if (nOverlapStart < nOverlapEnd) {
+            const qint64 nCopySize = nOverlapEnd - nOverlapStart;
+            memcpy(memoryReplace.baOriginal.data() + (nOverlapStart - memoryReplace.nOffset),
+                   pData + (nOverlapStart - nDataOffset), (size_t)nCopySize);
+            bResult = true;
         }
     }
 
@@ -15333,6 +16823,10 @@ XBinary::SYMBOL_RECORD XBinary::findSymbolByAddress(QList<SYMBOL_RECORD> *pListS
 {
     SYMBOL_RECORD result = {};
 
+    if (!pListSymbolRecords) {
+        return result;
+    }
+
     qint32 nNumberOfRecords = pListSymbolRecords->count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
@@ -15350,6 +16844,10 @@ XBinary::SYMBOL_RECORD XBinary::findSymbolByName(QList<SYMBOL_RECORD> *pListSymb
 {
     SYMBOL_RECORD result = {};
 
+    if (!pListSymbolRecords) {
+        return result;
+    }
+
     qint32 nNumberOfRecords = pListSymbolRecords->count();
 
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
@@ -15366,6 +16864,10 @@ XBinary::SYMBOL_RECORD XBinary::findSymbolByName(QList<SYMBOL_RECORD> *pListSymb
 XBinary::SYMBOL_RECORD XBinary::findSymbolByOrdinal(QList<SYMBOL_RECORD> *pListSymbolRecords, qint32 nOrdinal)
 {
     SYMBOL_RECORD result = {};
+
+    if (!pListSymbolRecords) {
+        return result;
+    }
 
     qint32 nNumberOfRecords = pListSymbolRecords->count();
 
@@ -15662,8 +17164,9 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nValue[2], bool bIsBigEndian)
 
     result.bIsBigEndian = bIsBigEndian;
     result.varType = VT_128;
-    // result.var.v_uint128[0] = nValue[0];
-    // result.var.v_uint128[1] = nValue[1];
+    if (nValue) {
+        result.var = QByteArray(reinterpret_cast<const char *>(nValue), 2 * (qint32)sizeof(quint64));
+    }
 
     return result;
 }
@@ -15674,8 +17177,8 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nLow, quint64 nHigh, bool bIsBigE
 
     result.bIsBigEndian = bIsBigEndian;
     result.varType = VT_128;
-    // result.var.v_uint128[0] = nLow;
-    // result.var.v_uint128[1] = nHigh;
+    const quint64 values[2] = {nLow, nHigh};
+    result.var = QByteArray(reinterpret_cast<const char *>(values), (qint32)sizeof(values));
 
     return result;
 }
@@ -15686,10 +17189,8 @@ XBinary::XVARIANT XBinary::getXVariant(quint64 nLow1, quint64 nLow2, quint64 nHi
 
     result.bIsBigEndian = bIsBigEndian;
     result.varType = VT_256;
-    // result.var.v_uint256[0] = nLow1;
-    // result.var.v_uint256[1] = nLow2;
-    // result.var.v_uint256[2] = nHigh1;
-    // result.var.v_uint256[3] = nHigh2;
+    const quint64 values[4] = {nLow1, nLow2, nHigh1, nHigh2};
+    result.var = QByteArray(reinterpret_cast<const char *>(values), (qint32)sizeof(values));
 
     return result;
 }
@@ -15700,10 +17201,9 @@ XBinary::XVARIANT XBinary::getXVariant(quint8 nValue[10], bool bIsBigEndian)
 
     result.bIsBigEndian = bIsBigEndian;
     result.varType = VT_FPEG;
-
-    // for (qint32 i = 0; i < 10; i++) {
-    //     result.var.v_freg[i] = nValue[i];
-    // }
+    if (nValue) {
+        result.var = QByteArray(reinterpret_cast<const char *>(nValue), 10);
+    }
 
     return result;
 }
@@ -15723,7 +17223,7 @@ quint32 XBinary::getDwordFromQword(quint64 nValue, qint32 nIndex)
 {
     quint32 nResult = 0;
 
-    if (nIndex < 2) {
+    if ((nIndex >= 0) && (nIndex < 2)) {
         nValue = nValue >> (nIndex * 32);
 
         nResult = nValue & 0xFFFFFFFF;
@@ -15736,7 +17236,7 @@ quint16 XBinary::getWordFromQword(quint64 nValue, qint32 nIndex)
 {
     quint16 nResult = 0;
 
-    if (nIndex < 4) {
+    if ((nIndex >= 0) && (nIndex < 4)) {
         nValue = nValue >> (nIndex * 16);
 
         nResult = nValue & 0xFFFF;
@@ -15749,7 +17249,7 @@ quint8 XBinary::getByteFromQword(quint64 nValue, qint32 nIndex)
 {
     quint8 nResult = 0;
 
-    if (nIndex < 8) {
+    if ((nIndex >= 0) && (nIndex < 8)) {
         nValue = nValue >> (nIndex * 8);
 
         nResult = nValue & 0xFF;
@@ -15762,7 +17262,7 @@ quint16 XBinary::getWordFromDword(quint32 nValue, qint32 nIndex)
 {
     quint16 nResult = 0;
 
-    if (nIndex < 2) {
+    if ((nIndex >= 0) && (nIndex < 2)) {
         nValue = nValue >> (nIndex * 16);
 
         nResult = nValue & 0xFFFF;
@@ -15775,7 +17275,7 @@ quint8 XBinary::getByteFromDword(quint32 nValue, qint32 nIndex)
 {
     quint8 nResult = 0;
 
-    if (nIndex < 4) {
+    if ((nIndex >= 0) && (nIndex < 4)) {
         nValue = nValue >> (nIndex * 8);
 
         nResult = nValue & 0xFF;
@@ -15788,7 +17288,7 @@ quint8 XBinary::getByteFromWord(quint16 nValue, qint32 nIndex)
 {
     quint8 nResult = 0;
 
-    if (nIndex < 2) {
+    if ((nIndex >= 0) && (nIndex < 2)) {
         nValue = nValue >> (nIndex * 8);
 
         nResult = nValue & 0xFF;
@@ -15801,7 +17301,7 @@ bool XBinary::getBitFromByte(quint8 nValue, qint32 nIndex)
 {
     bool bResult = false;
 
-    if (nIndex < 8) {
+    if ((nIndex >= 0) && (nIndex < 8)) {
         bResult = (nValue >> nIndex) & 0x1;
     }
 
@@ -15812,7 +17312,7 @@ bool XBinary::getBitFromWord(quint16 nValue, qint32 nIndex)
 {
     bool bResult = false;
 
-    if (nIndex < 16) {
+    if ((nIndex >= 0) && (nIndex < 16)) {
         bResult = (nValue >> nIndex) & 0x1;
     }
 
@@ -15823,7 +17323,7 @@ bool XBinary::getBitFromDword(quint32 nValue, qint32 nIndex)
 {
     bool bResult = false;
 
-    if (nIndex < 32) {
+    if ((nIndex >= 0) && (nIndex < 32)) {
         bResult = (nValue >> nIndex) & 0x1;
     }
 
@@ -15834,7 +17334,7 @@ bool XBinary::getBitFromQword(quint64 nValue, qint32 nIndex)
 {
     bool bResult = false;
 
-    if (nIndex < 64) {
+    if ((nIndex >= 0) && (nIndex < 64)) {
         bResult = (nValue >> nIndex) & 0x1;
     }
 
@@ -15845,7 +17345,7 @@ quint64 XBinary::setDwordToQword(quint64 nInit, quint32 nValue, qint32 nIndex)
 {
     quint64 nResult = nInit;
 
-    if (nIndex < 2) {
+    if ((nIndex >= 0) && (nIndex < 2)) {
         quint64 nFF = 0xFFFFFFFF;
         quint64 _nValue = nValue;
 
@@ -15863,7 +17363,7 @@ quint64 XBinary::setWordToQword(quint64 nInit, quint16 nValue, qint32 nIndex)
 {
     quint64 nResult = nInit;
 
-    if (nIndex < 4) {
+    if ((nIndex >= 0) && (nIndex < 4)) {
         quint64 nFF = 0xFFFF;
         quint64 _nValue = nValue;
 
@@ -15881,7 +17381,7 @@ quint64 XBinary::setByteToQword(quint64 nInit, quint8 nValue, qint32 nIndex)
 {
     quint64 nResult = nInit;
 
-    if (nIndex < 8) {
+    if ((nIndex >= 0) && (nIndex < 8)) {
         quint64 nFF = 0xFF;
         quint64 _nValue = nValue;
 
@@ -15899,7 +17399,7 @@ quint32 XBinary::setWordToDword(quint32 nInit, quint16 nValue, qint32 nIndex)
 {
     quint32 nResult = nInit;
 
-    if (nIndex < 2) {
+    if ((nIndex >= 0) && (nIndex < 2)) {
         quint32 nFF = 0xFFFF;
         quint32 _nValue = nValue;
 
@@ -15917,7 +17417,7 @@ quint32 XBinary::setByteToDword(quint32 nInit, quint8 nValue, qint32 nIndex)
 {
     quint32 nResult = nInit;
 
-    if (nIndex < 4) {
+    if ((nIndex >= 0) && (nIndex < 4)) {
         quint32 nFF = 0xFF;
         quint32 _nValue = nValue;
 
@@ -15935,7 +17435,7 @@ quint16 XBinary::setByteToWord(quint16 nInit, quint8 nValue, qint32 nIndex)
 {
     quint16 nResult = nInit;
 
-    if (nIndex < 2) {
+    if ((nIndex >= 0) && (nIndex < 2)) {
         quint16 nFF = 0xFF;
         quint16 _nValue = nValue;
 
@@ -15953,7 +17453,7 @@ quint8 XBinary::setBitToByte(quint8 nInit, bool bValue, qint32 nIndex)
 {
     quint8 nResult = nInit;
 
-    if (nIndex < 8) {
+    if ((nIndex >= 0) && (nIndex < 8)) {
         quint8 nFF = 0x01;
         quint8 _nValue = (quint8)bValue;
 
@@ -15971,7 +17471,7 @@ quint16 XBinary::setBitToWord(quint16 nInit, bool bValue, qint32 nIndex)
 {
     quint16 nResult = nInit;
 
-    if (nIndex < 16) {
+    if ((nIndex >= 0) && (nIndex < 16)) {
         quint16 nFF = 0x01;
         quint16 _nValue = (quint16)bValue;
 
@@ -15989,7 +17489,7 @@ quint32 XBinary::setBitToDword(quint32 nInit, bool bValue, qint32 nIndex)
 {
     quint32 nResult = nInit;
 
-    if (nIndex < 32) {
+    if ((nIndex >= 0) && (nIndex < 32)) {
         quint32 nFF = 0x01;
         quint32 _nValue = (quint32)bValue;
 
@@ -16007,7 +17507,7 @@ quint64 XBinary::setBitToQword(quint64 nInit, bool bValue, qint32 nIndex)
 {
     quint64 nResult = nInit;
 
-    if (nIndex < 64) {
+    if ((nIndex >= 0) && (nIndex < 64)) {
         quint64 nFF = 0x01;
         quint64 _nValue = (quint64)bValue;
 
@@ -16023,43 +17523,14 @@ quint64 XBinary::setBitToQword(quint64 nInit, bool bValue, qint32 nIndex)
 
 bool XBinary::isXVariantEqual(XVARIANT value1, XVARIANT value2)
 {
-    bool bResult = false;
-
-    // if ((value1.mode == value2.mode) && (value1.bIsBigEndian == value2.bIsBigEndian)) {
-    //     if (value1.mode == MODE_BIT) bResult = (value1.var.v_bool == value2.var.v_bool);
-    //     else if (value1.mode == MODE_8) bResult = (value1.var.v_uint8 == value2.var.v_uint8);
-    //     else if (value1.mode == MODE_16) bResult = (value1.var.v_uint16 == value2.var.v_uint16);
-    //     else if (value1.mode == MODE_32) bResult = (value1.var.v_uint32 == value2.var.v_uint32);
-    //     else if (value1.mode == MODE_64) bResult = (value1.var.v_uint64 == value2.var.v_uint64);
-    //     else if (value1.mode == MODE_128) {
-    //         bResult = (value1.var.v_uint128[0] == value2.var.v_uint128[0]) && (value1.var.v_uint128[1] == value2.var.v_uint128[1]);
-    //     } else if (value1.mode == MODE_256) {
-    //         bResult = true;
-
-    //         for (qint32 i = 0; i < 4; i++) {
-    //             if (value1.var.v_uint256[i] != value2.var.v_uint256[i]) {
-    //                 bResult = false;
-    //                 break;
-    //             }
-    //         }
-    //     } else if (value1.mode == MODE_FREG) {
-    //         bResult = true;
-
-    //         for (qint32 i = 0; i < 10; i++) {
-    //             if (value1.var.v_freg[i] != value2.var.v_freg[i]) {
-    //                 bResult = false;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-
-    return bResult;
+    return (value1.varType == value2.varType) && (value1.bIsBigEndian == value2.bIsBigEndian) && (value1.var == value2.var);
 }
 
 void XBinary::clearXVariant(XVARIANT *pVar)
 {
-    pVar->var = 0;
+    if (pVar) {
+        pVar->var.clear();
+    }
 }
 
 XBinary::MODE XBinary::getModeOS()
@@ -16075,32 +17546,144 @@ XBinary::MODE XBinary::getModeOS()
     return modeResult;
 }
 
-XBinary::PDSTRUCT XBinary::createPdStruct()
+XBinary::PDSTRUCT::PDSTRUCT()
+    : bIsStop(false),
+      nFinished(0),
+      bForceStop(false),
+      nBufferSize(0),
+      nFileBufferSize(0),
+      pCallback(nullptr),
+      pCallbackUserData(nullptr),
+      nLastCallbackTime(0),
+      _pdCallbackState(new PDSTRUCT_CALLBACK_STATE)
 {
-    PDSTRUCT result = {};
+    for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
+        _pdRecord[i].nCurrent.storeRelease(0);
+        _pdRecord[i].nTotal.storeRelease(0);
+        _pdRecord[i].sStatus.clear();
+        _pdRecord[i].bIsValid.storeRelease(false);
+    }
+}
 
-    result.bIsStop = false;
-    result.nFinished = false;
+XBinary::PDSTRUCT::PDSTRUCT(const PDSTRUCT &other) : PDSTRUCT()
+{
+    QMutexLocker locker(&other._pdMutex);
 
     for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
-        result._pdRecord[i].bIsValid = false;
-        result._pdRecord[i].nCurrent = 0;
-        result._pdRecord[i].nTotal = 0;
-        result._pdRecord[i].sStatus = "";
+        _pdRecord[i].nCurrent.storeRelease(other._pdRecord[i].nCurrent.loadAcquire());
+        _pdRecord[i].nTotal.storeRelease(other._pdRecord[i].nTotal.loadAcquire());
+        _pdRecord[i].sStatus = other._pdRecord[i].sStatus;
+        _pdRecord[i].bIsValid.storeRelease(other._pdRecord[i].bIsValid.loadAcquire());
     }
 
-    return result;
+    bIsStop.storeRelease(other.bIsStop.loadAcquire());
+    nFinished.storeRelease(other.nFinished.loadAcquire());
+    sInfoString = other.sInfoString;
+    sErrorString = other.sErrorString;
+    bForceStop.storeRelease(other.bForceStop.loadAcquire());
+    nBufferSize.storeRelease(other.nBufferSize.loadAcquire());
+    nFileBufferSize.storeRelease(other.nFileBufferSize.loadAcquire());
+    // A value snapshot must not inherit executable registrations or raw
+    // callback userdata owned by the source object.
+    pCallback = nullptr;
+    pCallbackUserData = nullptr;
+    nLastCallbackTime.storeRelease(0);
+}
+
+XBinary::PDSTRUCT &XBinary::PDSTRUCT::operator=(const PDSTRUCT &other)
+{
+    if (this == &other) return *this;
+
+    // Serialize multi-lock assignments so reciprocal copies cannot deadlock.
+    static QMutex assignmentMutex;
+    QMutexLocker assignmentLocker(&assignmentMutex);
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pState = _pdCallbackState;
+    QMutexLocker stateLocker(&pState->mutex);
+    QMutexLocker sourceLocker(&other._pdMutex);
+    QMutexLocker destinationLocker(&_pdMutex);
+
+    QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pPreviousEntry = pState->pLegacyEntry;
+    if (!pPreviousEntry.isNull()) pPreviousEntry->bActive = false;
+    pState->pLegacyEntry.clear();
+
+    for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
+        _pdRecord[i].nCurrent.storeRelease(other._pdRecord[i].nCurrent.loadAcquire());
+        _pdRecord[i].nTotal.storeRelease(other._pdRecord[i].nTotal.loadAcquire());
+        _pdRecord[i].sStatus = other._pdRecord[i].sStatus;
+        _pdRecord[i].bIsValid.storeRelease(other._pdRecord[i].bIsValid.loadAcquire());
+    }
+
+    bIsStop.storeRelease(other.bIsStop.loadAcquire());
+    nFinished.storeRelease(other.nFinished.loadAcquire());
+    sInfoString = other.sInfoString;
+    sErrorString = other.sErrorString;
+    bForceStop.storeRelease(other.bForceStop.loadAcquire());
+    nBufferSize.storeRelease(other.nBufferSize.loadAcquire());
+    nFileBufferSize.storeRelease(other.nFileBufferSize.loadAcquire());
+    pCallback = nullptr;
+    pCallbackUserData = nullptr;
+    nLastCallbackTime.storeRelease(0);
+
+    destinationLocker.unlock();
+    sourceLocker.unlock();
+    assignmentLocker.unlock();
+
+    if (!pPreviousEntry.isNull() && !isCurrentPdCallbackEntry(pPreviousEntry.data())) {
+        while (pPreviousEntry->nInFlight > 0) {
+            pState->drained.wait(&pState->mutex);
+        }
+    }
+
+    return *this;
+}
+
+XBinary::PDSTRUCT::~PDSTRUCT()
+{
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pState = _pdCallbackState;
+    if (pState.isNull()) return;
+
+    {
+        QMutexLocker locker(&pState->mutex);
+        pState->bDestroying = true;
+
+        if (!pState->pLegacyEntry.isNull()) pState->pLegacyEntry->bActive = false;
+        for (auto it = pState->mapSubscribers.begin(); it != pState->mapSubscribers.end(); ++it) {
+            it.value()->bActive = false;
+        }
+
+        // A callback may deliberately destroy its owning PDSTRUCT.  In that
+        // case the invocation guard owns pState and will complete without
+        // touching this object again.  Other threads must drain before the
+        // mutexes and QString fields in this object disappear.
+        if (!isCurrentPdCallbackState(pState.data())) {
+            while (pState->nInvocations > 0) {
+                pState->drained.wait(&pState->mutex);
+            }
+        }
+    }
+
+    _pdCallbackState.clear();
+}
+
+XBinary::PDSTRUCT XBinary::createPdStruct()
+{
+    return PDSTRUCT();
+}
+
+XBinary::PDSTRUCT XBinary::getPdStructSnapshot(const PDSTRUCT *pPdStruct)
+{
+    return pPdStruct ? PDSTRUCT(*pPdStruct) : PDSTRUCT();
 }
 
 void XBinary::setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal)
 {
-    if (pPdStruct) {
-        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-            pPdStruct->_pdRecord[nIndex].bIsValid = true;
-            pPdStruct->_pdRecord[nIndex].nCurrent = 0;
-            pPdStruct->_pdRecord[nIndex].nTotal = nTotal;
-            pPdStruct->_pdRecord[nIndex].sStatus.clear();
-        }
+    if (pPdStruct && (nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
+
+        pPdStruct->_pdRecord[nIndex].nCurrent = 0;
+        pPdStruct->_pdRecord[nIndex].nTotal = nTotal;
+        pPdStruct->_pdRecord[nIndex].sStatus.clear();
+        pPdStruct->_pdRecord[nIndex].bIsValid = true;
     }
 
     // qDebug("setPdStructInit: %d", nIndex);
@@ -16108,52 +17691,68 @@ void XBinary::setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal)
 
 void XBinary::setPdStructTotal(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue)
 {
-    if (pPdStruct) {
-        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-            pPdStruct->_pdRecord[nIndex].nTotal = nValue;
-        }
+    if (pPdStruct && (nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
+        pPdStruct->_pdRecord[nIndex].nTotal = nValue;
     }
 }
 
 void XBinary::setPdStructCurrent(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue)
 {
-    if (pPdStruct) {
-        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+    bool bNotify = false;
+
+    if (pPdStruct && (nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+        {
+            QMutexLocker locker(&pPdStruct->_pdMutex);
             pPdStruct->_pdRecord[nIndex].nCurrent = nValue;
-            invokePdStructCallback(pPdStruct);
+            bNotify = true;
         }
     }
+
+    if (bNotify) invokePdStructCallback(pPdStruct);
 }
 
 void XBinary::setPdStructCurrentIncrement(PDSTRUCT *pPdStruct, qint32 nIndex)
 {
-    if (pPdStruct) {
-        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-            pPdStruct->_pdRecord[nIndex].nCurrent++;
-            invokePdStructCallback(pPdStruct);
+    bool bNotify = false;
+
+    if (pPdStruct && (nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+        {
+            QMutexLocker locker(&pPdStruct->_pdMutex);
+            const qint64 nCurrent = pPdStruct->_pdRecord[nIndex].nCurrent.loadAcquire();
+            if (nCurrent < (std::numeric_limits<qint64>::max)()) {
+                pPdStruct->_pdRecord[nIndex].nCurrent.storeRelease(nCurrent + 1);
+                bNotify = true;
+            }
         }
     }
+
+    if (bNotify) invokePdStructCallback(pPdStruct);
 }
 
 void XBinary::setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, const QString &sStatus)
 {
-    if (pPdStruct) {
-        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-            pPdStruct->_pdRecord[nIndex].sStatus = sStatus;
-        }
+    if (pPdStruct && (nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
+        pPdStruct->_pdRecord[nIndex].sStatus = sStatus;
     }
 }
 
 void XBinary::setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex)
 {
-    if (pPdStruct) {
-        if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+    if (pPdStruct && (nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
+
+        if (pPdStruct->_pdRecord[nIndex].bIsValid.loadAcquire()) {
             pPdStruct->_pdRecord[nIndex].bIsValid = false;
             pPdStruct->_pdRecord[nIndex].nCurrent = 0;
             pPdStruct->_pdRecord[nIndex].nTotal = 0;
             pPdStruct->_pdRecord[nIndex].sStatus.clear();
 
-            pPdStruct->nFinished++;
+            const quint64 nFinished = pPdStruct->nFinished.loadAcquire();
+            if (nFinished < (std::numeric_limits<quint64>::max)()) {
+                pPdStruct->nFinished.storeRelease(nFinished + 1);
+            }
         }
     }
 
@@ -16163,6 +17762,7 @@ void XBinary::setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex)
 void XBinary::setPdStructInfoString(PDSTRUCT *pPdStruct, const QString &sInfoString)
 {
     if (pPdStruct) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
         pPdStruct->sInfoString = sInfoString;
     }
 }
@@ -16170,6 +17770,7 @@ void XBinary::setPdStructInfoString(PDSTRUCT *pPdStruct, const QString &sInfoStr
 void XBinary::setPdStructErrorString(PDSTRUCT *pPdStruct, const QString &sErrorString)
 {
     if (pPdStruct) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
         pPdStruct->sErrorString = sErrorString;
     }
 }
@@ -16177,6 +17778,7 @@ void XBinary::setPdStructErrorString(PDSTRUCT *pPdStruct, const QString &sErrorS
 void XBinary::clearPdStructInfoString(PDSTRUCT *pPdStruct)
 {
     if (pPdStruct) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
         pPdStruct->sInfoString.clear();
     }
 }
@@ -16184,6 +17786,7 @@ void XBinary::clearPdStructInfoString(PDSTRUCT *pPdStruct)
 void XBinary::clearPdStructErrorString(PDSTRUCT *pPdStruct)
 {
     if (pPdStruct) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
         pPdStruct->sErrorString.clear();
     }
 }
@@ -16193,6 +17796,7 @@ QString XBinary::getPdStructInfoString(PDSTRUCT *pPdStruct)
     QString sResult;
 
     if (pPdStruct) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
         sResult = pPdStruct->sInfoString;
     }
 
@@ -16204,50 +17808,56 @@ QString XBinary::getPdStructErrorString(PDSTRUCT *pPdStruct)
     QString sResult;
 
     if (pPdStruct) {
+        QMutexLocker locker(&pPdStruct->_pdMutex);
         sResult = pPdStruct->sErrorString;
     }
 
     return sResult;
 }
 
-qint32 XBinary::getFreeIndex(PDSTRUCT *pPdStruct)
+qint32 XBinary::reservePdStructRecord(PDSTRUCT *pPdStruct, qint64 nTotal, const QString &sStatus)
 {
-    qint32 nResult = -1;
+    if (!pPdStruct) return -1;
 
-    if (pPdStruct) {
-        for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
-            if (!pPdStruct->_pdRecord[i].bIsValid) {
-                nResult = i;
-
-                break;
-            }
+    QMutexLocker locker(&pPdStruct->_pdMutex);
+    for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
+        PDRECORD &record = pPdStruct->_pdRecord[i];
+        if (!record.bIsValid.loadAcquire()) {
+            record.nCurrent.storeRelease(0);
+            record.nTotal.storeRelease(nTotal);
+            record.sStatus = sStatus;
+            record.bIsValid.storeRelease(true);
+            return i;
         }
     }
 
-    if (nResult == -1) {
 #ifdef QT_DEBUG
-        qDebug("Cannot create an index !!!");
+    qDebug("Cannot reserve a PDSTRUCT record !!!");
 #endif
-    }
+    return -1;
+}
 
-    // qDebug("getFreeIndex: %d", nResult);
-
-    return nResult;
+qint32 XBinary::getFreeIndex(PDSTRUCT *pPdStruct)
+{
+    return reservePdStructRecord(pPdStruct, 0);
 }
 
 bool XBinary::isPdStructFinished(PDSTRUCT *pPdStruct)
 {
+    if (!pPdStruct) return false;
+
+    QMutexLocker locker(&pPdStruct->_pdMutex);
     bool bResult = true;
 
     for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
-        if (pPdStruct->_pdRecord[i].bIsValid) {
+        if (pPdStruct->_pdRecord[i].bIsValid.loadAcquire()) {
             bResult = false;
 
             break;
         }
     }
 
-    if (pPdStruct->nFinished == 0) {
+    if (pPdStruct->nFinished.loadAcquire() == 0) {
         bResult = false;
     }
 
@@ -16256,51 +17866,34 @@ bool XBinary::isPdStructFinished(PDSTRUCT *pPdStruct)
 
 bool XBinary::isPdStructNotCanceled(PDSTRUCT *pPdStruct)
 {
-    bool bResult = true;
-
-    if (pPdStruct) {
-        if (pPdStruct->bIsStop) {
-            bResult = false;
-        }
-    }
-
-    return bResult;
+    return !pPdStruct || !pPdStruct->bIsStop.loadAcquire();
 }
 
 bool XBinary::isPdStructSuccess(PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
+    if (!pPdStruct) return false;
 
-    if (isPdStructFinished(pPdStruct) && (!(pPdStruct->bIsStop))) {
-        if (pPdStruct->nFinished > 0) {
-            bResult = true;
+    QMutexLocker locker(&pPdStruct->_pdMutex);
+    bool bFinished = pPdStruct->nFinished.loadAcquire() > 0;
+    for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
+        if (pPdStruct->_pdRecord[i].bIsValid.loadAcquire()) {
+            bFinished = false;
+            break;
         }
     }
 
-    if (pPdStruct->bForceStop) {
-        bResult = false;
-    }
-
-    return bResult;
+    return bFinished && !pPdStruct->bIsStop.loadAcquire() && !pPdStruct->bForceStop.loadAcquire();
 }
 
 bool XBinary::isPdStructStopped(PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
-
-    if (pPdStruct) {
-        if (pPdStruct->bIsStop) {
-            bResult = true;
-        }
-    }
-
-    return bResult;
+    return pPdStruct && pPdStruct->bIsStop.loadAcquire();
 }
 
 void XBinary::setPdStructStopped(PDSTRUCT *pPdStruct)
 {
     if (pPdStruct) {
-        pPdStruct->bIsStop = true;
+        pPdStruct->bIsStop.storeRelease(true);
     }
 }
 
@@ -16308,9 +17901,15 @@ qint32 XBinary::getPdStructPercentage(PDSTRUCT *pPdStruct)
 {
     qint32 nResult = 0;
 
+    if (!pPdStruct) return nResult;
+
+    QMutexLocker locker(&pPdStruct->_pdMutex);
     for (qint32 i = 0; i < N_NUMBER_PDRECORDS; i++) {
-        if (pPdStruct->_pdRecord[i].nTotal) {
-            nResult = (pPdStruct->_pdRecord[i].nCurrent * 100) / pPdStruct->_pdRecord[i].nTotal;
+        const qint64 nTotal = pPdStruct->_pdRecord[i].nTotal.loadAcquire();
+        if (pPdStruct->_pdRecord[i].bIsValid.loadAcquire() && (nTotal > 0)) {
+            const qint64 nCurrent = qBound((qint64)0, pPdStruct->_pdRecord[i].nCurrent.loadAcquire(), nTotal);
+            nResult = (qint32)(((long double)nCurrent * 100.0L) / (long double)nTotal);
+            nResult = qBound((qint32)0, nResult, (qint32)100);
 
             break;
         }
@@ -16319,15 +17918,219 @@ qint32 XBinary::getPdStructPercentage(PDSTRUCT *pPdStruct)
     return nResult;
 }
 
+void XBinary::setPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData,
+                                  PDSTRUCT_CALLBACK *pPreviousCallback, void **pPreviousCallbackUserData)
+{
+    if (!pPdStruct) return;
+
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pState = pPdStruct->_pdCallbackState;
+    if (pState.isNull()) return;
+
+    QMutexLocker stateLocker(&pState->mutex);
+    if (pState->bDestroying) return;
+
+    QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pPreviousEntry;
+    {
+        QMutexLocker pdLocker(&pPdStruct->_pdMutex);
+        if (pPreviousCallback) *pPreviousCallback = pPdStruct->pCallback;
+        if (pPreviousCallbackUserData) *pPreviousCallbackUserData = pPdStruct->pCallbackUserData;
+
+        if ((pPdStruct->pCallback == pCallback) && (pPdStruct->pCallbackUserData == pCallbackUserData) &&
+            !pState->pLegacyEntry.isNull() && (pState->pLegacyEntry->pCallback == pCallback) &&
+            (pState->pLegacyEntry->pUserData == pCallbackUserData)) {
+            return;
+        }
+
+        pPreviousEntry = pState->pLegacyEntry;
+        if (!pPreviousEntry.isNull()) pPreviousEntry->bActive = false;
+
+        pPdStruct->pCallback = pCallback;
+        pPdStruct->pCallbackUserData = pCallbackUserData;
+
+        if (pCallback) {
+            QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pEntry(new PDSTRUCT_CALLBACK_STATE::ENTRY);
+            pEntry->pCallback = pCallback;
+            pEntry->pUserData = pCallbackUserData;
+            pState->pLegacyEntry = pEntry;
+        } else {
+            pState->pLegacyEntry.clear();
+        }
+    }
+
+    if (!pPreviousEntry.isNull() && !isCurrentPdCallbackEntry(pPreviousEntry.data())) {
+        while (pPreviousEntry->nInFlight > 0) {
+            pState->drained.wait(&pState->mutex);
+        }
+    }
+}
+
+bool XBinary::compareAndSetPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pExpectedCallback, void *pExpectedCallbackUserData,
+                                            PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData)
+{
+    if (!pPdStruct) return false;
+
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pState = pPdStruct->_pdCallbackState;
+    if (pState.isNull()) return false;
+
+    QMutexLocker stateLocker(&pState->mutex);
+    if (pState->bDestroying) return false;
+
+    QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pPreviousEntry;
+    {
+        QMutexLocker pdLocker(&pPdStruct->_pdMutex);
+        if ((pPdStruct->pCallback != pExpectedCallback) || (pPdStruct->pCallbackUserData != pExpectedCallbackUserData)) return false;
+
+        pPreviousEntry = pState->pLegacyEntry;
+        if (!pPreviousEntry.isNull()) pPreviousEntry->bActive = false;
+
+        pPdStruct->pCallback = pCallback;
+        pPdStruct->pCallbackUserData = pCallbackUserData;
+
+        if (pCallback) {
+            QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pEntry(new PDSTRUCT_CALLBACK_STATE::ENTRY);
+            pEntry->pCallback = pCallback;
+            pEntry->pUserData = pCallbackUserData;
+            pState->pLegacyEntry = pEntry;
+        } else {
+            pState->pLegacyEntry.clear();
+        }
+    }
+
+    if (!pPreviousEntry.isNull() && !isCurrentPdCallbackEntry(pPreviousEntry.data())) {
+        while (pPreviousEntry->nInFlight > 0) {
+            pState->drained.wait(&pState->mutex);
+        }
+    }
+
+    return true;
+}
+
+XBinary::PDCALLBACKSUBSCRIPTION XBinary::subscribePdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData)
+{
+    PDCALLBACKSUBSCRIPTION result;
+    if (!pPdStruct || !pCallback) return result;
+
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pState = pPdStruct->_pdCallbackState;
+    if (pState.isNull()) return result;
+
+    QMutexLocker locker(&pState->mutex);
+    if (pState->bDestroying) return result;
+
+    quint64 nToken = pState->nNextToken++;
+    while ((nToken == 0) || pState->mapSubscribers.contains(nToken)) {
+        nToken = pState->nNextToken++;
+    }
+
+    QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pEntry(new PDSTRUCT_CALLBACK_STATE::ENTRY);
+    pEntry->pCallback = pCallback;
+    pEntry->pUserData = pCallbackUserData;
+    pState->mapSubscribers.insert(nToken, pEntry);
+
+    result._state = pState;
+    result._token = nToken;
+    return result;
+}
+
+bool XBinary::unsubscribePdStructCallback(PDCALLBACKSUBSCRIPTION *pSubscription)
+{
+    if (!pSubscription || !pSubscription->isValid()) return false;
+
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pState = pSubscription->_state;
+    const quint64 nToken = pSubscription->_token;
+    pSubscription->_state.clear();
+    pSubscription->_token = 0;
+
+    QMutexLocker locker(&pState->mutex);
+    const auto it = pState->mapSubscribers.find(nToken);
+    if (it == pState->mapSubscribers.end()) return false;
+
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pEntry = it.value();
+    pEntry->bActive = false;
+    pState->mapSubscribers.erase(it);
+
+    if (!isCurrentPdCallbackEntry(pEntry.data())) {
+        while (pEntry->nInFlight > 0) {
+            pState->drained.wait(&pState->mutex);
+        }
+    }
+
+    return true;
+}
+
 void XBinary::invokePdStructCallback(PDSTRUCT *pPdStruct, qint32 nMinIntervalMs)
 {
-    if (pPdStruct && pPdStruct->pCallback) {
-        qint64 nCurrentTime = QDateTime::currentMSecsSinceEpoch();
+    if (!pPdStruct) return;
 
-        if ((nCurrentTime - pPdStruct->nLastCallbackTime) >= nMinIntervalMs) {
-            pPdStruct->pCallback(pPdStruct->pCallbackUserData, pPdStruct);
-            pPdStruct->nLastCallbackTime = nCurrentTime;
+    const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pState = pPdStruct->_pdCallbackState;
+    if (pState.isNull()) return;
+
+    QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pLegacyEntry;
+    QList<QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY>> listSubscribers;
+    const qint64 nCurrentTime = QDateTime::currentMSecsSinceEpoch();
+    const qint64 nInterval = qMax((qint64)0, (qint64)nMinIntervalMs);
+
+    {
+        QMutexLocker stateLocker(&pState->mutex);
+        if (pState->bDestroying || pState->bInvoking) return;
+
+        {
+            // State is locked before the public-field mutex everywhere the
+            // legacy registration is synchronized.
+            QMutexLocker pdLocker(&pPdStruct->_pdMutex);
+            if (pPdStruct->pCallback) {
+                if (pState->pLegacyEntry.isNull() ||
+                    (pState->pLegacyEntry->pCallback != pPdStruct->pCallback) ||
+                    (pState->pLegacyEntry->pUserData != pPdStruct->pCallbackUserData)) {
+                    if (!pState->pLegacyEntry.isNull()) pState->pLegacyEntry->bActive = false;
+                    QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> pEntry(new PDSTRUCT_CALLBACK_STATE::ENTRY);
+                    pEntry->pCallback = pPdStruct->pCallback;
+                    pEntry->pUserData = pPdStruct->pCallbackUserData;
+                    pState->pLegacyEntry = pEntry;
+                }
+            } else {
+                if (!pState->pLegacyEntry.isNull()) pState->pLegacyEntry->bActive = false;
+                pState->pLegacyEntry.clear();
+            }
+            pLegacyEntry = pState->pLegacyEntry;
         }
+
+        listSubscribers = pState->mapSubscribers.values();
+        if (pLegacyEntry.isNull() && listSubscribers.isEmpty()) return;
+
+        const qint64 nLastTime = pPdStruct->nLastCallbackTime.loadAcquire();
+        const bool bDue = (nLastTime <= 0) || (nLastTime > nCurrentTime) ||
+                          ((nLastTime != nCurrentTime) && (nInterval <= nCurrentTime) &&
+                           (nLastTime <= (nCurrentTime - nInterval)));
+        if (!bDue) return;
+
+        pPdStruct->nLastCallbackTime.storeRelease(nCurrentTime);
+        pState->bInvoking = true;
+        pState->nInvocations++;
+    }
+
+    PD_CALLBACK_INVOCATION_GUARD invocationGuard(pState);
+
+    const auto invokeEntry = [&](const QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> &pEntry) -> bool {
+        if (pEntry.isNull()) return true;
+
+        {
+            QMutexLocker locker(&pState->mutex);
+            if (pState->bDestroying || !pEntry->bActive || !pEntry->pCallback) return !pState->bDestroying;
+            pEntry->nInFlight++;
+        }
+
+        {
+            PD_CALLBACK_ENTRY_GUARD entryGuard(pState, pEntry);
+            pEntry->pCallback(pEntry->pUserData, pPdStruct);
+        }
+
+        QMutexLocker locker(&pState->mutex);
+        return !pState->bDestroying;
+    };
+
+    if (!invokeEntry(pLegacyEntry)) return;
+    for (const QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> &pEntry : qAsConst(listSubscribers)) {
+        if (!invokeEntry(pEntry)) return;
     }
 }
 
@@ -16452,6 +18255,9 @@ QList<XBinary::FPART> XBinary::getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct)
     QList<XBinary::FPART> listResult;
 
     if (hlType == HLTYPE_TOTAL) {
+        if (!m_pDevice || !m_pDevice->isOpen()) {
+            return listResult;
+        }
         FPART region = {};
         region.filePart = FILEPART_DATA;
         region.sName = tr("Total");
@@ -16469,32 +18275,31 @@ QList<XBinary::FPART> XBinary::getHighlights(HLTYPE hlType, PDSTRUCT *pPdStruct)
 
 qint64 XBinary::align_up(qint64 nValue, qint64 nAlignment)
 {
-    qint64 nResult = nValue;
-
-    if (nAlignment) {
-        qint64 r = nValue % nAlignment;
-
-        if (r) {
-            nResult += (nAlignment - r);
-        }
+    if ((nValue < 0) || (nAlignment < 0)) {
+        return -1;
+    }
+    if (nAlignment == 0) {
+        return nValue;
     }
 
-    return nResult;
+    const qint64 nRemainder = nValue % nAlignment;
+    if (nRemainder == 0) {
+        return nValue;
+    }
+    const qint64 nDelta = nAlignment - nRemainder;
+    return (nValue <= (std::numeric_limits<qint64>::max)() - nDelta) ? (nValue + nDelta) : -1;
 }
 
 qint64 XBinary::align_down(qint64 nValue, qint64 nAlignment)
 {
-    qint64 nResult = nValue;
-
-    if (nAlignment) {
-        qint64 r = nValue % nAlignment;
-
-        if (r) {
-            nResult -= r;
-        }
+    if ((nValue < 0) || (nAlignment < 0)) {
+        return -1;
+    }
+    if (nAlignment == 0) {
+        return nValue;
     }
 
-    return nResult;
+    return nValue - (nValue % nAlignment);
 }
 
 char *XBinary::strCopy(char *dest, const char *src, size_t destSize)
@@ -16583,6 +18388,10 @@ QString XBinary::_fromWCharArray(const wchar_t *pWString, qint32 size)
 {
     QString sResult;
 
+    if (!pWString || (size < -1)) {
+        return sResult;
+    }
+
 #if (QT_VERSION_MAJOR < 5)  // TODO Check
     sResult = QString::fromWCharArray(pWString, size);
     // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
@@ -16598,18 +18407,27 @@ QString XBinary::_fromWCharArray(const wchar_t *pWString, qint32 size)
 
 qint32 XBinary::_toWCharArray(const QString &sString, wchar_t *pWString)
 {
-    qint32 nResult = 0;
+    // The legacy signature has no destination capacity and therefore cannot
+    // perform a bounded write. Keep it as a source-compatible, fail-closed shim;
+    // callers must use the capacity overload below.
+    Q_UNUSED(sString)
+    Q_UNUSED(pWString)
+    return 0;
+}
 
-#if (QT_VERSION_MAJOR < 5)                     // TODO Check
-    nResult = sString.toWCharArray(pWString);  // TODO
-    // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Zc:wchar_t-")
-#else
-    nResult = sString.toWCharArray(pWString);
-#endif
+qint32 XBinary::_toWCharArray(const QString &sString, wchar_t *pWString, qint32 nCapacity)
+{
+    if (!pWString || (nCapacity <= 0) || (sString.size() >= nCapacity)) {
+        return 0;
+    }
 
+    const qint32 nResult = sString.toWCharArray(pWString);
+    if ((nResult < 0) || (nResult >= nCapacity)) {
+        pWString[0] = 0;
+        return 0;
+    }
+
+    pWString[nResult] = 0;
     return nResult;
 }
 
@@ -16640,9 +18458,23 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSi
 {
     QList<SIGNATURE_RECORD> listResult;
 
-    qint32 nSignatureSize = sSignature.size();
+    bool bValidLocal = true;
+    if (!pbValid) {
+        pbValid = &bValidLocal;
+    }
+    *pbValid = true;
 
-    for (qint32 i = 0; i < nSignatureSize;) {
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        *pbValid = false;
+        return listResult;
+    }
+
+    qint32 nSignatureSize = sSignature.size();
+    qint32 i = 0;
+
+    for (; (i < nSignatureSize) && isPdStructNotCanceled(pPdStruct);) {
+        const qint32 nPreviousIndex = i;
+        const qint32 nPreviousRecordCount = listResult.count();
         QChar cSymbol = sSignature.at(i);
         QChar cSymbol2;
 
@@ -16679,6 +18511,36 @@ QList<XBinary::SIGNATURE_RECORD> XBinary::getSignatureRecords(const QString &sSi
                 break;
             }
         }
+
+        if (i <= nPreviousIndex) {
+            *pbValid = false;
+            break;
+        }
+
+        if (*pbValid) {
+            if (listResult.count() != (nPreviousRecordCount + 1)) {
+                *pbValid = false;
+                break;
+            }
+
+            const SIGNATURE_RECORD &record = listResult.constLast();
+            const qint32 nConsumed = i - nPreviousIndex;
+            if (((record.st == ST_COMPAREBYTES) && (record.baData.isEmpty() || ((nConsumed & 1) != 0))) ||
+                (((record.st == ST_SKIP) || (record.st == ST_NOTNULL)) && ((record.nWindowSize <= 0) || ((nConsumed & 1) != 0))) ||
+                (((record.st == ST_ANSI) || (record.st == ST_NOTANSI) || (record.st == ST_NOTANSIANDNULL) || (record.st == ST_ANSINUMBER)) &&
+                 (record.nWindowSize <= 0)) ||
+                ((record.st == ST_FINDBYTES) && (record.baData.isEmpty() || (record.nFindDelta <= 0))) ||
+                (((record.st == ST_RELOFFSET) || (record.st == ST_ADDRESS)) &&
+                 (record.nSizeOfAddr != 1) && (record.nSizeOfAddr != 2) && (record.nSizeOfAddr != 4) && (record.nSizeOfAddr != 8))) {
+                *pbValid = false;
+                break;
+            }
+        }
+    }
+
+    if (!isPdStructNotCanceled(pPdStruct) || (i != nSignatureSize) || !*pbValid) {
+        *pbValid = false;
+        listResult.clear();
     }
 
     return listResult;
@@ -16688,14 +18550,19 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 {
     const qint64 fileSize = getSize();
 
+    if (!pMemoryMap || !pListSignatureRecords || (fileSize < 0) || (nOffset < 0) || (nOffset > fileSize) ||
+        !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
     const int nNumberOfSignatures = pListSignatureRecords->count();
-    for (int i = 0; i < nNumberOfSignatures; ++i) {
+    for (int i = 0; (i < nNumberOfSignatures) && isPdStructNotCanceled(pPdStruct); ++i) {
         const SIGNATURE_RECORD &rec = pListSignatureRecords->at(i);
 
         switch (rec.st) {
             case ST_COMPAREBYTES: {
                 qint32 need = rec.baData.size();
-                if (need <= 0 || (nOffset < 0) || (nOffset + need > fileSize)) return false;
+                if ((need <= 0) || (nOffset < 0) || (nOffset > fileSize) || (need > (fileSize - nOffset))) return false;
 
                 if (m_pConstMemory) {
                     const char *src = ((const char *)m_pConstMemory) + nOffset;
@@ -16714,7 +18581,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             case ST_NOTANSIANDNULL:
             case ST_ANSINUMBER: {
                 const int need = rec.nWindowSize;
-                if (need <= 0 || (nOffset < 0) || (nOffset + need > fileSize)) return false;
+                if ((need <= 0) || (nOffset < 0) || (nOffset > fileSize) || (need > (fileSize - nOffset))) return false;
 
                 if (m_pConstMemory) {
                     char *ptr = ((char *)m_pConstMemory) + nOffset;
@@ -16740,20 +18607,26 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
             } break;
 
             case ST_FINDBYTES: {
+                if ((rec.nFindDelta < 0) || rec.baData.isEmpty() ||
+                    (rec.nFindDelta > (std::numeric_limits<qint64>::max)() - rec.baData.size())) return false;
                 const qint64 limit = rec.nFindDelta + rec.baData.size();
+                if ((nOffset < 0) || (nOffset > fileSize) || (limit > (fileSize - nOffset))) return false;
                 qint64 where = find_byteArray(nOffset, limit, rec.baData, pPdStruct);
-                if (where == -1) return false;
+                if ((where < 0) || (where > fileSize) || (rec.baData.size() > (fileSize - where))) return false;
                 nOffset = where + rec.baData.size();
             } break;
 
             case ST_SKIP: {
                 const qint64 add = rec.nWindowSize;
-                if (add < 0 || (nOffset + add > fileSize)) return false;
+                if ((add < 0) || (nOffset < 0) || (nOffset > fileSize) || (add > (fileSize - nOffset))) return false;
                 nOffset += add;
             } break;
 
             case ST_RELOFFSET: {
                 qint64 nValue = 0;
+
+                if ((rec.nSizeOfAddr != 1) && (rec.nSizeOfAddr != 2) && (rec.nSizeOfAddr != 4) && (rec.nSizeOfAddr != 8)) return false;
+                if ((nOffset < 0) || (nOffset > fileSize) || ((qint64)rec.nSizeOfAddr > (fileSize - nOffset))) return false;
 
                 if (pMemoryMap->fileType == FT_AMIGAHUNK) {
                     switch (rec.nSizeOfAddr) {
@@ -16766,9 +18639,15 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 } else {
                     switch (rec.nSizeOfAddr) {
                         case 1: nValue = 1 + read_int8(nOffset); break;
-                        case 2: nValue = 2 + read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
-                        case 4: nValue = 4 + read_int32(nOffset, isBigEndian(pMemoryMap)); break;
-                        case 8: nValue = 8 + read_int64(nOffset, isBigEndian(pMemoryMap)); break;
+                        case 2: {
+                            if (!_addSignedOffset(read_int16(nOffset, isBigEndian(pMemoryMap)), 2, &nValue)) return false;
+                        } break;
+                        case 4: {
+                            if (!_addSignedOffset(read_int32(nOffset, isBigEndian(pMemoryMap)), 4, &nValue)) return false;
+                        } break;
+                        case 8: {
+                            if (!_addSignedOffset(read_int64(nOffset, isBigEndian(pMemoryMap)), 8, &nValue)) return false;
+                        } break;
                         default: return false;
                     }
                 }
@@ -16776,16 +18655,19 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
                 if ((pMemoryMap->fileType == FT_COM) || (pMemoryMap->fileType == FT_MSDOS)) {
                     const qint64 _nOffset = nOffset & 0xFFFF0000;
                     const qint64 _nDelta = nOffset & 0xFFFF;
-                    nOffset = _nOffset + ((_nDelta + nValue) & 0xFFFF);
+                    nOffset = _nOffset + (quint16)((quint16)_nDelta + (quint16)nValue);
                 } else {
-                    XADDR _nAddress = offsetToAddress(pMemoryMap, nOffset);
-                    _nAddress += nValue;
-                    nOffset = addressToOffset(pMemoryMap, _nAddress);
+                    const XADDR nBaseAddress = offsetToAddress(pMemoryMap, nOffset);
+                    XADDR nTargetAddress = (XADDR)-1;
+                    if (!_addSignedAddress(nBaseAddress, nValue, &nTargetAddress)) return false;
+                    nOffset = addressToOffset(pMemoryMap, nTargetAddress);
                 }
             } break;
 
             case ST_ADDRESS: {
                 XADDR _nAddress = 0;
+                if ((rec.nSizeOfAddr != 1) && (rec.nSizeOfAddr != 2) && (rec.nSizeOfAddr != 4) && (rec.nSizeOfAddr != 8)) return false;
+                if ((nOffset < 0) || (nOffset > fileSize) || ((qint64)rec.nSizeOfAddr > (fileSize - nOffset))) return false;
                 switch (rec.nSizeOfAddr) {
                     case 1: _nAddress = read_uint8(nOffset); break;
                     case 2: _nAddress = read_uint16(nOffset, isBigEndian(pMemoryMap)); break;
@@ -16796,12 +18678,14 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
 
                 if (pMemoryMap->fileType == FT_MSDOS) {
                     if (rec.nSizeOfAddr == 2) {
-                        _nAddress += pMemoryMap->nCodeBase;
-                        nOffset = addressToOffset(pMemoryMap, _nAddress);
+                        XADDR nTargetAddress = (XADDR)-1;
+                        if (!_addSignedAddress(_nAddress, pMemoryMap->nCodeBase, &nTargetAddress)) return false;
+                        nOffset = addressToOffset(pMemoryMap, nTargetAddress);
                     } else if (rec.nSizeOfAddr == 4) {
                         quint16 nLow = (quint16)_nAddress;
                         quint16 nHigh = (quint16)(_nAddress >> 16);
-                        nOffset = pMemoryMap->nStartLoadOffset + getSegmentAddress(nHigh, nLow);
+                        if ((pMemoryMap->nStartLoadOffset < 0) ||
+                            !_addSignedOffset(pMemoryMap->nStartLoadOffset, (qint64)getSegmentAddress(nHigh, nLow), &nOffset)) return false;
                     }
                 } else {
                     nOffset = addressToOffset(pMemoryMap, _nAddress);
@@ -16814,7 +18698,7 @@ bool XBinary::_compareSignature(_MEMORY_MAP *pMemoryMap, QList<XBinary::SIGNATUR
         }
     }
 
-    return true;
+    return isPdStructNotCanceled(pPdStruct);
 }
 
 qint32 XBinary::_getSignatureSkip(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
@@ -16830,7 +18714,7 @@ qint32 XBinary::_getSignatureSkip(QList<XBinary::SIGNATURE_RECORD> *pListSignatu
         }
     }
 
-    if (nResult) {
+    if (nResult && ((nResult & 1) == 0)) {
         SIGNATURE_RECORD record = {};
 
         record.st = XBinary::ST_SKIP;
@@ -16856,7 +18740,7 @@ qint32 XBinary::_getSignatureNotNull(QList<SIGNATURE_RECORD> *pListSignatureReco
         }
     }
 
-    if (nResult) {
+    if (nResult && ((nResult & 1) == 0)) {
         SIGNATURE_RECORD record = {};
 
         record.st = XBinary::ST_NOTNULL;
@@ -17000,7 +18884,7 @@ qint32 XBinary::_getSignatureDelta(QList<XBinary::SIGNATURE_RECORD> *pListSignat
             record.nSizeOfAddr = 0;
             record.nWindowSize = 0;
             record.baData = _listSignatureRecords.at(0).baData;
-            record.nFindDelta = 32 * nResult;
+            record.nFindDelta = (qint64)32 * nResult;
 
             pListSignatureRecords->append(record);
 
@@ -17025,11 +18909,13 @@ qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSi
         }
     }
 
-    if (nResult) {
+    const qint32 nSizeOfAddr = nResult / 2;
+    if (nResult && ((nResult & 1) == 0) &&
+        ((nSizeOfAddr == 1) || (nSizeOfAddr == 2) || (nSizeOfAddr == 4) || (nSizeOfAddr == 8))) {
         SIGNATURE_RECORD record = {};
 
         record.st = XBinary::ST_RELOFFSET;
-        record.nSizeOfAddr = nResult / 2;
+        record.nSizeOfAddr = nSizeOfAddr;
         record.nWindowSize = 0;
 
         pListSignatureRecords->append(record);
@@ -17040,37 +18926,44 @@ qint32 XBinary::_getSignatureRelOffset(QList<XBinary::SIGNATURE_RECORD> *pListSi
 
 qint32 XBinary::_getSignatureAddress(QList<XBinary::SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex)
 {
-    qint32 nResult = 0;
+    const qint32 nSignatureSize = sSignature.size();
+    qint32 i = nStartIndex;
+    while ((i < nSignatureSize) && (sSignature.at(i) == QChar('#'))) {
+        ++i;
+    }
 
-    qint32 nSignatureSize = sSignature.size();
+    const qint32 nNumberOfAddressSymbols = i - nStartIndex;
     QString sBaseAddress;
-    bool bIsBaseAddress = false;
-    qint32 nSizeOfAddress = 0;
-
-    for (qint32 i = nStartIndex; i < nSignatureSize; i++) {
-        if (sSignature.at(i) == QChar('#')) {
-            nResult++;
-            nSizeOfAddress++;
-        } else if (sSignature.at(i) == QChar('[')) {
-            nResult++;
-            bIsBaseAddress = true;
-        } else if (sSignature.at(i) == QChar(']')) {
-            nResult++;
-            bIsBaseAddress = false;
-        } else if (bIsBaseAddress) {
-            nResult++;
-            sBaseAddress.append(sSignature.at(i));
+    bool bBaseAddressValid = true;
+    if ((i < nSignatureSize) && (sSignature.at(i) == QChar('['))) {
+        const qint32 nBaseStart = ++i;
+        while ((i < nSignatureSize) && (sSignature.at(i) != QChar(']'))) {
+            const QChar c = sSignature.at(i);
+            if (!((c >= QChar('0')) && (c <= QChar('9'))) && !((c >= QChar('a')) && (c <= QChar('f')))) {
+                bBaseAddressValid = false;
+            }
+            ++i;
+        }
+        if ((i >= nSignatureSize) || (i == nBaseStart)) {
+            bBaseAddressValid = false;
         } else {
-            break;
+            sBaseAddress = sSignature.mid(nBaseStart, i - nBaseStart);
+            ++i;
         }
     }
 
-    if (nResult) {
+    const qint32 nResult = i - nStartIndex;
+    const qint32 nSizeOfAddress = nNumberOfAddressSymbols / 2;
+    bool bBaseConversionValid = true;
+    const XADDR nBaseAddress = sBaseAddress.isEmpty() ? 0 : sBaseAddress.toULongLong(&bBaseConversionValid, 16);
+
+    if (nResult && bBaseAddressValid && bBaseConversionValid && ((nNumberOfAddressSymbols & 1) == 0) &&
+        ((nSizeOfAddress == 1) || (nSizeOfAddress == 2) || (nSizeOfAddress == 4) || (nSizeOfAddress == 8))) {
         SIGNATURE_RECORD record = {};
 
         record.st = XBinary::ST_ADDRESS;
-        record.nSizeOfAddr = nSizeOfAddress / 2;
-        record.nBaseAddress = sBaseAddress.toInt(0, 16);
+        record.nSizeOfAddr = nSizeOfAddress;
+        record.nBaseAddress = nBaseAddress;
 
         pListSignatureRecords->append(record);
     }
@@ -17099,7 +18992,7 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
         }
     }
 
-    if (nResult) {
+    if (nResult && ((nResult & 1) == 0)) {
         SIGNATURE_RECORD record = {};
 
         record.st = XBinary::ST_COMPAREBYTES;
@@ -17108,6 +19001,8 @@ qint32 XBinary::_getSignatureBytes(QList<XBinary::SIGNATURE_RECORD> *pListSignat
         record.nWindowSize = record.baData.size();
 
         pListSignatureRecords->append(record);
+    } else if (nResult) {
+        *pbValid = false;
     }
 
     if (!(*pbValid)) {
@@ -17158,6 +19053,16 @@ qint64 XBinary::getPhysSize(char *pBuffer, qint64 nSize)
 
 bool XBinary::isEmptyData(char *pBuffer, qint64 nSize)  // TODO dwords
 {
+    if (nSize < 0) {
+        return false;
+    }
+    if (nSize == 0) {
+        return true;
+    }
+    if (!pBuffer) {
+        return false;
+    }
+
     bool bResult = true;
 
     for (qint64 i = 0; i < nSize; i++) {
@@ -17240,6 +19145,83 @@ bool XBinary::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *
     }
 
     return unpack(pDevice, pPdStruct);
+}
+
+bool XBinary::writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const char *pData, qint64 nSize, PDSTRUCT *pPdStruct)
+{
+    if (!pState) {
+        return false;
+    }
+
+    // The offset describes this invocation, including preflight failures.
+    // Never leave a successful preceding record's byte count visible.
+    pState->nCurrentOffset = 0;
+
+    if (!pDevice || !pDevice->isWritable() || (nSize < 0) || ((nSize > 0) && !pData) || !isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
+    const bool bSeekableOutput = !pDevice->isSequential();
+
+    // Exact replacement and rollback both require truncation.  A custom
+    // random-access QIODevice may implement seek()/write() but provide no
+    // resize operation; reject it before the first byte instead of promising
+    // rollback and leaving a partial result on failure.
+    if (bSeekableOutput && !isResizeEnable(pDevice)) {
+        return false;
+    }
+    auto failOutput = [&]() -> bool {
+        if (bSeekableOutput) {
+            resize(pDevice, 0);
+            pDevice->seek(0);
+        }
+        pState->nCurrentOffset = 0;
+        return false;
+    };
+
+    if (bSeekableOutput) {
+        if (!pDevice->seek(0)) {
+            return false;
+        }
+
+        // A reused seekable output must not retain a tail from the preceding
+        // record.  Refuse devices that cannot provide the required truncate
+        // operation instead of reporting a corrupt output as successful.
+        if ((pDevice->size() != 0) && (!resize(pDevice, 0) || !pDevice->seek(0))) {
+            return false;
+        }
+    }
+
+    qint64 nWrittenTotal = 0;
+
+    while (nWrittenTotal < nSize) {
+        if (!isPdStructNotCanceled(pPdStruct)) {
+            return failOutput();
+        }
+
+        const qint64 nChunkSize = qMin<qint64>(1ll << 20, nSize - nWrittenTotal);
+        const qint64 nWritten = pDevice->write(pData + nWrittenTotal, nChunkSize);
+
+        // Positive short writes are legal for QIODevice.  Keep draining the
+        // requested data and reject only errors, stalls, or impossible counts.
+        if ((nWritten <= 0) || (nWritten > nChunkSize)) {
+            return failOutput();
+        }
+
+        nWrittenTotal += nWritten;
+        pState->nCurrentOffset = nWrittenTotal;
+    }
+
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return failOutput();
+    }
+
+    return true;
+}
+
+bool XBinary::writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const QByteArray &baData, PDSTRUCT *pPdStruct)
+{
+    return writeUnpackData(pState, pDevice, baData.constData(), baData.size(), pPdStruct);
 }
 
 bool XBinary::moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
@@ -17334,7 +19316,7 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
 {
     bool bResult = false;
 
-    if (!pOutDevice) {
+    if (!pOutDevice || !pOutDevice->isWritable()) {
         return false;
     }
 
@@ -17344,11 +19326,27 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
         pPdStruct = &pdStructEmpty;
     }
 
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+
     UNPACK_STATE state = {};
 
     if (initUnpack(&state, mapProperties, pPdStruct)) {
         state.mapUnpackProperties = mapProperties;
+
+        if ((state.nCurrentIndex < 0) || (state.nNumberOfRecords <= 0) ||
+            (state.nCurrentIndex >= state.nNumberOfRecords) || !isPdStructNotCanceled(pPdStruct)) {
+            finishUnpack(&state, nullptr);
+            return false;
+        }
+
         ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+        if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
+            (state.nNumberOfRecords <= 0) || (state.nCurrentIndex >= state.nNumberOfRecords)) {
+            finishUnpack(&state, nullptr);
+            return false;
+        }
         CRC_TYPE crcType = (CRC_TYPE)record.mapProperties.value(FPART_PROP_CRC_TYPE, CRC_TYPE_UNKNOWN).toUInt();
         bool bCheckCRC = isUnpackCRCEnabled(mapProperties, crcType) && (crcType != CRC_TYPE_UNKNOWN) && record.mapProperties.contains(FPART_PROP_RESULTCRC);
         QIODevice *pWorkDevice = pOutDevice;
@@ -17394,8 +19392,25 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
                     }
                 }
 
-                QByteArray baBuffer(getBufferSize(pPdStruct), 0);
+                const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+                QByteArray baBuffer;
+                if (nRequestedBufferSize <= 0) {
+                    bResult = false;
+                } else {
+                    const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+                    try {
+                        baBuffer.resize(nBufferSize);
+                    } catch (const std::bad_alloc &) {
+                        bResult = false;
+                    }
+                    if (baBuffer.size() != nBufferSize) {
+                        bResult = false;
+                    }
+                }
                 qint64 nRemaining = pCRCBuffer->size();
+                if (nRemaining < 0) {
+                    bResult = false;
+                }
 
                 while (bResult && (nRemaining > 0) && isPdStructNotCanceled(pPdStruct)) {
                     qint64 nChunkSize = qMin(nRemaining, (qint64)baBuffer.size());
@@ -17440,7 +19455,12 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
 
         freeFileBuffer(&pCRCBuffer);
 
-        finishUnpack(&state, nullptr);
+        const bool bFinished = finishUnpack(&state, nullptr);
+        bResult = bResult && bFinished && isPdStructNotCanceled(pPdStruct);
+        if (!bResult && !pOutDevice->isSequential()) {
+            resize(pOutDevice, 0);
+            pOutDevice->seek(0);
+        }
     }
 
     return bResult;
@@ -17454,6 +19474,10 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
+    }
+
+    if (!isPdStructNotCanceled(pPdStruct)) {
+        return false;
     }
 
     if (!sFolderName.isEmpty()) {
@@ -17662,14 +19686,30 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
         if (initUnpack(&state, mapEffectiveProperties, pPdStruct)) {
             state.mapUnpackProperties = mapEffectiveProperties;
+
+            if ((state.nCurrentIndex < 0) || (state.nNumberOfRecords < 0) ||
+                (state.nCurrentIndex > state.nNumberOfRecords)) {
+                finishUnpack(&state, nullptr);
+                return false;
+            }
+            if (state.nCurrentIndex == state.nNumberOfRecords) {
+                return finishUnpack(&state, nullptr) && isPdStructNotCanceled(pPdStruct);
+            }
+
             bResult = true;
+            bool bContinue = false;
 
             do {
                 if (isPdStructNotCanceled(pPdStruct)) {
                     ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
 
+                    if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
+                        (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+                        bResult = false;
+                        break;
+                    }
+
                     QString sFileName = record.mapProperties.value(FPART_PROP_ORIGINALNAME).toString();
-                    qint64 nFileSize = record.mapProperties.value(FPART_PROP_UNCOMPRESSEDSIZE).toLongLong();
 
                     // Check if this is a directory entry (ends with '/' and has zero size)
                     bool bIsDirectory = sFileName.endsWith(QLatin1Char('/')) || record.mapProperties.value(FPART_PROP_ISFOLDER).toBool();
@@ -17872,22 +19912,57 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                         QSaveFile outputFile(sFilePath);
 
                                         if (outputFile.open(QIODevice::WriteOnly)) {
-                                            qint32 nBufferSize = getBufferSize(pPdStruct);
-                                            QByteArray baBuffer(nBufferSize, 0);
-
-                                            while (bResult && isPdStructNotCanceled(pPdStruct)) {
-                                                qint64 nRead = temporaryFile.read(baBuffer.data(), baBuffer.size());
-
-                                                if (nRead < 0) {
+                                            const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+                                            QByteArray baBuffer;
+                                            if (nRequestedBufferSize <= 0) {
+                                                bResult = false;
+                                            } else {
+                                                const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
+                                                try {
+                                                    baBuffer.resize(nBufferSize);
+                                                } catch (const std::bad_alloc &) {
                                                     bResult = false;
-                                                } else if (nRead == 0) {
-                                                    break;
-                                                } else if (outputFile.write(baBuffer.constData(), nRead) != nRead) {
+                                                }
+                                                if (baBuffer.size() != nBufferSize) {
                                                     bResult = false;
                                                 }
                                             }
 
-                                            if (bResult && isPdStructNotCanceled(pPdStruct)) {
+                                            const qint64 nVerifiedSize = temporaryFile.size();
+                                            qint64 nRemaining = nVerifiedSize;
+                                            if (nRemaining < 0) {
+                                                bResult = false;
+                                            }
+
+                                            while (bResult && (nRemaining > 0) && isPdStructNotCanceled(pPdStruct)) {
+                                                const qint64 nToRead = qMin(nRemaining, (qint64)baBuffer.size());
+                                                const qint64 nRead = temporaryFile.read(baBuffer.data(), nToRead);
+
+                                                if ((nRead <= 0) || (nRead > nToRead)) {
+                                                    bResult = false;
+                                                    break;
+                                                }
+
+                                                qint64 nWrittenTotal = 0;
+                                                while (bResult && (nWrittenTotal < nRead) && isPdStructNotCanceled(pPdStruct)) {
+                                                    const qint64 nWritten = outputFile.write(baBuffer.constData() + nWrittenTotal, nRead - nWrittenTotal);
+                                                    if ((nWritten <= 0) || (nWritten > (nRead - nWrittenTotal))) {
+                                                        bResult = false;
+                                                        break;
+                                                    }
+                                                    nWrittenTotal += nWritten;
+                                                }
+
+                                                if (nWrittenTotal != nRead) {
+                                                    bResult = false;
+                                                    break;
+                                                }
+
+                                                nRemaining -= nRead;
+                                            }
+
+                                            if (bResult && (nRemaining == 0) && (temporaryFile.size() == nVerifiedSize) &&
+                                                isPdStructNotCanceled(pPdStruct)) {
                                                 bResult = outputFile.commit();
                                             } else {
                                                 outputFile.cancelWriting();
@@ -17908,32 +19983,25 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                         // Set file datetime if provided by the archive record
                         if (bResult && !bSkipFile) {
                             QVariant vDateTime = record.mapProperties.value(XBinary::FPART_PROP_DATETIME);
-                                if (vDateTime.isValid() && !vDateTime.isNull()) {
-                                    QDateTime dt;
-                                    if (vDateTime.canConvert<QDateTime>()) {
-                                        dt = vDateTime.toDateTime();
-                                    } else if (vDateTime.canConvert<quint64>()) {
-                                        quint64 t = vDateTime.toULongLong();
+                            if (vDateTime.isValid() && !vDateTime.isNull()) {
+                                QDateTime dt;
+                                if (vDateTime.canConvert<QDateTime>()) {
+                                    dt = vDateTime.toDateTime();
+                                } else if (vDateTime.canConvert<quint64>()) {
+                                    quint64 t = vDateTime.toULongLong();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-                                        if (t <= (quint64)(std::numeric_limits<qint64>::max)()) {
-                                            dt = QDateTime::fromSecsSinceEpoch((qint64)t);
-                                        }
+                                    dt = QDateTime::fromSecsSinceEpoch((qint64)t);
 #else
-                                        if (t <= (quint64)((std::numeric_limits<qint64>::max)() / 1000)) {
-                                            dt = QDateTime::fromMSecsSinceEpoch((qint64)t * 1000);
-                                        }
+                                    dt = QDateTime::fromMSecsSinceEpoch((qint64)t * 1000);
 #endif
-                                    } else if (vDateTime.canConvert<qint64>()) {
-                                        qint64 t = vDateTime.toLongLong();
+                                } else if (vDateTime.canConvert<qint64>()) {
+                                    qint64 t = vDateTime.toLongLong();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-                                        dt = QDateTime::fromSecsSinceEpoch(t);
+                                    dt = QDateTime::fromSecsSinceEpoch(t);
 #else
-                                        if ((t >= ((std::numeric_limits<qint64>::min)() / 1000)) &&
-                                            (t <= ((std::numeric_limits<qint64>::max)() / 1000))) {
-                                            dt = QDateTime::fromMSecsSinceEpoch(t * 1000);
-                                        }
+                                    dt = QDateTime::fromMSecsSinceEpoch(t * 1000);
 #endif
-                                    }
+                                }
 
                                 if (dt.isValid()) {
                                     XBinary::setFileDateTime(sFilePath, dt);
@@ -17949,9 +20017,28 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                     break;
                 }
 
-            } while (moveToNext(&state, pPdStruct));
+                const qint32 nPreviousIndex = state.nCurrentIndex;
+                bContinue = moveToNext(&state, pPdStruct);
 
-            finishUnpack(&state, nullptr);
+                if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
+                    (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+                    bResult = false;
+                    break;
+                }
+                if (bContinue) {
+                    if (state.nCurrentIndex <= nPreviousIndex) {
+                        bResult = false;
+                        break;
+                    }
+                } else if ((nPreviousIndex + 1) < state.nNumberOfRecords) {
+                    bResult = false;
+                    break;
+                }
+
+            } while (bContinue);
+
+            const bool bFinished = finishUnpack(&state, nullptr);
+            bResult = bResult && bFinished && isPdStructNotCanceled(pPdStruct);
         }
     }
 
@@ -18243,7 +20330,7 @@ qint32 XBinary::getFileBufferSize(PDSTRUCT *pPdStruct)
     qint32 nResult = 0x1000000;
 
     if (pPdStruct) {
-        if (pPdStruct->nFileBufferSize) {
+        if (pPdStruct->nFileBufferSize > 0) {
             nResult = pPdStruct->nFileBufferSize;
         }
     }
@@ -18259,39 +20346,35 @@ qint32 XBinary::getFileBufferSize(PDSTRUCT *pPdStruct)
 
 QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
 {
-    if (nSize < 0) return nullptr;
+    Q_UNUSED(pPdStruct)
+    QIODevice *pResult = nullptr;
 
-    qint32 nFileBufferSize = pPdStruct ? pPdStruct->nFileBufferSize : 0;
+    qint32 nFileBufferSize = pPdStruct ? pPdStruct->nFileBufferSize.loadAcquire() : 0;
     if (nFileBufferSize <= 0) nFileBufferSize = 0x1000000;  // 16 MB
 
     if (nSize < nFileBufferSize) {
-        QBuffer *pBuffer = new (std::nothrow) QBuffer();
-        if (!pBuffer) return nullptr;
+        QBuffer *pBuffer = new QBuffer();
 
-        try {
-            pBuffer->buffer().fill('\0', (qint32)nSize);
-        } catch (const std::bad_alloc &) {
+        if (pBuffer->open(QIODevice::ReadWrite)) {
+            QByteArray ba(nSize, '\0');
+            pBuffer->write(ba);
+            pBuffer->seek(0);  // FIX: Reset position to beginning after pre-allocating
+            pResult = pBuffer;
+            pResult->setProperty("Memory", (quint64)pBuffer->buffer().constData());
+        } else {
             delete pBuffer;
-            return nullptr;
         }
-
-        if (!pBuffer->open(QIODevice::ReadWrite) || !pBuffer->seek(0) || (pBuffer->size() != nSize)) {
-            delete pBuffer;
-            return nullptr;
+    } else {
+        QTemporaryFile *pTempFile = new QTemporaryFile();
+        if (pTempFile->open()) {
+            pTempFile->resize(nSize);
+            pResult = pTempFile;
+        } else {
+            delete pTempFile;
         }
-
-        pBuffer->setProperty("Memory", (quint64)pBuffer->buffer().constData());
-        return pBuffer;
     }
 
-    QTemporaryFile *pTempFile = new (std::nothrow) QTemporaryFile();
-    if (!pTempFile) return nullptr;
-    if (!pTempFile->open() || !pTempFile->resize(nSize) || !pTempFile->seek(0) || (pTempFile->size() != nSize)) {
-        delete pTempFile;
-        return nullptr;
-    }
-
-    return pTempFile;
+    return pResult;
 }
 
 void XBinary::freeFileBuffer(QIODevice **ppBuffer)
@@ -18320,6 +20403,110 @@ QString XBinary::getArchiveRecordComment(const ARCHIVERECORD &record)
     return sResult;
 }
 
+// 7-Zip prints dictionary/size values compactly: an exact power of two 2^n is
+// shown as the exponent n, otherwise the value with a k/m/g suffix.
+static QString _sizeValueToString(quint32 nVal)
+{
+    for (quint32 i = 0; i <= 31; i++) {
+        if (((quint32)1 << i) == nVal) {
+            return QString::number(i);
+        }
+    }
+
+    QChar cSuffix;
+
+    if ((nVal % (1u << 30)) == 0) {
+        cSuffix = QChar('g');
+        nVal >>= 30;
+    } else if ((nVal % (1u << 20)) == 0) {
+        cSuffix = QChar('m');
+        nVal >>= 20;
+    } else if ((nVal % (1u << 10)) == 0) {
+        cSuffix = QChar('k');
+        nVal >>= 10;
+    }
+
+    QString sResult = QString::number(nVal);
+
+    if (!cSuffix.isNull()) {
+        sResult += cSuffix;
+    }
+
+    return sResult;
+}
+
+// RAR/WinRAR print the dictionary with a byte-size suffix (e.g. "128k", "4m"),
+// never as a bare power-of-two exponent. Used for window-size based coders.
+static QString _sizeSuffixString(quint64 nVal)
+{
+    QChar cSuffix;
+
+    if ((nVal >= (Q_UINT64_C(1) << 30)) && ((nVal % (Q_UINT64_C(1) << 30)) == 0)) {
+        cSuffix = QChar('g');
+        nVal >>= 30;
+    } else if ((nVal >= (Q_UINT64_C(1) << 20)) && ((nVal % (Q_UINT64_C(1) << 20)) == 0)) {
+        cSuffix = QChar('m');
+        nVal >>= 20;
+    } else if ((nVal >= (Q_UINT64_C(1) << 10)) && ((nVal % (Q_UINT64_C(1) << 10)) == 0)) {
+        cSuffix = QChar('k');
+        nVal >>= 10;
+    }
+
+    QString sResult = QString::number(nVal);
+
+    if (!cSuffix.isNull()) {
+        sResult += cSuffix;
+    }
+
+    return sResult;
+}
+
+static bool _isWindowDictMethod(XBinary::HANDLE_METHOD handleMethod)
+{
+    return (handleMethod == XBinary::HANDLE_METHOD_RAR_15) || (handleMethod == XBinary::HANDLE_METHOD_RAR_20) ||
+           (handleMethod == XBinary::HANDLE_METHOD_RAR_29) || (handleMethod == XBinary::HANDLE_METHOD_RAR_50) ||
+           (handleMethod == XBinary::HANDLE_METHOD_RAR_70);
+}
+
+QString XBinary::getCoderParamsString(HANDLE_METHOD handleMethod, const QByteArray &baProperties)
+{
+    QString sResult;
+
+    if (handleMethod == HANDLE_METHOD_LZMA2) {
+        // LZMA2 dictionary size is one property byte:
+        //   b > 40 invalid; b == 40 -> 4 GiB-1; else (2 | (b & 1)) << (b/2 + 11)
+        if (baProperties.size() >= 1) {
+            quint8 nByte = (quint8)baProperties.at(0);
+
+            if (nByte < 40) {
+                quint32 nDict = (2u | (nByte & 1u)) << ((nByte / 2) + 11);
+                sResult = _sizeValueToString(nDict);
+            } else if (nByte == 40) {
+                sResult = _sizeValueToString(0xFFFFFFFFu);
+            }
+        }
+    } else if (handleMethod == HANDLE_METHOD_LZMA) {
+        // LZMA properties: byte 0 packs lc/lp/pb, bytes 1..4 are the LE dict size.
+        if (baProperties.size() >= 5) {
+            quint32 nDict = (quint8)baProperties.at(1) | ((quint32)(quint8)baProperties.at(2) << 8) | ((quint32)(quint8)baProperties.at(3) << 16) |
+                            ((quint32)(quint8)baProperties.at(4) << 24);
+            sResult = _sizeValueToString(nDict);
+
+            quint32 nEncoded = (quint8)baProperties.at(0);
+            quint32 nLc = nEncoded % 9;
+            nEncoded /= 9;
+            quint32 nLp = nEncoded % 5;
+            quint32 nPb = nEncoded / 5;
+
+            if ((nLc != 3) || (nLp != 0) || (nPb != 2)) {
+                sResult += QString(":lc%1:lp%2:pb%3").arg(nLc).arg(nLp).arg(nPb);
+            }
+        }
+    }
+
+    return sResult;
+}
+
 QString XBinary::getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties)
 {
     QString sResult;
@@ -18330,11 +20517,35 @@ QString XBinary::getHandleMethods(const QMap<FPART_PROP, QVariant> &mapPropertie
     // QString sHandleMethod3 = handleMethodToString(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD3).toULongLong());
 
     if (handleMethod2 != HANDLE_METHOD_UNKNOWN) {
-        sResult = appendText(sResult, handleMethodToString(handleMethod2), "/");
+        QString sMethod2 = handleMethodToString(handleMethod2);
+        QString sParams2 = getCoderParamsString(handleMethod2, mapProperties.value(XBinary::FPART_PROP_COMPRESSPROPERTIES2).toByteArray());
+
+        if (!sParams2.isEmpty()) {
+            sMethod2 += QString(":") + sParams2;
+        }
+
+        sResult = appendText(sResult, sMethod2, "/");
     }
 
     if (handleMethod != HANDLE_METHOD_UNKNOWN) {
-        sResult = appendText(sResult, handleMethodToString(handleMethod), "/");
+        QString sMethod = handleMethodToString(handleMethod);
+        QString sParams = getCoderParamsString(handleMethod, mapProperties.value(XBinary::FPART_PROP_COMPRESSPROPERTIES).toByteArray());
+
+        // RAR (and other window-based coders) store the dictionary as a window
+        // size rather than coder property bytes (UnRAR shows this as -md=128k).
+        if (sParams.isEmpty() && _isWindowDictMethod(handleMethod)) {
+            quint64 nWindowSize = mapProperties.value(XBinary::FPART_PROP_WINDOWSIZE).toULongLong();
+
+            if (nWindowSize > 0) {
+                sParams = _sizeSuffixString(nWindowSize);
+            }
+        }
+
+        if (!sParams.isEmpty()) {
+            sMethod += QString(":") + sParams;
+        }
+
+        sResult = appendText(sResult, sMethod, "/");
     }
 
     return sResult;
@@ -18611,8 +20822,14 @@ static _XFStringRun _countXFUtf16Run(const char *pData, qint64 nSize, qint32 nMa
 
     while (result.nRunBytes + 1 < nEvenSize) {
 #ifdef USE_XSIMD
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
         if (!bIsBigEndian) {
-            qint64 nSimdBytes = xsimd_count_unicode_prefix(pData + result.nRunBytes, nEvenSize - result.nRunBytes);
+            const char *pCurrentData = pData + result.nRunBytes;
+            qint64 nSimdBytes = 0;
+
+            if ((((quintptr)pCurrentData) & (alignof(quint16) - 1)) == 0) {
+                nSimdBytes = xsimd_count_unicode_prefix(pCurrentData, nEvenSize - result.nRunBytes);
+            }
 
             if (nSimdBytes > 0) {
                 qint64 nSimdChars = nSimdBytes / 2;
@@ -18626,6 +20843,7 @@ static _XFStringRun _countXFUtf16Run(const char *pData, qint64 nSize, qint32 nMa
                 continue;
             }
         }
+#endif
 #endif
 
         quint16 nCode = _readXFUInt16(pData + result.nRunBytes, bIsBigEndian);
@@ -18864,7 +21082,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap
     nOffset = osRegion.nOffset;
     nSize = osRegion.nSize;
 
-    if ((nOffset == -1) || (nSize <= 0)) {
+    if ((nOffset == -1) || (nSize <= 0) || !isPdStructNotCanceled(pPdStruct)) {
         return listResult;
     }
 
@@ -18895,6 +21113,10 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap
         nLimit = 0x7FFFFFFF;
     }
 
+    // Keep one extra candidate internally so exact-N results can be
+    // distinguished from real truncation after per-encoding/lane trimming.
+    const qint32 nScanLimit = (nLimit < (std::numeric_limits<qint32>::max)()) ? (nLimit + 1) : nLimit;
+
     const bool bSearchAnsi = ssOptions.bANSI;
     const bool bSearchUtf8 = ssOptions.bUTF8;
     const bool bSearchUtf16 = ssOptions.bUTF16;
@@ -18904,7 +21126,13 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap
         return listResult;
     }
 
-    const qint32 nBufferSize = qBound((qint32)0x10000, getBufferSize(pPdStruct), (qint32)0x100000);
+    const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+
+    if (nRequestedBufferSize <= 0) {
+        return listResult;
+    }
+
+    const qint32 nBufferSize = qBound((qint32)0x10000, nRequestedBufferSize, (qint32)0x100000);
     qint64 nLookBehind = 0;
 
     if (bSearchAnsi) {
@@ -18929,20 +21157,23 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap
         nLookAhead = 0x10000;
     }
 
-    char *pBuffer = new char[nBufferSize + nLookAhead + nLookBehind];
-    bool bReadError = false;
-    qint32 nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-
-    XBinary::setPdStructInit(pPdStruct, nFreeIndex, nSize);
-
-    qint64 nCurrentOffset = nOffset;
-    qint64 nRemainingSize = nSize;
     if (nSize > (std::numeric_limits<qint64>::max)() - nOffset) {
-        delete[] pBuffer;
-        XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
         return listResult;
     }
 
+    const qint64 nAllocationSize = (qint64)nBufferSize + nLookAhead + nLookBehind;
+    char *pBuffer = new (std::nothrow) char[(size_t)nAllocationSize];
+
+    if (!pBuffer) {
+        return listResult;
+    }
+
+    bool bReadError = false;
+    bool bLimitReached = false;
+    qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
+
+    qint64 nCurrentOffset = nOffset;
+    qint64 nRemainingSize = nSize;
     const qint64 nEndOffset = nOffset + nSize;
 
     while ((nRemainingSize > 0) && isPdStructNotCanceled(pPdStruct)) {
@@ -18964,25 +21195,26 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap
 
         const auto mergeEncodingRecords = [&](QVector<MS_RECORD> *pEncodingRecords) {
             listChunkRecords += *pEncodingRecords;
+            bLimitReached = (listChunkRecords.size() > nLimit) || bLimitReached;
             _finalizeBestMSRecords(&listChunkRecords, nLimit);
         };
 
         if (bSearchAnsi) {
             QVector<MS_RECORD> listEncodingRecords;
-            _scanXFByteStrings(&listEncodingRecords, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit, VT_A,
+            _scanXFByteStrings(&listEncodingRecords, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nScanLimit, VT_A,
                                ssOptions.nCodepage);
             mergeEncodingRecords(&listEncodingRecords);
         }
 
         if (bSearchUtf8) {
             QVector<MS_RECORD> listEncodingRecords;
-            _scanXFUtf8Strings(&listEncodingRecords, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit);
+            _scanXFUtf8Strings(&listEncodingRecords, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nScanLimit);
             mergeEncodingRecords(&listEncodingRecords);
         }
 
         const auto scanUtf16Encoding = [&](bool bIsBigEndian) {
             QVector<MS_RECORD> listEncodingRecords;
-            _scanXFUtf16Strings(&listEncodingRecords, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit,
+            _scanXFUtf16Strings(&listEncodingRecords, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nScanLimit,
                                 bIsBigEndian);
             mergeEncodingRecords(&listEncodingRecords);
         };
@@ -19000,7 +21232,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap
 
         const auto scanUtf32Encoding = [&](bool bIsBigEndian) {
             QVector<MS_RECORD> listEncodingRecords;
-            _scanXFUtf32Strings(&listEncodingRecords, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nLimit,
+            _scanXFUtf32Strings(&listEncodingRecords, pMemoryMap, pBuffer, nReadOffset, nReadSize, nEmitStart, nEmitEnd, nMinChars, nMaxChars, nScanLimit,
                                 bIsBigEndian);
             mergeEncodingRecords(&listEncodingRecords);
         };
@@ -19017,6 +21249,7 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap
         }
 
         listResult += listChunkRecords;
+        bLimitReached = (listResult.size() > nLimit) || bLimitReached;
         _finalizeBestMSRecords(&listResult, nLimit);
 
         nCurrentOffset += nMainSize;
@@ -19029,13 +21262,17 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_strings(_MEMORY_MAP *pMemoryMap
 
     if (bReadError) {
         setPdStructErrorString(pPdStruct, tr("Read error"));
-    } else if (listResult.count() >= nLimit) {
-        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(listResult.count())));
+    } else if (bLimitReached) {
+        setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Maximum")).arg(QString::number(nLimit)));
     }
 
     _finalizeBestMSRecords(&listResult, nLimit);
 
     XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
+
+    if (bReadError || !isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+    }
 
     return listResult;
 }

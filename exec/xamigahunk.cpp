@@ -80,7 +80,7 @@ bool XAmigaHunk::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XAmigaHunk xamigahunk(pDevice);
 
-    return xamigahunk.isValid();
+    return xamigahunk.isValid(pPdStruct);
 }
 
 bool XAmigaHunk::_initMemoryMap(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
@@ -645,8 +645,11 @@ bool XAmigaHunk::isExecutable()
 
 QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     QList<FPART> list;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return list;
+    }
 
     QList<HUNK> hunks = getHunks(pPdStruct);
     if (hunks.isEmpty()) return list;
@@ -670,6 +673,7 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
                     r.nVirtualAddress = -1;
                     r.sName = tr("Table");
                     list.append(r);
+                    if ((nLimit != -1) && (list.count() >= nLimit)) return list;
                 }
 
                 quint32 nLongwords = read_uint32(h.nOffset + 4, true);
@@ -696,6 +700,7 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
                     r.nVirtualSize = nMemSize;
                     r.sName = sName;
                     list.append(r);
+                    if ((nLimit != -1) && (list.count() >= nLimit)) return list;
                 }
 
                 currentVA = currentVA + nMemSize;
@@ -710,6 +715,7 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
             r.nVirtualAddress = -1;
             r.sName = structIDToString(hunkTypeToStructId(h.nId));
             list.append(r);
+            if ((nLimit != -1) && (list.count() >= nLimit)) return list;
         }
 
         nMaxOffset = qMax(nMaxOffset, h.nOffset + h.nSize);
@@ -724,6 +730,7 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
             ov.nVirtualAddress = -1;
             ov.sName = tr("Overlay");
             list.append(ov);
+            if ((nLimit != -1) && (list.count() >= nLimit)) return list;
         }
     }
 

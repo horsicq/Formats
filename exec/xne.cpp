@@ -105,7 +105,7 @@ bool XNE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTR
 {
     XNE xne(pDevice, bIsImage, nModuleAddress);
 
-    return xne.isValid();
+    return xne.isValid(pPdStruct);
 }
 
 XBinary::MODE XNE::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
@@ -1486,10 +1486,12 @@ QList<XBinary::XFRECORD> XNE::getXFRecords(FT fileType, quint32 nStructID, const
 
 QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-
     QList<XBinary::FPART> listResult;
     QList<XBinary::FPART> _listCalc;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     bool bCalcAddress = false;
     if (nFileParts & FILEPART_SEGMENT) {
@@ -1521,6 +1523,7 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         }
         if ((nFileParts & FILEPART_HEADER) && (nImageHeaderSize > 0)) {
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
         nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
     }
@@ -1564,6 +1567,7 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             }
             if (nFileParts & FILEPART_SEGMENT) {
                 listResult.append(record);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             }
 
             nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
@@ -1579,6 +1583,7 @@ QList<XBinary::FPART> XNE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             record.nVirtualAddress = -1;
             record.sName = tr("Overlay");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

@@ -4,6 +4,10 @@ XBinary::XCONVERT _TABLE_XWEBP_STRUCTID[] = {
     {XWEBP::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
 };
 
+namespace {
+const qint32 WEBP_MAX_CHUNK_COUNT = 65536;
+}
+
 XWEBP::XWEBP(QIODevice *pDevice) : XRiff(pDevice)
 {
 }
@@ -13,17 +17,238 @@ XWEBP::~XWEBP()
 
 bool XWEBP::isValid(PDSTRUCT *pPdStruct)
 {
-    if (!XRiff::isValid(pPdStruct)) return false;
-    // WebP uses RIFF container with fourcc "WEBP" at bytes 8..11 (chunk type)
-    // RIFF header: 0..3 = 'RIFF'/'RIFX', 4..7 = size, 8..11 = form type
-    QString form = read_ansiString(8, 4);
-    return (form == "WEBP");
+    const qint64 nTotalSize = getSize();
+
+    if ((nTotalSize < 20) || !XBinary::isPdStructNotCanceled(pPdStruct) || (read_array(0, 4) != QByteArrayLiteral("RIFF")) ||
+        (read_array(8, 4) != QByteArrayLiteral("WEBP"))) {
+        return false;
+    }
+
+    const quint32 nRiffSize = read_uint32(4, false);
+    const qint64 nDeclaredEnd = 8 + (qint64)nRiffSize;
+
+    if ((nRiffSize < 12) || (nDeclaredEnd > nTotalSize)) {
+        return false;
+    }
+
+    auto isValidImageChunk = [this](const QByteArray &baType, qint64 nDataOffset, quint32 nDataSize,
+                                    quint32 *pWidth, quint32 *pHeight, bool *pHasAlpha) {
+        if (pWidth) *pWidth = 0;
+        if (pHeight) *pHeight = 0;
+        if (pHasAlpha) *pHasAlpha = false;
+
+        if (baType == QByteArrayLiteral("VP8 ")) {
+            if ((nDataSize < 10) || ((read_uint8(nDataOffset) & 1) != 0) ||
+                (read_array(nDataOffset + 3, 3) != QByteArray::fromHex("9d012a"))) {
+                return false;
+            }
+            const quint32 nWidth = read_uint16(nDataOffset + 6, false) & 0x3FFF;
+            const quint32 nHeight = read_uint16(nDataOffset + 8, false) & 0x3FFF;
+            if ((nWidth == 0) || (nHeight == 0)) return false;
+            if (pWidth) *pWidth = nWidth;
+            if (pHeight) *pHeight = nHeight;
+            return true;
+        }
+        if (baType == QByteArrayLiteral("VP8L")) {
+            if ((nDataSize < 5) || (read_uint8(nDataOffset) != 0x2F)) return false;
+            const quint32 nBits = read_uint32(nDataOffset + 1, false);
+            if ((nBits >> 29) != 0) return false;
+            if (pWidth) *pWidth = (nBits & 0x3FFF) + 1;
+            if (pHeight) *pHeight = ((nBits >> 14) & 0x3FFF) + 1;
+            if (pHasAlpha) *pHasAlpha = ((nBits >> 28) & 1) != 0;
+            return true;
+        }
+        return false;
+    };
+
+    qint64 nOffset = 12;
+    qint32 nChunkIndex = 0;
+    bool bSimple = false;
+    bool bExtended = false;
+    bool bHasTopImage = false;
+    bool bHasAlpha = false;
+    bool bHasICCP = false;
+    bool bHasEXIF = false;
+    bool bHasXMP = false;
+    bool bHasANIM = false;
+    qint32 nFrameCount = 0;
+    quint8 nFeatureFlags = 0;
+    quint32 nCanvasWidth = 0;
+    quint32 nCanvasHeight = 0;
+
+    while ((nOffset < nDeclaredEnd) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+        if (nChunkIndex >= WEBP_MAX_CHUNK_COUNT) {
+            return false;
+        }
+
+        if (nOffset > nDeclaredEnd - 8) {
+            return false;
+        }
+
+        const QByteArray baChunkType = read_array(nOffset, 4);
+        const quint32 nChunkSize = read_uint32(nOffset + 4, false);
+        const qint64 nChunkExtent = (qint64)nChunkSize + (nChunkSize & 1);
+
+        if (nChunkExtent > nDeclaredEnd - nOffset - 8) {
+            return false;
+        }
+
+        const qint64 nDataOffset = nOffset + 8;
+
+        if (nChunkIndex == 0) {
+            if ((baChunkType != QByteArrayLiteral("VP8 ")) && (baChunkType != QByteArrayLiteral("VP8L")) &&
+                (baChunkType != QByteArrayLiteral("VP8X"))) {
+                return false;
+            }
+            bSimple = (baChunkType == QByteArrayLiteral("VP8 ")) || (baChunkType == QByteArrayLiteral("VP8L"));
+            bExtended = baChunkType == QByteArrayLiteral("VP8X");
+        }
+
+        if ((baChunkType == QByteArrayLiteral("VP8 ")) || (baChunkType == QByteArrayLiteral("VP8L"))) {
+            quint32 nImageWidth = 0;
+            quint32 nImageHeight = 0;
+            bool bImageAlpha = false;
+            if (bHasTopImage || bHasANIM || (nFrameCount != 0) ||
+                !isValidImageChunk(baChunkType, nDataOffset, nChunkSize, &nImageWidth, &nImageHeight, &bImageAlpha)) {
+                return false;
+            }
+            if (bExtended && ((nImageWidth != nCanvasWidth) || (nImageHeight != nCanvasHeight) ||
+                              (bHasAlpha && (baChunkType != QByteArrayLiteral("VP8 "))))) {
+                return false;
+            }
+            bHasTopImage = true;
+            bHasAlpha |= bImageAlpha;
+        } else if (baChunkType == QByteArrayLiteral("VP8X")) {
+            if ((nChunkIndex != 0) || (nChunkSize != 10) || ((read_uint8(nDataOffset) & 0xC1) != 0) ||
+                (read_uint8(nDataOffset + 1) != 0) || (read_uint8(nDataOffset + 2) != 0) || (read_uint8(nDataOffset + 3) != 0)) {
+                return false;
+            }
+            nFeatureFlags = read_uint8(nDataOffset);
+            nCanvasWidth = read_uint24(nDataOffset + 4, false) + 1;
+            nCanvasHeight = read_uint24(nDataOffset + 7, false) + 1;
+        } else if (baChunkType == QByteArrayLiteral("ALPH")) {
+            if (!bExtended || bHasTopImage || bHasANIM || (nFrameCount != 0) || bHasAlpha || (nChunkSize < 1) ||
+                ((read_uint8(nDataOffset) & 0xE3) != 0)) {
+                return false;
+            }
+            bHasAlpha = true;
+        } else if (baChunkType == QByteArrayLiteral("ICCP")) {
+            if (!bExtended || bHasICCP || bHasTopImage || bHasANIM || (nFrameCount != 0) || (nChunkSize == 0)) return false;
+            bHasICCP = true;
+        } else if (baChunkType == QByteArrayLiteral("EXIF")) {
+            if (!bExtended || bHasEXIF || (nChunkSize == 0)) return false;
+            bHasEXIF = true;
+        } else if (baChunkType == QByteArrayLiteral("XMP ")) {
+            if (!bExtended || bHasXMP || (nChunkSize == 0)) return false;
+            bHasXMP = true;
+        } else if (baChunkType == QByteArrayLiteral("ANIM")) {
+            if (!bExtended || bHasANIM || bHasTopImage || bHasAlpha || (nFrameCount != 0) || (nChunkSize != 6) ||
+                ((nFeatureFlags & 0x02) == 0)) {
+                return false;
+            }
+            bHasANIM = true;
+        } else if (baChunkType == QByteArrayLiteral("ANMF")) {
+            if (!bExtended || !bHasANIM || bHasTopImage || (nChunkSize < 16) ||
+                ((read_uint8(nDataOffset + 15) & 0xFC) != 0)) {
+                return false;
+            }
+
+            const quint32 nFrameX = read_uint24(nDataOffset, false) * 2;
+            const quint32 nFrameY = read_uint24(nDataOffset + 3, false) * 2;
+            const quint32 nFrameWidth = read_uint24(nDataOffset + 6, false) + 1;
+            const quint32 nFrameHeight = read_uint24(nDataOffset + 9, false) + 1;
+            if ((nFrameX > nCanvasWidth) || (nFrameY > nCanvasHeight) ||
+                (nFrameWidth > nCanvasWidth - nFrameX) || (nFrameHeight > nCanvasHeight - nFrameY)) {
+                return false;
+            }
+
+            const qint64 nFrameEnd = nDataOffset + nChunkSize;
+            qint64 nFrameOffset = nDataOffset + 16;
+            bool bFrameImage = false;
+            bool bFrameAlpha = false;
+            qint32 nFrameChunkCount = 0;
+
+            while ((nFrameOffset < nFrameEnd) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+                if (nFrameChunkCount++ >= WEBP_MAX_CHUNK_COUNT) {
+                    return false;
+                }
+
+                if (nFrameOffset > nFrameEnd - 8) {
+                    return false;
+                }
+
+                const QByteArray baFrameType = read_array(nFrameOffset, 4);
+                const quint32 nFrameSize = read_uint32(nFrameOffset + 4, false);
+                const qint64 nFrameExtent = (qint64)nFrameSize + (nFrameSize & 1);
+
+                if (nFrameExtent > nFrameEnd - nFrameOffset - 8) {
+                    return false;
+                }
+
+                if (baFrameType == QByteArrayLiteral("ALPH")) {
+                    if (bFrameAlpha || bFrameImage || (nFrameSize < 1) ||
+                        ((read_uint8(nFrameOffset + 8) & 0xE3) != 0)) {
+                        return false;
+                    }
+                    bFrameAlpha = true;
+                } else if ((baFrameType == QByteArrayLiteral("VP8 ")) || (baFrameType == QByteArrayLiteral("VP8L"))) {
+                    quint32 nImageWidth = 0;
+                    quint32 nImageHeight = 0;
+                    bool bImageAlpha = false;
+                    if (bFrameImage || !isValidImageChunk(baFrameType, nFrameOffset + 8, nFrameSize,
+                                                         &nImageWidth, &nImageHeight, &bImageAlpha) ||
+                        (nImageWidth != nFrameWidth) || (nImageHeight != nFrameHeight) ||
+                        (bFrameAlpha && (baFrameType != QByteArrayLiteral("VP8 ")))) {
+                        return false;
+                    }
+                    bFrameImage = true;
+                    bFrameAlpha |= bImageAlpha;
+                } else if ((baFrameType == QByteArrayLiteral("VP8X")) || (baFrameType == QByteArrayLiteral("ANIM")) ||
+                           (baFrameType == QByteArrayLiteral("ANMF")) || (baFrameType == QByteArrayLiteral("ICCP")) ||
+                           (baFrameType == QByteArrayLiteral("EXIF")) || (baFrameType == QByteArrayLiteral("XMP "))) {
+                    return false;
+                }
+
+                nFrameOffset += 8 + nFrameExtent;
+            }
+
+            if (!XBinary::isPdStructNotCanceled(pPdStruct) || !bFrameImage) {
+                return false;
+            }
+            bHasAlpha |= bFrameAlpha;
+            nFrameCount++;
+        }
+
+        nOffset += 8 + nChunkExtent;
+        nChunkIndex++;
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct) || (nOffset != nDeclaredEnd)) {
+        return false;
+    }
+
+    if (bSimple) {
+        return bHasTopImage && !bExtended && !bHasICCP && !bHasEXIF && !bHasXMP && !bHasANIM && (nFrameCount == 0);
+    }
+
+    const bool bAnimationFlag = (nFeatureFlags & 0x02) != 0;
+    const bool bFeatureStateValid = (((nFeatureFlags & 0x20) != 0) == bHasICCP) &&
+                                    (((nFeatureFlags & 0x10) != 0) == bHasAlpha) &&
+                                    (((nFeatureFlags & 0x08) != 0) == bHasEXIF) &&
+                                    (((nFeatureFlags & 0x04) != 0) == bHasXMP);
+    if (!bExtended || !bFeatureStateValid) return false;
+
+    if (bAnimationFlag) {
+        return bHasANIM && (nFrameCount > 0) && !bHasTopImage;
+    }
+
+    return !bHasANIM && (nFrameCount == 0) && bHasTopImage;
 }
 
 bool XWEBP::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XWEBP x(pDevice);
-    return x.isValid();
+    return x.isValid(pPdStruct);
 }
 
 QString XWEBP::getFileFormatExt()
@@ -36,7 +261,7 @@ QString XWEBP::getFileFormatExtsString()
 }
 qint64 XWEBP::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    return _calculateRawSize(pPdStruct);
+    return isValid(pPdStruct) ? (8 + (qint64)read_uint32(4, false)) : 0;
 }
 XBinary::FT XWEBP::getFileType()
 {

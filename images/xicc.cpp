@@ -20,6 +20,12 @@
  */
 #include "xicc.h"
 
+#include <limits>
+
+namespace {
+const quint32 ICC_MAX_TAG_COUNT = 262144;
+}
+
 XBinary::XCONVERT _TABLE_XICC_STRUCTID[] = {
     {XICC::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XICC::STRUCTID_HEADER, "Header", QObject::tr("Header")},
@@ -37,28 +43,48 @@ XICC::~XICC()
 
 bool XICC::isValid(PDSTRUCT *pPdStruct)
 {
-    bool bIsValid = false;
+    const qint64 nTotalSize = getSize();
 
-    if (getSize() >= 128) {
-        // ICC profiles start with profile size and have specific signatures
-        quint32 nProfileSize = read_uint32(0, true);
-        quint32 nSignature = read_uint32(12, true);
-
-        // 'scnr' 73636E72h input devices - scanners and digital cameras
-        // 'mntr' 6D6E7472h display devices - CRTs and LCDs
-        // 'prtr' 70727472h output devices - printers.
-
-        bIsValid = (nProfileSize <= getSize()) && ((nSignature == 0x73636E72) || (nSignature == 0x6D6E7472) || (nSignature == 0x70727472));
+    if ((nTotalSize < 132) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return false;
     }
 
-    return bIsValid;
+    const quint32 nProfileSize = read_uint32(0, true);
+    const quint32 nDeviceClass = read_uint32(12, true);
+    const quint32 nMagic = read_uint32(36, true);
+    const bool bKnownDeviceClass = (nDeviceClass == 0x73636E72) || (nDeviceClass == 0x6D6E7472) || (nDeviceClass == 0x70727472) ||
+                                   (nDeviceClass == 0x6C696E6B) || (nDeviceClass == 0x73706163) || (nDeviceClass == 0x61627374) ||
+                                   (nDeviceClass == 0x6E6D636C);
+
+    if ((nProfileSize < 132) || ((nProfileSize & 3) != 0) || (nProfileSize > (quint64)nTotalSize) ||
+        (nMagic != 0x61637370) || !bKnownDeviceClass) {
+        return false;
+    }
+
+    const quint32 nTagCount = read_uint32(128, true);
+
+    if ((nTagCount > ICC_MAX_TAG_COUNT) || (nTagCount > ((qint64)nProfileSize - 132) / 12)) {
+        return false;
+    }
+
+    const qint64 nTableEnd = 132 + (qint64)nTagCount * 12;
+
+    for (quint32 i = 0; (i < nTagCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+        const TAG tag = _readTag(132 + (qint64)i * 12);
+
+        if (!tag.bValid || (tag.nOffset < (quint64)nTableEnd)) {
+            return false;
+        }
+    }
+
+    return XBinary::isPdStructNotCanceled(pPdStruct);
 }
 
 bool XICC::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XICC xicc(pDevice);
 
-    return xicc.isValid();
+    return xicc.isValid(pPdStruct);
 }
 
 XBinary::_MEMORY_MAP XICC::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
@@ -93,7 +119,7 @@ QString XICC::getFileFormatExtsString()
 
 qint64 XICC::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    return _calculateRawSize(pPdStruct);
+    return isValid(pPdStruct) ? read_uint32(0, true) : 0;
 }
 
 QString XICC::getVersion()
@@ -151,6 +177,10 @@ XICC::HEADER XICC::getHeader()
 {
     HEADER result = {};
 
+    if (getSize() < 128) {
+        return result;
+    }
+
     result.nProfileSize = read_uint32(0, true);
     result.nCMMType = read_uint32(4, true);
     result.nVersion = read_uint32(8, true);
@@ -180,16 +210,31 @@ QList<XICC::TAG> XICC::getTags(PDSTRUCT *pPdStruct)
 {
     QList<TAG> listResult;
 
-    if (getSize() > 132) {
-        quint32 nTagCount = read_uint32(128, true);
+    if ((getSize() >= 132) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+        const quint32 nProfileSize = read_uint32(0, true);
+        const quint32 nTagCount = read_uint32(128, true);
+
+        if ((nProfileSize < 132) || (nProfileSize > (quint64)getSize()) || (nTagCount > ICC_MAX_TAG_COUNT) ||
+            (nTagCount > ((qint64)nProfileSize - 132) / 12)) {
+            return listResult;
+        }
+
+        const qint64 nTableEnd = 132 + (qint64)nTagCount * 12;
 
         for (quint32 i = 0; (i < nTagCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
-            TAG tag = _readTag(132 + (i * 12));
+            TAG tag = _readTag(132 + (qint64)i * 12);
 
-            if (tag.bValid) {
-                listResult.append(tag);
+            if (!tag.bValid || (tag.nOffset < (quint64)nTableEnd)) {
+                listResult.clear();
+                return listResult;
             }
+
+            listResult.append(tag);
         }
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
     }
 
     return listResult;
@@ -198,6 +243,10 @@ QList<XICC::TAG> XICC::getTags(PDSTRUCT *pPdStruct)
 QList<XICC::TAG> XICC::_getTagsBySignature(QList<TAG> *pListTags, quint32 nSignature)
 {
     QList<XICC::TAG> listResult;
+
+    if (!pListTags) {
+        return listResult;
+    }
 
     qint32 nNumberOfRecords = pListTags->count();
 
@@ -217,12 +266,14 @@ QString XICC::getTagName(quint32 nSignature)
 
 QString XICC::getDescription(QList<TAG> *pListTags, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
+    if (!pListTags || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return {};
+    }
 
-    QList<XICC::TAG> listDesc = _getTagsBySignature(pListTags, 0x64657363);  // 'desc'
-
-    if (!listDesc.isEmpty()) {
-        return _readTagContent(listDesc.at(0).nOffset);
+    for (const TAG &tag : *pListTags) {
+        if (_isProfileTag(tag, 0x64657363, pPdStruct)) {  // 'desc'
+            return _readTagContent(tag.nOffset, tag.nSize);
+        }
     }
 
     return {};
@@ -237,12 +288,14 @@ QString XICC::getDescription()
 
 QString XICC::getCopyright(QList<TAG> *pListTags, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
+    if (!pListTags || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return {};
+    }
 
-    QList<XICC::TAG> listCopyright = _getTagsBySignature(pListTags, 0x63707274);  // 'cprt'
-
-    if (!listCopyright.isEmpty()) {
-        return _readTagContent(listCopyright.at(0).nOffset);
+    for (const TAG &tag : *pListTags) {
+        if (_isProfileTag(tag, 0x63707274, pPdStruct)) {  // 'cprt'
+            return _readTagContent(tag.nOffset, tag.nSize);
+        }
     }
 
     return {};
@@ -316,6 +369,10 @@ QList<XBinary::XFHEADER> XICC::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
 {
     QList<XBinary::XFHEADER> listResult;
 
+    if (!isValid(pPdStruct)) {
+        return listResult;
+    }
+
     quint32 nStructID = xfStruct.nStructID;
 
     if (nStructID == STRUCTID_UNKNOWN) {
@@ -345,7 +402,8 @@ QList<XBinary::XFHEADER> XICC::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
             _xfStruct.sParent = xfHeader.sTag;
             _xfStruct.nStructID = STRUCTID_TAG;
             _xfStruct.xLoc = offsetToLoc(132);
-            _xfStruct.nCount = (qint32)read_uint32(128, true);
+            const quint32 nTagCount = read_uint32(128, true);
+            _xfStruct.nCount = (nTagCount <= (quint32)(std::numeric_limits<qint32>::max)()) ? (qint32)nTagCount : 0;
             listResult.append(getXFHeaders(_xfStruct, pPdStruct));
         }
     } else if (nStructID == STRUCTID_TAG) {
@@ -357,7 +415,8 @@ QList<XBinary::XFHEADER> XICC::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
             nOffset = 132;
         }
         if (nCount == 0) {
-            nCount = (qint32)read_uint32(128, true);
+            const quint32 nTagCount = read_uint32(128, true);
+            nCount = (nTagCount <= (quint32)(std::numeric_limits<qint32>::max)()) ? (qint32)nTagCount : 0;
         }
 
         if (nCount > 0) {
@@ -370,8 +429,8 @@ QList<XBinary::XFHEADER> XICC::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
             xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_TAG, xfHeader.xLoc);
 
             qint64 nCurrentOffset = nOffset;
-            for (qint32 i = 0; i < nCount; i++) {
-                if ((nCurrentOffset + 12) > nFileSize) {
+            for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                if ((nCurrentOffset < 0) || (nCurrentOffset > nFileSize - 12)) {
                     break;
                 }
                 xfHeader.listRowLocations.append(nCurrentOffset);
@@ -381,6 +440,10 @@ QList<XBinary::XFHEADER> XICC::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
             xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_TAG), xfHeader.sParentTag);
             listResult.append(xfHeader);
         }
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
     }
 
     return listResult;
@@ -475,9 +538,20 @@ QList<XBinary::XFRECORD> XICC::getXFRecords(FT fileType, quint32 nStructID, cons
 
 QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
+
+    if (!isValid(pPdStruct)) {
+        return listResult;
+    }
+
+    const qint64 nTotalSize = getSize();
+    const qint64 nProfileSize = read_uint32(0, true);
+    const quint32 nTagCount = read_uint32(128, true);
+    const qint64 nTableSize = 4 + (qint64)nTagCount * 12;
 
     if (nFileParts & FILEPART_HEADER) {
         FPART record = {};
@@ -488,22 +562,21 @@ QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.nVirtualAddress = -1;
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
-    qint64 nMaxOffset = 128;
-    qint64 nTotalSize = getSize();
+    qint64 nMaxOffset = nProfileSize;
 
     if (nFileParts & FILEPART_TABLE) {
-        quint32 nTagCount = read_uint32(128, true);
-
         FPART record = {};
 
         record.filePart = FILEPART_TABLE;
         record.nFileOffset = 128;
-        record.nFileSize = 4 + (nTagCount * 12);
+        record.nFileSize = nTableSize;
         record.nVirtualAddress = -1;
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_OBJECT) {
@@ -518,9 +591,15 @@ QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.nVirtualAddress = -1;
 
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
 
             nMaxOffset = qMax((record.nFileOffset + record.nFileSize), nMaxOffset);
         }
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+        return listResult;
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
@@ -533,6 +612,7 @@ QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.nVirtualAddress = -1;
 
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 
@@ -543,30 +623,64 @@ XICC::TAG XICC::_readTag(qint64 nOffset)
 {
     TAG result = {};
 
+    if ((nOffset < 0) || (nOffset > getSize() - 12)) {
+        return result;
+    }
+
     result.nSignature = read_uint32(nOffset, true);
     result.nOffset = read_uint32(nOffset + 4, true);
     result.nSize = read_uint32(nOffset + 8, true);
 
     result.sTagName = getTagName(result.nSignature);
-    result.bValid = (result.nOffset > 0) && (result.nSize > 0) && (result.nOffset + result.nSize <= getSize());
+    const qint64 nProfileSize = qMin<qint64>(read_uint32(0, true), getSize());
+    result.bValid = (result.nSignature != 0) && (result.nOffset > 0) && ((result.nOffset & 3) == 0) && (result.nSize > 0) &&
+                    (result.nOffset <= (quint64)nProfileSize) &&
+                    (result.nSize <= (quint64)nProfileSize - result.nOffset);
 
     return result;
 }
 
-QString XICC::_readTagContent(qint64 nOffset)
+bool XICC::_isProfileTag(const TAG &tag, quint32 nExpectedSignature, PDSTRUCT *pPdStruct)
 {
+    if (!tag.bValid || (tag.nSignature != nExpectedSignature) || !isValid(pPdStruct)) {
+        return false;
+    }
+
+    const quint32 nTagCount = read_uint32(128, true);
+    const qint64 nTableEnd = 132 + (qint64)nTagCount * 12;
+    if ((tag.nOffset < (quint64)nTableEnd) || ((tag.nOffset & 3) != 0) || (tag.nSize == 0)) {
+        return false;
+    }
+
+    for (quint32 i = 0; (i < nTagCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+        const TAG actualTag = _readTag(132 + (qint64)i * 12);
+        if (actualTag.bValid && (actualTag.nSignature == tag.nSignature) &&
+            (actualTag.nOffset == tag.nOffset) && (actualTag.nSize == tag.nSize)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+QString XICC::_readTagContent(qint64 nOffset, qint64 nSize)
+{
+    if ((nOffset < 0) || (nSize < 8) || (nOffset > getSize() - nSize)) {
+        return {};
+    }
+
     quint32 nType = read_uint32(nOffset, true);
 
     if (nType == 0x74657874 || nType == 0x64657363) {  // 'text' or 'desc'
-        return _readTextType(nOffset);
+        return _readTextType(nOffset, nSize);
     } else if (nType == 0x6D6C7563) {  // 'mluc'
-        return _readMultiLocalizedUnicodeType(nOffset);
+        return _readMultiLocalizedUnicodeType(nOffset, nSize);
     }
 
     return {};
 }
 
-QString XICC::_readTextType(qint64 nOffset)
+QString XICC::_readTextType(qint64 nOffset, qint64 nSize)
 {
     QString sResult;
 
@@ -574,34 +688,40 @@ QString XICC::_readTextType(qint64 nOffset)
 
     if (nType == 0x74657874) {  // 'text'
         // Skip type signature (4 bytes) and reserved (4 bytes)
-        sResult = read_ansiString(nOffset + 8);
+        sResult = read_ansiString(nOffset + 8, (qint32)qMin<qint64>(nSize - 8, 1000));
     } else if (nType == 0x64657363) {  // 'desc'
         // Skip type signature (4 bytes) and reserved (4 bytes)
+        if (nSize < 12) {
+            return sResult;
+        }
+
         quint32 nLength = read_uint32(nOffset + 8, true);
-        if (nLength > 0) {
-            sResult = read_ansiString(nOffset + 12, qMin(nLength, quint32(1000)));
+        if ((nLength > 0) && (nLength <= (quint64)nSize - 12)) {
+            sResult = read_ansiString(nOffset + 12, (qint32)qMin(nLength, quint32(1000)));
         }
     }
 
     return sResult;
 }
 
-QString XICC::_readMultiLocalizedUnicodeType(qint64 nOffset)
+QString XICC::_readMultiLocalizedUnicodeType(qint64 nOffset, qint64 nSize)
 {
     QString sResult;
 
     quint32 nType = read_uint32(nOffset, true);
 
-    if (nType == 0x6D6C7563) {  // 'mluc'
+    if ((nType == 0x6D6C7563) && (nSize >= 16)) {  // 'mluc'
         // Skip type signature (4 bytes) and reserved (4 bytes)
         quint32 nRecordCount = read_uint32(nOffset + 8, true);
+        quint32 nRecordSize = read_uint32(nOffset + 12, true);
 
-        if (nRecordCount > 0) {
+        if ((nRecordCount > 0) && (nRecordSize >= 12) && (nRecordCount <= (nSize - 16) / nRecordSize)) {
             // Read first record (English preferred)
             quint32 nLength = read_uint32(nOffset + 16, true);
             quint32 nRecordOffset = read_uint32(nOffset + 20, true);
 
-            if (nLength > 0 && nRecordOffset > 0) {
+            if ((nLength > 0) && ((nLength & 1) == 0) && (nRecordOffset >= 16) && (nRecordOffset <= (quint64)nSize) &&
+                (nLength <= (quint64)nSize - nRecordOffset)) {
                 sResult = read_unicodeString(nOffset + nRecordOffset, qMin(nLength / 2, quint32(500)), true);
             }
         }

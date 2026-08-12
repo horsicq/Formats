@@ -72,6 +72,7 @@ public:
     virtual QList<QString> getSearchSignatures() override;
     virtual XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
 private:
+    qint64 _getStructuredSize(PDSTRUCT *pPdStruct);
     INTERNAL_INFO m_internalInfo;
 
 };

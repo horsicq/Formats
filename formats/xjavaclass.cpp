@@ -63,7 +63,7 @@ bool XJavaClass::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XJavaClass xjavaclass(pDevice);
 
-    return xjavaclass.isValid();
+    return xjavaclass.isValid(pPdStruct);
 }
 
 QString XJavaClass::getArch()
@@ -726,9 +726,11 @@ XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStru
 
 QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     INFO info = _getInfo(pPdStruct);
 
@@ -742,6 +744,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
         record.sName = tr("Header");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_REGION) {
@@ -786,6 +789,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.nVirtualAddress = -1;
             record.sName = tr("Constant pool");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             nOffset += record.nFileSize;
         }
 
@@ -798,6 +802,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.nVirtualAddress = -1;
             record.sName = tr("Class info");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             nOffset += 6;
         }
 
@@ -810,6 +815,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.nVirtualAddress = -1;
             record.sName = tr("Interfaces");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             nOffset += record.nFileSize;
         }
 
@@ -830,6 +836,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.nVirtualAddress = -1;
             record.sName = tr("Fields");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             nOffset += record.nFileSize;
         }
 
@@ -850,6 +857,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.nVirtualAddress = -1;
             record.sName = tr("Methods");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             nOffset += record.nFileSize;
         }
 
@@ -867,6 +875,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.nVirtualAddress = -1;
             record.sName = tr("Attributes");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             nOffset += record.nFileSize;
         }
     }
@@ -885,6 +894,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.sName = tr("Overlay");
 
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

@@ -168,9 +168,11 @@ XBinary::_MEMORY_MAP XAVI::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     if (nFileParts & FILEPART_HEADER) {
         FPART record = {};
@@ -181,6 +183,7 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.sName = tr("RIFF Header");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_REGION) {
@@ -195,6 +198,7 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.sName = "AVI";
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_DATA) {
@@ -206,6 +210,7 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.sName = tr("Data");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
@@ -222,6 +227,7 @@ QList<XBinary::FPART> XAVI::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.sName = tr("Overlay");
 
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

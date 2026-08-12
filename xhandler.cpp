@@ -52,8 +52,7 @@ void XHandler::addRecord_Move(QList<RECORD> *pListRecords, const QString &sFilen
 
 void XHandler::processRecords(QList<RECORD> *pListRecords, XBinary::PDSTRUCT *pDStruct)
 {
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pDStruct);
-    XBinary::setPdStructInit(pDStruct, _nFreeIndex, pListRecords->size());
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pDStruct, pListRecords->size());
 
     for (qint32 i = 0; i < pListRecords->size(); i++) {
         if (!XBinary::isPdStructNotCanceled(pDStruct)) {

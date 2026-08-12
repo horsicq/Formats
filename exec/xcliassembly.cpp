@@ -420,9 +420,11 @@ quint32 XCLIAssembly::ftStringToStructID(const QString &sFtString)
 
 QList<XBinary::FPART> XCLIAssembly::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     CLI_INFO cliInfo = getCliInfo(false, pPdStruct);
 
@@ -439,6 +441,7 @@ QList<XBinary::FPART> XCLIAssembly::getFileParts(quint32 nFileParts, qint32 nLim
         record.sName = tr("Header");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_REGION) {
@@ -455,6 +458,7 @@ QList<XBinary::FPART> XCLIAssembly::getFileParts(quint32 nFileParts, qint32 nLim
                 record.sName = cliInfo.metaData.listStreams.at(i).sName;
 
                 listResult.append(record);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             }
         }
     }
@@ -1268,7 +1272,11 @@ QList<XCLIAssembly::CLI_METADATA_RECORD> XCLIAssembly::getCliMetadataRecords(CLI
 
     QList<XCLIAssembly::CLI_METADATA_RECORD> listResult;
 
-    for (qint32 i = 0; (i < 64) && (!(pPdStruct->bIsStop)); i++) {
+    if (!pCliInfo || !isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
+
+    for (qint32 i = 0; (i < 64) && isPdStructNotCanceled(pPdStruct); i++) {
         if (pCliInfo->metaData.nTables_Valid & ((unsigned long long)1 << i)) {
             CLI_METADATA_RECORD record = {};
 
@@ -1290,6 +1298,10 @@ QList<QString> XCLIAssembly::getAnsiStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPdStr
 {
     QList<QString> listResult;
 
+    if (!pCliInfo || !isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
+
     char *_pOffset = pCliInfo->metaData.baStrings.data();
     qint32 _nSize = pCliInfo->metaData.baStrings.size();
 
@@ -1310,9 +1322,15 @@ QList<QString> XCLIAssembly::getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPd
 {
     QList<QString> listResult;
 
+    if (!pCliInfo || !isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
+
     char *pStringOffset = pCliInfo->metaData.baUS.data();
     char *pStringCurrentOffsetOffset = pStringOffset;
     qint32 _nSize = pCliInfo->metaData.baUS.size();
+
+    if (_nSize <= 1) return listResult;
 
     pStringCurrentOffsetOffset++;
 
@@ -1353,13 +1371,13 @@ bool XCLIAssembly::isNetTypePresent(CLI_INFO *pCliInfo, const QString &sTypeName
 {
     bool bResult = false;
 
-    if (pCliInfo->bValid) {
+    if (pCliInfo && isPdStructNotCanceled(pPdStruct) && pCliInfo->bValid) {
         char *pBuffer = pCliInfo->metaData.baStrings.data();
         qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
 
         qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XCLIASSEMBLY_DEF::metadata_TypeDef];
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+        for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
             XCLIASSEMBLY_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
 
             QString _sTypeName;
@@ -1387,7 +1405,7 @@ bool XCLIAssembly::isNetMethodPresent(CLI_INFO *pCliInfo, QString sTypeNamespace
 {
     bool bResult = false;
 
-    if (pCliInfo->bValid) {
+    if (pCliInfo && isPdStructNotCanceled(pPdStruct) && pCliInfo->bValid) {
         char *pBuffer = pCliInfo->metaData.baStrings.data();
         qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
 
@@ -1468,13 +1486,13 @@ bool XCLIAssembly::isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace,
 {
     bool bResult = false;
 
-    if (pCliInfo->bValid) {
+    if (pCliInfo && isPdStructNotCanceled(pPdStruct) && pCliInfo->bValid) {
         char *pBuffer = pCliInfo->metaData.baStrings.data();
         qint32 nBufferSize = pCliInfo->metaData.baStrings.size();
 
         qint32 nNumberOfRecords = pCliInfo->metaData.Tables_TablesNumberOfIndexes[XCLIASSEMBLY_DEF::metadata_TypeDef];
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && (!(pPdStruct->bIsStop)); i++) {
+        for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
             XCLIASSEMBLY_DEF::S_METADATA_TYPEDEF record = getMetadataTypeDef(pCliInfo, i);
 
             QString _sTypeName;
@@ -1498,7 +1516,7 @@ bool XCLIAssembly::isNetFieldPresent(CLI_INFO *pCliInfo, QString sTypeNamespace,
                     nFieldsCount = nNumberOfFieldsRecords - record.nFieldList;
                 }
 
-                for (qint32 j = 0; (j < nFieldsCount) && (!(pPdStruct->bIsStop)); j++) {
+                for (qint32 j = 0; (j < nFieldsCount) && isPdStructNotCanceled(pPdStruct); j++) {
                     XCLIASSEMBLY_DEF::S_METADATA_FIELD field = getMetadataField(pCliInfo, record.nFieldList + j - 1);
 
                     QString _sFieldName = _read_ansiString_safe(pBuffer, nBufferSize, field.nName);

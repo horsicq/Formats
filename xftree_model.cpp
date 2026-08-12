@@ -27,6 +27,10 @@
 #include <algorithm>
 #include <limits>
 
+#ifdef QT_GUI_LIB
+#include "xoptions.h"
+#endif
+
 
 namespace {
 qint64 getHeaderEndOffset(const XBinary::XFHEADER &xfHeader)
@@ -273,8 +277,20 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
                 result = tr("Hex");
             } else if (pItem->xfHeader.sTag == "!DISASM") {
                 result = tr("Disasm");
+            } else if (pItem->xfHeader.sTag == "!INFO") {
+                result = tr("Info");
             } else if (pItem->xfHeader.sTag == "!NFDSCAN") {
-                result = tr("Nauz File Detector");
+                result = QString("Nauz File Detector (NFD)");
+            } else if (pItem->xfHeader.sTag == "!DIESCAN") {
+                result = QString("Detect It Easy (DiE)");
+            } else if (pItem->xfHeader.sTag == "!YARASCAN") {
+                result = QString("Yara rules");
+            } else if (pItem->xfHeader.sTag == "!VIRUSTOTALSCAN") {
+                result = QString("VirusTotal");
+            } else if (pItem->xfHeader.sTag == "!TOOLS") {
+                result = tr("Tools");
+            } else if (pItem->xfHeader.sTag == "!DEMANGLE") {
+                result = tr("Demangle");
             } else if (pItem->xfHeader.sTag == "!HASH") {
                 result = tr("Hash");
             } else if (pItem->xfHeader.sTag == "!SIGNATURES") {
@@ -301,7 +317,8 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
                 result = pItem->sStructName;
             }
             // TODO if table number of records
-        } /*else if (nColumn == COLUMN_TYPE) {
+        }
+        /*else if (nColumn == COLUMN_TYPE) {
             if (pItem->xfHeader.xfType == XBinary::XFTYPE_HEADER) {
                 result = QString("HEADER");
             } else if (pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
@@ -318,7 +335,17 @@ QVariant XFTreeModel::data(const QModelIndex &index, int role) const
                 result = QString("rows: %1").arg(pItem->xfHeader.listRowLocations.count());
             }
         }*/
-    } /*else if (role == Qt::TextAlignmentRole) {
+    }
+#ifdef QT_GUI_LIB
+    else if ((role == Qt::DecorationRole) && (nColumn == COLUMN_NAME)) {
+        QIcon icon = getItemIcon(pItem);
+
+        if (!icon.isNull()) {
+            result = icon;
+        }
+    }
+#endif
+    /*else if (role == Qt::TextAlignmentRole) {
         if (nColumn == COLUMN_OFFSET) {
             result = static_cast<int>(Qt::AlignRight | Qt::AlignVCenter);
         }
@@ -463,6 +490,35 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bE
     QVector<quint64> listParentMaxEnds(nParentTreeBase * 2, 0);
     QHash<QString, TREEITEM *> mapLatestItemsByTag;
 
+    if (bExtraInfo && m_pRootItem) {
+        // Common records first (Info group, tool commands, Tools group); the
+        // format-specific headers from listHeaders are appended after them by
+        // the hierarchy loop below. Same node set as the family format viewers.
+        XFTreeModel::TREEITEM *pItemInfo = appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!INFO", XBinary::STRUCTID_INFO);
+        appendExtraTreeItem(pItemInfo, m_inData.fileType, "!NFDSCAN", XBinary::STRUCTID_NFDSCAN);
+        appendExtraTreeItem(pItemInfo, m_inData.fileType, "!DIESCAN", XBinary::STRUCTID_DIESCAN);
+#ifdef USE_YARA
+        appendExtraTreeItem(pItemInfo, m_inData.fileType, "!YARASCAN", XBinary::STRUCTID_YARASCAN);
+#endif
+        appendExtraTreeItem(pItemInfo, m_inData.fileType, "!VIRUSTOTALSCAN", XBinary::STRUCTID_VIRUSTOTALSCAN);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!VISUALIZATION", XBinary::STRUCTID_VISUALIZATION);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HEX", XBinary::STRUCTID_HEX);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!DISASM", XBinary::STRUCTID_DISASM);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HASH", XBinary::STRUCTID_HASH);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!STRINGS", XBinary::STRUCTID_STRINGS);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SIGNATURES", XBinary::STRUCTID_SIGNATURES);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!MEMORYMAP", XBinary::STRUCTID_MEMORYMAP);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!ENTROPY", XBinary::STRUCTID_ENTROPY);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXTRACTOR", XBinary::STRUCTID_EXTRACTOR);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SEARCH", XBinary::STRUCTID_SEARCH);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!IMPORT", XBinary::STRUCTID_IMPORT);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXPORT", XBinary::STRUCTID_EXPORT);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SYMBOLS", XBinary::STRUCTID_SYMBOLS);
+        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!RESOURCES", XBinary::STRUCTID_RESOURCES);
+        XFTreeModel::TREEITEM *pItemTools = appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!TOOLS", XBinary::STRUCTID_TOOLS);
+        appendExtraTreeItem(pItemTools, m_inData.fileType, "!DEMANGLE", XBinary::STRUCTID_DEMANGLE);
+    }
+
     // Build tree hierarchy in source order to keep parent references deterministic.
     for (qint32 i = 0; i < nCount; i++) {
         TREEITEM *pItem = listItems.at(i);
@@ -528,23 +584,6 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bE
         }
     }
 
-    if (bExtraInfo && m_pRootItem) {
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!VISUALIZATION", XBinary::STRUCTID_VISUALIZATION);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HEX", XBinary::STRUCTID_HEX);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!DISASM", XBinary::STRUCTID_DISASM);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!NFDSCAN", XBinary::STRUCTID_NFDSCAN);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!HASH", XBinary::STRUCTID_HASH);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SIGNATURES", XBinary::STRUCTID_SIGNATURES);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!MEMORYMAP", XBinary::STRUCTID_MEMORYMAP);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!ENTROPY", XBinary::STRUCTID_ENTROPY);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXTRACTOR", XBinary::STRUCTID_EXTRACTOR);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SEARCH", XBinary::STRUCTID_SEARCH);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!STRINGS", XBinary::STRUCTID_STRINGS);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!IMPORT", XBinary::STRUCTID_IMPORT);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!EXPORT", XBinary::STRUCTID_EXPORT);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!SYMBOLS", XBinary::STRUCTID_SYMBOLS);
-        appendExtraTreeItem(m_pRootItem, m_inData.fileType, "!RESOURCES", XBinary::STRUCTID_RESOURCES);
-    }
 }
 
 QString XFTreeModel::getItemSize(TREEITEM *pItem)
@@ -857,6 +896,63 @@ QString XFTreeModel::toTSV() const
 
     return listLines.join("\n");
 }
+
+#ifdef QT_GUI_LIB
+QIcon XFTreeModel::getItemIcon(const TREEITEM *pItem) const
+{
+    XOptions::ICONTYPE iconType = XOptions::ICONTYPE_NONE;
+
+    if (pItem->xfHeader.xfType == XBinary::XFTYPE_COMMAND) {
+        switch (pItem->xfHeader.structID) {
+            case XBinary::STRUCTID_INFO: iconType = XOptions::ICONTYPE_INFO; break;
+            case XBinary::STRUCTID_NFDSCAN: iconType = XOptions::ICONTYPE_NFD; break;
+            case XBinary::STRUCTID_DIESCAN: iconType = XOptions::ICONTYPE_DIE; break;
+            case XBinary::STRUCTID_YARASCAN: iconType = XOptions::ICONTYPE_YARA; break;
+            case XBinary::STRUCTID_VIRUSTOTALSCAN: iconType = XOptions::ICONTYPE_VIRUSTOTAL; break;
+            case XBinary::STRUCTID_VISUALIZATION: iconType = XOptions::ICONTYPE_VISUALIZATION; break;
+            case XBinary::STRUCTID_HEX: iconType = XOptions::ICONTYPE_HEX; break;
+            case XBinary::STRUCTID_DISASM: iconType = XOptions::ICONTYPE_DISASM; break;
+            case XBinary::STRUCTID_HASH: iconType = XOptions::ICONTYPE_HASH; break;
+            case XBinary::STRUCTID_STRINGS: iconType = XOptions::ICONTYPE_STRING; break;
+            case XBinary::STRUCTID_SIGNATURES: iconType = XOptions::ICONTYPE_SIGNATURE; break;
+            case XBinary::STRUCTID_MEMORYMAP: iconType = XOptions::ICONTYPE_MEMORYMAP; break;
+            case XBinary::STRUCTID_ENTROPY: iconType = XOptions::ICONTYPE_ENTROPY; break;
+            case XBinary::STRUCTID_EXTRACTOR: iconType = XOptions::ICONTYPE_EXTRACTOR; break;
+            case XBinary::STRUCTID_SEARCH: iconType = XOptions::ICONTYPE_SEARCH; break;
+            case XBinary::STRUCTID_IMPORT: iconType = XOptions::ICONTYPE_IMPORT; break;
+            case XBinary::STRUCTID_EXPORT: iconType = XOptions::ICONTYPE_EXPORT; break;
+            case XBinary::STRUCTID_SYMBOLS: iconType = XOptions::ICONTYPE_SYMBOL; break;
+            case XBinary::STRUCTID_RESOURCES: iconType = XOptions::ICONTYPE_RESOURCE; break;
+            case XBinary::STRUCTID_TOOLS: iconType = XOptions::ICONTYPE_TOOL; break;
+            case XBinary::STRUCTID_DEMANGLE: iconType = XOptions::ICONTYPE_TOOL; break;
+            default: iconType = XOptions::ICONTYPE_GENERIC; break;
+        }
+    } else if (pItem->xfHeader.xfType == XBinary::XFTYPE_HEADER) {
+        iconType = XOptions::ICONTYPE_HEADER;
+    } else if (pItem->xfHeader.xfType == XBinary::XFTYPE_TABLE) {
+        iconType = XOptions::ICONTYPE_TABLE;
+    }
+
+    if (iconType == XOptions::ICONTYPE_NONE) {
+        return QIcon();
+    }
+
+    if (m_hashIcons.contains((qint32)iconType)) {
+        return m_hashIcons.value((qint32)iconType);
+    }
+
+    QIcon icon;
+    QString sIconPath = XOptions::getIconPath(iconType);
+
+    if (sIconPath != "") {
+        icon.addFile(sIconPath, QSize(), QIcon::Normal, QIcon::Off);
+    }
+
+    m_hashIcons.insert((qint32)iconType, icon);
+
+    return icon;
+}
+#endif
 
 
 

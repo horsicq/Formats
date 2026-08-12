@@ -88,7 +88,7 @@ bool XDJVU::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XDJVU djvu(pDevice);
 
-    return djvu.isValid();
+    return djvu.isValid(pPdStruct);
 }
 
 QString XDJVU::getFileFormatExt()
@@ -350,9 +350,11 @@ QList<XBinary::XFRECORD> XDJVU::getXFRecords(FT fileType, quint32 nStructID, con
 
 QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     if (nFileParts & FILEPART_HEADER) {
         FPART record = {};
@@ -364,6 +366,7 @@ QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         record.sName = tr("Header");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     HEADER header = getHeader();
@@ -396,6 +399,7 @@ QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
                 record.sName = sChunkName;
 
                 listResult.append(record);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             }
 
             nOffset += (8 + nChunkSize);
@@ -424,6 +428,7 @@ QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
             record.sName = tr("Overlay");
 
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

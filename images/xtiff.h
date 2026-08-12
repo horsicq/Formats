@@ -87,6 +87,19 @@ public:
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
 private:
+    struct IFD_INFO {
+        qint64 nOffset;
+        qint64 nSize;
+        quint16 nCount;
+        quint32 nNextOffset;
+    };
+
+    bool getIFDInfo(qint64 nOffset, bool bIsBigEndian, qint64 nTotalSize, IFD_INFO *pInfo, PDSTRUCT *pPdStruct);
+    bool getIFDChain(QList<IFD_INFO> *pListInfo, PDSTRUCT *pPdStruct);
+    bool getIFDChunk(qint64 nEntryOffset, bool bIsBigEndian, qint64 nTotalSize, CHUNK *pChunk, quint16 *pType,
+                     PDSTRUCT *pPdStruct);
+    bool readUInt16Exact(qint64 nOffset, bool bIsBigEndian, quint16 *pValue, PDSTRUCT *pPdStruct);
+    bool readUInt32Exact(qint64 nOffset, bool bIsBigEndian, quint32 *pValue, PDSTRUCT *pPdStruct);
     qint32 getBaseTypeSize(quint16 nType);
 private:
     INTERNAL_INFO m_internalInfo;

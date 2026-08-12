@@ -22,14 +22,17 @@ if (NOT DEFINED XDEX_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XDEX/xdex.cmake)
     set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XDEX_SOURCES})
 endif()
+add_definitions(-DUSE_DEX)
 if (NOT DEFINED XPDF_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XPDF/xpdf.cmake)
     set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XPDF_SOURCES})
 endif()
+add_definitions(-DUSE_PDF)
 if (NOT DEFINED XARCHIVES_SOURCES)
     include(${CMAKE_CURRENT_LIST_DIR}/../XArchive/xarchives.cmake)
     set(XFORMATS_SOURCES ${XFORMATS_SOURCES} ${XARCHIVES_SOURCES})
 endif()
+add_definitions(-DUSE_ARCHIVE)
 
 # TODO
 

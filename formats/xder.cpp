@@ -41,7 +41,7 @@ bool XDER::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XDER der(pDevice);
 
-    return der.isValid();
+    return der.isValid(pPdStruct);
 }
 
 XBinary::FT XDER::getFileType()

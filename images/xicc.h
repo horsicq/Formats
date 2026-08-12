@@ -107,9 +107,10 @@ public:
 
 private:
     TAG _readTag(qint64 nOffset);
-    QString _readTagContent(qint64 nOffset);
-    QString _readTextType(qint64 nOffset);
-    QString _readMultiLocalizedUnicodeType(qint64 nOffset);
+    bool _isProfileTag(const TAG &tag, quint32 nExpectedSignature, PDSTRUCT *pPdStruct);
+    QString _readTagContent(qint64 nOffset, qint64 nSize);
+    QString _readTextType(qint64 nOffset, qint64 nSize);
+    QString _readMultiLocalizedUnicodeType(qint64 nOffset, qint64 nSize);
     QString _fourCCToString(quint32 nValue);
 private:
     INTERNAL_INFO m_internalInfo;

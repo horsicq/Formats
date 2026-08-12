@@ -68,7 +68,7 @@ bool XRiff::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XRiff xriff(pDevice);
 
-    return xriff.isValid();
+    return xriff.isValid(pPdStruct);
 }
 
 QString XRiff::getFileFormatExt()
@@ -157,8 +157,11 @@ QList<XBinary::MAPMODE> XRiff::getMapModesList()
 
 QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     QList<FPART> list;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return list;
+    }
 
     if (getSize() < 12) return list;
 
@@ -172,6 +175,7 @@ QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         f.nVirtualAddress = -1;
         f.sName = tr("Header");
         list.append(f);
+        if ((nLimit != -1) && (list.count() >= nLimit)) return list;
     }
 
     if (nFileParts & FILEPART_REGION) {
@@ -185,6 +189,7 @@ QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         f.nVirtualAddress = -1;
         f.sName = read_ansiString(0, 4);
         list.append(f);
+        if ((nLimit != -1) && (list.count() >= nLimit)) return list;
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
@@ -200,6 +205,7 @@ QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
             ov.nVirtualAddress = -1;
             ov.sName = tr("Overlay");
             list.append(ov);
+            if ((nLimit != -1) && (list.count() >= nLimit)) return list;
         }
     }
 

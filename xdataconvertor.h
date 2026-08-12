@@ -121,9 +121,9 @@ public:
     };
 
     struct DATA {
-        bool bValid;
-        QTemporaryFile *pTmpFile;
-        double dEntropy;
+        bool bValid = false;
+        QTemporaryFile *pTmpFile = nullptr;  // caller-owned; process() transactionally replaces a prior result
+        double dEntropy = 0;
     };
 
     struct OPTIONS {
@@ -142,9 +142,8 @@ public:
     static qint32 getMethodWidth(CMETHOD method);  // 1/2/4/8 (byte width the method operates on)
 
 private:
-    // Streaming converters. Each reads pDeviceIn sequentially and writes pDeviceOut
-    // sequentially (output offset is never assumed equal to the input offset), reports
-    // progress on nFreeIndex and honours cooperative cancellation.
+    // Streaming converters write pDeviceOut sequentially (output offset is never
+    // assumed equal to the input offset), report progress, and honour cancellation.
     bool convertMap(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex);      // 1:1 bit/byte/word ops
     bool convertKeyed(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex);    // 1:1 repeating-key / rolling XOR-ADD-SUB
     bool convertRC4(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex);      // 1:1 RC4 stream cipher (baKey)
@@ -152,7 +151,7 @@ private:
     bool convertReverse(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex);  // 1:1 whole-stream reverse
     bool convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex);   // expanding Base64/Base64Url/Hex encode
     bool convertDecode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex);   // shrinking Base64/Base64Url/Hex decode
-    bool convertWhole(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex);    // whole-buffer Base32/Ascii85/URL/QP
+    bool convertWhole(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex);    // bounded whole-buffer encodings
 
     QIODevice *m_pDeviceIn;
     DATA *m_pData;

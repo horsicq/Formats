@@ -19,6 +19,107 @@
  * SOFTWARE.
  */
 #include "xicon.h"
+#include "xpng.h"
+
+namespace {
+bool isValidIconDib(XIcon *pIcon, const XIcon::ICONDIRENTRY &entry, quint32 nHeaderSize)
+{
+    if (!pIcon || (entry.dwBytesInRes < nHeaderSize)) {
+        return false;
+    }
+
+    const bool bCoreHeader = nHeaderSize == 12;
+    const qint64 nSignedWidth = bCoreHeader ? pIcon->read_uint16(entry.dwImageOffset + 4)
+                                            : pIcon->read_int32(entry.dwImageOffset + 4);
+    const qint64 nSignedCombinedHeight = bCoreHeader ? pIcon->read_uint16(entry.dwImageOffset + 6)
+                                                     : pIcon->read_int32(entry.dwImageOffset + 8);
+    const quint16 nPlanes = pIcon->read_uint16(entry.dwImageOffset + (bCoreHeader ? 8 : 12));
+    const quint16 nBitCount = pIcon->read_uint16(entry.dwImageOffset + (bCoreHeader ? 10 : 14));
+
+    if ((nSignedWidth <= 0) || (nSignedCombinedHeight == 0) || (nPlanes != 1) ||
+        ((nBitCount != 1) && (nBitCount != 4) && (nBitCount != 8) && (nBitCount != 16) &&
+         (nBitCount != 24) && (nBitCount != 32))) {
+        return false;
+    }
+
+    const quint64 nCombinedHeight = (nSignedCombinedHeight < 0)
+                                        ? (quint64)(-nSignedCombinedHeight)
+                                        : (quint64)nSignedCombinedHeight;
+    if ((nCombinedHeight < 2) || ((nCombinedHeight & 1) != 0)) {
+        return false;
+    }
+
+    const quint64 nWidth = (quint64)nSignedWidth;
+    const quint64 nHeight = nCombinedHeight / 2;
+    const quint64 nEntrySize = entry.dwBytesInRes;
+    quint64 nBeforePixels = nHeaderSize;
+    quint32 nCompression = 0;
+    quint32 nImageSize = 0;
+    quint32 nColorCount = 0;
+
+    if (!bCoreHeader) {
+        nCompression = pIcon->read_uint32(entry.dwImageOffset + 16);
+        nImageSize = pIcon->read_uint32(entry.dwImageOffset + 20);
+        nColorCount = pIcon->read_uint32(entry.dwImageOffset + 32);
+
+        const bool bRgb = nCompression == 0;
+        const bool bRle = ((nCompression == 1) && (nBitCount == 8)) ||
+                          ((nCompression == 2) && (nBitCount == 4));
+        const bool bBitFields = ((nCompression == 3) || (nCompression == 6)) &&
+                                ((nBitCount == 16) || (nBitCount == 32));
+        if (!bRgb && !bRle && !bBitFields) {
+            return false;
+        }
+
+        if ((nHeaderSize == 40) && bBitFields) {
+            nBeforePixels += (nCompression == 6) ? 16 : 12;
+        }
+    }
+
+    if (nBitCount <= 8) {
+        const quint32 nMaximumColors = 1U << nBitCount;
+        if (bCoreHeader) {
+            nColorCount = nMaximumColors;
+        } else if (nColorCount == 0) {
+            nColorCount = nMaximumColors;
+        } else if (nColorCount > nMaximumColors) {
+            return false;
+        }
+    }
+
+    const quint64 nPaletteEntrySize = bCoreHeader ? 3 : 4;
+    const quint64 nPaletteSize = (quint64)nColorCount * nPaletteEntrySize;
+    if ((nBeforePixels > nEntrySize) || (nPaletteSize > nEntrySize - nBeforePixels)) {
+        return false;
+    }
+    nBeforePixels += nPaletteSize;
+
+    const quint64 nXorRowSize = (((nWidth * nBitCount) + 31) / 32) * 4;
+    const quint64 nAndRowSize = ((nWidth + 31) / 32) * 4;
+    quint64 nXorSize = 0;
+    if ((nCompression == 1) || (nCompression == 2)) {
+        if (nImageSize == 0) {
+            return false;
+        }
+        nXorSize = nImageSize;
+    } else {
+        const quint64 nRemaining = nEntrySize - nBeforePixels;
+        if ((nXorRowSize == 0) || (nXorRowSize > nRemaining / nHeight)) {
+            return false;
+        }
+        nXorSize = nXorRowSize * nHeight;
+        if (nImageSize > nXorSize) {
+            nXorSize = nImageSize;
+        }
+    }
+
+    if ((nXorSize > nEntrySize - nBeforePixels) || (nAndRowSize == 0)) {
+        return false;
+    }
+    const quint64 nAfterXor = nBeforePixels + nXorSize;
+    return nAndRowSize <= (nEntrySize - nAfterXor) / nHeight;
+}
+}  // namespace
 
 static XBinary::XCONVERT _TABLE_XICON_STRUCTID[] = {
     {XIcon::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -36,35 +137,68 @@ XIcon::~XIcon()
 
 bool XIcon::isValid(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
-    bool bResult = false;
-    // TODO more checks !!!
-    if (getSize() > (qint64)(sizeof(ICONDIR) + sizeof(ICONDIRENTRY))) {
-        ICONDIR iconDir = readICONDIR();
+    const qint64 nTotalSize = getSize();
 
-        if ((iconDir.idReserved == 0) && ((iconDir.idType == 1) || (iconDir.idType == 2)) && (iconDir.idCount > 0) && (iconDir.idCount < 100)) {
-            ICONDIRENTRY iconDirectory = readICONDIRENTRY(sizeof(ICONDIR));
+    if ((nTotalSize < (qint64)(sizeof(ICONDIR) + sizeof(ICONDIRENTRY))) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
 
-            if ((iconDirectory.bReserved == 0) && (iconDirectory.dwBytesInRes > 0)) {
-                if (iconDir.idType == 1) {
-                    if ((iconDirectory.wPlanes == 0) || (iconDirectory.wPlanes == 1)) {
-                        bResult = true;
-                    }
-                } else if (iconDir.idType == 2) {
-                    bResult = true;
-                }
+    const ICONDIR iconDir = readICONDIR();
+
+    if ((iconDir.idReserved != 0) || ((iconDir.idType != 1) && (iconDir.idType != 2)) || (iconDir.idCount == 0)) {
+        return false;
+    }
+
+    const qint64 nTableSize = (qint64)iconDir.idCount * (qint64)sizeof(ICONDIRENTRY);
+    const qint64 nDataOffset = (qint64)sizeof(ICONDIR) + nTableSize;
+
+    if (nDataOffset > nTotalSize) {
+        return false;
+    }
+
+    qint64 nOffset = sizeof(ICONDIR);
+
+    for (quint32 i = 0; (i < iconDir.idCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++, nOffset += sizeof(ICONDIRENTRY)) {
+        const ICONDIRENTRY entry = readICONDIRENTRY(nOffset);
+
+        if ((entry.bReserved != 0) || (entry.dwBytesInRes < 4) || (entry.dwImageOffset < (quint64)nDataOffset) ||
+            (entry.dwImageOffset > (quint64)nTotalSize) || (entry.dwBytesInRes > (quint64)nTotalSize - entry.dwImageOffset)) {
+            return false;
+        }
+
+        if ((iconDir.idType == 1) && (entry.wPlanes != 0) && (entry.wPlanes != 1)) {
+            return false;
+        }
+
+        const quint32 nHeader = read_uint32(entry.dwImageOffset);
+        const bool bDibHeader = (nHeader == 12) || (nHeader == 40) || (nHeader == 108) || (nHeader == 124);
+        const bool bPngHeader = (entry.dwBytesInRes >= 8) &&
+                                (read_array(entry.dwImageOffset, 8) == QByteArray::fromHex("89504e470d0a1a0a"));
+
+        if (bPngHeader) {
+            SubDevice subDevice(getDevice(), entry.dwImageOffset, entry.dwBytesInRes);
+            if (!subDevice.open(QIODevice::ReadOnly)) {
+                return false;
             }
+            XPNG png(&subDevice);
+            const qint64 nPngSize = png.getFileFormatSize(pPdStruct);
+            subDevice.close();
+            if (nPngSize != entry.dwBytesInRes) {
+                return false;
+            }
+        } else if (!bDibHeader || !isValidIconDib(this, entry, nHeader)) {
+            return false;
         }
     }
 
-    return bResult;
+    return XBinary::isPdStructNotCanceled(pPdStruct);
 }
 
 bool XIcon::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XIcon xicon(pDevice);
 
-    return xicon.isValid();
+    return xicon.isValid(pPdStruct);
 }
 
 XBinary::FT XIcon::getFileType()
@@ -118,6 +252,10 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     result.nBinarySize = getSize();
 
+    if (!isValid(pPdStruct)) {
+        return result;
+    }
+
     qint32 nIndex = 0;
 
     {
@@ -146,7 +284,9 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         ICONDIRENTRY iconDirectory = readICONDIRENTRY(nOffset);
 
-        if ((iconDirectory.dwBytesInRes == 0) || (iconDirectory.dwImageOffset < nDataOffset) || (iconDirectory.bReserved != 0)) {
+        if ((iconDirectory.dwBytesInRes < 4) || (iconDirectory.dwImageOffset < (quint64)nDataOffset) ||
+            (iconDirectory.dwImageOffset > (quint64)result.nBinarySize) ||
+            (iconDirectory.dwBytesInRes > (quint64)result.nBinarySize - iconDirectory.dwImageOffset) || (iconDirectory.bReserved != 0)) {
             bError = true;
             break;
         }
@@ -160,7 +300,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
         quint32 nHeader = read_uint32(iconDirectory.dwImageOffset);
 
-        if ((nHeader != 0x00000028) && nHeader != (0x474e5089)) {  // PNG
+        if ((nHeader != 12) && (nHeader != 40) && (nHeader != 108) && (nHeader != 124) && (nHeader != 0x474e5089)) {
             bError = true;
             break;
         }
@@ -180,6 +320,11 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
     if (bError) {
         result.listRecords.clear();
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        result.listRecords.clear();
+        return result;
     }
 
     _handleOverlay(&result);
@@ -230,20 +375,32 @@ XIcon::GRPICONDIRENTRY XIcon::readGPRICONDIRENTRY(qint64 nOffset)
     return result;
 }
 
-QList<XIcon::ICONDIRENTRY> XIcon::getIconDirectories()
+QList<XIcon::ICONDIRENTRY> XIcon::getIconDirectories(PDSTRUCT *pPdStruct)
 {
     QList<XIcon::ICONDIRENTRY> listResult;
+
+    if (!isValid(pPdStruct)) {
+        return listResult;
+    }
 
     ICONDIR iconDir = readICONDIR();
 
     qint32 nNumberOfRecords = iconDir.idCount;
+    const qint64 nTotalSize = getSize();
+    const qint64 nTableEnd = (qint64)sizeof(ICONDIR) + (qint64)nNumberOfRecords * (qint64)sizeof(ICONDIRENTRY);
+
+    if ((iconDir.idReserved != 0) || ((iconDir.idType != 1) && (iconDir.idType != 2)) || (nTableEnd > nTotalSize)) {
+        return listResult;
+    }
 
     qint64 nOffset = sizeof(ICONDIR);
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         ICONDIRENTRY record = readICONDIRENTRY(nOffset);
 
-        if ((record.dwBytesInRes == 0) || (record.dwImageOffset == 0)) {
+        if ((record.bReserved != 0) || (record.dwBytesInRes == 0) || (record.dwImageOffset < (quint64)nTableEnd) ||
+            (record.dwImageOffset > (quint64)nTotalSize) || (record.dwBytesInRes > (quint64)nTotalSize - record.dwImageOffset)) {
+            listResult.clear();
             break;
         }
 
@@ -252,29 +409,45 @@ QList<XIcon::ICONDIRENTRY> XIcon::getIconDirectories()
         nOffset += sizeof(ICONDIRENTRY);
     }
 
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+    }
+
     return listResult;
 }
 
-QList<XIcon::GRPICONDIRENTRY> XIcon::getIconGPRDirectories()
+QList<XIcon::GRPICONDIRENTRY> XIcon::getIconGPRDirectories(PDSTRUCT *pPdStruct)
 {
     QList<XIcon::GRPICONDIRENTRY> listResult;
 
     ICONDIR iconDir = readICONDIR();
 
     qint32 nNumberOfRecords = iconDir.idCount;
+    const qint64 nTableEnd = (qint64)sizeof(ICONDIR) + (qint64)nNumberOfRecords * (qint64)sizeof(GRPICONDIRENTRY);
+
+    if ((getSize() < (qint64)sizeof(ICONDIR)) || (iconDir.idReserved != 0) || (iconDir.idType != 1) ||
+        (iconDir.idCount == 0) || (nTableEnd > getSize()) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return listResult;
+    }
 
     qint64 nOffset = sizeof(ICONDIR);
 
-    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+    for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         GRPICONDIRENTRY record = readGPRICONDIRENTRY(nOffset);
 
-        if ((record.dwBytesInRes == 0) || (record.nID == 0)) {
+        if ((record.bReserved != 0) || ((record.wPlanes != 0) && (record.wPlanes != 1)) ||
+            (record.dwBytesInRes == 0) || (record.nID == 0)) {
+            listResult.clear();
             break;
         }
 
         listResult.append(record);
 
         nOffset += sizeof(GRPICONDIRENTRY);
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
     }
 
     return listResult;
@@ -298,6 +471,10 @@ quint32 XIcon::ftStringToStructID(const QString &sFtString)
 QList<XBinary::XFHEADER> XIcon::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::XFHEADER> listResult;
+
+    if (!isValid(pPdStruct)) {
+        return listResult;
+    }
 
     quint32 nStructID = xfStruct.nStructID;
 
@@ -343,7 +520,7 @@ QList<XBinary::XFHEADER> XIcon::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
             nCount = readICONDIR().idCount;
         }
 
-        if (nCount > 0) {
+        if ((nCount > 0) && (nOffset >= 0) && (nOffset <= nFileSize - (qint64)sizeof(ICONDIRENTRY))) {
             XFHEADER xfHeader = {};
             xfHeader.sParentTag = xfStruct.sParent;
             xfHeader.fileType = xfStruct.fileType;
@@ -353,8 +530,8 @@ QList<XBinary::XFHEADER> XIcon::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
             xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_ICONDIRENTRY, xfHeader.xLoc);
 
             qint64 nCurrentOffset = nOffset;
-            for (qint32 i = 0; i < nCount; i++) {
-                if ((nCurrentOffset + (qint64)sizeof(ICONDIRENTRY)) > nFileSize) {
+            for (qint32 i = 0; (i < nCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+                if ((nCurrentOffset < 0) || (nCurrentOffset > nFileSize - (qint64)sizeof(ICONDIRENTRY))) {
                     break;
                 }
                 xfHeader.listRowLocations.append(nCurrentOffset);
@@ -364,6 +541,10 @@ QList<XBinary::XFHEADER> XIcon::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
             xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_ICONDIRENTRY), xfHeader.sParentTag);
             listResult.append(xfHeader);
         }
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
     }
 
     return listResult;
@@ -444,11 +625,18 @@ QList<XBinary::XFRECORD> XIcon::getXFRecords(FT fileType, quint32 nStructID, con
 
 QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     qint64 nTotal = getSize();
     qint64 nMax = sizeof(ICONDIR);
+
+    if (!isValid(pPdStruct)) {
+        return listResult;
+    }
 
     if (nFileParts & FILEPART_HEADER) {
         FPART rec = {};
@@ -458,6 +646,7 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         rec.nVirtualAddress = -1;
         rec.sName = tr("Header");
         listResult.append(rec);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     ICONDIR dir = readICONDIR();
@@ -470,11 +659,12 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         rec.nVirtualAddress = -1;
         rec.sName = tr("Entries");
         listResult.append(rec);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     nMax = qMax(nMax, (qint64)(sizeof(ICONDIR) + sizeof(ICONDIRENTRY) * dir.idCount));
 
-    QList<ICONDIRENTRY> entries = getIconDirectories();
+    QList<ICONDIRENTRY> entries = getIconDirectories(pPdStruct);
     for (qint32 nI = 0; nI < entries.size(); ++nI) {
         ICONDIRENTRY e = entries.at(nI);
         if ((e.dwImageOffset < nTotal) && (e.dwBytesInRes > 0)) {
@@ -486,10 +676,16 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
                 rec.nVirtualAddress = -1;
                 rec.sName = tr("Icon");
                 listResult.append(rec);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             }
 
-            nMax = qMax(nMax, (qint64)(e.dwImageOffset + e.dwBytesInRes));
+            nMax = qMax(nMax, (qint64)e.dwImageOffset + (qint64)e.dwBytesInRes);
         }
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+        return listResult;
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
@@ -501,6 +697,7 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
             rec.nVirtualAddress = -1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

@@ -82,8 +82,8 @@ public:
     ICONDIR readICONDIR();
     ICONDIRENTRY readICONDIRENTRY(qint64 nOffset);
     GRPICONDIRENTRY readGPRICONDIRENTRY(qint64 nOffset);
-    QList<ICONDIRENTRY> getIconDirectories();
-    QList<GRPICONDIRENTRY> getIconGPRDirectories();
+    QList<ICONDIRENTRY> getIconDirectories(PDSTRUCT *pPdStruct = nullptr);
+    QList<GRPICONDIRENTRY> getIconGPRDirectories(PDSTRUCT *pPdStruct = nullptr);
     virtual QString getMIMEString() override;
 
     // Data headers/inspection

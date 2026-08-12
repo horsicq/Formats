@@ -19,6 +19,9 @@
  * SOFTWARE.
  */
 #include "xgif.h"
+namespace {
+const qint32 GIF_MAX_BLOCK_COUNT = 65536;
+}
 static XBinary::XCONVERT _TABLE_XGIF_STRUCTID[] = {
     {XGif::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XGif::STRUCTID_SIGNATURE, "Signature", QString("Signature")},
@@ -43,25 +46,14 @@ XGif::~XGif()
 
 bool XGif::isValid(PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
-
-    if (getSize() > 0x320) {
-        _MEMORY_MAP memoryMap = XBinary::getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-
-        if (compareSignature(&memoryMap, "'GIF87a'", 0, pPdStruct) || compareSignature(&memoryMap, "'GIF89a'", 0, pPdStruct)) {
-            // TODO more checks
-            bResult = true;
-        }
-    }
-
-    return bResult;
+    return _getStructuredSize(pPdStruct) > 0;
 }
 
 bool XGif::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XGif xgif(pDevice);
 
-    return xgif.isValid();
+    return xgif.isValid(pPdStruct);
 }
 
 QString XGif::getFileFormatExt()
@@ -76,32 +68,120 @@ QString XGif::getFileFormatExtsString()
 
 qint64 XGif::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(pPdStruct)
+    return _getStructuredSize(pPdStruct);
+}
 
-    qint64 nResult = 0;
+qint64 XGif::_getStructuredSize(PDSTRUCT *pPdStruct)
+{
+    const qint64 nTotalSize = getSize();
 
-    qint64 nCurrentOffset = 0x320;
+    if ((nTotalSize < 14) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return 0;
+    }
 
-    while (XBinary::isPdStructNotCanceled(pPdStruct)) {
-        quint8 nBlockSize = read_uint8(nCurrentOffset);
+    const QByteArray baSignature = read_array(0, 6);
 
-        if (nBlockSize) {
-            nCurrentOffset++;
-            nCurrentOffset += nBlockSize;
+    if ((baSignature != QByteArrayLiteral("GIF87a")) && (baSignature != QByteArrayLiteral("GIF89a"))) {
+        return 0;
+    }
+
+    if ((read_uint16(6) == 0) || (read_uint16(8) == 0)) {
+        return 0;
+    }
+
+    const quint8 nPacked = read_uint8(10);
+    qint64 nOffset = 13;
+    qint32 nBlockCount = 0;
+
+    if (nPacked & 0x80) {
+        const qint64 nColorTableSize = 3 * ((qint64)1 << ((nPacked & 7) + 1));
+
+        if (nColorTableSize > nTotalSize - nOffset) {
+            return 0;
+        }
+
+        nOffset += nColorTableSize;
+    }
+
+    while ((nOffset < nTotalSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+        if (nBlockCount++ >= GIF_MAX_BLOCK_COUNT) {
+            return 0;
+        }
+
+        const quint8 nMarker = read_uint8(nOffset);
+
+        if (nMarker == 0x3B) {
+            return XBinary::isPdStructNotCanceled(pPdStruct) ? nOffset + 1 : 0;
+        }
+
+        if (nMarker == 0x2C) {
+            if (nOffset > nTotalSize - 10) {
+                return 0;
+            }
+
+            if ((read_uint16(nOffset + 5) == 0) || (read_uint16(nOffset + 7) == 0)) {
+                return 0;
+            }
+
+            const quint8 nImagePacked = read_uint8(nOffset + 9);
+            nOffset += 10;
+
+            if (nImagePacked & 0x80) {
+                const qint64 nLocalTableSize = 3 * ((qint64)1 << ((nImagePacked & 7) + 1));
+
+                if (nLocalTableSize > nTotalSize - nOffset) {
+                    return 0;
+                }
+
+                nOffset += nLocalTableSize;
+            }
+
+            if (nOffset >= nTotalSize) {
+                return 0;
+            }
+
+            const quint8 nMinimumCodeSize = read_uint8(nOffset++);
+
+            if ((nMinimumCodeSize < 2) || (nMinimumCodeSize > 8)) {
+                return 0;
+            }
+        } else if (nMarker == 0x21) {
+            if (nOffset > nTotalSize - 2) {
+                return 0;
+            }
+
+            nOffset += 2;
         } else {
-            break;
+            return 0;
+        }
+
+        bool bTerminated = false;
+
+        while ((nOffset < nTotalSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            if (nBlockCount++ >= GIF_MAX_BLOCK_COUNT) {
+                return 0;
+            }
+
+            const quint8 nBlockSize = read_uint8(nOffset++);
+
+            if (nBlockSize == 0) {
+                bTerminated = true;
+                break;
+            }
+
+            if (nBlockSize > nTotalSize - nOffset) {
+                return 0;
+            }
+
+            nOffset += nBlockSize;
+        }
+
+        if (!bTerminated) {
+            return 0;
         }
     }
 
-    nCurrentOffset++;
-
-    if (read_uint8(nCurrentOffset) == 0x3B) {
-        nCurrentOffset++;
-
-        nResult = nCurrentOffset;
-    }
-
-    return nResult;
+    return 0;
 }
 
 QString XGif::getMIMEString()
@@ -127,6 +207,10 @@ quint32 XGif::ftStringToStructID(const QString &sFtString)
 QList<XBinary::XFHEADER> XGif::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::XFHEADER> listResult;
+
+    if (!isValid(pPdStruct)) {
+        return listResult;
+    }
 
     quint32 nStructID = xfStruct.nStructID;
 
@@ -351,30 +435,47 @@ QList<XBinary::XFRECORD> XGif::getXFRecords(FT fileType, quint32 nStructID, cons
 QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<XBinary::FPART> listResult;
-    Q_UNUSED(nLimit)
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     qint64 nTotalSize = getSize();
+
+    if (nTotalSize <= 0) {
+        return listResult;
+    }
+
+    if (_getStructuredSize(pPdStruct) == 0) {
+        return listResult;
+    }
 
     if (nFileParts & FILEPART_SIGNATURE) {
         FPART rec = {};
         rec.filePart = FILEPART_SIGNATURE;
         rec.nFileOffset = 0;
-        rec.nFileSize = 6;
+        rec.nFileSize = qMin<qint64>(6, nTotalSize);
         rec.nVirtualAddress = -1;
         rec.sName = tr("Signature");
         listResult.append(rec);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     // Logical Screen Descriptor and optional GCT
     qint64 nOffset = 6;
-    if (nFileParts & FILEPART_HEADER) {
+    if ((nFileParts & FILEPART_HEADER) && (nOffset < nTotalSize)) {
         FPART rec = {};
         rec.filePart = FILEPART_HEADER;
         rec.nFileOffset = nOffset;
-        rec.nFileSize = 7;
+        rec.nFileSize = qMin<qint64>(7, nTotalSize - nOffset);
         rec.nVirtualAddress = -1;
         rec.sName = tr("Logical Screen Descriptor");
         listResult.append(rec);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
+    }
+
+    if ((nOffset < 0) || (nOffset > nTotalSize - 7)) {
+        return listResult;
     }
 
     quint8 packed = read_uint8(nOffset + 4);
@@ -382,20 +483,35 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     quint8 gctSizeCode = (packed & 0x07);
     nOffset += 7;
 
-    if (bGCT && (nFileParts & FILEPART_TABLE)) {
+    if (bGCT) {
         qint64 gctSize = 3 * ((qint64)1 << (gctSizeCode + 1));
-        FPART rec = {};
-        rec.filePart = FILEPART_TABLE;
-        rec.nFileOffset = nOffset;
-        rec.nFileSize = gctSize;
-        rec.nVirtualAddress = -1;
-        rec.sName = tr("Global Color Table");
-        listResult.append(rec);
+
+        if (gctSize > nTotalSize - nOffset) {
+            return listResult;
+        }
+
+        if (nFileParts & FILEPART_TABLE) {
+            FPART rec = {};
+            rec.filePart = FILEPART_TABLE;
+            rec.nFileOffset = nOffset;
+            rec.nFileSize = gctSize;
+            rec.nVirtualAddress = -1;
+            rec.sName = tr("Global Color Table");
+            listResult.append(rec);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
+        }
+
         nOffset += gctSize;
     }
 
     // Blocks loop (sections/regions)
+    qint32 nBlockCount = 0;
     while ((nOffset < nTotalSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+        if (nBlockCount++ >= GIF_MAX_BLOCK_COUNT) {
+            listResult.clear();
+            return listResult;
+        }
+
         quint8 marker = read_uint8(nOffset);
         if (marker == 0x3B) {  // Trailer
             if (nFileParts & FILEPART_FOOTER) {
@@ -406,25 +522,65 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                 rec.nVirtualAddress = -1;
                 rec.sName = tr("Trailer");
                 listResult.append(rec);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             }
             nOffset += 1;
             break;
         } else if (marker == 0x2C) {  // Image Descriptor
             qint64 start = nOffset;
+
+            if (start > nTotalSize - 10) {
+                break;
+            }
+
             nOffset += 10;
             quint8 ipacked = read_uint8(start + 9);
             if (ipacked & 0x80) {  // Local Color Table
                 quint8 sizeCode = (ipacked & 0x07);
-                nOffset += 3 * ((qint64)1 << (sizeCode + 1));
+                qint64 nLocalTableSize = 3 * ((qint64)1 << (sizeCode + 1));
+
+                if (nLocalTableSize > nTotalSize - nOffset) {
+                    nOffset = start;
+                    break;
+                }
+
+                nOffset += nLocalTableSize;
             }
+
             // LZW
-            nOffset += 1;  // LZW min code size
-            while (XBinary::isPdStructNotCanceled(pPdStruct)) {
-                quint8 sub = read_uint8(nOffset++);
-                if (sub == 0) break;
-                nOffset += sub;
-                if (nOffset > nTotalSize) break;
+            if (nOffset >= nTotalSize) {
+                nOffset = start;
+                break;
             }
+
+            nOffset += 1;  // LZW min code size
+
+            bool bComplete = false;
+            while ((nOffset < nTotalSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+                if (nBlockCount++ >= GIF_MAX_BLOCK_COUNT) {
+                    listResult.clear();
+                    return listResult;
+                }
+
+                quint8 sub = read_uint8(nOffset++);
+
+                if (sub == 0) {
+                    bComplete = true;
+                    break;
+                }
+
+                if (sub > nTotalSize - nOffset) {
+                    break;
+                }
+
+                nOffset += sub;
+            }
+
+            if (!bComplete) {
+                nOffset = start;
+                break;
+            }
+
             if (nFileParts & FILEPART_REGION) {
                 FPART rec = {};
                 rec.filePart = FILEPART_REGION;
@@ -433,17 +589,43 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                 rec.nVirtualAddress = -1;
                 rec.sName = tr("Image");
                 listResult.append(rec);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             }
         } else if (marker == 0x21) {  // Extension
+            if (nOffset > nTotalSize - 2) {
+                break;
+            }
+
             quint8 label = read_uint8(nOffset + 1);
             qint64 start = nOffset;
             nOffset += 2;
-            while (XBinary::isPdStructNotCanceled(pPdStruct)) {
+
+            bool bComplete = false;
+            while ((nOffset < nTotalSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+                if (nBlockCount++ >= GIF_MAX_BLOCK_COUNT) {
+                    listResult.clear();
+                    return listResult;
+                }
+
                 quint8 sub = read_uint8(nOffset++);
-                if (sub == 0) break;
+
+                if (sub == 0) {
+                    bComplete = true;
+                    break;
+                }
+
+                if (sub > nTotalSize - nOffset) {
+                    break;
+                }
+
                 nOffset += sub;
-                if (nOffset > nTotalSize) break;
             }
+
+            if (!bComplete) {
+                nOffset = start;
+                break;
+            }
+
             if (nFileParts & FILEPART_SECTION) {
                 FPART rec = {};
                 rec.filePart = FILEPART_SECTION;
@@ -458,10 +640,16 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                     default: rec.sName = tr("Extension"); break;
                 }
                 listResult.append(rec);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             }
         } else {
             break;  // Unknown marker
         }
+    }
+
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        listResult.clear();
+        return listResult;
     }
 
     if (nFileParts & FILEPART_OVERLAY) {
@@ -473,6 +661,7 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             rec.nVirtualAddress = -1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

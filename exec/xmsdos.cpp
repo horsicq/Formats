@@ -64,7 +64,7 @@ bool XMSDOS::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PD
 {
     XMSDOS xmsdos(pDevice, bIsImage, nModuleAddress);
 
-    return xmsdos.isValid();
+    return xmsdos.isValid(pPdStruct);
 }
 
 bool XMSDOS::isExecutable()
@@ -120,10 +120,14 @@ XMSDOS_DEF::IMAGE_DOS_HEADER XMSDOS::getDosHeader()
 
 QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     Q_UNUSED(pPdStruct)
 
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
+
     qint64 nImageSize = getImageSize();
     qint64 nTotal = getSize();
 
@@ -141,6 +145,7 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
         record.nVirtualAddress = -1;
         record.sName = tr("Header");
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_SEGMENT) {
@@ -152,6 +157,7 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
             record.nVirtualAddress = -1;
             record.sName = tr("Image");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 
@@ -166,6 +172,7 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
             record.nVirtualAddress = -1;
             record.sName = tr("Overlay");
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

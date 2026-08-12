@@ -48,6 +48,7 @@ public:
     };
 
     struct CHUNK {
+        bool bValid;
         QString sName;
         qint64 nDataOffset;
         qint64 nDataSize;
@@ -123,9 +124,9 @@ public:
     static bool createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, COLOR_TYPE colorType, quint8 nBitDepth = 8);
     static bool createPNGIndexed(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, const QByteArray &baPalette, quint8 nBitDepth = 8);
 
-    IHDR getIHDR();
-    pHYs getpHYs();
-    bKGD getbKGD();
+    IHDR getIHDR(PDSTRUCT *pPdStruct = nullptr);
+    pHYs getpHYs(PDSTRUCT *pPdStruct = nullptr);
+    bKGD getbKGD(PDSTRUCT *pPdStruct = nullptr);
 
     virtual QString structIDToString(quint32 nID) override;
     virtual QString structIDToFtString(quint32 nID) override;
@@ -139,7 +140,9 @@ public:
     //                             void *pUserData, PDSTRUCT *pPdStruct) override;
 
 private:
+    qint64 _getStructuredSize(PDSTRUCT *pPdStruct);
     CHUNK _readChunk(qint64 nOffset);
+    bool _isChunkCRCValid(const CHUNK &chunk, PDSTRUCT *pPdStruct);
     static bool _writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByteArray &data);
     static QByteArray _compressData(const QByteArray &data);
     static QByteArray _convertImageData(const char *pData, qint32 nDataSize, quint32 nWidth, quint32 nHeight, COLOR_TYPE colorType, quint8 nBitDepth);

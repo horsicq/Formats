@@ -29,6 +29,7 @@ class XSearchProcess : public XThreadObject {
 
 public:
     explicit XSearchProcess(QObject *pParent = nullptr);
+    ~XSearchProcess() override;
 
     void setData(const XBinary::INDATA &inData, XBinary::XLOC location, qint64 nSize, const XBinary::XFSS_OPTIONS &ssOptions,
                  XBinary::_MEMORY_MAP *pMemoryMap, QVector<XBinary::MS_RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
@@ -50,6 +51,7 @@ private:
     XBinary::_MEMORY_MAP *m_pMemoryMap;
     QVector<XBinary::MS_RECORD> *m_pListRecords;
     XBinary::PDSTRUCT *m_pPdStruct;
+    XBinary::PDCALLBACKSUBSCRIPTION m_pdCallbackSubscription;
 };
 
 #endif  // XSEARCHPROCESS_H

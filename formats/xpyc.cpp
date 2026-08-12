@@ -110,7 +110,7 @@ bool XPYC::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XPYC xpyc(pDevice);
 
-    return xpyc.isValid();
+    return xpyc.isValid(pPdStruct);
 }
 
 QString XPYC::getArch()
@@ -936,9 +936,11 @@ XBinary::_MEMORY_MAP XPYC::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
 QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
-
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     qint64 nTotalSize = getSize();
     qint64 nFormatSize = getFileFormatSize(pPdStruct);
@@ -973,6 +975,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.sName = tr("Header");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     // Code object (remaining data up to format size)
@@ -985,6 +988,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.sName = tr("Code Object");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_DATA) {
@@ -996,6 +1000,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.sName = tr("Data");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     // Overlay (if any data beyond format size)
@@ -1008,6 +1013,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.sName = tr("Overlay");
 
         listResult.append(record);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     return listResult;

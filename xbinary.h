@@ -21,6 +21,7 @@
 #ifndef XBINARY_H
 #define XBINARY_H
 
+#include <QAtomicInteger>
 #include <QBuffer>
 #include <QCoreApplication>
 #include <QCryptographicHash>
@@ -36,6 +37,7 @@
 #include <QMutex>
 #include <QPair>
 #include <QSet>
+#include <QSharedPointer>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUuid>
@@ -179,7 +181,10 @@ public:
         STRUCTID_ENTROPY,
         STRUCTID_EXTRACTOR,
         STRUCTID_SEARCH,
-        STRUCTID_OVERLAY
+        STRUCTID_OVERLAY,
+        STRUCTID_INFO,
+        STRUCTID_TOOLS,
+        STRUCTID_DEMANGLE
     };
 
     struct DATASET {
@@ -255,8 +260,8 @@ public:
         HANDLE_METHOD_ARJ,          // ARJ compression methods 1-3 (Huffman + LZSS)
         HANDLE_METHOD_ARJ_FASTEST,  // ARJ compression method 4 (simple LZSS)
         HANDLE_METHOD_BROTLI,       // Brotli compression (.br)
-        HANDLE_METHOD_ACE,           // ACE method 1: LZ77 + Huffman (32KB window)
-        HANDLE_METHOD_ACE_DELTA,     // ACE method 2: LZ77 + Huffman + inverse byte-delta filter
+        HANDLE_METHOD_ACE,           // ACE method 1: LZ77 + Huffman
+        HANDLE_METHOD_ACE_DELTA,     // Reserved legacy value; ACE TECH.TYPE 2 is unsupported BLOCKED_1
         HANDLE_METHOD_DELTA,         // Delta filter (7z/XZ), property byte = distance - 1
         HANDLE_METHOD_ARM_BCJ,       // ARM (LE) branch filter
         HANDLE_METHOD_ARMT_BCJ,      // ARM Thumb (LE) branch filter
@@ -380,6 +385,7 @@ public:
         FPART_PROP_BCJ2_AES_UNPACK_3,  // AES output size for BCJ2 range stream
         FPART_PROP_PASSWORD_MODIFIER,  // ARJ garble password modifier byte
         FPART_PROP_GEN,                // PDF object generation number (for the per-object decryption key)
+        FPART_PROP_RAR5_HASHMAC,       // RAR5 stored hash uses the password-derived MAC transform
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -1210,34 +1216,60 @@ public:
     static FPART findParentFPart(const QList<FPART> &listFParts, const FPART &fPart);
 
     struct PDRECORD {
-        qint64 nCurrent;
-        qint64 nTotal;
+        // Numeric fields remain directly readable for source compatibility, but
+        // are atomic so legacy polling code does not race worker updates.  Use a
+        // PDSTRUCT snapshot whenever the fields and sStatus must be coherent.
+        QAtomicInteger<qint64> nCurrent;
+        QAtomicInteger<qint64> nTotal;
         QString sStatus;
         //        bool bSuccess;
         //        bool bFinished;
-        bool bIsValid;
+        QAtomicInteger<bool> bIsValid;
     };
 
     const static qint32 N_NUMBER_PDRECORDS = 5;
 
     typedef void (*PDSTRUCT_CALLBACK)(void *pUserData, PDSTRUCT *pPdStruct);
 
+    struct PDSTRUCT_CALLBACK_STATE;
+
+    // Opaque callback registration whose external state can outlive PDSTRUCT.
+    struct PDCALLBACKSUBSCRIPTION {
+        QSharedPointer<PDSTRUCT_CALLBACK_STATE> _state;
+        quint64 _token = 0;
+
+        bool isValid() const { return !_state.isNull() && (_token != 0); }
+    };
+
     struct PDSTRUCT {
+        PDSTRUCT();
+        PDSTRUCT(const PDSTRUCT &other);
+        PDSTRUCT &operator=(const PDSTRUCT &other);
+        ~PDSTRUCT();
+
         PDRECORD _pdRecord[N_NUMBER_PDRECORDS];
-        bool bIsStop;
-        quint64 nFinished;
+        QAtomicInteger<bool> bIsStop;
+        QAtomicInteger<quint64> nFinished;
         //        bool bIsDisable;
         //        QString sStatus;
         //        bool bErrors;
         //        bool bSuccess; // TODO important
         QString sInfoString;
         QString sErrorString;
-        bool bForceStop;         // TODO !!!
-        qint32 nBufferSize;      // 0 => 0x4000
-        qint32 nFileBufferSize;  // 0 => 0x10000
+        QAtomicInteger<bool> bForceStop;  // TODO !!!
+        QAtomicInteger<qint32> nBufferSize;      // 0 => 0x4000
+        QAtomicInteger<qint32> nFileBufferSize;  // 0 => 0x10000
         PDSTRUCT_CALLBACK pCallback;
         void *pCallbackUserData;
-        qint64 nLastCallbackTime;
+        QAtomicInteger<qint64> nLastCallbackTime;
+
+        // Protects compound progress records and the QString state.  The
+        // atomic fields preserve common direct polling syntax, but changing
+        // their scalar types and adding synchronization is an ABI-major change.
+        // Writers should use the helper API and cross-thread readers should use
+        // getPdStructSnapshot().
+        mutable QMutex _pdMutex;
+        QSharedPointer<PDSTRUCT_CALLBACK_STATE> _pdCallbackState;
     };
 
     enum DHT {
@@ -2096,6 +2128,7 @@ public:
 
     static double getEntropy(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static double getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
+    static double getEntropy(QIODevice *pDevice, qint32 nBufferSize, PDSTRUCT *pPdStruct);
 
     enum BSTATUS {
         BSTATUS_ENTROPY = 0,
@@ -2105,6 +2138,7 @@ public:
     };
 
     double getBinaryStatus(BSTATUS bstatus, qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
+    double getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct, qint32 nBufferSize);
     bool isZeroFilled(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
 
     BYTE_COUNTS getByteCounts(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
@@ -2453,6 +2487,7 @@ public:
     static MODE getModeOS();
 
     static PDSTRUCT createPdStruct();
+    static PDSTRUCT getPdStructSnapshot(const PDSTRUCT *pPdStruct);
     static void setPdStructInit(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nTotal);
     static void setPdStructTotal(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue);
     static void setPdStructCurrent(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue);
@@ -2465,6 +2500,8 @@ public:
     static void clearPdStructErrorString(PDSTRUCT *pPdStruct);
     static QString getPdStructInfoString(PDSTRUCT *pPdStruct);
     static QString getPdStructErrorString(PDSTRUCT *pPdStruct);
+    static qint32 reservePdStructRecord(PDSTRUCT *pPdStruct, qint64 nTotal = 0, const QString &sStatus = QString());
+    // Legacy name retained for callers; it now reserves the returned slot.
     static qint32 getFreeIndex(PDSTRUCT *pPdStruct);
     static bool isPdStructFinished(PDSTRUCT *pPdStruct);
     static bool isPdStructNotCanceled(PDSTRUCT *pPdStruct);
@@ -2472,6 +2509,12 @@ public:
     static bool isPdStructStopped(PDSTRUCT *pPdStruct);
     static void setPdStructStopped(PDSTRUCT *pPdStruct);
     static qint32 getPdStructPercentage(PDSTRUCT *pPdStruct);  // 0-100
+    static void setPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData,
+                                    PDSTRUCT_CALLBACK *pPreviousCallback = nullptr, void **pPreviousCallbackUserData = nullptr);
+    static bool compareAndSetPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pExpectedCallback, void *pExpectedCallbackUserData,
+                                              PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData);
+    static PDCALLBACKSUBSCRIPTION subscribePdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData);
+    static bool unsubscribePdStructCallback(PDCALLBACKSUBSCRIPTION *pSubscription);
     static void invokePdStructCallback(PDSTRUCT *pPdStruct, qint32 nMinIntervalMs = 100);
 
     struct REGION_FILL {
@@ -2493,7 +2536,9 @@ public:
     static QString getiOSVersionFromDarwin(quint32 nDarwin);
 
     static QString _fromWCharArray(const wchar_t *pWString, qint32 size = -1);
+    // Legacy fail-closed shim. Use the capacity overload for all writes.
     static qint32 _toWCharArray(const QString &sString, wchar_t *pWString);
+    static qint32 _toWCharArray(const QString &sString, wchar_t *pWString, qint32 nCapacity);
 
     enum DSMODE {
         DSMODE_NONE = 0,
@@ -2590,6 +2635,8 @@ public:
     virtual bool unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     virtual bool moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+    static bool writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const char *pData, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    static bool writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<FPART_PROP> getAvailableFPARTProperties();
 
@@ -2637,6 +2684,10 @@ public:
 
     static QString getArchiveRecordComment(const ARCHIVERECORD &record);
     static QString getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties);
+    // Decode a coder's raw property bytes into 7-Zip-style parameters, e.g. LZMA2
+    // dictionary byte 0x00 -> "12" (2^12 = 4 KiB), LZMA -> "<dictexp>[:lcN:lpN:pbN]".
+    // Returns an empty string for methods without decodable parameters.
+    static QString getCoderParamsString(HANDLE_METHOD handleMethod, const QByteArray &baProperties);
 
     struct XFSS_OPTIONS {
         qint32 nLimit;

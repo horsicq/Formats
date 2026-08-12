@@ -345,8 +345,12 @@ qint64 XMP3::decodeFrame(qint64 nOffset)
 
 QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     QList<FPART> list;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return list;
+    }
+
     const qint64 total = getSize();
 
     qint64 offset = 0;
@@ -368,6 +372,7 @@ QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                 h.nVirtualAddress = -1;
                 h.sName = tr("Header");
                 list.append(h);
+                if ((nLimit != -1) && (list.count() >= nLimit)) return list;
             }
             startAfterId3 = qMin(id3Size, total);
             offset = startAfterId3;
@@ -391,6 +396,7 @@ QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             f.nVirtualAddress = -1;
             f.sName = QString("Frame");
             list.append(f);
+            if ((nLimit != -1) && (list.count() >= nLimit)) return list;
             offset += frameSize;
         }
     }
@@ -409,6 +415,7 @@ QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             ov.nVirtualAddress = -1;
             ov.sName = tr("Overlay");
             list.append(ov);
+            if ((nLimit != -1) && (list.count() >= nLimit)) return list;
         }
     }
 

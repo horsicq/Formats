@@ -51,7 +51,7 @@ bool XLE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTR
 {
     XLE xle(pDevice, bIsImage, nModuleAddress);
 
-    return xle.isValid();
+    return xle.isValid(pPdStruct);
 }
 
 XBinary::MODE XLE::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
@@ -1631,10 +1631,14 @@ quint32 XLE::ftStringToStructID(const QString &sFtString)
 
 QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     Q_UNUSED(pPdStruct)
 
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
+
     qint64 nTotal = getSize();
     qint64 nMaxOffset = 0;
 
@@ -1656,6 +1660,7 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         rec.sName = tr("Header");
         if (nImageHeaderSize > 0) {
             listResult.append(rec);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
 
         nMaxOffset = qMax(nMaxOffset, rec.nFileOffset + rec.nFileSize);
@@ -1791,6 +1796,7 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                 rec.nVirtualSize = rec.nFileSize;
                 rec.sName = QString("%1(%2)").arg(tr("Object")).arg(i + 1);
                 listResult.append(rec);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
                 nMaxOffset = qMax(nMaxOffset, rec.nFileOffset + rec.nFileSize);
             }
         }
@@ -1806,6 +1812,7 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             rec.nVirtualAddress = -1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

@@ -72,7 +72,7 @@ bool XTTF::isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     XTTF xttf(pDevice);
 
-    return xttf.isValid();
+    return xttf.isValid(pPdStruct);
 }
 
 XBinary::FT XTTF::getFileType()

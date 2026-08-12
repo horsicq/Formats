@@ -503,7 +503,7 @@ bool XPE::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, PDSTR
 {
     XPE xpe(pDevice, bIsImage, nModuleAddress);
 
-    return xpe.isValid();
+    return xpe.isValid(pPdStruct);
 }
 
 XBinary::MODE XPE::getMode(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
@@ -2584,10 +2584,10 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUC
                 break;
             }
 
-            qint64 nOffset = addressToOffset(pMemoryMap, iid.Name + pMemoryMap->nModuleAddress);
+            qint64 nLibraryNameOffset = addressToOffset(pMemoryMap, iid.Name + pMemoryMap->nModuleAddress);
 
-            if (nOffset != -1) {
-                sLibrary = read_ansiString(nOffset);
+            if (nLibraryNameOffset != -1) {
+                sLibrary = read_ansiString(nLibraryNameOffset);
 
                 if (sLibrary == "") {
                     break;
@@ -2624,10 +2624,10 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUC
                     }
 
                     if (!(nThunk64 & 0x8000000000000000)) {
-                        qint64 nOffset = addressToOffset(pMemoryMap, nThunk64 + pMemoryMap->nModuleAddress);
+                        qint64 nFunctionNameOffset = addressToOffset(pMemoryMap, nThunk64 + pMemoryMap->nModuleAddress);
 
-                        if (nOffset != -1) {
-                            sFunction = read_ansiString(nOffset + 2);
+                        if (nFunctionNameOffset != -1) {
+                            sFunction = read_ansiString(nFunctionNameOffset + 2);
 
                             if (sFunction == "") {
                                 break;
@@ -2646,10 +2646,10 @@ QList<XPE::IMPORT_RECORD> XPE::getImportRecords(_MEMORY_MAP *pMemoryMap, PDSTRUC
                     }
 
                     if (!(nThunk32 & 0x80000000)) {
-                        qint64 nOffset = addressToOffset(pMemoryMap, nThunk32 + pMemoryMap->nModuleAddress);
+                        qint64 nFunctionNameOffset = addressToOffset(pMemoryMap, nThunk32 + pMemoryMap->nModuleAddress);
 
-                        if (nOffset != -1) {
-                            sFunction = read_ansiString(nOffset + 2);
+                        if (nFunctionNameOffset != -1) {
+                            sFunction = read_ansiString(nFunctionNameOffset + 2);
 
                             if (sFunction == "") {
                                 break;
@@ -4796,8 +4796,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
 
         if ((result.directory.NumberOfFunctions < 0xFFFF) && (result.directory.NumberOfNames < 0xFFFF)) {
             if ((nAddressOfFunctionsOffset != -1) && (nAddressOfNamesOffset != -1) && (nAddressOfNameOrdinalsOffset != -1)) {
-                qint32 _nFreeIndexScan = XBinary::getFreeIndex(pPdStruct);
-                XBinary::setPdStructInit(pPdStruct, _nFreeIndexScan, result.directory.NumberOfFunctions);
+                qint32 _nFreeIndexScan = XBinary::reservePdStructRecord(pPdStruct, result.directory.NumberOfFunctions);
 
                 QMap<quint16, EXPORT_POSITION> mapNames;
 
@@ -9332,7 +9331,7 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
 #if defined(_MSC_VER)
     wchar_t wszFilePath[512] = {};
 
-    if (XBinary::_toWCharArray(sFileName, wszFilePath)) {
+    if (XBinary::_toWCharArray(sFileName, wszFilePath, (qint32)(sizeof(wszFilePath) / sizeof(wszFilePath[0])))) {
         WINTRUST_FILE_INFO wintrustFileInfo = {};
         wintrustFileInfo.cbStruct = sizeof(WINTRUST_FILE_INFO);
         wintrustFileInfo.pcwszFilePath = wszFilePath;
@@ -9430,9 +9429,10 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
 
                                     if (pCertContext) {
                                         DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
-                                        for (DWORD n = 0; n < dwData; n++) {
+                                        for (DWORD nSerialIndex = 0; nSerialIndex < dwData; nSerialIndex++) {
                                             result.sSerialNumber.append(
-                                                QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData - (n + 1)])));
+                                                QString("%1 ").arg(XBinary::valueToHex(
+                                                    pCertContext->pCertInfo->SerialNumber.pbData[dwData - (nSerialIndex + 1)])));
                                         }
 
                                         result.sIssuer = getCertNameString(pCertContext, CERTNAMESTRING_ISSUER);
@@ -9473,9 +9473,10 @@ XPE::XCERT_INFO XPE::getCertInfo(const QString &sFileName)
 
                                         if (pCertContext) {
                                             DWORD dwData = pCertContext->pCertInfo->SerialNumber.cbData;
-                                            for (DWORD n = 0; n < dwData; n++) {
+                                            for (DWORD nSerialIndex = 0; nSerialIndex < dwData; nSerialIndex++) {
                                                 result.sTSSerialNumber.append(
-                                                    QString("%1 ").arg(XBinary::valueToHex(pCertContext->pCertInfo->SerialNumber.pbData[dwData - (n + 1)])));
+                                                    QString("%1 ").arg(XBinary::valueToHex(
+                                                        pCertContext->pCertInfo->SerialNumber.pbData[dwData - (nSerialIndex + 1)])));
                                             }
 
                                             result.sTSIssuer = getCertNameString(pCertContext, CERTNAMESTRING_ISSUER);
@@ -13183,10 +13184,12 @@ quint32 XPE::hlTypeToFParts(HLTYPE hlType)
 
 QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit);
-
     QList<XBinary::FPART> listResult;
     QList<XBinary::FPART> _listCalc;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     bool bCalcAdress = false;
 
@@ -13245,6 +13248,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
         if (nFileParts & FILEPART_HEADER) {
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
 
         nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
@@ -13281,6 +13285,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                 record.mapProperties.insert(FPART_PROP_ORIGINALNAME, _sSectionName);
                 record.sName = QString("%1 (%2) [\"%3\"]").arg(tr("Section")).arg(QString::number(i + 1)).arg(_sSectionName);
                 listResult.append(record);
+                if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             }
 
             nMaxOffset = qMax(nMaxOffset, record.nFileOffset + record.nFileSize);
@@ -13299,8 +13304,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
             qint32 nNumberOfRecords = listResources.count();
 
-            qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-            XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+            qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nNumberOfRecords);
 
             for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 qint64 nResourceOffset = listResources.at(i).nOffset;
@@ -13323,12 +13327,15 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                     }
 
                     listResult.append(record);
+                    if ((nLimit != -1) && (listResult.count() >= nLimit)) break;
                 }
 
                 XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
             }
 
             XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 
@@ -13338,8 +13345,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
             qint32 nNumberOfRecords = listDebug.count();
 
-            qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-            XBinary::setPdStructInit(pPdStruct, _nFreeIndex, nNumberOfRecords);
+            qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nNumberOfRecords);
 
             for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 qint64 nRecordOffset = listDebug.at(i).PointerToRawData;
@@ -13355,6 +13361,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                         record.sName = QString::number(nRecordType);
 
                         listResult.append(record);
+                        if ((nLimit != -1) && (listResult.count() >= nLimit)) break;
                     }
                 }
 
@@ -13362,6 +13369,8 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             }
 
             XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 
@@ -13376,6 +13385,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             record.sName = tr("Overlay");
 
             listResult.append(record);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

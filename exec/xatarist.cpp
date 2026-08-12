@@ -60,7 +60,7 @@ bool XAtariST::isValid(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, 
 {
     XAtariST xatarist(pDevice, bIsImage, nModuleAddress);
 
-    return xatarist.isValid();
+    return xatarist.isValid(pPdStruct);
 }
 
 bool XAtariST::isExecutable()
@@ -102,10 +102,13 @@ QList<XBinary::MAPMODE> XAtariST::getMapModesList()
 
 QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
-    Q_UNUSED(nLimit)
     Q_UNUSED(pPdStruct)
 
     QList<FPART> listResult;
+
+    if ((nLimit < -1) || (nLimit == 0)) {
+        return listResult;
+    }
 
     XATARIST_DEF::HEADER header = getHeader();
 
@@ -121,6 +124,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
         partHeader.nVirtualAddress = -1;
         partHeader.sName = tr("Header");
         listResult.append(partHeader);
+        if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
     }
 
     if (nFileParts & FILEPART_SEGMENT) {
@@ -133,6 +137,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
             partText.nVirtualAddress = getModuleAddress();
             partText.sName = tr("Text");
             listResult.append(partText);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             nCurrentOffset += partText.nFileSize;
         }
 
@@ -145,6 +150,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
             partData.nVirtualAddress = getModuleAddress() + header.nTextSize;
             partData.sName = tr("Data");
             listResult.append(partData);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
             nCurrentOffset += partData.nFileSize;
         }
 
@@ -157,6 +163,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
             partBss.nVirtualAddress = getModuleAddress() + header.nTextSize + header.nDataSize;
             partBss.sName = QString("BSS");
             listResult.append(partBss);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 
@@ -185,6 +192,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
             partOverlay.nVirtualAddress = -1;
             partOverlay.sName = tr("Overlay");
             listResult.append(partOverlay);
+            if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
     }
 

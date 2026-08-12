@@ -22,8 +22,104 @@
 
 #include <algorithm>
 #include <cstring>
+#include <limits>
+#include <new>
 
 namespace {
+
+constexpr qint32 MAX_CONVERT_BUFFER_SIZE = 0x100000;
+constexpr qint64 MAX_WHOLE_INPUT_SIZE = 64LL * 1024 * 1024;
+constexpr qint64 MAX_BASE58_ENCODE_INPUT_SIZE = 0x1000;
+constexpr qint64 MAX_BASE58_DECODE_INPUT_SIZE = 0x1800;
+constexpr qint32 MAX_ZERO_PROGRESS_ATTEMPTS = 3;
+
+qint32 getConvertBufferSize(XBinary::PDSTRUCT *pPdStruct, qint32 nMinimumSize = 1)
+{
+    nMinimumSize = qMax<qint32>(1, nMinimumSize);
+
+    return qBound(nMinimumSize, XBinary::getBufferSize(pPdStruct), qMax(nMinimumSize, MAX_CONVERT_BUFFER_SIZE));
+}
+
+char *allocateConvertBuffer(qint32 nSize, XBinary::PDSTRUCT *pPdStruct)
+{
+    char *pResult = new (std::nothrow) char[nSize];
+
+    if (!pResult) {
+        XBinary::setPdStructInfoString(pPdStruct, QObject::tr("Memory allocation error"));
+    }
+
+    return pResult;
+}
+
+bool isAsciiWhitespace(char nChar)
+{
+    return (nChar == ' ') || (nChar == '\t') || (nChar == '\r') || (nChar == '\n') || (nChar == '\f') || (nChar == '\v');
+}
+
+bool isWholeConversionCanceled(XBinary::PDSTRUCT *pPdStruct, qint32 nPosition)
+{
+    return ((nPosition & 0x3FFF) == 0) && !XBinary::isPdStructNotCanceled(pPdStruct);
+}
+
+bool readExact(QIODevice *pDevice, char *pData, qint64 nSize, XBinary::PDSTRUCT *pPdStruct)
+{
+    qint64 nDone = 0;
+    qint32 nZeroAttempts = 0;
+
+    while (nDone < nSize) {
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            return false;
+        }
+
+        const qint64 nRead = pDevice->read(pData + nDone, nSize - nDone);
+        if (nRead < 0) {
+            XBinary::setPdStructInfoString(pPdStruct, QObject::tr("Read error"));
+            return false;
+        }
+        if (nRead == 0) {
+            if (++nZeroAttempts >= MAX_ZERO_PROGRESS_ATTEMPTS) {
+                XBinary::setPdStructInfoString(pPdStruct, QObject::tr("Read error"));
+                return false;
+            }
+            continue;
+        }
+
+        nDone += nRead;
+        nZeroAttempts = 0;
+    }
+
+    return true;
+}
+
+bool writeExact(QIODevice *pDevice, const char *pData, qint64 nSize, XBinary::PDSTRUCT *pPdStruct)
+{
+    qint64 nDone = 0;
+    qint32 nZeroAttempts = 0;
+
+    while (nDone < nSize) {
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            return false;
+        }
+
+        const qint64 nWritten = pDevice->write(pData + nDone, nSize - nDone);
+        if (nWritten < 0) {
+            XBinary::setPdStructInfoString(pPdStruct, QObject::tr("Write error"));
+            return false;
+        }
+        if (nWritten == 0) {
+            if (++nZeroAttempts >= MAX_ZERO_PROGRESS_ATTEMPTS) {
+                XBinary::setPdStructInfoString(pPdStruct, QObject::tr("Write error"));
+                return false;
+            }
+            continue;
+        }
+
+        nDone += nWritten;
+        nZeroAttempts = 0;
+    }
+
+    return true;
+}
 
 // Operation groups used by the 1:1 "map" converter. The concrete method
 // (e.g. CMETHOD_XOR_WORD) is decomposed into an operation + a byte width so a
@@ -41,14 +137,14 @@ enum MAPOP {
     MAPOP_NIBBLESWAP,  // byte width only
     MAPOP_SHL,
     MAPOP_SHR,
-    MAPOP_ROT13,      // byte width only
-    MAPOP_ROT47,      // byte width only
-    MAPOP_UPPERCASE,  // byte width only
-    MAPOP_LOWERCASE,  // byte width only
-    MAPOP_SWAPCASE,   // byte width only
-    MAPOP_ATBASH,     // byte width only
-    MAPOP_ROT5,       // byte width only
-    MAPOP_ROT18,      // byte width only
+    MAPOP_ROT13,         // byte width only
+    MAPOP_ROT47,         // byte width only
+    MAPOP_UPPERCASE,     // byte width only
+    MAPOP_LOWERCASE,     // byte width only
+    MAPOP_SWAPCASE,      // byte width only
+    MAPOP_ATBASH,        // byte width only
+    MAPOP_ROT5,          // byte width only
+    MAPOP_ROT18,         // byte width only
     MAPOP_EBCDIC2ASCII,  // byte width only
     MAPOP_ASCII2EBCDIC   // byte width only
 };
@@ -646,14 +742,38 @@ inline qint32 hexNibble(char nChar)
     return -1;
 }
 
+qint32 base64Value(char nChar, bool bUrl)
+{
+    if ((nChar >= 'A') && (nChar <= 'Z')) {
+        return nChar - 'A';
+    }
+    if ((nChar >= 'a') && (nChar <= 'z')) {
+        return nChar - 'a' + 26;
+    }
+    if ((nChar >= '0') && (nChar <= '9')) {
+        return nChar - '0' + 52;
+    }
+    if (nChar == (bUrl ? '-' : '+')) {
+        return 62;
+    }
+    if (nChar == (bUrl ? '_' : '/')) {
+        return 63;
+    }
+
+    return -1;
+}
+
 // ---- Base32 (RFC 4648) ----
-QByteArray base32Encode(const QByteArray &baIn)
+QByteArray base32Encode(const QByteArray &baIn, XBinary::PDSTRUCT *pPdStruct)
 {
     static const char *ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
     QByteArray baOut;
     qint32 nLen = baIn.size();
 
     for (qint32 i = 0; i < nLen;) {
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
         qint32 nBlock = qMin(5, nLen - i);  // up to 5 input bytes -> 8 chars
         quint64 nBuffer = 0;
 
@@ -692,21 +812,43 @@ qint32 base32Value(char nChar)
     return -1;
 }
 
-QByteArray base32Decode(const QByteArray &baIn)
+QByteArray base32Decode(const QByteArray &baIn, bool *pOk, XBinary::PDSTRUCT *pPdStruct)
 {
     QByteArray baOut;
     quint64 nBuffer = 0;
     qint32 nBits = 0;
+    qint32 nDataChars = 0;
+    qint32 nPadding = 0;
+    bool bPadding = false;
+
+    *pOk = false;
 
     for (qint32 i = 0; i < baIn.size(); i++) {
-        qint32 nValue = base32Value(baIn.at(i));
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
+        const char nChar = baIn.at(i);
+        if (isAsciiWhitespace(nChar)) {
+            continue;
+        }
+        if (nChar == '=') {
+            bPadding = true;
+            nPadding++;
+            continue;
+        }
+        if (bPadding) {
+            return QByteArray();
+        }
+
+        const qint32 nValue = base32Value(nChar);
 
         if (nValue < 0) {
-            continue;  // padding / whitespace / invalid
+            return QByteArray();
         }
 
         nBuffer = (nBuffer << 5) | (quint32)nValue;
         nBits += 5;
+        nDataChars++;
 
         if (nBits >= 8) {
             nBits -= 8;
@@ -714,16 +856,31 @@ QByteArray base32Decode(const QByteArray &baIn)
         }
     }
 
+    const qint32 nRemainder = nDataChars % 8;
+    if ((nRemainder != 0) && (nRemainder != 2) && (nRemainder != 4) && (nRemainder != 5) && (nRemainder != 7)) {
+        return QByteArray();
+    }
+    if (nPadding && ((nDataChars == 0) || (nPadding != ((8 - nRemainder) % 8)))) {
+        return QByteArray();
+    }
+    if (nBits && ((nBuffer & (((quint64)1 << nBits) - 1)) != 0)) {
+        return QByteArray();
+    }
+
+    *pOk = true;
     return baOut;
 }
 
 // ---- Ascii85 (Adobe / btoa, 'z' for a zero group) ----
-QByteArray ascii85Encode(const QByteArray &baIn)
+QByteArray ascii85Encode(const QByteArray &baIn, XBinary::PDSTRUCT *pPdStruct)
 {
     QByteArray baOut;
     qint32 nLen = baIn.size();
 
     for (qint32 i = 0; i < nLen;) {
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
         qint32 nBlock = qMin(4, nLen - i);
         quint32 nValue = 0;
 
@@ -751,11 +908,15 @@ QByteArray ascii85Encode(const QByteArray &baIn)
     return baOut;
 }
 
-QByteArray ascii85Decode(const QByteArray &baIn)
+QByteArray ascii85Decode(const QByteArray &baIn, bool *pOk, XBinary::PDSTRUCT *pPdStruct)
 {
     QByteArray baOut;
-    quint32 nTuple = 0;
+    quint64 nTuple = 0;
     qint32 nCount = 0;
+    bool bFramed = false;
+    bool bEnded = false;
+
+    *pOk = false;
 
     // Strip an optional leading Adobe "<~" frame ('<' is otherwise a valid data char and
     // must NOT be skipped mid-stream). The '~' of a trailing "~>" ends the data below.
@@ -765,32 +926,47 @@ QByteArray ascii85Decode(const QByteArray &baIn)
         nStart++;
     }
     if (((nStart + 1) < baIn.size()) && (baIn.at(nStart) == '<') && (baIn.at(nStart + 1) == '~')) {
+        bFramed = true;
         nStart += 2;
     }
 
     for (qint32 i = nStart; i < baIn.size(); i++) {
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
         char nChar = baIn.at(i);
 
         if (nChar == '~') {
-            break;  // '~>' end marker
-        } else if ((nChar == ' ') || (nChar == '\t') || (nChar == '\r') || (nChar == '\n') || (nChar == '\f') || (nChar == '\v')) {
+            if (!bFramed || ((i + 1) >= baIn.size()) || (baIn.at(i + 1) != '>')) {
+                return QByteArray();
+            }
+            bEnded = true;
+            i++;
+            while (++i < baIn.size()) {
+                if (!isAsciiWhitespace(baIn.at(i))) {
+                    return QByteArray();
+                }
+            }
+            break;
+        } else if (isAsciiWhitespace(nChar)) {
             continue;
         } else if (nChar == 'z') {
-            if (nCount == 0) {
-                baOut.append((char)0);
-                baOut.append((char)0);
-                baOut.append((char)0);
-                baOut.append((char)0);
+            if (nCount != 0) {
+                return QByteArray();
             }
+            baOut.append(4, (char)0);
             continue;
         } else if ((nChar < '!') || (nChar > 'u')) {
-            continue;  // out of alphabet
+            return QByteArray();
         }
 
         nTuple = nTuple * 85 + (quint32)(nChar - '!');
         nCount++;
 
         if (nCount == 5) {
+            if (nTuple > 0xFFFFFFFFULL) {
+                return QByteArray();
+            }
             baOut.append((char)((nTuple >> 24) & 0xFF));
             baOut.append((char)((nTuple >> 16) & 0xFF));
             baOut.append((char)((nTuple >> 8) & 0xFF));
@@ -800,15 +976,26 @@ QByteArray ascii85Decode(const QByteArray &baIn)
         }
     }
 
-    if (nCount > 0) {
+    if (bFramed && !bEnded) {
+        return QByteArray();
+    }
+
+    if (nCount == 1) {
+        return QByteArray();
+    }
+    if (nCount > 1) {
         for (qint32 k = nCount; k < 5; k++) {
             nTuple = nTuple * 85 + 84;  // pad with 'u'
+        }
+        if (nTuple > 0xFFFFFFFFULL) {
+            return QByteArray();
         }
         for (qint32 k = 0; k < (nCount - 1); k++) {
             baOut.append((char)((nTuple >> (24 - k * 8)) & 0xFF));
         }
     }
 
+    *pOk = true;
     return baOut;
 }
 
@@ -819,12 +1006,15 @@ inline bool urlUnreserved(quint8 nByte)
            (nByte == '.') || (nByte == '~');
 }
 
-QByteArray urlEncode(const QByteArray &baIn)
+QByteArray urlEncode(const QByteArray &baIn, XBinary::PDSTRUCT *pPdStruct)
 {
     static const char *HEX = "0123456789ABCDEF";
     QByteArray baOut;
 
     for (qint32 i = 0; i < baIn.size(); i++) {
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
         quint8 nByte = (quint8)baIn.at(i);
 
         if (urlUnreserved(nByte)) {
@@ -839,39 +1029,52 @@ QByteArray urlEncode(const QByteArray &baIn)
     return baOut;
 }
 
-QByteArray urlDecode(const QByteArray &baIn)
+QByteArray urlDecode(const QByteArray &baIn, bool *pOk, XBinary::PDSTRUCT *pPdStruct)
 {
     QByteArray baOut;
     qint32 nLen = baIn.size();
 
+    *pOk = false;
+
     for (qint32 i = 0; i < nLen; i++) {
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
         char nChar = baIn.at(i);
 
-        if ((nChar == '%') && ((i + 2) < nLen)) {
+        if (nChar == '%') {
+            if ((i + 2) >= nLen) {
+                return QByteArray();
+            }
             qint32 nHi = hexNibble(baIn.at(i + 1));
             qint32 nLo = hexNibble(baIn.at(i + 2));
 
-            if ((nHi >= 0) && (nLo >= 0)) {
-                baOut.append((char)((nHi << 4) | nLo));
-                i += 2;
-                continue;
+            if ((nHi < 0) || (nLo < 0)) {
+                return QByteArray();
             }
+            baOut.append((char)((nHi << 4) | nLo));
+            i += 2;
+            continue;
         }
 
         baOut.append(nChar);
     }
 
+    *pOk = true;
     return baOut;
 }
 
 // ---- Quoted-printable (binary-reversible: escapes everything but 33..126 except '=') ----
-QByteArray qpEncode(const QByteArray &baIn)
+QByteArray qpEncode(const QByteArray &baIn, XBinary::PDSTRUCT *pPdStruct)
 {
     static const char *HEX = "0123456789ABCDEF";
     QByteArray baOut;
     qint32 nLineLen = 0;
 
     for (qint32 i = 0; i < baIn.size(); i++) {
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
         quint8 nByte = (quint8)baIn.at(i);
         bool bLiteral = ((nByte >= 33) && (nByte <= 126) && (nByte != '='));
 
@@ -901,23 +1104,27 @@ QByteArray qpEncode(const QByteArray &baIn)
     return baOut;
 }
 
-QByteArray qpDecode(const QByteArray &baIn)
+QByteArray qpDecode(const QByteArray &baIn, bool *pOk, XBinary::PDSTRUCT *pPdStruct)
 {
     QByteArray baOut;
     qint32 nLen = baIn.size();
 
+    *pOk = false;
+
     for (qint32 i = 0; i < nLen; i++) {
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
         char nChar = baIn.at(i);
 
         if (nChar == '=') {
-            if (((i + 1) < nLen) && ((baIn.at(i + 1) == '\r') || (baIn.at(i + 1) == '\n'))) {
-                // soft line break "=\r\n" or "=\n"
-                if ((baIn.at(i + 1) == '\r') && ((i + 2) < nLen) && (baIn.at(i + 2) == '\n')) {
-                    i += 2;
-                } else {
-                    i += 1;
-                }
+            if (((i + 1) < nLen) && (baIn.at(i + 1) == '\n')) {
+                i += 1;  // tolerate a Unix soft line break
                 continue;
+            }
+            if (((i + 2) < nLen) && (baIn.at(i + 1) == '\r') && (baIn.at(i + 2) == '\n')) {
+                i += 2;
+                continue;  // RFC 2045 soft line break
             }
 
             if ((i + 2) < nLen) {
@@ -931,14 +1138,13 @@ QByteArray qpDecode(const QByteArray &baIn)
                 }
             }
 
-            baOut.append(nChar);  // stray '='
-        } else if ((nChar == '\r') || (nChar == '\n')) {
-            continue;  // hard breaks are structure, not data (encoder escapes real CR/LF)
+            return QByteArray();
         } else {
             baOut.append(nChar);
         }
     }
 
+    *pOk = true;
     return baOut;
 }
 
@@ -955,7 +1161,7 @@ qint32 base58Value(char nChar)
     return -1;
 }
 
-QByteArray base58Encode(const QByteArray &baIn)
+QByteArray base58Encode(const QByteArray &baIn, XBinary::PDSTRUCT *pPdStruct)
 {
     qint32 nZeros = 0;
     while ((nZeros < baIn.size()) && (baIn.at(nZeros) == 0)) {
@@ -965,6 +1171,9 @@ QByteArray base58Encode(const QByteArray &baIn)
     QByteArray baDigits;  // little-endian base-58 digits
 
     for (qint32 i = 0; i < baIn.size(); i++) {
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            return QByteArray();
+        }
         qint32 nCarry = (quint8)baIn.at(i);
 
         for (qint32 j = 0; j < baDigits.size(); j++) {
@@ -990,21 +1199,36 @@ QByteArray base58Encode(const QByteArray &baIn)
     return baOut;
 }
 
-QByteArray base58Decode(const QByteArray &baIn)
+QByteArray base58Decode(const QByteArray &baIn, bool *pOk, XBinary::PDSTRUCT *pPdStruct)
 {
+    *pOk = false;
+    QByteArray baNormalized;
+    baNormalized.reserve(baIn.size());
+    for (qint32 i = 0; i < baIn.size(); i++) {
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            return QByteArray();
+        }
+        if (isAsciiWhitespace(baIn.at(i))) {
+            continue;
+        }
+        if (base58Value(baIn.at(i)) < 0) {
+            return QByteArray();
+        }
+        baNormalized.append(baIn.at(i));
+    }
+
     qint32 nOnes = 0;
-    while ((nOnes < baIn.size()) && (baIn.at(nOnes) == '1')) {
+    while ((nOnes < baNormalized.size()) && (baNormalized.at(nOnes) == '1')) {
         nOnes++;
     }
 
     QByteArray baBytes;  // little-endian base-256
 
-    for (qint32 i = 0; i < baIn.size(); i++) {
-        qint32 nValue = base58Value(baIn.at(i));
-
-        if (nValue < 0) {
-            continue;  // ignore whitespace / invalid
+    for (qint32 i = nOnes; i < baNormalized.size(); i++) {
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            return QByteArray();
         }
+        qint32 nValue = base58Value(baNormalized.at(i));
 
         qint32 nCarry = nValue;
 
@@ -1028,6 +1252,7 @@ QByteArray base58Decode(const QByteArray &baIn)
         baOut.append(baBytes.at(i));
     }
 
+    *pOk = true;
     return baOut;
 }
 
@@ -1043,7 +1268,7 @@ inline qint32 uuDecChar(char nChar)
     return ((quint8)nChar - 0x20) & 0x3F;  // 0x20 and 0x60 both map to 0
 }
 
-QByteArray uuEncode(const QByteArray &baIn)
+QByteArray uuEncode(const QByteArray &baIn, XBinary::PDSTRUCT *pPdStruct)
 {
     QByteArray baOut;
     baOut.append("begin 644 data\n");
@@ -1051,6 +1276,9 @@ QByteArray uuEncode(const QByteArray &baIn)
     qint32 nLen = baIn.size();
 
     for (qint32 i = 0; i < nLen;) {
+        if (isWholeConversionCanceled(pPdStruct, i)) {
+            return QByteArray();
+        }
         qint32 nLine = qMin(45, nLen - i);
         baOut.append((char)(0x20 + nLine));  // line length char
 
@@ -1076,12 +1304,21 @@ QByteArray uuEncode(const QByteArray &baIn)
     return baOut;
 }
 
-QByteArray uuDecode(const QByteArray &baIn)
+QByteArray uuDecode(const QByteArray &baIn, bool *pOk, XBinary::PDSTRUCT *pPdStruct)
 {
     QByteArray baOut;
     QList<QByteArray> listLines = baIn.split('\n');
+    bool bHeader = false;
+    bool bTerminated = false;
+    bool bEnded = false;
+    bool bSawData = false;
+
+    *pOk = false;
 
     for (qint32 li = 0; li < listLines.size(); li++) {
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            return QByteArray();
+        }
         QByteArray baLine = listLines.at(li);
         while (baLine.endsWith('\r')) {
             baLine.chop(1);
@@ -1090,27 +1327,75 @@ QByteArray uuDecode(const QByteArray &baIn)
         if (baLine.isEmpty()) {
             continue;
         }
-        if (baLine.startsWith("begin")) {
+        if (!bHeader && !bSawData && !bTerminated && baLine.startsWith("begin ")) {
+            const QList<QByteArray> listHeader = baLine.split(' ');
+            if ((listHeader.size() < 3) || (listHeader.at(1).size() != 3) || listHeader.at(2).isEmpty()) {
+                return QByteArray();
+            }
+            for (qint32 i = 0; i < 3; i++) {
+                if ((listHeader.at(1).at(i) < '0') || (listHeader.at(1).at(i) > '7')) {
+                    return QByteArray();
+                }
+            }
+            bHeader = true;
             continue;
         }
-        if (baLine.startsWith("end")) {
+        if (baLine == "end") {
+            if (!bTerminated) {
+                return QByteArray();
+            }
+            bEnded = true;
+            for (qint32 i = li + 1; i < listLines.size(); i++) {
+                if (!listLines.at(i).trimmed().isEmpty()) {
+                    return QByteArray();
+                }
+            }
             break;
         }
+        if (bTerminated) {
+            return QByteArray();
+        }
 
-        qint32 nLine = uuDecChar(baLine.at(0));
-        if (nLine <= 0) {
-            break;  // terminator line
+        const quint8 nLengthChar = (quint8)baLine.at(0);
+        if ((nLengthChar < 0x20) || (nLengthChar > 0x60)) {
+            return QByteArray();
+        }
+        qint32 nLine = uuDecChar((char)nLengthChar);
+        if (nLine == 0) {
+            if (baLine.size() != 1) {
+                return QByteArray();
+            }
+            bTerminated = true;
+            continue;
+        }
+        bSawData = true;
+
+        const qint32 nEncodedSize = 4 * ((nLine + 2) / 3);
+        if (baLine.size() != (1 + nEncodedSize)) {
+            return QByteArray();
         }
 
         qint32 nPos = 1;
         qint32 nProduced = 0;
 
         while ((nProduced < nLine) && ((nPos + 4) <= baLine.size())) {
+            for (qint32 i = 0; i < 4; i++) {
+                const quint8 nEncodedChar = (quint8)baLine.at(nPos + i);
+                if ((nEncodedChar < 0x20) || (nEncodedChar > 0x60)) {
+                    return QByteArray();
+                }
+            }
             qint32 c0 = uuDecChar(baLine.at(nPos));
             qint32 c1 = uuDecChar(baLine.at(nPos + 1));
             qint32 c2 = uuDecChar(baLine.at(nPos + 2));
             qint32 c3 = uuDecChar(baLine.at(nPos + 3));
             nPos += 4;
+
+            const qint32 nRemaining = nLine - nProduced;
+            if (((nRemaining == 1) && (((c1 & 0x0F) != 0) || (c2 != 0) || (c3 != 0))) ||
+                ((nRemaining == 2) && (((c2 & 0x03) != 0) || (c3 != 0)))) {
+                return QByteArray();
+            }
 
             quint8 b0 = (quint8)((c0 << 2) | (c1 >> 4));
             quint8 b1 = (quint8)((c1 << 4) | (c2 >> 2));
@@ -1131,6 +1416,11 @@ QByteArray uuDecode(const QByteArray &baIn)
         }
     }
 
+    if (!bTerminated || (bHeader && !bEnded)) {
+        return QByteArray();
+    }
+
+    *pOk = true;
     return baOut;
 }
 
@@ -1208,10 +1498,7 @@ bool XDataConvertor::convertMap(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
     // bytes are intentionally dropped (matching the S_ALIGN_DOWN64 output sizing).
     qint64 nConvertSize = (nWidth > 1) ? (qint64)S_ALIGN_DOWN64(nInSize, nWidth) : nInSize;
 
-    qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
-    if (nBufferSize < 8) {
-        nBufferSize = 8;  // keep chunk >= max width so width alignment never yields 0
-    }
+    qint32 nBufferSize = getConvertBufferSize(pPdStruct, 8);  // keep chunk >= max width so width alignment never yields 0
 
     XBinary::setPdStructTotal(pPdStruct, nFreeIndex, nInSize);
 
@@ -1220,7 +1507,10 @@ bool XDataConvertor::convertMap(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
         return false;
     }
 
-    char *pBuffer = new char[nBufferSize];
+    char *pBuffer = allocateConvertBuffer(nBufferSize, pPdStruct);
+    if (!pBuffer) {
+        return false;
+    }
     bResult = true;
 
     for (qint64 nOffset = 0; (nOffset < nConvertSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
@@ -1230,16 +1520,14 @@ bool XDataConvertor::convertMap(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
             nChunkSize -= (nChunkSize % nWidth);  // keep each chunk width-aligned (nBufferSize >= 8 >= nWidth)
         }
 
-        if (pDeviceIn->read(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Read error"));
+        if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
 
         applyMap(pBuffer, nChunkSize, op, nWidth, nKey);
 
-        if (pDeviceOut->write(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+        if (!writeExact(pDeviceOut, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1266,10 +1554,7 @@ bool XDataConvertor::convertKeyed(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
 
     qint64 nInSize = pDeviceIn->size();
 
-    qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
-    if (nBufferSize < 1) {
-        nBufferSize = 1;
-    }
+    qint32 nBufferSize = getConvertBufferSize(pPdStruct);
 
     XBinary::setPdStructTotal(pPdStruct, nFreeIndex, nInSize);
 
@@ -1278,14 +1563,16 @@ bool XDataConvertor::convertKeyed(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
         return false;
     }
 
-    char *pBuffer = new char[nBufferSize];
+    char *pBuffer = allocateConvertBuffer(nBufferSize, pPdStruct);
+    if (!pBuffer) {
+        return false;
+    }
     bool bResult = true;
 
     for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
 
-        if (pDeviceIn->read(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Read error"));
+        if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1311,8 +1598,7 @@ bool XDataConvertor::convertKeyed(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
             pBuffer[j] = (char)nValue;
         }
 
-        if (pDeviceOut->write(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+        if (!writeExact(pDeviceOut, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1352,10 +1638,7 @@ bool XDataConvertor::convertRC4(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
 
     qint64 nInSize = pDeviceIn->size();
 
-    qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
-    if (nBufferSize < 1) {
-        nBufferSize = 1;
-    }
+    qint32 nBufferSize = getConvertBufferSize(pPdStruct);
 
     XBinary::setPdStructTotal(pPdStruct, nFreeIndex, nInSize);
 
@@ -1364,7 +1647,10 @@ bool XDataConvertor::convertRC4(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
         return false;
     }
 
-    char *pBuffer = new char[nBufferSize];
+    char *pBuffer = allocateConvertBuffer(nBufferSize, pPdStruct);
+    if (!pBuffer) {
+        return false;
+    }
     bool bResult = true;
 
     // PRGA indices persist across chunks (single-threaded process()).
@@ -1374,8 +1660,7 @@ bool XDataConvertor::convertRC4(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
     for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
 
-        if (pDeviceIn->read(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Read error"));
+        if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1390,8 +1675,7 @@ bool XDataConvertor::convertRC4(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
             pBuffer[k] = (char)((quint8)pBuffer[k] ^ nKeyStream);
         }
 
-        if (pDeviceOut->write(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+        if (!writeExact(pDeviceOut, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1411,20 +1695,12 @@ bool XDataConvertor::convertChain(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
     bool bEncode = (m_method == CMETHOD_DELTA_ENCODE) || (m_method == CMETHOD_XORPREV_ENCODE);
     bool bXor = (m_method == CMETHOD_XORPREV_ENCODE) || (m_method == CMETHOD_XORPREV_DECODE);
 
-    qint64 nDistance = m_options.varKey.toLongLong();
-    if (nDistance < 1) {
-        nDistance = 1;
-    }
-    if (nDistance > 0x10000) {
-        nDistance = 0x10000;  // bound the reference ring buffer
-    }
+    const qint64 nRequestedDistance = m_options.varKey.toLongLong();
+    const qint32 nDistance = (nRequestedDistance < 1) ? 1 : ((nRequestedDistance > 0x10000) ? 0x10000 : (qint32)nRequestedDistance);
 
     qint64 nInSize = pDeviceIn->size();
 
-    qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
-    if (nBufferSize < 1) {
-        nBufferSize = 1;
-    }
+    qint32 nBufferSize = getConvertBufferSize(pPdStruct);
 
     XBinary::setPdStructTotal(pPdStruct, nFreeIndex, nInSize);
 
@@ -1433,42 +1709,67 @@ bool XDataConvertor::convertChain(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
         return false;
     }
 
-    char *pBuffer = new char[nBufferSize];
-    unsigned char *pRing = new unsigned char[nDistance];  // last `distance` reference bytes, init 0
-    memset(pRing, 0, (size_t)nDistance);
+    char *pBuffer = allocateConvertBuffer(nBufferSize, pPdStruct);
+    if (!pBuffer) {
+        return false;
+    }
+
+    QByteArray baRing;
+    try {
+        baRing = QByteArray(nDistance, '\0');  // last `distance` reference bytes
+    } catch (const std::bad_alloc &) {
+        delete[] pBuffer;
+        XBinary::setPdStructInfoString(pPdStruct, tr("Memory allocation error"));
+        return false;
+    }
+    if (baRing.size() != nDistance) {
+        delete[] pBuffer;
+        XBinary::setPdStructInfoString(pPdStruct, tr("Memory allocation error"));
+        return false;
+    }
 
     bool bResult = true;
-    qint64 nPos = 0;
+    qint32 nRingIndex = 0;
 
     for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
 
-        if (pDeviceIn->read(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Read error"));
+        if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
 
         for (qint64 k = 0; k < nChunkSize; k++) {
-            qint64 nRingIndex = nPos % nDistance;
-            unsigned char nRef = pRing[nRingIndex];
+            if ((nRingIndex < 0) || (nRingIndex >= baRing.size())) {
+                XBinary::setPdStructInfoString(pPdStruct, tr("Internal state error"));
+                bResult = false;
+                break;
+            }
+
+            unsigned char nRef = (quint8)baRing.at(nRingIndex);
             unsigned char nInByte = (quint8)pBuffer[k];
             unsigned char nOutByte;
 
             if (bEncode) {
                 nOutByte = bXor ? (unsigned char)(nInByte ^ nRef) : (unsigned char)(nInByte - nRef);
-                pRing[nRingIndex] = nInByte;  // reference stream is the input
+                baRing[nRingIndex] = (char)nInByte;  // reference stream is the input
             } else {
                 nOutByte = bXor ? (unsigned char)(nInByte ^ nRef) : (unsigned char)(nInByte + nRef);
-                pRing[nRingIndex] = nOutByte;  // reference stream is the reconstructed output
+                baRing[nRingIndex] = (char)nOutByte;  // reference stream is the reconstructed output
             }
 
             pBuffer[k] = (char)nOutByte;
-            nPos++;
+            nRingIndex++;
+            if (nRingIndex == nDistance) {
+                nRingIndex = 0;
+            }
         }
 
-        if (pDeviceOut->write(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+        if (!bResult) {
+            break;
+        }
+
+        if (!writeExact(pDeviceOut, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1478,7 +1779,6 @@ bool XDataConvertor::convertChain(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
         XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
     }
 
-    delete[] pRing;
     delete[] pBuffer;
 
     return bResult && (!XBinary::isPdStructStopped(pPdStruct));
@@ -1490,10 +1790,7 @@ bool XDataConvertor::convertReverse(QIODevice *pDeviceIn, QIODevice *pDeviceOut,
 
     qint64 nInSize = pDeviceIn->size();
 
-    qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
-    if (nBufferSize < 1) {
-        nBufferSize = 1;
-    }
+    qint32 nBufferSize = getConvertBufferSize(pPdStruct);
 
     XBinary::setPdStructTotal(pPdStruct, nFreeIndex, nInSize);
 
@@ -1502,7 +1799,10 @@ bool XDataConvertor::convertReverse(QIODevice *pDeviceIn, QIODevice *pDeviceOut,
         return false;
     }
 
-    char *pBuffer = new char[nBufferSize];
+    char *pBuffer = allocateConvertBuffer(nBufferSize, pPdStruct);
+    if (!pBuffer) {
+        return false;
+    }
     bResult = true;
 
     // Read the input from the tail towards the head, reverse each chunk, and write
@@ -1519,8 +1819,7 @@ bool XDataConvertor::convertReverse(QIODevice *pDeviceIn, QIODevice *pDeviceOut,
             break;
         }
 
-        if (pDeviceIn->read(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Read error"));
+        if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1531,8 +1830,7 @@ bool XDataConvertor::convertReverse(QIODevice *pDeviceIn, QIODevice *pDeviceOut,
             pBuffer[b] = nTmp;
         }
 
-        if (pDeviceOut->write(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+        if (!writeExact(pDeviceOut, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1560,10 +1858,7 @@ bool XDataConvertor::convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
 
     qint64 nInSize = pDeviceIn->size();
 
-    qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
-    if (nBufferSize < nInUnit) {
-        nBufferSize = nInUnit;
-    }
+    qint32 nBufferSize = getConvertBufferSize(pPdStruct, nInUnit);
 
     XBinary::setPdStructTotal(pPdStruct, nFreeIndex, nInSize);
 
@@ -1572,7 +1867,10 @@ bool XDataConvertor::convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
         return false;
     }
 
-    char *pBuffer = new char[nBufferSize];
+    char *pBuffer = allocateConvertBuffer(nBufferSize, pPdStruct);
+    if (!pBuffer) {
+        return false;
+    }
     bResult = true;
 
     for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
@@ -1583,8 +1881,7 @@ bool XDataConvertor::convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
             nChunkSize -= (nChunkSize % nInUnit);  // non-final chunks must be whole groups
         }
 
-        if (pDeviceIn->read(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Read error"));
+        if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1600,8 +1897,7 @@ bool XDataConvertor::convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
         }
         qint64 nOutSize = baOut.size();
 
-        if (pDeviceOut->write(baOut.constData(), nOutSize) != nOutSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+        if (!writeExact(pDeviceOut, baOut.constData(), nOutSize, pPdStruct)) {
             bResult = false;
             break;
         }
@@ -1618,21 +1914,10 @@ bool XDataConvertor::convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
 
 bool XDataConvertor::convertDecode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
-    bool bResult = false;
-
-    bool bHex = (m_method == CMETHOD_HEX_DECODE);
-    bool bBase64Url = (m_method == CMETHOD_BASE64URL_DECODE);
-    // Decoding consumes fixed-size character groups (4 for Base64, 2 for Hex). We
-    // strip whitespace (so MIME/PEM wrapped input works) and carry any partial group
-    // across chunk boundaries, decoding whole groups only until the final chunk.
-    qint32 nGroup = bHex ? 2 : 4;
-
-    qint64 nInSize = pDeviceIn->size();
-
-    qint32 nBufferSize = XBinary::getBufferSize(pPdStruct);
-    if (nBufferSize < 1) {
-        nBufferSize = 1;
-    }
+    const bool bHex = (m_method == CMETHOD_HEX_DECODE);
+    const bool bBase64Url = (m_method == CMETHOD_BASE64URL_DECODE);
+    const qint64 nInSize = pDeviceIn->size();
+    const qint32 nBufferSize = getConvertBufferSize(pPdStruct);
 
     XBinary::setPdStructTotal(pPdStruct, nFreeIndex, nInSize);
 
@@ -1641,65 +1926,144 @@ bool XDataConvertor::convertDecode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
         return false;
     }
 
-    char *pBuffer = new char[nBufferSize];
-    bResult = true;
+    char *pBuffer = allocateConvertBuffer(nBufferSize, pPdStruct);
+    if (!pBuffer) {
+        return false;
+    }
 
-    QByteArray baCarry;
+    bool bResult = true;
+    qint32 nHexNibble = -1;
+    qint32 nQuartet[4] = {0, 0, 0, 0};
+    qint32 nQuartetSize = 0;
+    bool bBase64Finished = false;
+
+    const auto flushBase64Quartet = [&](QByteArray *pOutput) -> bool {
+        if ((nQuartet[0] < 0) || (nQuartet[1] < 0)) {
+            return false;
+        }
+
+        pOutput->append((char)((nQuartet[0] << 2) | (nQuartet[1] >> 4)));
+        if (nQuartet[2] == -2) {
+            if ((nQuartet[3] != -2) || (nQuartet[1] & 0x0F)) {
+                return false;
+            }
+            bBase64Finished = true;
+        } else {
+            pOutput->append((char)((nQuartet[1] << 4) | (nQuartet[2] >> 2)));
+            if (nQuartet[3] == -2) {
+                if (nQuartet[2] & 0x03) {
+                    return false;
+                }
+                bBase64Finished = true;
+            } else {
+                if (nQuartet[3] < 0) {
+                    return false;
+                }
+                pOutput->append((char)((nQuartet[2] << 6) | nQuartet[3]));
+            }
+        }
+
+        nQuartetSize = 0;
+        return true;
+    };
 
     for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
-        qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
+        const qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
 
-        if (pDeviceIn->read(pBuffer, nChunkSize) != nChunkSize) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Read error"));
+        if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
             bResult = false;
             break;
         }
 
-        QByteArray baGroup = baCarry;
-        baCarry.clear();
+        QByteArray baOut;
+        baOut.reserve((qint32)nChunkSize);
 
         for (qint64 j = 0; j < nChunkSize; j++) {
-            char nChar = pBuffer[j];
-
-            if ((nChar != ' ') && (nChar != '\t') && (nChar != '\r') && (nChar != '\n') && (nChar != '\f') && (nChar != '\v')) {
-                baGroup.append(nChar);
+            const char nChar = pBuffer[j];
+            if (isAsciiWhitespace(nChar)) {
+                continue;
             }
-        }
 
-        nOffset += nChunkSize;
-
-        bool bLast = (nOffset >= nInSize);
-        QByteArray baToDecode;
-
-        if (bLast) {
-            baToDecode = baGroup;
-        } else {
-            qint32 nUse = (baGroup.size() / nGroup) * nGroup;
-            baToDecode = baGroup.left(nUse);
-            baCarry = baGroup.mid(nUse);
-        }
-
-        if (!baToDecode.isEmpty()) {
-            QByteArray baOut;
             if (bHex) {
-                baOut = QByteArray::fromHex(baToDecode);
-            } else if (bBase64Url) {
-                baOut = QByteArray::fromBase64(baToDecode, QByteArray::Base64UrlEncoding);
+                const qint32 nValue = hexNibble(nChar);
+                if (nValue < 0) {
+                    bResult = false;
+                    break;
+                }
+                if (nHexNibble < 0) {
+                    nHexNibble = nValue;
+                } else {
+                    baOut.append((char)((nHexNibble << 4) | nValue));
+                    nHexNibble = -1;
+                }
             } else {
-                baOut = QByteArray::fromBase64(baToDecode);
-            }
-            qint64 nOutSize = baOut.size();
-
-            if (nOutSize > 0) {
-                if (pDeviceOut->write(baOut.constData(), nOutSize) != nOutSize) {
-                    XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+                if (bBase64Finished) {
+                    bResult = false;
+                    break;
+                }
+                const qint32 nValue = (nChar == '=') ? -2 : base64Value(nChar, bBase64Url);
+                if (nValue == -1) {
+                    bResult = false;
+                    break;
+                }
+                if (nQuartetSize == 0) {
+                    nQuartet[0] = nValue;
+                } else if (nQuartetSize == 1) {
+                    nQuartet[1] = nValue;
+                } else if (nQuartetSize == 2) {
+                    nQuartet[2] = nValue;
+                } else if (nQuartetSize == 3) {
+                    nQuartet[3] = nValue;
+                } else {
+                    bResult = false;
+                    break;
+                }
+                nQuartetSize++;
+                if ((nQuartetSize == 4) && !flushBase64Quartet(&baOut)) {
                     bResult = false;
                     break;
                 }
             }
         }
 
+        nOffset += nChunkSize;
+        if (!bResult) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Invalid encoding"));
+            break;
+        }
+        if (!baOut.isEmpty() && !writeExact(pDeviceOut, baOut.constData(), baOut.size(), pPdStruct)) {
+            bResult = false;
+            break;
+        }
+
         XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+    }
+
+    if (bResult && XBinary::isPdStructNotCanceled(pPdStruct)) {
+        QByteArray baTail;
+        if (bHex) {
+            bResult = (nHexNibble < 0);
+        } else if (nQuartetSize == 1) {
+            bResult = false;
+        } else if (nQuartetSize == 2) {
+            bResult = (nQuartet[0] >= 0) && (nQuartet[1] >= 0) && ((nQuartet[1] & 0x0F) == 0);
+            if (bResult) {
+                baTail.append((char)((nQuartet[0] << 2) | (nQuartet[1] >> 4)));
+            }
+        } else if (nQuartetSize == 3) {
+            bResult = (nQuartet[0] >= 0) && (nQuartet[1] >= 0) && (nQuartet[2] >= 0) && ((nQuartet[2] & 0x03) == 0);
+            if (bResult) {
+                baTail.append((char)((nQuartet[0] << 2) | (nQuartet[1] >> 4)));
+                baTail.append((char)((nQuartet[1] << 4) | (nQuartet[2] >> 2)));
+            }
+        }
+
+        if (bResult && !baTail.isEmpty()) {
+            bResult = writeExact(pDeviceOut, baTail.constData(), baTail.size(), pPdStruct);
+        }
+        if (!bResult && XBinary::isPdStructNotCanceled(pPdStruct) && XBinary::getPdStructInfoString(pPdStruct).isEmpty()) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Invalid encoding"));
+        }
     }
 
     delete[] pBuffer;
@@ -1709,63 +2073,87 @@ bool XDataConvertor::convertDecode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
 
 bool XDataConvertor::convertWhole(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
-    // Base32/Ascii85/URL/QP are not cleanly chunk-independent, so they run whole-buffer.
-    qint64 nInSize = pDeviceIn->size();
+    // These formats are not cleanly chunk-independent. Bound their in-memory
+    // representation (and the quadratic Base58 implementation more tightly).
+    const qint64 nInSize = pDeviceIn->size();
+    qint64 nMaximumSize = MAX_WHOLE_INPUT_SIZE;
+    if (m_method == CMETHOD_BASE58_ENCODE) {
+        nMaximumSize = MAX_BASE58_ENCODE_INPUT_SIZE;
+    } else if (m_method == CMETHOD_BASE58_DECODE) {
+        nMaximumSize = MAX_BASE58_DECODE_INPUT_SIZE;
+    }
 
     XBinary::setPdStructTotal(pPdStruct, nFreeIndex, nInSize);
 
-    if (!pDeviceIn->seek(0)) {
+    if ((nInSize < 0) || (nInSize > nMaximumSize) || (nInSize > (std::numeric_limits<qint32>::max)())) {
+        XBinary::setPdStructInfoString(pPdStruct, tr("Input is too large"));
+        return false;
+    }
+
+    if (!pDeviceIn->seek(0) || !pDeviceOut->seek(0)) {
         XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
         return false;
     }
 
-    QByteArray baIn = pDeviceIn->readAll();
-    if (baIn.size() != nInSize) {
-        XBinary::setPdStructInfoString(pPdStruct, tr("Read error"));
-        return false;
-    }
-
-    XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nInSize);
-
-    if (XBinary::isPdStructStopped(pPdStruct)) {
-        return false;
-    }
-
+    QByteArray baIn;
     QByteArray baOut;
+    bool bDecodeOk = true;
 
-    if (m_method == CMETHOD_BASE32_ENCODE) {
-        baOut = base32Encode(baIn);
-    } else if (m_method == CMETHOD_BASE32_DECODE) {
-        baOut = base32Decode(baIn);
-    } else if (m_method == CMETHOD_ASCII85_ENCODE) {
-        baOut = ascii85Encode(baIn);
-    } else if (m_method == CMETHOD_ASCII85_DECODE) {
-        baOut = ascii85Decode(baIn);
-    } else if (m_method == CMETHOD_URL_ENCODE) {
-        baOut = urlEncode(baIn);
-    } else if (m_method == CMETHOD_URL_DECODE) {
-        baOut = urlDecode(baIn);
-    } else if (m_method == CMETHOD_QP_ENCODE) {
-        baOut = qpEncode(baIn);
-    } else if (m_method == CMETHOD_QP_DECODE) {
-        baOut = qpDecode(baIn);
-    } else if (m_method == CMETHOD_BASE58_ENCODE) {
-        baOut = base58Encode(baIn);
-    } else if (m_method == CMETHOD_BASE58_DECODE) {
-        baOut = base58Decode(baIn);
-    } else if (m_method == CMETHOD_UU_ENCODE) {
-        baOut = uuEncode(baIn);
-    } else if (m_method == CMETHOD_UU_DECODE) {
-        baOut = uuDecode(baIn);
-    }
+    try {
+        baIn.resize((qint32)nInSize);
+        const qint32 nBufferSize = getConvertBufferSize(pPdStruct);
+        for (qint64 nOffset = 0; nOffset < nInSize;) {
+            const qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
+            if (!readExact(pDeviceIn, baIn.data() + nOffset, nChunkSize, pPdStruct)) {
+                return false;
+            }
+            nOffset += nChunkSize;
+            XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+        }
 
-    if (!pDeviceOut->seek(0)) {
-        XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            return false;
+        }
+
+        if (m_method == CMETHOD_BASE32_ENCODE) {
+            baOut = base32Encode(baIn, pPdStruct);
+        } else if (m_method == CMETHOD_BASE32_DECODE) {
+            baOut = base32Decode(baIn, &bDecodeOk, pPdStruct);
+        } else if (m_method == CMETHOD_ASCII85_ENCODE) {
+            baOut = ascii85Encode(baIn, pPdStruct);
+        } else if (m_method == CMETHOD_ASCII85_DECODE) {
+            baOut = ascii85Decode(baIn, &bDecodeOk, pPdStruct);
+        } else if (m_method == CMETHOD_URL_ENCODE) {
+            baOut = urlEncode(baIn, pPdStruct);
+        } else if (m_method == CMETHOD_URL_DECODE) {
+            baOut = urlDecode(baIn, &bDecodeOk, pPdStruct);
+        } else if (m_method == CMETHOD_QP_ENCODE) {
+            baOut = qpEncode(baIn, pPdStruct);
+        } else if (m_method == CMETHOD_QP_DECODE) {
+            baOut = qpDecode(baIn, &bDecodeOk, pPdStruct);
+        } else if (m_method == CMETHOD_BASE58_ENCODE) {
+            baOut = base58Encode(baIn, pPdStruct);
+        } else if (m_method == CMETHOD_BASE58_DECODE) {
+            baOut = base58Decode(baIn, &bDecodeOk, pPdStruct);
+        } else if (m_method == CMETHOD_UU_ENCODE) {
+            baOut = uuEncode(baIn, pPdStruct);
+        } else if (m_method == CMETHOD_UU_DECODE) {
+            baOut = uuDecode(baIn, &bDecodeOk, pPdStruct);
+        }
+    } catch (const std::bad_alloc &) {
+        XBinary::setPdStructInfoString(pPdStruct, tr("Memory allocation error"));
         return false;
     }
 
-    if (pDeviceOut->write(baOut.constData(), baOut.size()) != baOut.size()) {
-        XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+    if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return false;
+    }
+    if (!bDecodeOk) {
+        XBinary::setPdStructInfoString(pPdStruct, tr("Invalid encoding"));
+        return false;
+    }
+
+    if (!writeExact(pDeviceOut, baOut.constData(), baOut.size(), pPdStruct)) {
         return false;
     }
 
@@ -1781,59 +2169,158 @@ void XDataConvertor::process()
         pPdStruct = &pdStructEmpty;
     }
 
-    qint32 _nFreeIndex = XBinary::getFreeIndex(pPdStruct);
-    XBinary::setPdStructInit(pPdStruct, _nFreeIndex, 0);
+    qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, 0);
+    XBinary::clearPdStructInfoString(pPdStruct);
+    XBinary::clearPdStructErrorString(pPdStruct);
 
-    m_pData->bValid = false;
-    m_pData->pTmpFile = nullptr;
-    m_pData->dEntropy = 0;
-
-    if (!m_pDeviceIn) {
-        XBinary::setPdStructInfoString(pPdStruct, tr("No data"));
+    if (!m_pData) {
+        XBinary::setPdStructInfoString(pPdStruct, tr("No result data"));
         XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
         return;
     }
 
-    if (m_method == CMETHOD_NONE) {
-        m_pData->dEntropy = XBinary::getEntropy(m_pDeviceIn, pPdStruct);
-        m_pData->bValid = (!pPdStruct->bIsStop);
-    } else {
-        m_pData->pTmpFile = new QTemporaryFile;
+    QTemporaryFile *pPreviousTmpFile = m_pData->pTmpFile;
+    const bool bPreviousIsInput = pPreviousTmpFile && (pPreviousTmpFile == m_pDeviceIn);
+    m_pData->bValid = false;
+    m_pData->pTmpFile = nullptr;
+    m_pData->dEntropy = 0;
+    QTemporaryFile *pNewTmpFile = nullptr;
+    qint64 nOriginalPosition = -1;
+    bool bRestorePosition = false;
+    bool bOperationOk = false;
 
-        if (m_pData->pTmpFile->open()) {
-            bool bConvertOk = false;
+    const auto calculateEntropy = [&](QIODevice *pDevice, double *pEntropy) -> bool {
+        *pEntropy = XBinary::getEntropy(pDevice, getConvertBufferSize(pPdStruct), pPdStruct);
+        return XBinary::isPdStructNotCanceled(pPdStruct) && XBinary::getPdStructErrorString(pPdStruct).isEmpty();
+    };
 
+    do {
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Canceled"));
+            break;
+        }
+
+        if (!m_pDeviceIn || !m_pDeviceIn->isOpen() || !m_pDeviceIn->isReadable() || m_pDeviceIn->isSequential() || (m_pDeviceIn->size() < 0)) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("No data"));
+            break;
+        }
+
+        nOriginalPosition = m_pDeviceIn->pos();
+        if (nOriginalPosition < 0) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
+            break;
+        }
+        bRestorePosition = true;
+        if (!m_pDeviceIn->seek(0) || !m_pDeviceIn->seek(nOriginalPosition)) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
+            break;
+        }
+
+        if (m_method == CMETHOD_NONE) {
+            bOperationOk = calculateEntropy(m_pDeviceIn, &m_pData->dEntropy);
+            break;
+        }
+
+        const bool bSupported = isMethodWidth(m_method) || isMethodKeyed(m_method) || (m_method == CMETHOD_RC4) || isMethodChain(m_method) ||
+                                (m_method == CMETHOD_REVERSE) || (m_method == CMETHOD_BASE64_ENCODE) || (m_method == CMETHOD_BASE64URL_ENCODE) ||
+                                (m_method == CMETHOD_HEX_ENCODE) || (m_method == CMETHOD_BASE64_DECODE) || (m_method == CMETHOD_BASE64URL_DECODE) ||
+                                (m_method == CMETHOD_HEX_DECODE) || isMethodWhole(m_method);
+        if (!bSupported) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Unknown method"));
+            break;
+        }
+
+        try {
+            pNewTmpFile = new (std::nothrow) QTemporaryFile;
+        } catch (const std::bad_alloc &) {
+            pNewTmpFile = nullptr;
+        }
+        if (!pNewTmpFile) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Memory allocation error"));
+            break;
+        }
+        if (!pNewTmpFile->open()) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Open error"));
+            break;
+        }
+
+        try {
             if (isMethodWidth(m_method)) {
-                bConvertOk = convertMap(m_pDeviceIn, m_pData->pTmpFile, pPdStruct, _nFreeIndex);
+                bOperationOk = convertMap(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             } else if (isMethodKeyed(m_method)) {
-                bConvertOk = convertKeyed(m_pDeviceIn, m_pData->pTmpFile, pPdStruct, _nFreeIndex);
+                bOperationOk = convertKeyed(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             } else if (m_method == CMETHOD_RC4) {
-                bConvertOk = convertRC4(m_pDeviceIn, m_pData->pTmpFile, pPdStruct, _nFreeIndex);
+                bOperationOk = convertRC4(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             } else if (isMethodChain(m_method)) {
-                bConvertOk = convertChain(m_pDeviceIn, m_pData->pTmpFile, pPdStruct, _nFreeIndex);
+                bOperationOk = convertChain(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             } else if (m_method == CMETHOD_REVERSE) {
-                bConvertOk = convertReverse(m_pDeviceIn, m_pData->pTmpFile, pPdStruct, _nFreeIndex);
+                bOperationOk = convertReverse(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             } else if ((m_method == CMETHOD_BASE64_ENCODE) || (m_method == CMETHOD_BASE64URL_ENCODE) || (m_method == CMETHOD_HEX_ENCODE)) {
-                bConvertOk = convertEncode(m_pDeviceIn, m_pData->pTmpFile, pPdStruct, _nFreeIndex);
+                bOperationOk = convertEncode(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             } else if ((m_method == CMETHOD_BASE64_DECODE) || (m_method == CMETHOD_BASE64URL_DECODE) || (m_method == CMETHOD_HEX_DECODE)) {
-                bConvertOk = convertDecode(m_pDeviceIn, m_pData->pTmpFile, pPdStruct, _nFreeIndex);
-            } else if (isMethodWhole(m_method)) {
-                bConvertOk = convertWhole(m_pDeviceIn, m_pData->pTmpFile, pPdStruct, _nFreeIndex);
+                bOperationOk = convertDecode(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             } else {
-                XBinary::setPdStructInfoString(pPdStruct, tr("Unknown method"));
+                bOperationOk = convertWhole(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             }
-
-            // The temp file is written sequentially, so its size is already exactly the
-            // number of bytes produced (no trailing padding to truncate). Flush so the
-            // subsequent read-back (entropy, hex view) sees the final contents.
-            m_pData->pTmpFile->flush();
-
-            m_pData->bValid = bConvertOk;
+        } catch (const std::bad_alloc &) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Memory allocation error"));
+            bOperationOk = false;
         }
 
-        if (m_pData->bValid) {
-            m_pData->dEntropy = XBinary::getEntropy(m_pData->pTmpFile, pPdStruct);
+        if (!bOperationOk) {
+            break;
         }
+        if (!pNewTmpFile->flush()) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Write error"));
+            bOperationOk = false;
+            break;
+        }
+        if (!calculateEntropy(pNewTmpFile, &m_pData->dEntropy)) {
+            bOperationOk = false;
+            break;
+        }
+        if (!pNewTmpFile->seek(0)) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
+            bOperationOk = false;
+            break;
+        }
+
+        m_pData->pTmpFile = pNewTmpFile;
+        pNewTmpFile = nullptr;
+    } while (false);
+
+    if (bRestorePosition && m_pDeviceIn && !m_pDeviceIn->seek(nOriginalPosition)) {
+        XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
+        bOperationOk = false;
+    }
+
+    if (!bOperationOk && XBinary::isPdStructStopped(pPdStruct) && XBinary::getPdStructInfoString(pPdStruct).isEmpty()) {
+        XBinary::setPdStructInfoString(pPdStruct, tr("Canceled"));
+    }
+
+    if (!bOperationOk) {
+        delete pNewTmpFile;
+        pNewTmpFile = nullptr;
+        if (m_pData->pTmpFile) {
+            delete m_pData->pTmpFile;
+            m_pData->pTmpFile = nullptr;
+        }
+        if (bPreviousIsInput) {
+            // A caller may chain a conversion by reusing DATA's prior temp file as
+            // the next input. A failed replacement must not destroy that source.
+            m_pData->pTmpFile = pPreviousTmpFile;
+            pPreviousTmpFile = nullptr;
+        }
+        m_pData->dEntropy = 0;
+    }
+
+    m_pData->bValid = bOperationOk;
+
+    if (pPreviousTmpFile && (pPreviousTmpFile != m_pData->pTmpFile)) {
+        if (pPreviousTmpFile == m_pDeviceIn) {
+            m_pDeviceIn = nullptr;
+        }
+        delete pPreviousTmpFile;
     }
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
