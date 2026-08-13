@@ -25,7 +25,7 @@ XBinary::XCONVERT _TABLE_EXAMPLE_CLASS_STRUCTID[] = {{EXAMPLE_CLASS::STRUCTID_UN
                                                      {EXAMPLE_CLASS::STRUCTID_DATA_STRUCT1, "DATA_STRUCT1", QString("DATA_STRUCT1")},
                                                      {EXAMPLE_CLASS::STRUCTID_DATA_STRUCT2, "DATA_STRUCT2", QString("DATA_STRUCT2")}};
 
-EXAMPLE_CLASS::EXAMPLE_CLASS(QIODevice *pDevice = nullptr) : XBinary(pDevice)
+EXAMPLE_CLASS::EXAMPLE_CLASS(QIODevice *pDevice) : XBinary(pDevice)
 {
     // Constructor implementation
 }
@@ -153,18 +153,6 @@ quint32 EXAMPLE_CLASS::ftStringToStructID(const QString &sFtString)
     return XCONVERT_ftStringToId(sFtString, _TABLE_EXAMPLE_CLASS_STRUCTID, sizeof(_TABLE_EXAMPLE_CLASS_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
-qint32 EXAMPLE_CLASS::readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
-                                   PDSTRUCT *pPdStruct)
-{
-    // Read a row from the table based on the provided parameters
-    qint32 nResult = 0;
-
-    // Perform reading logic here
-    // ...
-
-    return nResult;  // Replace with actual implementation
-}
-
 EXAMPLE_CLASS::DATA_STRUCT2 EXAMPLE_CLASS::_read_DATA_STRUCT2(qint64 nOffset)
 {
     DATA_STRUCT2 dataStruct2 = {};
@@ -196,67 +184,10 @@ EXAMPLE_CLASS::ORIGINALHEADERNAME EXAMPLE_CLASS::_read_ORIGINALHEADERNAME(qint64
     return originalHeaderName;
 }
 
-QList<XBinary::DATA_HEADER> EXAMPLE_CLASS::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
+QList<XBinary::FPART> EXAMPLE_CLASS::getHData(PDSTRUCT *pPdStruct)
 {
-    QList<XBinary::DATA_HEADER> listResult;
-
-    if (dataHeadersOptions.nID == STRUCTID_UNKNOWN) {
-        DATA_HEADERS_OPTIONS _dataHeadersOptions = dataHeadersOptions;
-        _dataHeadersOptions.bChildren = true;
-        _dataHeadersOptions.dsID_parent = _addDefaultHeaders(&listResult, pPdStruct);
-        _dataHeadersOptions.dhMode = XBinary::DHMODE_HEADER;
-
-        _dataHeadersOptions.nID = STRUCTID_ORIGINALHEADERNAME;
-        _dataHeadersOptions.nLocation = 0;
-        _dataHeadersOptions.locType = XBinary::LT_OFFSET;
-
-        listResult.append(getDataHeaders(_dataHeadersOptions, pPdStruct));
-    } else {
-        qint64 nStartOffset = locationToOffset(dataHeadersOptions.pMemoryMap, dataHeadersOptions.locType, dataHeadersOptions.nLocation);
-
-        if (nStartOffset != -1) {
-            XBinary::DATA_HEADER dataHeader = {};
-            dataHeader.dsID_parent = dataHeadersOptions.dsID_parent;
-            dataHeader.dsID.sGUID = generateUUID();
-            dataHeader.dsID.fileType = dataHeadersOptions.pMemoryMap->fileType;
-            dataHeader.dsID.nID = dataHeadersOptions.nID;
-            dataHeader.locType = dataHeadersOptions.locType;
-            dataHeader.nLocation = dataHeadersOptions.nLocation;
-            dataHeader.sName = structIDToString(dataHeadersOptions.nID);
-            dataHeader.dhMode = dataHeadersOptions.dhMode;
-
-            if (dataHeadersOptions.nID == STRUCTID_ORIGINALHEADERNAME) {
-                dataHeader.nSize = sizeof(ORIGINALHEADERNAME);
-
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(ORIGINALHEADERNAME, field1), 4, "field1", VT_UINT64, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(
-                    getDataRecord(offsetof(ORIGINALHEADERNAME, field2), 4, "field2", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-            } else if (dataHeadersOptions.nID == STRUCTID_DATA_STRUCT1) {
-                dataHeader.nSize = sizeof(DATA_STRUCT1);
-
-                dataHeader.listRecords.append(getDataRecord(offsetof(DATA_STRUCT1, fieldA), 4, "fieldA", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(DATA_STRUCT1, fieldB), 4, "fieldB", VT_UINT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                // Handle DATA_STRUCT1
-            } else if (dataHeadersOptions.nID == STRUCTID_DATA_STRUCT2) {
-                dataHeader.nSize = sizeof(DATA_STRUCT2);
-
-                dataHeader.listRecords.append(getDataRecord(offsetof(DATA_STRUCT2, nFieldX), 1, "nFieldX", VT_INT8, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(DATA_STRUCT2, nFieldY), 4, "nFieldY", VT_INT32, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                dataHeader.listRecords.append(getDataRecord(offsetof(DATA_STRUCT2, nFieldZ), 8, "nFieldZ", VT_INT64, DRF_UNKNOWN, dataHeadersOptions.pMemoryMap->endian));
-                // Handle DATA_STRUCT2
-            }
-            // TODO
-        }
-    }
-
-    return listResult;
-}
-
-QList<XBinary::HREGION> EXAMPLE_CLASS::getNativeRegions(PDSTRUCT *pPdStruct)
-{
-    // Return a list of native regions
-    QList<HREGION> listRegions;
+    // Return a list of header data parts
+    QList<FPART> listRegions;
     // Populate the list with regions as needed
     // ...
 
@@ -278,11 +209,10 @@ XBinary::_MEMORY_MAP EXAMPLE_CLASS::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdS
 
     _MEMORY_RECORD recordHeader = {};
     recordHeader.nAddress = -1;
-    recordHeader.segment = ADDRESS_SEGMENT_FLAT;
     recordHeader.nOffset = 0;
     recordHeader.nSize = sizeof(ORIGINALHEADERNAME);
     recordHeader.nIndex = nIndex++;
-    recordHeader.type = MMT_HEADER;
+    recordHeader.filePart = FILEPART_HEADER;
     recordHeader.sName = tr("Header");
 
     result.listRecords.append(recordHeader);
@@ -300,26 +230,33 @@ XBinary::OSNAME EXAMPLE_CLASS::getOsName()
 
 bool EXAMPLE_CLASS::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<EXAMPLE_CLASS> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *EXAMPLE_CLASS::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<EXAMPLE_CLASS> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void EXAMPLE_CLASS::setInternalInfo(void *pInternalInfo)

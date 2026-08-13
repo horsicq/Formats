@@ -408,6 +408,25 @@ void XFTreeModel::clear()
     }
 }
 
+namespace {
+struct PARENT_ORDER_LESS {
+    const QList<XFTreeModel::TREEITEM *> *pListItems;
+
+    bool operator()(qint32 nLeftIndex, qint32 nRightIndex) const
+    {
+        qint64 nLeftOffset = (qint64)pListItems->at(nLeftIndex)->xfHeader.xLoc.nLocation;
+        qint64 nRightOffset = (qint64)pListItems->at(nRightIndex)->xfHeader.xLoc.nLocation;
+
+        if (nLeftOffset != nRightOffset) {
+            return nLeftOffset < nRightOffset;
+        }
+
+        // Earlier source items win ties, matching the previous forward scan.
+        return nLeftIndex > nRightIndex;
+    }
+};
+}  // namespace
+
 void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bExtraInfo)
 {
     qint32 nCount = listHeaders.count();
@@ -460,17 +479,9 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bE
         }
     }
 
-    std::sort(listParentOrder.begin(), listParentOrder.end(), [&listItems](qint32 nLeftIndex, qint32 nRightIndex) {
-        qint64 nLeftOffset = (qint64)listItems.at(nLeftIndex)->xfHeader.xLoc.nLocation;
-        qint64 nRightOffset = (qint64)listItems.at(nRightIndex)->xfHeader.xLoc.nLocation;
-
-        if (nLeftOffset != nRightOffset) {
-            return nLeftOffset < nRightOffset;
-        }
-
-        // Earlier source items win ties, matching the previous forward scan.
-        return nLeftIndex > nRightIndex;
-    });
+    PARENT_ORDER_LESS parentOrderLess;
+    parentOrderLess.pListItems = &listItems;
+    std::sort(listParentOrder.begin(), listParentOrder.end(), parentOrderLess);
 
     QVector<qint32> listParentPositions(nCount, -1);
     QHash<qint64, qint32> mapLastParentPositions;

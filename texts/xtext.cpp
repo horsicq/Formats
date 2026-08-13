@@ -87,7 +87,7 @@ XBinary::_MEMORY_MAP XText::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         recordBOM.sName = QString("BOM");
         recordBOM.nOffset = 0;
         recordBOM.nSize = nBOMSize;
-        recordBOM.nAddress = -1;
+        recordBOM.nAddress = (XADDR)-1;
         result.listRecords.append(recordBOM);
     }
 
@@ -98,7 +98,7 @@ XBinary::_MEMORY_MAP XText::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     recordText.sName = tr("Text content");
     recordText.nOffset = nBOMSize;
     recordText.nSize = getSize() - nBOMSize;
-    recordText.nAddress = -1;
+    recordText.nAddress = (XADDR)-1;
     result.listRecords.append(recordText);
 
     return result;
@@ -238,19 +238,38 @@ QString XText::getTextByLines(qint64 nStartLine, qint64 nLineCount)
 
 QStringList XText::getLines(qint64 nStartLine, qint64 nLineCount)
 {
-    QString allText = getText();
-    // QStringList allLines = allText.split(QRegExp("\\r\\n|\\r|\\n"));
-
-    // if (nLineCount == -1) {
-    //     nLineCount = allLines.size() - nStartLine;
-    // }
-
     QStringList result;
-    // for (qint64 i = nStartLine; i < qMin(nStartLine + nLineCount, qint64(allLines.size())); i++) {
-    //     if (i >= 0 && i < allLines.size()) {
-    //         result.append(allLines[i]);
-    //     }
-    // }
+
+    QString sText = getText();
+
+    if (sText.isEmpty()) {
+        return result;
+    }
+
+    sText.replace("\r\n", "\n");
+    sText.replace('\r', '\n');
+
+    QStringList allLines = sText.split('\n');
+
+    // A trailing line terminator ends the final line; it does not introduce an
+    // additional line after the end of the file.
+    if (sText.endsWith('\n')) {
+        allLines.removeLast();
+    }
+
+    const qint64 nTotalLines = allLines.size();
+    const qint64 nFirstLine = qMax<qint64>(nStartLine, 0);
+
+    if ((nFirstLine >= nTotalLines) || (nLineCount < -1) || (nLineCount == 0)) {
+        return result;
+    }
+
+    const qint64 nAvailableLines = nTotalLines - nFirstLine;
+    const qint64 nResultLines = (nLineCount == -1) ? nAvailableLines : qMin(nLineCount, nAvailableLines);
+
+    for (qint64 i = 0; i < nResultLines; i++) {
+        result.append(allLines.at((qint32)(nFirstLine + i)));
+    }
 
     return result;
 }
@@ -498,18 +517,33 @@ bool XText::_isPrintableASCII(const QByteArray &data, qint64 nMaxCheck)
 
 XText::LINE_ENDING XText::_detectLineEndingInData(const QByteArray &data)
 {
-    bool hasCRLF = data.contains("\r\n");
-    bool hasLF = data.contains("\n");
-    bool hasCR = data.contains("\r");
+    bool bHasCRLF = false;
+    bool bHasLF = false;
+    bool bHasCR = false;
 
-    if (hasCRLF && !hasCR && !hasLF) {
-        return LINE_ENDING_CRLF;
-    } else if (hasLF && !hasCR) {
-        return LINE_ENDING_LF;
-    } else if (hasCR && !hasLF) {
-        return LINE_ENDING_CR;
-    } else if ((hasCR || hasLF) && (hasCRLF || (hasCR && hasLF))) {
+    for (qint64 i = 0; i < data.size(); i++) {
+        if (data.at(i) == '\r') {
+            if (((i + 1) < data.size()) && (data.at(i + 1) == '\n')) {
+                bHasCRLF = true;
+                i++;
+            } else {
+                bHasCR = true;
+            }
+        } else if (data.at(i) == '\n') {
+            bHasLF = true;
+        }
+    }
+
+    const qint32 nTypes = (bHasCRLF ? 1 : 0) + (bHasLF ? 1 : 0) + (bHasCR ? 1 : 0);
+
+    if (nTypes > 1) {
         return LINE_ENDING_MIXED;
+    } else if (bHasCRLF) {
+        return LINE_ENDING_CRLF;
+    } else if (bHasLF) {
+        return LINE_ENDING_LF;
+    } else if (bHasCR) {
+        return LINE_ENDING_CR;
     }
 
     return LINE_ENDING_UNKNOWN;
@@ -518,18 +552,16 @@ XText::LINE_ENDING XText::_detectLineEndingInData(const QByteArray &data)
 qint64 XText::_countLines(const QByteArray &data)
 {
     qint64 nLines = 0;
-    LINE_ENDING lineEnding = _detectLineEndingInData(data);
 
-    switch (lineEnding) {
-        case LINE_ENDING_CRLF: nLines = data.count("\r\n"); break;
-        case LINE_ENDING_LF: nLines = data.count("\n"); break;
-        case LINE_ENDING_CR: nLines = data.count("\r"); break;
-        case LINE_ENDING_MIXED:
-            // Count all types of line endings
-            nLines = data.count("\r\n") + data.count("\n") + data.count("\r");
-            nLines -= data.count("\r\n");  // Don't double-count CRLF
-            break;
-        default: nLines = 0; break;
+    for (qint64 i = 0; i < data.size(); i++) {
+        if (data.at(i) == '\r') {
+            nLines++;
+            if (((i + 1) < data.size()) && (data.at(i + 1) == '\n')) {
+                i++;
+            }
+        } else if (data.at(i) == '\n') {
+            nLines++;
+        }
     }
 
     // Add 1 if file doesn't end with a line ending
@@ -542,32 +574,51 @@ qint64 XText::_countLines(const QByteArray &data)
 
 qint64 XText::_countWords(const QString &text)
 {
-    // return text.split(QRegExp("\\s+"), Qt::SkipEmptyParts).count();
-    return 0;
+    qint64 nWords = 0;
+    bool bInWord = false;
+
+    for (const QChar &character : text) {
+        const bool bIsWordCharacter = !character.isSpace();
+
+        if (bIsWordCharacter && !bInWord) {
+            nWords++;
+        }
+
+        bInWord = bIsWordCharacter;
+    }
+
+    return nWords;
 }
 
 bool XText::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XText> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XText::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XText> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XText::setInternalInfo(void *pInternalInfo)

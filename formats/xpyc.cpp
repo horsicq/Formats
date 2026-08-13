@@ -135,9 +135,10 @@ XBinary::FT XPYC::getFileType()
 
 QString XPYC::getVersion()
 {
-    INFO info = *static_cast<INFO *>(getInternalInfo(nullptr));
-
-    return info.sVersion;
+    QPointer<XPYC> guardedThis(this);
+    const INFO *pInfo = static_cast<const INFO *>(
+        guardedThis->getInternalInfo(nullptr));
+    return (guardedThis && pInfo) ? pInfo->sVersion : QString();
 }
 
 QString XPYC::getFileFormatExt()
@@ -153,9 +154,13 @@ QString XPYC::getFileFormatExtsString()
 qint64 XPYC::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
+    QPointer<XPYC> guardedThis(this);
 
-    if (isValid(pPdStruct)) {
-        INFO info = *static_cast<INFO *>(getInternalInfo(pPdStruct));
+    if (guardedThis->isValid(pPdStruct) && guardedThis) {
+        const INFO *pInfo = static_cast<const INFO *>(
+            guardedThis->getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return nResult;
+        const INFO info = *pInfo;
         qint32 nMajor = 0;
         qint32 nMinor = 0;
         _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
@@ -252,7 +257,11 @@ QList<XBinary::XFRECORD> XPYC::getXFRecords(FT fileType, quint32 nStructID, cons
     QList<XBinary::XFRECORD> listResult;
 
     if (nStructID == STRUCTID_HEADER) {
-        INFO info = *static_cast<INFO *>(getInternalInfo(nullptr));
+        QPointer<XPYC> guardedThis(this);
+        const INFO *pInfo = static_cast<const INFO *>(
+            guardedThis->getInternalInfo(nullptr));
+        if (!guardedThis || !pInfo) return listResult;
+        const INFO info = *pInfo;
 
         qint32 nMajor = 0;
         qint32 nMinor = 0;
@@ -282,24 +291,60 @@ QList<XBinary::XFRECORD> XPYC::getXFRecords(FT fileType, quint32 nStructID, cons
 
 bool XPYC::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    bool bResult = true;
+    QPointer<XPYC> guardedThis(this);
+    const bool bAlreadyHandled = guardedThis->isInternalInfoHandled();
+    if (!guardedThis) return false;
 
-    if (!isInternalInfoHandled()) {
-        m_internalInfo = INTERNAL_INFO();
-        setIsInternalInfoHandled(true);
-        m_internalInfo = _getInternalInfo(pPdStruct);
-        m_internalInfo.memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-        XBinary::setInternalInfo(static_cast<XBinary::INTERNAL_INFO *>(&m_internalInfo));
+    if (!bAlreadyHandled) {
+        const quint64 nTransaction =
+            guardedThis->beginInternalInfoTransaction();
+        if (!nTransaction) return false;
+
+        // The transaction supplies the recursion sentinel. Keep every
+        // source-derived value local until the same binding is revalidated.
+        guardedThis->m_internalInfo = INTERNAL_INFO();
+        INTERNAL_INFO info = guardedThis->_getInternalInfo(pPdStruct);
+        if (!guardedThis) return false;
+        if (!guardedThis->isInternalInfoTransactionCurrent(nTransaction) ||
+            !XBinary::isPdStructNotCanceled(pPdStruct)) {
+            guardedThis->rollbackInternalInfoTransaction(nTransaction);
+            return false;
+        }
+
+        const auto memoryMap =
+            guardedThis->getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+        if (!guardedThis) return false;
+        if (!guardedThis->isInternalInfoTransactionCurrent(nTransaction) ||
+            !XBinary::isPdStructNotCanceled(pPdStruct)) {
+            guardedThis->rollbackInternalInfoTransaction(nTransaction);
+            return false;
+        }
+        info.memoryMap = memoryMap;
+
+        if (!guardedThis->isInternalInfoTransactionCurrent(nTransaction)) {
+            guardedThis->rollbackInternalInfoTransaction(nTransaction);
+            return false;
+        }
+        guardedThis->m_internalInfo = info;
+        if (!guardedThis->commitInternalInfoTransaction(
+                nTransaction,
+                static_cast<XBinary::INTERNAL_INFO *>(
+                    &guardedThis->m_internalInfo))) {
+            guardedThis->rollbackInternalInfoTransaction(nTransaction);
+            return false;
+        }
     }
 
-    return bResult;
+    return true;
 }
 
 void *XPYC::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XPYC> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XPYC::setInternalInfo(void *pInternalInfo)
@@ -630,9 +675,7 @@ QList<XPYC::MARSHAL_OBJECT> XPYC::_readMarshalTuple(qint64 *pnOffset, PDSTRUCT *
 
     // Read each element
     for (qint32 i = 0; (i < nCount) && isPdStructNotCanceled(pPdStruct); i++) {
-        qint64 nItemOffset = nOffset;
         MARSHAL_OBJECT obj = _readMarshalObject(&nOffset, pPdStruct);
-        // qDebug("_readMarshalTuple: item[%d] at offset %lld, type=0x%02X, valid=%d, new offset=%lld", i, nItemOffset, obj.nType, obj.bValid, nOffset);
         listResult.append(obj);
 
         if (!obj.bValid) {
@@ -659,11 +702,15 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     codeObject.nStackSize = 0;
     codeObject.nFlags = 0;
 
-    if (!isValid(pPdStruct)) {
+    QPointer<XPYC> guardedThis(this);
+    if (!guardedThis->isValid(pPdStruct) || !guardedThis) {
         return codeObject;
     }
 
-    INFO info = *static_cast<INFO *>(getInternalInfo(pPdStruct));
+    const INFO *pInfo = static_cast<const INFO *>(
+        guardedThis->getInternalInfo(pPdStruct));
+    if (!guardedThis || !pInfo) return codeObject;
+    const INFO info = *pInfo;
     qint32 nMajor = 0;
     qint32 nMinor = 0;
     _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
@@ -698,10 +745,7 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
 
     // Check for code object type (TYPE_CODE = 'c' = 0x63)
     // The high bit (0x80) is the FLAG_REF which indicates this object can be referenced later
-    bool bHasRefFlag = (nMarshalType & 0x80) != 0;
     quint8 nActualType = nMarshalType & 0x7F;
-
-    // qDebug("getCodeObject: bHasRefFlag=%d, nActualType=0x%02X", bHasRefFlag, nActualType);
 
     if (nActualType != 0x63) {
         // Not a code object at the expected position
@@ -786,7 +830,6 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     }
 
     // Read code (bytecode) - TYPE_STRING or TYPE_BYTES
-    qint64 nCodeBytesOffset = nOffset;
     // qDebug("getCodeObject: Reading code at offset %lld", nOffset);
     if ((nOffset + 1) <= nTotalSize) {
         quint8 nCodeType = read_uint8(nOffset);
@@ -937,14 +980,20 @@ XBinary::_MEMORY_MAP XPYC::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<FPART> listResult;
+    QPointer<XPYC> guardedThis(this);
 
     if ((nLimit < -1) || (nLimit == 0)) {
         return listResult;
     }
 
-    qint64 nTotalSize = getSize();
-    qint64 nFormatSize = getFileFormatSize(pPdStruct);
-    INFO info = *static_cast<INFO *>(getInternalInfo(pPdStruct));
+    qint64 nTotalSize = guardedThis->getSize();
+    if (!guardedThis) return listResult;
+    qint64 nFormatSize = guardedThis->getFileFormatSize(pPdStruct);
+    if (!guardedThis) return listResult;
+    const INFO *pInfo = static_cast<const INFO *>(
+        guardedThis->getInternalInfo(pPdStruct));
+    if (!guardedThis || !pInfo) return listResult;
+    const INFO info = *pInfo;
 
     // Calculate header size (magic + marker + metadata)
     qint64 nHeaderSize = 4;  // Magic + Marker
@@ -971,7 +1020,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
         record.nFileSize = qMin(nHeaderSize, nTotalSize);
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Header");
 
         listResult.append(record);
@@ -984,7 +1033,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.filePart = FILEPART_REGION;
         record.nFileOffset = nHeaderSize;
         record.nFileSize = nFormatSize - nHeaderSize;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Code Object");
 
         listResult.append(record);
@@ -996,7 +1045,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.filePart = FILEPART_DATA;
         record.nFileOffset = 0;
         record.nFileSize = nFormatSize;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Data");
 
         listResult.append(record);
@@ -1009,7 +1058,7 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.filePart = FILEPART_OVERLAY;
         record.nFileOffset = nFormatSize;
         record.nFileSize = nTotalSize - nFormatSize;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Overlay");
 
         listResult.append(record);

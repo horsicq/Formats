@@ -94,7 +94,7 @@ void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, X
     record.filePart = filePart;
     record.nFileOffset = nOffset;
     record.nFileSize = nSize;
-    record.nVirtualAddress = -1;
+    record.nVirtualAddress = (XADDR)-1;
     record.sName = sName;
 
     pList->append(record);
@@ -685,26 +685,33 @@ XXM::INSTRUMENT_EXTRA_HEADER XXM::_read_INSTRUMENT_EXTRA_HEADER(qint64 nOffset)
 
 bool XXM::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XXM> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XXM::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XXM> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XXM::setInternalInfo(void *pInternalInfo)

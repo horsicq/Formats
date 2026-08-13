@@ -1169,7 +1169,7 @@ QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.filePart = FILEPART_SIGNATURE;
         record.nFileOffset = 0;
         record.nFileSize = 8;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Signature");
 
         listResult.append(record);
@@ -1196,7 +1196,7 @@ QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.filePart = FILEPART_REGION;
             record.nFileOffset = nCurrentOffset;
             record.nFileSize = 12 + chunk.nDataSize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = chunk.sName;
 
             listResult.append(record);
@@ -1223,7 +1223,7 @@ QList<XBinary::FPART> XPNG::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.filePart = FILEPART_OVERLAY;
             record.nFileOffset = nCurrentOffset;
             record.nFileSize = nTotalSize - nCurrentOffset;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Overlay");
 
             listResult.append(record);
@@ -1278,26 +1278,33 @@ XBinary *XPNG::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
 bool XPNG::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XPNG> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XPNG::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XPNG> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XPNG::setInternalInfo(void *pInternalInfo)

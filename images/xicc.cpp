@@ -138,26 +138,33 @@ QString XICC::getVersion()
 
 bool XICC::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XICC> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XICC::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XICC> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XICC::setInternalInfo(void *pInternalInfo)
@@ -559,7 +566,7 @@ QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
         record.nFileSize = 128;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
 
         listResult.append(record);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -573,7 +580,7 @@ QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         record.filePart = FILEPART_TABLE;
         record.nFileOffset = 128;
         record.nFileSize = nTableSize;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
 
         listResult.append(record);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -588,7 +595,7 @@ QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.filePart = FILEPART_OBJECT;
             record.nFileOffset = listTags.at(i).nOffset;
             record.nFileSize = listTags.at(i).nSize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
 
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -609,7 +616,7 @@ QList<XBinary::FPART> XICC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             record.filePart = FILEPART_OVERLAY;
             record.nFileOffset = nMaxOffset;
             record.nFileSize = nTotalSize - nMaxOffset;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
 
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;

@@ -34,8 +34,6 @@ bool XCOM::isValid(PDSTRUCT *pPdStruct)
 {
     Q_UNUSED(pPdStruct)
 
-    bool bResult = false;
-
     return getSize() <= (XCOM_DEF::IMAGESIZE - XCOM_DEF::ADDRESS_BEGIN);
 }
 
@@ -248,26 +246,33 @@ QList<XBinary::XFHEADER> XCOM::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
 
 bool XCOM::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XCOM> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XCOM::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XCOM> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XCOM::setInternalInfo(void *pInternalInfo)

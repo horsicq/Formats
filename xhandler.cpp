@@ -52,6 +52,15 @@ void XHandler::addRecord_Move(QList<RECORD> *pListRecords, const QString &sFilen
 
 void XHandler::processRecords(QList<RECORD> *pListRecords, XBinary::PDSTRUCT *pDStruct)
 {
+    if (!pListRecords) return;
+
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pDStruct) {
+        pDStruct = &pdStructEmpty;
+    }
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pDStruct);
+    if (!progressLifetime.isValid()) return;
+
     qint32 _nFreeIndex = XBinary::reservePdStructRecord(pDStruct, pListRecords->size());
 
     for (qint32 i = 0; i < pListRecords->size(); i++) {
@@ -83,8 +92,12 @@ void XHandler::processRecords(QList<RECORD> *pListRecords, XBinary::PDSTRUCT *pD
             }
         }
 
-        XBinary::setPdStructCurrentIncrement(pDStruct, _nFreeIndex);
+        if (!XBinary::setPdStructCurrentIncrementChecked(pDStruct, _nFreeIndex, progressLifetime)) {
+            return;
+        }
     }
 
-    XBinary::setPdStructFinished(pDStruct, _nFreeIndex);
+    if (XBinary::isPdStructLifetimeAlive(progressLifetime)) {
+        XBinary::setPdStructFinished(pDStruct, _nFreeIndex);
+    }
 }

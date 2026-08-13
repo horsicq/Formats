@@ -437,7 +437,7 @@ QList<XBinary::FPART> XCLIAssembly::getFileParts(quint32 nFileParts, qint32 nLim
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = nHeaderOffset;
         record.nFileSize = nHeaderSize;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Header");
 
         listResult.append(record);
@@ -454,7 +454,7 @@ QList<XBinary::FPART> XCLIAssembly::getFileParts(quint32 nFileParts, qint32 nLim
                 record.filePart = FILEPART_REGION;
                 record.nFileOffset = cliInfo.metaData.listStreams.at(i).nOffset;
                 record.nFileSize = cliInfo.metaData.listStreams.at(i).nSize;
-                record.nVirtualAddress = -1;
+                record.nVirtualAddress = (XADDR)-1;
                 record.sName = cliInfo.metaData.listStreams.at(i).sName;
 
                 listResult.append(record);
@@ -2144,26 +2144,33 @@ bool XCLIAssembly::isSignatureInBlobPresent_NET(const QString &sSignature, PDSTR
 
 bool XCLIAssembly::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XCLIAssembly> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XCLIAssembly::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XCLIAssembly> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XCLIAssembly::setInternalInfo(void *pInternalInfo)

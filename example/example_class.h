@@ -82,15 +82,11 @@ public:
     virtual QList<MAPMODE> getMapModesList();
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr);
 
-    virtual QList<HREGION> getHData(PDSTRUCT *pPdStruct = nullptr);
+    virtual QList<FPART> getHData(PDSTRUCT *pPdStruct = nullptr) override;
 
     virtual QString structIDToString(quint32 nID);
     virtual QString structIDToFtString(quint32 nID);
     virtual quint32 ftStringToStructID(const QString &sFtString);
-    virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
-    virtual qint32 readTableRow(qint32 nRow, LT locType, XADDR nLocation, const DATA_RECORDS_OPTIONS &dataRecordsOptions, QList<QVariant> *pListValues,
-                                PDSTRUCT *pPdStruct);
-
     ORIGINALHEADERNAME _read_ORIGINALHEADERNAME(qint64 nOffset);
     DATA_STRUCT1 _read_DATA_STRUCT1(qint64 nOffset);
     DATA_STRUCT2 _read_DATA_STRUCT2(qint64 nOffset);

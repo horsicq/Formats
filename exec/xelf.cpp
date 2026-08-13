@@ -1639,26 +1639,33 @@ QList<XELF_DEF::Elf32_Shdr> XELF::getElf32_ShdrList(qint32 nLimit)
 
 bool XELF::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XELF> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XELF::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XELF> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XELF::setInternalInfo(void *pInternalInfo)
@@ -2034,7 +2041,7 @@ quint64 XELF::getElf_Shdr_entsize(quint32 nIndex, QList<XELF_DEF::Elf_Shdr> *pLi
 
 qint64 XELF::getShdrOffset(quint32 nIndex)
 {
-    quint64 nResult = -1;
+    quint64 nResult = (quint64)-1;
 
     bool bIs64 = is64();
     quint32 nNumberOfSections = 0;
@@ -2402,7 +2409,7 @@ quint64 XELF::getElf_Phdr_align(quint32 nIndex, QList<XELF_DEF::Elf_Phdr> *pList
 
 qint64 XELF::getPhdrOffset(quint32 nIndex)
 {
-    quint64 nResult = -1;
+    quint64 nResult = (quint64)-1;
 
     bool bIs64 = is64();
     quint32 nNumberOfPrograms = 0;
@@ -3238,6 +3245,8 @@ QMap<quint64, QString> XELF::getDynamicTagsS(const QString &sArch)
 
 XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     // TODO Check alignment!
     XBinary::_MEMORY_MAP result = {};
 
@@ -3413,7 +3422,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
             if (listSectionRecords.at(i).nAddress != 0) {
                 record.nAddress = listSectionRecords.at(i).nAddress;
             } else {
-                record.nAddress = -1;
+                record.nAddress = (XADDR)-1;
             }
 
             record.nIndex = nIndex++;
@@ -3462,7 +3471,7 @@ XBinary::_MEMORY_MAP XELF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         record.sName = tr("Overlay");
         // TODO Section number!
         // TODO virtual sections!
-        record.nAddress = -1;
+        record.nAddress = (XADDR)-1;
         record.nSize = nNoLoadableSize;
         record.nOffset = nMaxUsedOffset;
         record.nIndex = nIndex++;

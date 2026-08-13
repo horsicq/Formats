@@ -2955,7 +2955,7 @@ QList<XPE::IMPORT_HEADER> XPE::getImports(XBinary::_MEMORY_MAP *pMemoryMap, PDST
                 || nMappedStart != nImportOffset
                 || (!bLegacyPartialFirstDescriptor && nMappedEnd
                        != nImportOffset
-                              + sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR) - 1)) {
+                              + static_cast<qint64>(sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)) - 1)) {
                 break;
             }
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid = read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
@@ -3102,7 +3102,7 @@ QList<QString> XPE::getImportNames(_MEMORY_MAP *pMemoryMap, PDSTRUCT *pPdStruct)
                 || nMappedStart != nImportOffset
                 || (!bLegacyPartialFirstDescriptor && nMappedEnd
                        != nImportOffset
-                              + sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR) - 1)) {
+                              + static_cast<qint64>(sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)) - 1)) {
                 break;
             }
             XPE_DEF::IMAGE_IMPORT_DESCRIPTOR iid = read_IMAGE_IMPORT_DESCRIPTOR(nImportOffset);
@@ -3304,7 +3304,7 @@ QList<XPE::IMPORT_POSITION> XPE::getImportPositions(qint32 nIndex, PDSTRUCT *pPd
                 || nMappedStart != nImportOffset
                 || nMappedEnd
                        != nImportOffset
-                              + sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR) - 1) {
+                              + static_cast<qint64>(sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR)) - 1) {
                 break;
             }
             IMPORT_HEADER importHeader = {};
@@ -4058,7 +4058,7 @@ bool XPE::isResourceStringTablePresent()
 
 bool XPE::isResourceStringTablePresent(QList<RESOURCE_RECORD> *pListResourceRecords)
 {
-    return isResourcePresent(XPE_DEF::S_RT_STRING, -1, pListResourceRecords);
+    return isResourcePresent(XPE_DEF::S_RT_STRING, (quint32)-1, pListResourceRecords);
 }
 
 QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords()
@@ -4073,7 +4073,7 @@ QList<XPE::RESOURCE_STRINGTABLE_RECORD> XPE::getResourceStringTableRecords(QList
 {
     QList<XPE::RESOURCE_STRINGTABLE_RECORD> listResult;
 
-    QList<XPE::RESOURCE_RECORD> listResourceRecords = getResourceRecords(XPE_DEF::S_RT_STRING, -1, pListResourceRecords);
+    QList<XPE::RESOURCE_RECORD> listResourceRecords = getResourceRecords(XPE_DEF::S_RT_STRING, (quint32)-1, pListResourceRecords);
 
     qint32 nNumberOfRecords = listResourceRecords.count();
 
@@ -4138,7 +4138,7 @@ bool XPE::isResourceManifestPresent()
 
 bool XPE::isResourceManifestPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return isResourcePresent(XPE_DEF::S_RT_MANIFEST, -1, pListResourceRecords);
+    return isResourcePresent(XPE_DEF::S_RT_MANIFEST, (quint32)-1, pListResourceRecords);
 }
 
 QString XPE::getResourceManifest()
@@ -4152,7 +4152,7 @@ QString XPE::getResourceManifest(QList<XPE::RESOURCE_RECORD> *pListResourceRecor
 {
     QString sResult;
 
-    RESOURCE_RECORD rh = getResourceRecord(XPE_DEF::S_RT_MANIFEST, -1, pListResourceRecords);
+    RESOURCE_RECORD rh = getResourceRecord(XPE_DEF::S_RT_MANIFEST, (quint32)-1, pListResourceRecords);
 
     if (rh.nOffset != -1) {
         rh.nSize = qMin(rh.nSize, qint64(4000));
@@ -4171,7 +4171,7 @@ bool XPE::isResourceVersionPresent()
 
 bool XPE::isResourceVersionPresent(QList<XPE::RESOURCE_RECORD> *pListResourceRecords)
 {
-    return isResourcePresent(XPE_DEF::S_RT_VERSION, -1, pListResourceRecords);
+    return isResourcePresent(XPE_DEF::S_RT_VERSION, (quint32)-1, pListResourceRecords);
 }
 
 XPE_DEF::S_VS_VERSION_INFO XPE::readVS_VERSION_INFO(qint64 nOffset)
@@ -4291,7 +4291,7 @@ XPE::RESOURCES_VERSION XPE::getResourcesVersion(QList<XPE::RESOURCE_RECORD> *pLi
     RESOURCES_VERSION result = {};
     result.nFixedFileInfoOffset = -1;
 
-    RESOURCE_RECORD resourceRecord = getResourceRecord(XPE_DEF::S_RT_VERSION, -1, pListResourceRecords);  // TODO pdstruct
+    RESOURCE_RECORD resourceRecord = getResourceRecord(XPE_DEF::S_RT_VERSION, (quint32)-1, pListResourceRecords);  // TODO pdstruct
 
     if (resourceRecord.nOffset != -1) {
         __getResourcesVersion(&result, resourceRecord.nOffset, resourceRecord.nSize, "", 0);
@@ -4673,7 +4673,7 @@ bool XPE::isResourceGroupIconsPresent()
 
 bool XPE::isResourceGroupIconsPresent(QList<RESOURCE_RECORD> *pListResourceRecords)
 {
-    return isResourcePresent(XPE_DEF::S_RT_GROUP_ICON, -1, pListResourceRecords);
+    return isResourcePresent(XPE_DEF::S_RT_GROUP_ICON, (quint32)-1, pListResourceRecords);
 }
 
 bool XPE::isResourceGroupCursorsPresent()
@@ -4685,7 +4685,7 @@ bool XPE::isResourceGroupCursorsPresent()
 
 bool XPE::isResourceGroupCursorsPresent(QList<RESOURCE_RECORD> *pListResourceRecords)
 {
-    return isResourcePresent(XPE_DEF::S_RT_GROUP_CURSOR, -1, pListResourceRecords);
+    return isResourcePresent(XPE_DEF::S_RT_GROUP_CURSOR, (quint32)-1, pListResourceRecords);
 }
 
 QString XPE::resourceRecordToString(const RESOURCE_RECORD &resourceRecord)
@@ -4763,10 +4763,15 @@ XPE::EXPORT_HEADER XPE::getExport(bool bValidOnly, PDSTRUCT *pPdStruct)
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const PDSTRUCTLIFETIME progressLifetime = retainPdStructLifetime(pPdStruct);
+    if (!progressLifetime.isValid()) return {};
 
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+    if (!isPdStructLifetimeAlive(progressLifetime)) return {};
 
-    return getExport(&memoryMap, bValidOnly, pPdStruct);
+    EXPORT_HEADER result = getExport(&memoryMap, bValidOnly, pPdStruct);
+    if (!isPdStructLifetimeAlive(progressLifetime)) return {};
+    return result;
 }
 
 XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDSTRUCT *pPdStruct)
@@ -4778,6 +4783,10 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
     }
 
     EXPORT_HEADER result = {};
+    if (!pMemoryMap) return result;
+    const PDSTRUCTLIFETIME progressLifetime = retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return result;
 
     qint64 nExportOffset = getDataDirectoryOffset(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXPORT);
 
@@ -4800,7 +4809,7 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
 
                 QMap<quint16, EXPORT_POSITION> mapNames;
 
-                for (qint32 i = 0; (i < (int)result.directory.NumberOfNames) && (!(pPdStruct->bIsStop)); i++) {
+                for (qint32 i = 0; bProgressOwnerAlive && (i < (int)result.directory.NumberOfNames) && isPdStructNotCanceled(pPdStruct); i++) {
                     EXPORT_POSITION position = {};
 
                     qint32 nIndex = read_uint16(nAddressOfNameOrdinalsOffset + 2 * i);
@@ -4817,11 +4826,12 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
 
                     mapNames.insert(position.nOrdinal, position);
 
-                    XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndexScan);
+                    bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, _nFreeIndexScan, progressLifetime);
+                    if (!bProgressOwnerAlive) return {};
                     XBinary::setPdStructStatus(pPdStruct, _nFreeIndexScan, position.sFunctionName);
                 }
 
-                for (qint32 i = 0; (i < (int)result.directory.NumberOfFunctions) && (!(pPdStruct->bIsStop)); i++) {
+                for (qint32 i = 0; bProgressOwnerAlive && (i < (int)result.directory.NumberOfFunctions) && isPdStructNotCanceled(pPdStruct); i++) {
                     EXPORT_POSITION position = {};
 
                     qint32 nIndex = i;
@@ -4846,10 +4856,13 @@ XPE::EXPORT_HEADER XPE::getExport(_MEMORY_MAP *pMemoryMap, bool bValidOnly, PDST
                         result.listPositions.append(position);
                     }
 
-                    XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndexScan);
+                    bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, _nFreeIndexScan, progressLifetime);
+                    if (!bProgressOwnerAlive) return {};
                 }
 
-                XBinary::setPdStructFinished(pPdStruct, _nFreeIndexScan);
+                if (bProgressOwnerAlive) {
+                    XBinary::setPdStructFinished(pPdStruct, _nFreeIndexScan);
+                }
             }
         }
     }
@@ -4864,8 +4877,11 @@ QList<QString> XPE::getExportFunctionsList(PDSTRUCT *pPdStruct)
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const PDSTRUCTLIFETIME progressLifetime = retainPdStructLifetime(pPdStruct);
+    if (!progressLifetime.isValid()) return {};
 
     EXPORT_HEADER exportHeader = getExport(false, pPdStruct);
+    if (!isPdStructLifetimeAlive(progressLifetime)) return {};
 
     return getExportFunctionsList(&exportHeader, pPdStruct);
 }
@@ -4895,8 +4911,11 @@ QList<XADDR> XPE::getExportFunctionAddressesList(PDSTRUCT *pPdStruct)
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const PDSTRUCTLIFETIME progressLifetime = retainPdStructLifetime(pPdStruct);
+    if (!progressLifetime.isValid()) return {};
 
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+    if (!isPdStructLifetimeAlive(progressLifetime)) return {};
     XPE_DEF::IMAGE_EXPORT_DIRECTORY ied = getExportDirectory();
 
     return getExportFunctionAddressesList(&memoryMap, &ied, pPdStruct);
@@ -13187,6 +13206,14 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
     QList<XBinary::FPART> listResult;
     QList<XBinary::FPART> _listCalc;
 
+    PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+    const PDSTRUCTLIFETIME progressLifetime = retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return listResult;
+
     if ((nLimit < -1) || (nLimit == 0)) {
         return listResult;
     }
@@ -13296,17 +13323,21 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
 
     if (bCalcAdress) {
         memoryMap = _getMemoryMap(&_listCalc, pPdStruct);
+        bProgressOwnerAlive = isPdStructLifetimeAlive(progressLifetime);
+        if (!bProgressOwnerAlive) return {};
     }
 
     if (nFileParts & FILEPART_RESOURCE) {
         if (isResourcesPresent()) {
             QList<XPE::RESOURCE_RECORD> listResources = getResources(&memoryMap, 10000, pPdStruct);
+            bProgressOwnerAlive = isPdStructLifetimeAlive(progressLifetime);
+            if (!bProgressOwnerAlive) return {};
 
             qint32 nNumberOfRecords = listResources.count();
 
             qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nNumberOfRecords);
 
-            for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+            for (qint32 i = 0; bProgressOwnerAlive && (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 qint64 nResourceOffset = listResources.at(i).nOffset;
                 qint64 nResourceSize = listResources.at(i).nSize;
                 XADDR nAddress = listResources.at(i).nAddress;
@@ -13330,10 +13361,13 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                     if ((nLimit != -1) && (listResult.count() >= nLimit)) break;
                 }
 
-                XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+                bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, _nFreeIndex, progressLifetime);
+                if (!bProgressOwnerAlive) return {};
             }
 
-            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            if (bProgressOwnerAlive) {
+                XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            }
 
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
@@ -13342,12 +13376,14 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
     if (nFileParts & FILEPART_DEBUGDATA) {
         if (isDebugPresent()) {
             QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listDebug = getDebugList(&memoryMap, pPdStruct);
+            bProgressOwnerAlive = isPdStructLifetimeAlive(progressLifetime);
+            if (!bProgressOwnerAlive) return {};
 
             qint32 nNumberOfRecords = listDebug.count();
 
             qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nNumberOfRecords);
 
-            for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+            for (qint32 i = 0; bProgressOwnerAlive && (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 qint64 nRecordOffset = listDebug.at(i).PointerToRawData;
                 qint64 nRecordSize = listDebug.at(i).SizeOfData;
                 quint32 nRecordType = listDebug.at(i).Type;
@@ -13365,10 +13401,13 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                     }
                 }
 
-                XBinary::setPdStructCurrentIncrement(pPdStruct, _nFreeIndex);
+                bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, _nFreeIndex, progressLifetime);
+                if (!bProgressOwnerAlive) return {};
             }
 
-            XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            if (bProgressOwnerAlive) {
+                XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+            }
 
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
         }
@@ -13381,7 +13420,7 @@ QList<XBinary::FPART> XPE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             record.filePart = FILEPART_OVERLAY;
             record.nFileOffset = nMaxOffset;
             record.nFileSize = getSize() - nMaxOffset;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Overlay");
 
             listResult.append(record);
@@ -14801,7 +14840,7 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64
     // GetHeaders
     // pList must be sorted!
 
-    XADDR nBaseAddress = -1;
+    XADDR nBaseAddress = (XADDR)-1;
     quint32 nSize = 0;
 
     qint32 nNumberOfRelocs = pListRelocs->count();
@@ -14822,7 +14861,7 @@ QByteArray XPE::relocsAsRVAListToByteArray(QList<XADDR> *pListRelocs, bool bIs64
 
     baResult.resize(nSize);
 
-    nBaseAddress = -1;
+    nBaseAddress = (XADDR)-1;
     quint32 nOffset = 0;
     char *pData = baResult.data();
     char *pVirtualAddress = 0;
@@ -15722,26 +15761,33 @@ QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileTypesS()
 
 bool XPE::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XPE> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XMSDOS::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XMSDOS::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XMSDOS::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XMSDOS::INTERNAL_INFO *>(XMSDOS::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XMSDOS::INTERNAL_INFO *pInfo =
+            static_cast<XMSDOS::INTERNAL_INFO *>(
+                guardedThis->XMSDOS::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XMSDOS::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XPE::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XPE> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XPE::setInternalInfo(void *pInternalInfo)

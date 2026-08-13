@@ -670,7 +670,7 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
                     r.filePart = FILEPART_TABLE;
                     r.nFileOffset = h.nOffset;
                     r.nFileSize = 8;
-                    r.nVirtualAddress = -1;
+                    r.nVirtualAddress = (XADDR)-1;
                     r.sName = tr("Table");
                     list.append(r);
                     if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -712,7 +712,7 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
             r.filePart = FILEPART_REGION;
             r.nFileOffset = h.nOffset;
             r.nFileSize = h.nSize;
-            r.nVirtualAddress = -1;
+            r.nVirtualAddress = (XADDR)-1;
             r.sName = structIDToString(hunkTypeToStructId(h.nId));
             list.append(r);
             if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -727,7 +727,7 @@ QList<XBinary::FPART> XAmigaHunk::getFileParts(quint32 nFileParts, qint32 nLimit
             ov.filePart = FILEPART_OVERLAY;
             ov.nFileOffset = nMaxOffset;
             ov.nFileSize = getSize() - nMaxOffset;
-            ov.nVirtualAddress = -1;
+            ov.nVirtualAddress = (XADDR)-1;
             ov.sName = tr("Overlay");
             list.append(ov);
             if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -757,26 +757,33 @@ XBinary *XAmigaHunk::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nMo
 
 bool XAmigaHunk::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XAmigaHunk> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XAmigaHunk::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XAmigaHunk> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XAmigaHunk::setInternalInfo(void *pInternalInfo)

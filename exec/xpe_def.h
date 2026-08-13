@@ -403,6 +403,14 @@ struct IMAGE_RESOURCE_DIRECTORY {
     quint16 NumberOfIdEntries;
 };
 
+// These on-disk Windows ABI structures intentionally expose anonymous
+// struct/union fields exactly like the platform headers. MSVC supports that
+// representation but reports its own extension under /W4.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4201)
+#endif
+
 struct IMAGE_RESOURCE_DIRECTORY_ENTRY {
     union {
         struct {
@@ -496,6 +504,10 @@ struct SYSTEM_INFO64 {
     quint16 wProcessorLevel;
     quint16 wProcessorRevision;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 struct IMAGE_COR20_HEADER {
     // Header versioning
@@ -760,13 +772,15 @@ struct S_IMAGE_LOAD_CONFIG_DIRECTORY64 {
     quint64 GuardMemcpyFunctionPointer;
 };
 
+struct S_IMAGE_DELAYLOAD_ATTRIBUTES {
+    quint32 RvaBased : 1;  // Delay load version 2
+    quint32 ReservedAttributes : 31;
+};
+
 struct S_IMAGE_DELAYLOAD_DESCRIPTOR {
     union {
         quint32 AllAttributes;
-        struct {
-            quint32 RvaBased : 1;  // Delay load version 2
-            quint32 ReservedAttributes : 31;
-        } DUMMYSTRUCTNAME;
+        S_IMAGE_DELAYLOAD_ATTRIBUTES Attributes;
     };
     quint32 DllNameRVA;                  // RVA to the name of the target library
                                          // (NULL-terminate ASCII string)

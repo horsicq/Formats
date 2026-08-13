@@ -93,7 +93,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     header.filePart = FILEPART_HEADER;
     header.nOffset = 0;
     header.nSize = 8;
-    header.nAddress = -1;
+    header.nAddress = (XADDR)-1;
     header.sName = tr("Header");
     result.listRecords.append(header);
 
@@ -109,7 +109,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         table.filePart = FILEPART_TABLE;
         table.nOffset = info.nOffset;
         table.nSize = info.nSize;
-        table.nAddress = -1;
+        table.nAddress = (XADDR)-1;
         table.sName = tr("Table");
         result.listRecords.append(table);
 
@@ -123,7 +123,7 @@ XBinary::_MEMORY_MAP XTiff::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 region.filePart = FILEPART_REGION;
                 region.nOffset = chunk.nOffset;
                 region.nSize = chunk.nSize;
-                region.nAddress = -1;
+                region.nAddress = (XADDR)-1;
                 region.sName = QString("%1-%2").arg(XBinary::valueToHex(chunk.nTag)).arg(XBinary::valueToHex(nType));
                 result.listRecords.append(region);
             }
@@ -472,6 +472,11 @@ QList<XBinary::XFRECORD> XTiff::getXFRecords(FT fileType, quint32 nStructID, con
 //     return listResult;
 // }
 
+static bool _tiffCanAppend(qint32 nLimit, const QList<XBinary::FPART> &listResult)
+{
+    return (nLimit == -1) || (listResult.count() < nLimit);
+}
+
 QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<FPART> listResult;
@@ -485,16 +490,15 @@ QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
     QList<IFD_INFO> listInfo;
     if (!getIFDChain(&listInfo, pPdStruct) || !isPdStructNotCanceled(pPdStruct)) return listResult;
 
-    const auto canAppend = [&]() -> bool { return (nLimit == -1) || (listResult.count() < nLimit); };
     const bool bIsBigEndian = (endian == ENDIAN_BIG);
     qint64 nParsedEnd = 8;
 
-    if ((nFileParts & FILEPART_HEADER) && canAppend()) {
+    if ((nFileParts & FILEPART_HEADER) && _tiffCanAppend(nLimit, listResult)) {
         FPART record = {};
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
         record.nFileSize = 8;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Header");
         listResult.append(record);
     }
@@ -502,12 +506,12 @@ QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
     for (const IFD_INFO &info : listInfo) {
         nParsedEnd = qMax(nParsedEnd, info.nOffset + info.nSize);
 
-        if ((nFileParts & FILEPART_TABLE) && canAppend()) {
+        if ((nFileParts & FILEPART_TABLE) && _tiffCanAppend(nLimit, listResult)) {
             FPART record = {};
             record.filePart = FILEPART_TABLE;
             record.nFileOffset = info.nOffset;
             record.nFileSize = info.nSize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("IFD table");
             listResult.append(record);
         }
@@ -520,12 +524,12 @@ QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
                 // Referenced values may intentionally alias.  Keep each tag's extent, but use a maximum end
                 // rather than summing extents so overlap cannot inflate overlay accounting.
                 nParsedEnd = qMax(nParsedEnd, chunk.nOffset + chunk.nSize);
-                if ((nFileParts & FILEPART_REGION) && canAppend()) {
+                if ((nFileParts & FILEPART_REGION) && _tiffCanAppend(nLimit, listResult)) {
                     FPART record = {};
                     record.filePart = FILEPART_REGION;
                     record.nFileOffset = chunk.nOffset;
                     record.nFileSize = chunk.nSize;
-                    record.nVirtualAddress = -1;
+                    record.nVirtualAddress = (XADDR)-1;
                     record.sName = QString("%1-%2").arg(XBinary::valueToHex(chunk.nTag)).arg(XBinary::valueToHex(nType));
                     listResult.append(record);
                 }
@@ -537,12 +541,12 @@ QList<XBinary::FPART> XTiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         }
     }
 
-    if ((nFileParts & FILEPART_OVERLAY) && (nParsedEnd < nTotal) && canAppend()) {
+    if ((nFileParts & FILEPART_OVERLAY) && (nParsedEnd < nTotal) && _tiffCanAppend(nLimit, listResult)) {
         FPART record = {};
         record.filePart = FILEPART_OVERLAY;
         record.nFileOffset = nParsedEnd;
         record.nFileSize = nTotal - nParsedEnd;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Overlay");
         listResult.append(record);
     }
@@ -763,26 +767,33 @@ XBinary *XTiff::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
 bool XTiff::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XTiff> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XTiff::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XTiff> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XTiff::setInternalInfo(void *pInternalInfo)

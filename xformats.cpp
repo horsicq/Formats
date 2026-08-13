@@ -880,7 +880,7 @@ bool XFormats::saveAllPEIconsToDirectory(QIODevice *pDevice, const QString &sDir
         bResult = true;
 
         QList<XPE::RESOURCE_RECORD> listResources = pe.getResources(10000);
-        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_ICON, -1, &listResources);
+        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_ICON, (quint32)-1, &listResources);
 
         qint32 nNumberOfRecords = listIcons.size();
 
@@ -908,7 +908,7 @@ bool XFormats::saveAllPECursorsToDirectory(QIODevice *pDevice, const QString &sD
         bResult = true;
 
         QList<XPE::RESOURCE_RECORD> listResources = pe.getResources(10000);
-        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_CURSOR, -1, &listResources);
+        QList<XPE::RESOURCE_RECORD> listIcons = pe.getResourceRecords(XPE_DEF::S_RT_GROUP_CURSOR, (quint32)-1, &listResources);
 
         qint32 nNumberOfRecords = listIcons.size();
 
@@ -1380,7 +1380,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                                 qint32 nFPC = listFilterPartCounts.at(j);
 
                                 if (bMatch && (nFPC >= 1)) {
-                                    if (header.xLoc.nLocation != listFilterOffsets.at(j)) {
+                                    if (header.xLoc.nLocation != (XADDR)listFilterOffsets.at(j)) {
                                         bMatch = false;
                                     }
                                 }
@@ -1390,7 +1390,7 @@ QList<XBinary::XFHEADER> XFormats::getXFHeaders(QIODevice *pDevice, const QStrin
                                     }
                                 }
                                 if (bMatch && (nFPC >= 3)) {
-                                    if (header.structID != listFilterStructIDs.at(j)) {
+                                    if ((quint32)header.structID != listFilterStructIDs.at(j)) {
                                         bMatch = false;
                                     }
                                 }
@@ -1693,6 +1693,10 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
 {
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pRecord)
+    Q_UNUSED(bExtra)
+
     QSet<XBinary::FT> stResult;
 
     // QByteArray baData = XArchives::decompress(pDevice, pRecord, 0, 0, 0x200);
@@ -1771,6 +1775,8 @@ QSet<XBinary::FT> XFormats::getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypesTBZIP2(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pListRecords)
     Q_UNUSED(pPdStruct)
 
     QSet<XBinary::FT> stResult;
@@ -1792,6 +1798,8 @@ QSet<XBinary::FT> XFormats::getFileTypesTBZIP2(QIODevice *pDevice, QList<XArchiv
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypesTXZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pListRecords)
     Q_UNUSED(pPdStruct)
 
     QSet<XBinary::FT> stResult;
@@ -1813,6 +1821,8 @@ QSet<XBinary::FT> XFormats::getFileTypesTXZ(QIODevice *pDevice, QList<XArchive::
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypesTLZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pListRecords)
     Q_UNUSED(pPdStruct)
 
     QSet<XBinary::FT> stResult;
@@ -1850,6 +1860,10 @@ QSet<XBinary::FT> XFormats::getFileTypesAR(QIODevice *pDevice, QList<XArchive::R
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypesGZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pListRecords)
+    Q_UNUSED(pPdStruct)
+
     QSet<XBinary::FT> stResult;
 
     // if (pListRecords->count()) {
@@ -1892,38 +1906,15 @@ QSet<XBinary::FT> XFormats::getFileTypesXZ(QIODevice *pDevice, QList<XArchive::R
 #ifdef USE_ARCHIVE
 QSet<XBinary::FT> XFormats::getFileTypesLZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pDevice)
+    Q_UNUSED(pListRecords)
+    Q_UNUSED(pPdStruct)
+
     QSet<XBinary::FT> stResult;
 
     // stResult += getFileTypesTLZIP(pDevice, pListRecords, pPdStruct);
 
     return stResult;
-}
-#endif
-
-#ifdef USE_ARCHIVE
-static XBinary::FT _compressionTypeToTarFT(XTARCOMPRESSED::COMPRESSION_TYPE compressionType)
-{
-    XBinary::FT result = XBinary::FT_UNKNOWN;
-
-    if (compressionType == XTARCOMPRESSED::COMPRESSION_GZIP) {
-        result = XBinary::FT_TAR_GZ;
-    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_BZIP2) {
-        result = XBinary::FT_TAR_BZIP2;
-    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_XZ) {
-        result = XBinary::FT_TAR_XZ;
-    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_LZMA) {
-        result = XBinary::FT_TAR_LZMA;
-    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_ZSTD) {
-        result = XBinary::FT_TAR_ZSTD;
-    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_COMPRESS) {
-        result = XBinary::FT_TAR_Z;
-    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_LZIP) {
-        result = XBinary::FT_TAR_LZIP;
-    } else if (compressionType == XTARCOMPRESSED::COMPRESSION_LZOP) {
-        result = XBinary::FT_TAR_LZOP;
-    }
-
-    return result;
 }
 #endif
 
@@ -1957,23 +1948,23 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
         // No cached file types, proceed with detection
         stResult.insert(XBinary::FT_BINARY);
 
-        if (XMSDOS::isValid(pDevice, false, -1, pPdStruct)) {
+        if (XMSDOS::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
             stResult.insert(XBinary::FT_MSDOS);
 
-            if (XPE::isValid(pDevice, false, -1, pPdStruct)) {
+            if (XPE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
                 stResult.insert(XBinary::FT_PE);
 
-                XPE xpe(pDevice, false, -1);
+                XPE xpe(pDevice, false, (XADDR)-1);
 
                 if (xpe.isValid(pPdStruct)) {
                     stResult.insert(xpe.getFileType());
                 }
-            } else if (XNE::isValid(pDevice, false, -1, pPdStruct)) {
+            } else if (XNE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
                 stResult.insert(XBinary::FT_NE);
-            } else if (XLE::isValid(pDevice, false, -1, pPdStruct)) {
+            } else if (XLE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
                 stResult.insert(XBinary::FT_LE);
 
-                XLE xle(pDevice, false, -1);
+                XLE xle(pDevice, false, (XADDR)-1);
 
                 if (xle.isValid(pPdStruct)) {
                     stResult.insert(xle.getFileType());
@@ -1987,15 +1978,15 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 }
             }
 #endif
-        } else if (XELF::isValid(pDevice, false, -1, pPdStruct)) {
+        } else if (XELF::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
             stResult.insert(XBinary::FT_ELF);
 
-            XELF xelf(pDevice, false, -1);
+            XELF xelf(pDevice, false, (XADDR)-1);
 
             if (xelf.isValid(pPdStruct)) {
                 stResult.insert(xelf.getFileType());
             }
-        } else if (XMACH::isValid(pDevice, false, -1, pPdStruct)) {
+        } else if (XMACH::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
             stResult.insert(XBinary::FT_MACHO);
 
             XMACH xmach(pDevice);
@@ -2014,7 +2005,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
         }
 
         if (stResult.size() <= 1) {
-            if (XAtariST::isValid(pDevice, false, -1, pPdStruct)) {
+            if (XAtariST::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
                 stResult.insert(XBinary::FT_ATARIST);
             }
         }
@@ -2293,7 +2284,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
         if ((stResult.size() <= 1) || (stResult.contains(XBinary::FT_PLAINTEXT)) || (XBinary::getDeviceFileSuffix(pDevice).toUpper() == "COM")) {
-            if (XCOM::isValid(pDevice, false, -1, pPdStruct)) {
+            if (XCOM::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
                 if (XBinary::getDeviceFileSuffix(pDevice).toUpper() == "COM") {
                     stResult.insert(XBinary::FT_COM);
                 }
@@ -2328,10 +2319,18 @@ void XFormats::setData(MODE mode, XBinary::FT fileFormat, QIODevice *pDevice, QS
 
 void XFormats::process()
 {
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    XBinary::PDSTRUCT *pPdStruct = m_pPdStruct;
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    if (!progressLifetime.isValid()) return;
+
     if (m_mode == MODE_UNPACKDEVICETOFOLDER) {
         if (m_pDevice) {
-            if (!unpackDeviceToFolder(m_fileFormat, m_pDevice, m_sFolderName, m_pPdStruct)) {
-                if (XBinary::isPdStructNotCanceled(m_pPdStruct)) {
+            if (!unpackDeviceToFolder(m_fileFormat, m_pDevice, m_sFolderName, pPdStruct)) {
+                if (XBinary::isPdStructLifetimeAlive(progressLifetime) && XBinary::isPdStructNotCanceled(pPdStruct)) {
                     emit errorMessage(tr("Cannot unpack"));
                 }
             }
@@ -2341,12 +2340,20 @@ void XFormats::process()
 
 bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct)
 {
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    if (!progressLifetime.isValid()) return false;
+
     if (!isReadableSeekableDevice(pDevice) || sFolderName.isEmpty() || !XBinary::isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
 
     if (fileType == XBinary::FT_UNKNOWN) {
         fileType = XFormats::getPrefFileType(pDevice, true, pPdStruct);
+        if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) return false;
     }
 
     if ((fileType == XBinary::FT_UNKNOWN) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
@@ -2367,6 +2374,7 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
         if (pBinary) {
             QMap<XBinary::UNPACK_PROP, QVariant> mapProperties;
             bResult = pBinary->unpackToFolder(sFolderName, mapProperties, pPdStruct);
+            if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) bResult = false;
             delete pBinary;
         }
     }
@@ -2380,6 +2388,14 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
     qDebug("XFormats::extractArchiveRecordsToFolder: Starting extraction to %s", sFolderName.toLatin1().data());
 #endif
     bool bResult = false;
+
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
 
     if (!pListRecords || !isReadableSeekableDevice(pDevice) || sFolderName.isEmpty() || !XBinary::isPdStructNotCanceled(pPdStruct)) {
         return bResult;
@@ -2412,7 +2428,7 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
                 return false;
             }
 
-            for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+            for (qint32 i = 0; bProgressOwnerAlive && (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 QString sPrefName = pListRecords->at(i).mapProperties.value(XBinary::FPART_PROP_ORIGINALNAME).toString();
 #ifdef QT_DEBUG
                 qDebug("XFormats::extractArchiveRecordsToFolder: Processing record %d/%d: %s", i + 1, nNumberOfRecords, sPrefName.toLatin1().data());
@@ -2442,7 +2458,8 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #endif
                     emit errorMessage(QString("%1: %2").arg(tr("Path traversal detected")).arg(sPrefName));
                     bResult = false;
-                    XBinary::setPdStructCurrentIncrement(pPdStruct, nGlobalIndex);
+                    bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, nGlobalIndex, progressLifetime);
+                    if (!bProgressOwnerAlive) return false;
                     continue;
                 }
 
@@ -2458,7 +2475,8 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
                     if (fi.isDir() || fi.isSymLink() || !isPathBelowRoot(sCanonicalRoot, sResultFileName)) {
                         emit errorMessage(QString("%1: %2").arg(tr("Cannot create")).arg(sResultFileName));
                         bResult = false;
-                        XBinary::setPdStructCurrentIncrement(pPdStruct, nGlobalIndex);
+                        bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, nGlobalIndex, progressLifetime);
+                        if (!bProgressOwnerAlive) return false;
                         continue;
                     }
 
@@ -2471,8 +2489,13 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 #ifdef USE_ARCHIVE
                         QMap<XBinary::UNPACK_PROP, QVariant> mapUnpackProperties;
 
-                        bRecordResult = xDecompress.decompressArchiveRecord(archiveRecord, pDevice, &file, mapUnpackProperties, pPdStruct) &&
-                                        XBinary::isPdStructNotCanceled(pPdStruct);
+                        bRecordResult = xDecompress.decompressArchiveRecord(archiveRecord, pDevice, &file, mapUnpackProperties, pPdStruct);
+                        bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+                        if (!bProgressOwnerAlive) {
+                            file.cancelWriting();
+                            return false;
+                        }
+                        bRecordResult = bRecordResult && XBinary::isPdStructNotCanceled(pPdStruct);
 #endif
 
                         if (bRecordResult && file.commit()) {
@@ -2502,14 +2525,17 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
                     bResult = false;
                 }
 
-                XBinary::setPdStructCurrentIncrement(pPdStruct, nGlobalIndex);
+                bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, nGlobalIndex, progressLifetime);
+                if (!bProgressOwnerAlive) return false;
             }
 
-            if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            if (bProgressOwnerAlive && !XBinary::isPdStructNotCanceled(pPdStruct)) {
                 bResult = false;
             }
 
-            XBinary::setPdStructFinished(pPdStruct, nGlobalIndex);
+            if (bProgressOwnerAlive) {
+                XBinary::setPdStructFinished(pPdStruct, nGlobalIndex);
+            }
 #ifdef QT_DEBUG
             qDebug("XFormats::extractArchiveRecordsToFolder: Extraction completed, bResult=%d", bResult);
 #endif
@@ -2533,12 +2559,20 @@ bool XFormats::packFolderToDevice(XBinary::FT fileType, QIODevice *pDevice, cons
 {
     bool bResult = false;
 
+    XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
+    if (!pPdStruct) {
+        pPdStruct = &pdStructEmpty;
+    }
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    if (!progressLifetime.isValid()) return false;
+
     if (pDevice && pDevice->isOpen() && pDevice->isWritable() && !pDevice->isSequential() && XBinary::isPdStructNotCanceled(pPdStruct) &&
         XBinary::isDirectoryExists(sFolderName)) {
         XBinary *pBinary = createClass(fileType, pDevice);
 
         if (pBinary) {
             bResult = pBinary->packFolderToDevice(pDevice, mapProperties, sFolderName, pPdStruct);
+            if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) bResult = false;
             delete pBinary;
         }
     }
@@ -2870,26 +2904,31 @@ QVector<XBinary::KeyValueItem> XFormats::getEntropy(QIODevice *pDevice, bool bIs
 {
     QVector<XBinary::KeyValueItem> result;
 
-    if (!isReadableSeekableDevice(pDevice) || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
-    DevicePositionGuard positionGuard(pDevice);
-
     XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive || !isReadableSeekableDevice(pDevice) || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
+    DevicePositionGuard positionGuard(pDevice);
 
     XBinary binary(pDevice);
 
     result.append({"Total", binary.getBinaryStatus(XBinary::BSTATUS_ENTROPY, 0, -1, pPdStruct)});
+    bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
 
-    if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
+    if (!bProgressOwnerAlive || !XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
     XBinary::FT fileType = getPrefFileType(pDevice, true, pPdStruct);
-    if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
+    bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+    if (!bProgressOwnerAlive || !XBinary::isPdStructNotCanceled(pPdStruct)) return {};
     XBinary::_MEMORY_MAP memoryMap = getMemoryMap(fileType, XBinary::MAPMODE_UNKNOWN, pDevice, bIsImage, nModuleAddress, pPdStruct);
+    bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+    if (!bProgressOwnerAlive) return {};
 
     qint32 nNumberOfRecords = memoryMap.listRecords.size();
-    for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
+    for (qint32 i = 0; bProgressOwnerAlive && (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         const XBinary::_MEMORY_RECORD &record = memoryMap.listRecords.at(i);
 
         if (record.bIsVirtual || (record.nOffset < 0) || (record.nSize <= 0) || (record.nOffset > pDevice->size()) ||
@@ -2898,12 +2937,14 @@ QVector<XBinary::KeyValueItem> XFormats::getEntropy(QIODevice *pDevice, bool bIs
         }
 
         double dEntropy = binary.getBinaryStatus(XBinary::BSTATUS_ENTROPY, record.nOffset, record.nSize, pPdStruct);
+        bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+        if (!bProgressOwnerAlive) return {};
 
         QString sKey = record.sName.isEmpty() ? QString("Record_%1").arg(i) : record.sName;
         result.append({sKey, dEntropy});
     }
 
-    if (!XBinary::isPdStructNotCanceled(pPdStruct)) result.clear();
+    if (bProgressOwnerAlive && !XBinary::isPdStructNotCanceled(pPdStruct)) result.clear();
     return result;
 }
 
@@ -2911,20 +2952,27 @@ QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bI
 {
     QVector<XBinary::KeyValueItem> result;
 
-    if (!isReadableSeekableDevice(pDevice) || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
-    DevicePositionGuard positionGuard(pDevice);
-
     XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive || !isReadableSeekableDevice(pDevice) || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
+    DevicePositionGuard positionGuard(pDevice);
 
     XBinary::FT fileType = getPrefFileType(pDevice, true, pPdStruct);
-    if (!XBinary::isPdStructNotCanceled(pPdStruct)) return result;
+    bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+    if (!bProgressOwnerAlive || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
     XBinary *pBinary = createClass(fileType, pDevice, bIsImage, nModuleAddress);
 
     if (pBinary) {
         XBinary::FILEFORMATINFO info = pBinary->getFileFormatInfo(pPdStruct);
+        bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+        if (!bProgressOwnerAlive) {
+            delete pBinary;
+            return {};
+        }
 
         QString sValue;
 
@@ -2962,14 +3010,24 @@ QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bI
         if (!sValue.isEmpty()) result.append({"CompressionMethod", sValue});
 
         sValue = XBinary::getHash(XBinary::HASH_MD5, pDevice, pPdStruct);
+        bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+        if (!bProgressOwnerAlive) {
+            delete pBinary;
+            return {};
+        }
         if (!sValue.isEmpty()) result.append({"MD5", sValue});
 
         sValue = QString::number(pBinary->getBinaryStatus(XBinary::BSTATUS_ENTROPY, 0, -1, pPdStruct), 'f', 4);
+        bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+        if (!bProgressOwnerAlive) {
+            delete pBinary;
+            return {};
+        }
         if (!sValue.isEmpty()) result.append({"Entropy", sValue});
 
         delete pBinary;
     }
 
-    if (!XBinary::isPdStructNotCanceled(pPdStruct)) result.clear();
+    if (bProgressOwnerAlive && !XBinary::isPdStructNotCanceled(pPdStruct)) result.clear();
     return result;
 }

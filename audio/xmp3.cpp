@@ -369,7 +369,7 @@ QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                 h.filePart = FILEPART_HEADER;
                 h.nFileOffset = 0;
                 h.nFileSize = qMin(id3Size, total);
-                h.nVirtualAddress = -1;
+                h.nVirtualAddress = (XADDR)-1;
                 h.sName = tr("Header");
                 list.append(h);
                 if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -393,7 +393,7 @@ QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             f.filePart = FILEPART_REGION;
             f.nFileOffset = offset;
             f.nFileSize = frameSize;
-            f.nVirtualAddress = -1;
+            f.nVirtualAddress = (XADDR)-1;
             f.sName = QString("Frame");
             list.append(f);
             if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -412,7 +412,7 @@ QList<XBinary::FPART> XMP3::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             ov.filePart = FILEPART_OVERLAY;
             ov.nFileOffset = maxEnd;
             ov.nFileSize = total - maxEnd;
-            ov.nVirtualAddress = -1;
+            ov.nVirtualAddress = (XADDR)-1;
             ov.sName = tr("Overlay");
             list.append(ov);
             if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -467,26 +467,33 @@ XBinary *XMP3::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
 bool XMP3::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XMP3> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XMP3::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XMP3> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XMP3::setInternalInfo(void *pInternalInfo)

@@ -260,7 +260,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 
             _MEMORY_RECORD memHeader = {};
             memHeader.nOffset = nHeaderOffset;
-            memHeader.nAddress = -1;
+            memHeader.nAddress = (XADDR)-1;
             memHeader.nSize = nHeaderSize;
             memHeader.filePart = FILEPART_HEADER;
             memHeader.sName = tr("Header") + QString(" + ") + tr("Table Directory");
@@ -276,7 +276,7 @@ XBinary::_MEMORY_MAP XTTF::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
                 rec.filePart = FILEPART_OBJECT;
                 rec.sName = tagToString(tableRecords.at(i).tag);
                 rec.nIndex = i;
-                rec.nAddress = -1;
+                rec.nAddress = (XADDR)-1;
                 result.listRecords.append(rec);
             }
         }
@@ -568,26 +568,33 @@ QMap<quint64, QString> XTTF::getHeaderVersions()
 
 bool XTTF::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XTTF> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XTTF::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XTTF> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XTTF::setInternalInfo(void *pInternalInfo)

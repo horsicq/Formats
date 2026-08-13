@@ -362,7 +362,7 @@ QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
         record.nFileSize = 16;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Header");
 
         listResult.append(record);
@@ -395,7 +395,7 @@ QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
                 record.filePart = FILEPART_REGION;
                 record.nFileOffset = nOffset;
                 record.nFileSize = 8 + nChunkSize;
-                record.nVirtualAddress = -1;
+                record.nVirtualAddress = (XADDR)-1;
                 record.sName = sChunkName;
 
                 listResult.append(record);
@@ -424,7 +424,7 @@ QList<XBinary::FPART> XDJVU::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
             record.filePart = FILEPART_OVERLAY;
             record.nFileOffset = nFileFormatSize;
             record.nFileSize = nTotalSize - nFileFormatSize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Overlay");
 
             listResult.append(record);
@@ -643,26 +643,33 @@ XBinary *XDJVU::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
 bool XDJVU::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XDJVU> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XDJVU::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XDJVU> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XDJVU::setInternalInfo(void *pInternalInfo)

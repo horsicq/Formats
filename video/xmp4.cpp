@@ -126,6 +126,11 @@ bool XMP4::isTagValid(const QString &sTagName)
 //     return list;
 // }
 
+static bool _mp4CanAppend(qint32 nLimit, const QList<XBinary::FPART> &list)
+{
+    return (nLimit == -1) || (list.size() < nLimit);
+}
+
 QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<FPART> list;
@@ -135,20 +140,19 @@ QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     }
 
     const qint64 nTotal = getSize();
-    const auto canAppend = [&]() -> bool { return (nLimit == -1) || (list.size() < nLimit); };
 
-    if ((nFileParts & FILEPART_HEADER) && canAppend()) {
+    if ((nFileParts & FILEPART_HEADER) && _mp4CanAppend(nLimit, list)) {
         FPART h = {};
         h.filePart = FILEPART_HEADER;
         h.nFileOffset = 0;
         h.nFileSize = qMin<qint64>(nTotal, 8);  // size(4)+type(4) of first box
-        h.nVirtualAddress = -1;
+        h.nVirtualAddress = (XADDR)-1;
         h.sName = tr("Header");
         list.append(h);
     }
 
     qint64 nParsedEnd = 0;
-    if ((nFileParts & (FILEPART_REGION | FILEPART_OVERLAY)) && canAppend()) {
+    if ((nFileParts & (FILEPART_REGION | FILEPART_OVERLAY)) && _mp4CanAppend(nLimit, list)) {
         qint64 nOffset = 0;
         while ((nOffset <= (nTotal - 8)) && XBinary::isPdStructNotCanceled(pPdStruct)) {
             const quint32 nSize32 = read_uint32(nOffset, true);
@@ -172,31 +176,31 @@ QList<XBinary::FPART> XMP4::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
 
             if ((nBoxSize < 8) || (nBoxSize > (quint64)nRemaining)) break;
 
-            if ((nFileParts & FILEPART_REGION) && canAppend()) {
+            if ((nFileParts & FILEPART_REGION) && _mp4CanAppend(nLimit, list)) {
                 FPART f = {};
                 f.filePart = FILEPART_REGION;
                 f.nFileOffset = nOffset;
                 f.nFileSize = (qint64)nBoxSize;
-                f.nVirtualAddress = -1;
+                f.nVirtualAddress = (XADDR)-1;
                 f.sName = sType;
                 list.append(f);
             }
 
             nOffset += (qint64)nBoxSize;
             nParsedEnd = nOffset;
-            if (!canAppend() || bExtendsToEnd) break;
+            if (!_mp4CanAppend(nLimit, list) || bExtendsToEnd) break;
         }
     }
 
     if (!XBinary::isPdStructNotCanceled(pPdStruct)) return QList<FPART>();
 
-    if ((nFileParts & FILEPART_OVERLAY) && canAppend()) {
+    if ((nFileParts & FILEPART_OVERLAY) && _mp4CanAppend(nLimit, list)) {
         if (nParsedEnd < nTotal) {
             FPART ov = {};
             ov.filePart = FILEPART_OVERLAY;
             ov.nFileOffset = nParsedEnd;
             ov.nFileSize = nTotal - nParsedEnd;
-            ov.nVirtualAddress = -1;
+            ov.nVirtualAddress = (XADDR)-1;
             ov.sName = tr("Overlay");
             list.append(ov);
         }
@@ -361,26 +365,33 @@ XBinary *XMP4::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
 bool XMP4::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XMP4> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XMP4::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XMP4> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XMP4::setInternalInfo(void *pInternalInfo)

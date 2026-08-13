@@ -85,26 +85,33 @@ XBinary *XWAV::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
 bool XWAV::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XWAV> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XRiff::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XRiff::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XRiff::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XRiff::INTERNAL_INFO *>(XRiff::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XRiff::INTERNAL_INFO *pInfo =
+            static_cast<XRiff::INTERNAL_INFO *>(
+                guardedThis->XRiff::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XRiff::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XWAV::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XWAV> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XWAV::setInternalInfo(void *pInternalInfo)

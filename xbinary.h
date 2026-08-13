@@ -1246,6 +1246,15 @@ public:
         bool isValid() const { return !_state.isNull() && (_token != 0); }
     };
 
+    // Retains only the callback/liveness control block, never the PDSTRUCT
+    // object itself.  Code that can invoke a user callback must stop touching
+    // the raw PDSTRUCT as soon as this token reports that its owner died.
+    struct PDSTRUCTLIFETIME {
+        QSharedPointer<PDSTRUCT_CALLBACK_STATE> _state;
+
+        bool isValid() const { return !_state.isNull(); }
+    };
+
     struct PDSTRUCT {
         PDSTRUCT();
         PDSTRUCT(const PDSTRUCT &other);
@@ -2541,6 +2550,12 @@ public:
                                               PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData);
     static PDCALLBACKSUBSCRIPTION subscribePdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData);
     static bool unsubscribePdStructCallback(PDCALLBACKSUBSCRIPTION *pSubscription);
+    static PDSTRUCTLIFETIME retainPdStructLifetime(PDSTRUCT *pPdStruct);
+    static bool isPdStructLifetimeAlive(const PDSTRUCTLIFETIME &lifetime);
+    static bool setPdStructCurrentChecked(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue, const PDSTRUCTLIFETIME &lifetime);
+    static bool setPdStructCurrentIncrementChecked(PDSTRUCT *pPdStruct, qint32 nIndex, const PDSTRUCTLIFETIME &lifetime);
+    static bool invokePdStructCallbackChecked(PDSTRUCT *pPdStruct, const PDSTRUCTLIFETIME &lifetime,
+                                              qint32 nMinIntervalMs = 100);
     static void invokePdStructCallback(PDSTRUCT *pPdStruct, qint32 nMinIntervalMs = 100);
 
     struct REGION_FILL {
@@ -2739,6 +2754,15 @@ public:
     bool isInternalInfoHandled();
     void setIsInternalInfoHandled(bool bState);
 
+    // Internal-info construction is a transaction bound to the exact input
+    // device generation.  An active transaction is deliberately not reported
+    // as handled: a nested getter fails instead of observing unpublished data.
+    quint64 beginInternalInfoTransaction();
+    bool isInternalInfoTransactionCurrent(quint64 nTransaction) const;
+    bool commitInternalInfoTransaction(quint64 nTransaction,
+                                       const XBinary::INTERNAL_INFO *pInternalInfo);
+    void rollbackInternalInfoTransaction(quint64 nTransaction);
+
 private:
     static QString qcharToHex(QChar cSymbol);
 
@@ -2801,6 +2825,12 @@ private:
     bool m_bIsArchive;
     QString m_sFileFormatExts;
     bool m_bIsInternalInfoHandled;
+    quint64 m_nInternalInfoEpoch;
+    quint64 m_nInternalInfoDeviceGeneration;
+    quint64 m_nInternalInfoTransaction;
+    // Identity only; never dereferenced.  Unlike QPointer::data(), this keeps
+    // the pre-destruction value so source deletion is observable.
+    QIODevice *m_pInternalInfoDeviceIdentity;
     XBinary::INTERNAL_INFO m_internalInfo;
 };
 

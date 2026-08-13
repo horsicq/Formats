@@ -1739,7 +1739,7 @@ QVector<XBinary::XIMPORT_STRUCT> XMACH::getImportStructs()
                         XIMPORT_STRUCT record = {};
                         record.nOffset = nRowOffset;
                         record.nSize = nImportSize;
-                        record.nAddress = -1;
+                        record.nAddress = (XADDR)-1;
                         record.sLibrary = _libraryOrdinalToName(nLibOrdinal, listDylibNames);
                         record.sFunction = sName;
                         record.nOrdinal = nLibOrdinal;
@@ -1783,7 +1783,7 @@ QVector<XBinary::XIMPORT_STRUCT> XMACH::getImportStructs()
                 XIMPORT_STRUCT record = {};
                 record.nOffset = nlistRecord.nStructOffset;
                 record.nSize = nlistRecord.bIs64 ? (qint64)sizeof(XMACH_DEF::nlist_64) : (qint64)sizeof(XMACH_DEF::nlist);
-                record.nAddress = -1;
+                record.nAddress = (XADDR)-1;
                 record.sLibrary = _libraryOrdinalToName(nLibOrdinal, listDylibNames);
                 record.sFunction = sName;
                 record.nOrdinal = nLibOrdinal;
@@ -7043,26 +7043,33 @@ XBinary *XMACH::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
 bool XMACH::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XMACH> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XMACH::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XMACH> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XMACH::setInternalInfo(void *pInternalInfo)

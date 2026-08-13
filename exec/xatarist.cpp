@@ -121,7 +121,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
         partHeader.filePart = FILEPART_HEADER;
         partHeader.nFileOffset = 0;
         partHeader.nFileSize = nHeaderSize;
-        partHeader.nVirtualAddress = -1;
+        partHeader.nVirtualAddress = (XADDR)-1;
         partHeader.sName = tr("Header");
         listResult.append(partHeader);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -189,7 +189,7 @@ QList<XBinary::FPART> XAtariST::getFileParts(quint32 nFileParts, qint32 nLimit, 
             partOverlay.filePart = FILEPART_OVERLAY;
             partOverlay.nFileOffset = nCoveredEnd;
             partOverlay.nFileSize = nTotalSize - nCoveredEnd;
-            partOverlay.nVirtualAddress = -1;
+            partOverlay.nVirtualAddress = (XADDR)-1;
             partOverlay.sName = tr("Overlay");
             listResult.append(partOverlay);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -358,26 +358,33 @@ QString XAtariST::getFileFormatExtsString()
 
 bool XAtariST::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XAtariST> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XAtariST::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XAtariST> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XAtariST::setInternalInfo(void *pInternalInfo)

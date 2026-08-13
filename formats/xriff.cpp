@@ -157,6 +157,8 @@ QList<XBinary::MAPMODE> XRiff::getMapModesList()
 
 QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
+    Q_UNUSED(pPdStruct)
+
     QList<FPART> list;
 
     if ((nLimit < -1) || (nLimit == 0)) {
@@ -172,7 +174,7 @@ QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         f.filePart = FILEPART_HEADER;
         f.nFileOffset = 0;
         f.nFileSize = 12;  // RIFF header: 'RIFF'/'RIFX' + size + form type
-        f.nVirtualAddress = -1;
+        f.nVirtualAddress = (XADDR)-1;
         f.sName = tr("Header");
         list.append(f);
         if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -186,7 +188,7 @@ QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         f.filePart = FILEPART_REGION;
         f.nFileOffset = 0;
         f.nFileSize = nChunkTotal;
-        f.nVirtualAddress = -1;
+        f.nVirtualAddress = (XADDR)-1;
         f.sName = read_ansiString(0, 4);
         list.append(f);
         if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -202,7 +204,7 @@ QList<XBinary::FPART> XRiff::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
             ov.filePart = FILEPART_OVERLAY;
             ov.nFileOffset = nEnd;
             ov.nFileSize = getSize() - nEnd;
-            ov.nVirtualAddress = -1;
+            ov.nVirtualAddress = (XADDR)-1;
             ov.sName = tr("Overlay");
             list.append(ov);
             if ((nLimit != -1) && (list.count() >= nLimit)) return list;
@@ -381,26 +383,33 @@ XBinary *XRiff::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
 bool XRiff::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XRiff> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XRiff::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XRiff> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XRiff::setInternalInfo(void *pInternalInfo)

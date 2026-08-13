@@ -142,7 +142,7 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
         record.nFileSize = qMin(nHeaderSize, nTotal);
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Header");
         listResult.append(record);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -154,7 +154,7 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
             record.filePart = FILEPART_SEGMENT;
             record.nFileOffset = nBodyOffset;
             record.nFileSize = nBodySize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Image");
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -169,7 +169,7 @@ QList<XBinary::FPART> XMSDOS::getFileParts(quint32 nFileParts, qint32 nLimit, PD
             record.filePart = FILEPART_OVERLAY;
             record.nFileOffset = nCoveredEnd;
             record.nFileSize = nTotal - nCoveredEnd;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Overlay");
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -460,8 +460,6 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
 
     // qint64 nCodeSize = 0;
     qint64 nOverlayOffset = nMaxOffset;
-    qint64 nOverlaySize = qMax(nBinarySize - nMaxOffset, (qint64)0);
-
     // if (nMaxOffset > nCodeOffset) {
     //     nCodeSize = S_ALIGN_UP(nMaxOffset - nCodeOffset, 512);
     //     //    nCodeSize=qMin(nCodeSize,getSize());
@@ -478,7 +476,7 @@ XBinary::_MEMORY_MAP XMSDOS::getMemoryMap(XBinary::MAPMODE mapMode, PDSTRUCT *pP
         record.sName = QString("MSDOS %1").arg(tr("Header"));
         record.nSize = nHeaderSize;
         record.nOffset = nHeaderOffset;
-        record.nAddress = -1;
+        record.nAddress = (XADDR)-1;
         record.filePart = FILEPART_HEADER;
         record.nIndex = nIndex++;
 
@@ -1048,26 +1046,33 @@ QList<XBinary::XFRECORD> XMSDOS::getXFRecords(FT fileType, quint32 nStructID, co
 
 bool XMSDOS::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XMSDOS> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XMSDOS::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XMSDOS> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XMSDOS::setInternalInfo(void *pInternalInfo)

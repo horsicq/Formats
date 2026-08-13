@@ -87,7 +87,7 @@ XBinary::FPART createFilePart(XBinary::FILEPART filePart, qint64 nOffset, qint64
     result.filePart = filePart;
     result.nFileOffset = nOffset;
     result.nFileSize = nSize;
-    result.nVirtualAddress = -1;
+    result.nVirtualAddress = (XADDR)-1;
     result.sName = sName;
 
     return result;
@@ -729,26 +729,33 @@ XBinary *XJpeg::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
 bool XJpeg::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XJpeg> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XJpeg::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XJpeg> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XJpeg::setInternalInfo(void *pInternalInfo)

@@ -265,7 +265,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         record.filePart = FILEPART_HEADER;
         record.nOffset = 0;
         record.nSize = sizeof(ICONDIR);
-        record.nAddress = -1;
+        record.nAddress = (XADDR)-1;
         record.sName = tr("Header");
 
         result.listRecords.append(record);
@@ -311,7 +311,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
         record.filePart = FILEPART_DATA;
         record.nOffset = iconDirectory.dwImageOffset;
         record.nSize = iconDirectory.dwBytesInRes;
-        record.nAddress = -1;
+        record.nAddress = (XADDR)-1;
 
         result.listRecords.append(record);
 
@@ -643,7 +643,7 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         rec.filePart = FILEPART_HEADER;
         rec.nFileOffset = 0;
         rec.nFileSize = sizeof(ICONDIR);
-        rec.nVirtualAddress = -1;
+        rec.nVirtualAddress = (XADDR)-1;
         rec.sName = tr("Header");
         listResult.append(rec);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -656,7 +656,7 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
         rec.filePart = FILEPART_TABLE;
         rec.nFileOffset = sizeof(ICONDIR);
         rec.nFileSize = sizeof(ICONDIRENTRY) * dir.idCount;
-        rec.nVirtualAddress = -1;
+        rec.nVirtualAddress = (XADDR)-1;
         rec.sName = tr("Entries");
         listResult.append(rec);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -673,7 +673,7 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
                 rec.filePart = FILEPART_OBJECT;
                 rec.nFileOffset = e.dwImageOffset;
                 rec.nFileSize = qMin<qint64>(e.dwBytesInRes, nTotal - e.dwImageOffset);
-                rec.nVirtualAddress = -1;
+                rec.nVirtualAddress = (XADDR)-1;
                 rec.sName = tr("Icon");
                 listResult.append(rec);
                 if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -694,7 +694,7 @@ QList<XBinary::FPART> XIcon::getFileParts(quint32 nFileParts, qint32 nLimit, PDS
             rec.filePart = FILEPART_OVERLAY;
             rec.nFileOffset = nMax;
             rec.nFileSize = nTotal - nMax;
-            rec.nVirtualAddress = -1;
+            rec.nVirtualAddress = (XADDR)-1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -721,26 +721,33 @@ XBinary *XIcon::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleA
 
 bool XIcon::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XIcon> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XIcon::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XIcon> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XIcon::setInternalInfo(void *pInternalInfo)

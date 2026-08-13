@@ -1809,7 +1809,7 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             rec.filePart = FILEPART_OVERLAY;
             rec.nFileOffset = nMaxOffset;
             rec.nFileSize = nTotal - nMaxOffset;
-            rec.nVirtualAddress = -1;
+            rec.nVirtualAddress = (XADDR)-1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -1838,26 +1838,33 @@ XBinary *XLE::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAdd
 
 bool XLE::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XLE> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XMSDOS::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XMSDOS::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XMSDOS::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XMSDOS::INTERNAL_INFO *>(XMSDOS::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XMSDOS::INTERNAL_INFO *pInfo =
+            static_cast<XMSDOS::INTERNAL_INFO *>(
+                guardedThis->XMSDOS::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XMSDOS::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XLE::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XLE> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XLE::setInternalInfo(void *pInternalInfo)

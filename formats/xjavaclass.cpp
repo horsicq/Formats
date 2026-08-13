@@ -740,7 +740,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
         record.filePart = FILEPART_HEADER;
         record.nFileOffset = 0;
         record.nFileSize = 8;
-        record.nVirtualAddress = -1;
+        record.nVirtualAddress = (XADDR)-1;
         record.sName = tr("Header");
 
         listResult.append(record);
@@ -786,7 +786,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.filePart = FILEPART_REGION;
             record.nFileOffset = nOffset;
             record.nFileSize = 2 + nConstantPoolSize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Constant pool");
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -799,7 +799,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.filePart = FILEPART_REGION;
             record.nFileOffset = nOffset;
             record.nFileSize = 6;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Class info");
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -812,7 +812,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.filePart = FILEPART_REGION;
             record.nFileOffset = nOffset;
             record.nFileSize = 2 + (info.nInterfacesCount * 2);
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Interfaces");
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -833,7 +833,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.filePart = FILEPART_REGION;
             record.nFileOffset = nOffset;
             record.nFileSize = 2 + nFieldsSize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Fields");
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -854,7 +854,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.filePart = FILEPART_REGION;
             record.nFileOffset = nOffset;
             record.nFileSize = 2 + nMethodsSize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Methods");
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -872,7 +872,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.filePart = FILEPART_REGION;
             record.nFileOffset = nOffset;
             record.nFileSize = 2 + nAttributesSize;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Attributes");
             listResult.append(record);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -890,7 +890,7 @@ QList<XBinary::FPART> XJavaClass::getFileParts(quint32 nFileParts, qint32 nLimit
             record.filePart = FILEPART_OVERLAY;
             record.nFileOffset = nDataEnd;
             record.nFileSize = nTotalSize - nDataEnd;
-            record.nVirtualAddress = -1;
+            record.nVirtualAddress = (XADDR)-1;
             record.sName = tr("Overlay");
 
             listResult.append(record);
@@ -935,26 +935,33 @@ XBinary *XJavaClass::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nMo
 
 bool XJavaClass::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XJavaClass> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XJavaClass::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XJavaClass> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XJavaClass::setInternalInfo(void *pInternalInfo)

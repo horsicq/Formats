@@ -15,6 +15,36 @@ XWEBP::~XWEBP()
 {
 }
 
+static bool _webpIsValidImageChunk(XWEBP *pWebp, const QByteArray &baType, qint64 nDataOffset, quint32 nDataSize, quint32 *pWidth, quint32 *pHeight, bool *pHasAlpha)
+{
+    if (pWidth) *pWidth = 0;
+    if (pHeight) *pHeight = 0;
+    if (pHasAlpha) *pHasAlpha = false;
+
+    if (baType == QByteArrayLiteral("VP8 ")) {
+        if ((nDataSize < 10) || ((pWebp->read_uint8(nDataOffset) & 1) != 0) ||
+            (pWebp->read_array(nDataOffset + 3, 3) != QByteArray::fromHex("9d012a"))) {
+            return false;
+        }
+        const quint32 nWidth = pWebp->read_uint16(nDataOffset + 6, false) & 0x3FFF;
+        const quint32 nHeight = pWebp->read_uint16(nDataOffset + 8, false) & 0x3FFF;
+        if ((nWidth == 0) || (nHeight == 0)) return false;
+        if (pWidth) *pWidth = nWidth;
+        if (pHeight) *pHeight = nHeight;
+        return true;
+    }
+    if (baType == QByteArrayLiteral("VP8L")) {
+        if ((nDataSize < 5) || (pWebp->read_uint8(nDataOffset) != 0x2F)) return false;
+        const quint32 nBits = pWebp->read_uint32(nDataOffset + 1, false);
+        if ((nBits >> 29) != 0) return false;
+        if (pWidth) *pWidth = (nBits & 0x3FFF) + 1;
+        if (pHeight) *pHeight = ((nBits >> 14) & 0x3FFF) + 1;
+        if (pHasAlpha) *pHasAlpha = ((nBits >> 28) & 1) != 0;
+        return true;
+    }
+    return false;
+}
+
 bool XWEBP::isValid(PDSTRUCT *pPdStruct)
 {
     const qint64 nTotalSize = getSize();
@@ -30,36 +60,6 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
     if ((nRiffSize < 12) || (nDeclaredEnd > nTotalSize)) {
         return false;
     }
-
-    auto isValidImageChunk = [this](const QByteArray &baType, qint64 nDataOffset, quint32 nDataSize,
-                                    quint32 *pWidth, quint32 *pHeight, bool *pHasAlpha) {
-        if (pWidth) *pWidth = 0;
-        if (pHeight) *pHeight = 0;
-        if (pHasAlpha) *pHasAlpha = false;
-
-        if (baType == QByteArrayLiteral("VP8 ")) {
-            if ((nDataSize < 10) || ((read_uint8(nDataOffset) & 1) != 0) ||
-                (read_array(nDataOffset + 3, 3) != QByteArray::fromHex("9d012a"))) {
-                return false;
-            }
-            const quint32 nWidth = read_uint16(nDataOffset + 6, false) & 0x3FFF;
-            const quint32 nHeight = read_uint16(nDataOffset + 8, false) & 0x3FFF;
-            if ((nWidth == 0) || (nHeight == 0)) return false;
-            if (pWidth) *pWidth = nWidth;
-            if (pHeight) *pHeight = nHeight;
-            return true;
-        }
-        if (baType == QByteArrayLiteral("VP8L")) {
-            if ((nDataSize < 5) || (read_uint8(nDataOffset) != 0x2F)) return false;
-            const quint32 nBits = read_uint32(nDataOffset + 1, false);
-            if ((nBits >> 29) != 0) return false;
-            if (pWidth) *pWidth = (nBits & 0x3FFF) + 1;
-            if (pHeight) *pHeight = ((nBits >> 14) & 0x3FFF) + 1;
-            if (pHasAlpha) *pHasAlpha = ((nBits >> 28) & 1) != 0;
-            return true;
-        }
-        return false;
-    };
 
     qint64 nOffset = 12;
     qint32 nChunkIndex = 0;
@@ -109,7 +109,7 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
             quint32 nImageHeight = 0;
             bool bImageAlpha = false;
             if (bHasTopImage || bHasANIM || (nFrameCount != 0) ||
-                !isValidImageChunk(baChunkType, nDataOffset, nChunkSize, &nImageWidth, &nImageHeight, &bImageAlpha)) {
+                !_webpIsValidImageChunk(this, baChunkType, nDataOffset, nChunkSize, &nImageWidth, &nImageHeight, &bImageAlpha)) {
                 return false;
             }
             if (bExtended && ((nImageWidth != nCanvasWidth) || (nImageHeight != nCanvasHeight) ||
@@ -195,8 +195,8 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
                     quint32 nImageWidth = 0;
                     quint32 nImageHeight = 0;
                     bool bImageAlpha = false;
-                    if (bFrameImage || !isValidImageChunk(baFrameType, nFrameOffset + 8, nFrameSize,
-                                                         &nImageWidth, &nImageHeight, &bImageAlpha) ||
+                    if (bFrameImage || !_webpIsValidImageChunk(this, baFrameType, nFrameOffset + 8, nFrameSize,
+                                                               &nImageWidth, &nImageHeight, &bImageAlpha) ||
                         (nImageWidth != nFrameWidth) || (nImageHeight != nFrameHeight) ||
                         (bFrameAlpha && (baFrameType != QByteArrayLiteral("VP8 ")))) {
                         return false;
@@ -289,26 +289,33 @@ quint32 XWEBP::ftStringToStructID(const QString &sFtString)
 
 bool XWEBP::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XWEBP> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XRiff::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XRiff::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XRiff::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XRiff::INTERNAL_INFO *>(XRiff::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XRiff::INTERNAL_INFO *pInfo =
+            static_cast<XRiff::INTERNAL_INFO *>(
+                guardedThis->XRiff::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XRiff::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XWEBP::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XWEBP> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XWEBP::setInternalInfo(void *pInternalInfo)

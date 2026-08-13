@@ -197,9 +197,6 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     result.bIsImage = false;
 
     BMPFILEHEADER fileHeader = getFileHeader();
-    BMPINFOHEADER infoHeader = getInfoHeader();
-    const qint64 nTotalSize = getSize();
-    const qint64 nHeaderSize = 14 + (qint64)infoHeader.biSize;
     if (!isValid(pPdStruct)) {
         return result;
     }
@@ -207,7 +204,7 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     // Add Header
     _MEMORY_RECORD headerRecord = {};
     headerRecord.nOffset = 0;
-    headerRecord.nAddress = -1;
+    headerRecord.nAddress = (XADDR)-1;
     headerRecord.nSize = fileHeader.bfOffBits;
     headerRecord.filePart = FILEPART_HEADER;
     headerRecord.sName = "Header";
@@ -217,7 +214,7 @@ XBinary::_MEMORY_MAP XBMP::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     // Add Bitmap Data (Object)
     _MEMORY_RECORD objectRecord = {};
     objectRecord.nOffset = fileHeader.bfOffBits;
-    objectRecord.nAddress = -1;
+    objectRecord.nAddress = (XADDR)-1;
     objectRecord.nSize = (qint64)fileHeader.bfSize - (qint64)fileHeader.bfOffBits;
     objectRecord.filePart = FILEPART_DATA;
     objectRecord.sName = "Bitmap Data";
@@ -479,7 +476,7 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         rec.filePart = FILEPART_HEADER;
         rec.nFileOffset = 0;
         rec.nFileSize = fh.bfOffBits;
-        rec.nVirtualAddress = -1;
+        rec.nVirtualAddress = (XADDR)-1;
         rec.sName = tr("Header");
         listResult.append(rec);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -491,7 +488,7 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             rec.filePart = FILEPART_DATA;
             rec.nFileOffset = fh.bfOffBits;
             rec.nFileSize = qMin<qint64>((qint64)fh.bfSize - (qint64)fh.bfOffBits, nTotal - (qint64)fh.bfOffBits);
-            rec.nVirtualAddress = -1;
+            rec.nVirtualAddress = (XADDR)-1;
             rec.sName = tr("Bitmap Data");
             listResult.append(rec);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -506,7 +503,7 @@ QList<XBinary::FPART> XBMP::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             rec.filePart = FILEPART_OVERLAY;
             rec.nFileOffset = nMaxOffset;
             rec.nFileSize = nTotal - nMaxOffset;
-            rec.nVirtualAddress = -1;
+            rec.nVirtualAddress = (XADDR)-1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -531,26 +528,33 @@ XBinary *XBMP::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
 bool XBMP::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XBMP> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XBMP::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XBMP> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XBMP::setInternalInfo(void *pInternalInfo)

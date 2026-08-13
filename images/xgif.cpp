@@ -455,7 +455,7 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         rec.filePart = FILEPART_SIGNATURE;
         rec.nFileOffset = 0;
         rec.nFileSize = qMin<qint64>(6, nTotalSize);
-        rec.nVirtualAddress = -1;
+        rec.nVirtualAddress = (XADDR)-1;
         rec.sName = tr("Signature");
         listResult.append(rec);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -468,7 +468,7 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
         rec.filePart = FILEPART_HEADER;
         rec.nFileOffset = nOffset;
         rec.nFileSize = qMin<qint64>(7, nTotalSize - nOffset);
-        rec.nVirtualAddress = -1;
+        rec.nVirtualAddress = (XADDR)-1;
         rec.sName = tr("Logical Screen Descriptor");
         listResult.append(rec);
         if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -495,7 +495,7 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             rec.filePart = FILEPART_TABLE;
             rec.nFileOffset = nOffset;
             rec.nFileSize = gctSize;
-            rec.nVirtualAddress = -1;
+            rec.nVirtualAddress = (XADDR)-1;
             rec.sName = tr("Global Color Table");
             listResult.append(rec);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -519,7 +519,7 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                 rec.filePart = FILEPART_FOOTER;
                 rec.nFileOffset = nOffset;
                 rec.nFileSize = 1;
-                rec.nVirtualAddress = -1;
+                rec.nVirtualAddress = (XADDR)-1;
                 rec.sName = tr("Trailer");
                 listResult.append(rec);
                 if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -586,7 +586,7 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                 rec.filePart = FILEPART_REGION;
                 rec.nFileOffset = start;
                 rec.nFileSize = nOffset - start;
-                rec.nVirtualAddress = -1;
+                rec.nVirtualAddress = (XADDR)-1;
                 rec.sName = tr("Image");
                 listResult.append(rec);
                 if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -631,7 +631,7 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
                 rec.filePart = FILEPART_SECTION;
                 rec.nFileOffset = start;
                 rec.nFileSize = nOffset - start;
-                rec.nVirtualAddress = -1;
+                rec.nVirtualAddress = (XADDR)-1;
                 switch (label) {
                     case 0xF9: rec.sName = tr("Graphic Control Extension"); break;
                     case 0xFE: rec.sName = tr("Comment Extension"); break;
@@ -658,7 +658,7 @@ QList<XBinary::FPART> XGif::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
             rec.filePart = FILEPART_OVERLAY;
             rec.nFileOffset = nOffset;
             rec.nFileSize = nTotalSize - nOffset;
-            rec.nVirtualAddress = -1;
+            rec.nVirtualAddress = (XADDR)-1;
             rec.sName = tr("Overlay");
             listResult.append(rec);
             if ((nLimit != -1) && (listResult.count() >= nLimit)) return listResult;
@@ -704,26 +704,33 @@ XBinary *XGif::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
 bool XGif::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
+    QPointer<XGif> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = XBinary::handleInternalInfo(pPdStruct);
+        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
+        if (!guardedThis || !bResult) return false;
 
-        if (bResult) {
-            static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) =
-                *static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
-            setIsInternalInfoHandled(true);
-        }
+        XBinary::INTERNAL_INFO *pInfo =
+            static_cast<XBinary::INTERNAL_INFO *>(
+                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        if (!guardedThis || !pInfo) return false;
+
+        static_cast<XBinary::INTERNAL_INFO &>(
+            guardedThis->m_internalInfo) = *pInfo;
+        guardedThis->setIsInternalInfoHandled(true);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 void *XGif::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    handleInternalInfo(pPdStruct);
+    QPointer<XGif> guardedThis(this);
+    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
+    if (!guardedThis || !bHandled) return nullptr;
 
-    return &m_internalInfo;
+    return &guardedThis->m_internalInfo;
 }
 
 void XGif::setInternalInfo(void *pInternalInfo)

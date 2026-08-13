@@ -1484,6 +1484,9 @@ qint32 XDataConvertor::getMethodWidth(CMETHOD method)
 bool XDataConvertor::convertMap(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
     bool bResult = false;
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
 
     MAPOP op = MAPOP_XOR;
     qint32 nWidth = 1;
@@ -1513,7 +1516,7 @@ bool XDataConvertor::convertMap(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
     }
     bResult = true;
 
-    for (qint64 nOffset = 0; (nOffset < nConvertSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
+    for (qint64 nOffset = 0; bProgressOwnerAlive && (nOffset < nConvertSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nConvertSize - nOffset);
 
         if (nWidth > 1) {
@@ -1534,16 +1537,20 @@ bool XDataConvertor::convertMap(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
 
         nOffset += nChunkSize;
 
-        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+        bProgressOwnerAlive = XBinary::setPdStructCurrentChecked(pPdStruct, nFreeIndex, nOffset, progressLifetime);
     }
 
     delete[] pBuffer;
 
-    return bResult && (!XBinary::isPdStructStopped(pPdStruct));
+    return bProgressOwnerAlive && bResult && (!XBinary::isPdStructStopped(pPdStruct));
 }
 
 bool XDataConvertor::convertKeyed(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
+
     QByteArray baKey = m_options.baKey;
     qint32 nKeyLen = baKey.size();
 
@@ -1569,7 +1576,7 @@ bool XDataConvertor::convertKeyed(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
     }
     bool bResult = true;
 
-    for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
+    for (qint64 nOffset = 0; bProgressOwnerAlive && (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
 
         if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
@@ -1605,16 +1612,20 @@ bool XDataConvertor::convertKeyed(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
 
         nOffset += nChunkSize;
 
-        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+        bProgressOwnerAlive = XBinary::setPdStructCurrentChecked(pPdStruct, nFreeIndex, nOffset, progressLifetime);
     }
 
     delete[] pBuffer;
 
-    return bResult && (!XBinary::isPdStructStopped(pPdStruct));
+    return bProgressOwnerAlive && bResult && (!XBinary::isPdStructStopped(pPdStruct));
 }
 
 bool XDataConvertor::convertRC4(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
+
     QByteArray baKey = m_options.baKey;
     qint32 nKeyLen = baKey.size();
 
@@ -1657,7 +1668,7 @@ bool XDataConvertor::convertRC4(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
     qint32 nI = 0;
     qint32 nJ = 0;
 
-    for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
+    for (qint64 nOffset = 0; bProgressOwnerAlive && (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
 
         if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
@@ -1682,16 +1693,20 @@ bool XDataConvertor::convertRC4(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBi
 
         nOffset += nChunkSize;
 
-        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+        bProgressOwnerAlive = XBinary::setPdStructCurrentChecked(pPdStruct, nFreeIndex, nOffset, progressLifetime);
     }
 
     delete[] pBuffer;
 
-    return bResult && (!XBinary::isPdStructStopped(pPdStruct));
+    return bProgressOwnerAlive && bResult && (!XBinary::isPdStructStopped(pPdStruct));
 }
 
 bool XDataConvertor::convertChain(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
+
     bool bEncode = (m_method == CMETHOD_DELTA_ENCODE) || (m_method == CMETHOD_XORPREV_ENCODE);
     bool bXor = (m_method == CMETHOD_XORPREV_ENCODE) || (m_method == CMETHOD_XORPREV_DECODE);
 
@@ -1731,7 +1746,7 @@ bool XDataConvertor::convertChain(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
     bool bResult = true;
     qint32 nRingIndex = 0;
 
-    for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
+    for (qint64 nOffset = 0; bProgressOwnerAlive && (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
 
         if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
@@ -1776,17 +1791,20 @@ bool XDataConvertor::convertChain(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
 
         nOffset += nChunkSize;
 
-        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+        bProgressOwnerAlive = XBinary::setPdStructCurrentChecked(pPdStruct, nFreeIndex, nOffset, progressLifetime);
     }
 
     delete[] pBuffer;
 
-    return bResult && (!XBinary::isPdStructStopped(pPdStruct));
+    return bProgressOwnerAlive && bResult && (!XBinary::isPdStructStopped(pPdStruct));
 }
 
 bool XDataConvertor::convertReverse(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
     bool bResult = false;
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
 
     qint64 nInSize = pDeviceIn->size();
 
@@ -1809,7 +1827,7 @@ bool XDataConvertor::convertReverse(QIODevice *pDeviceIn, QIODevice *pDeviceOut,
     // it out head-first. The output is therefore produced sequentially.
     qint64 nRemaining = nInSize;
 
-    while ((nRemaining > 0) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+    while (bProgressOwnerAlive && (nRemaining > 0) && XBinary::isPdStructNotCanceled(pPdStruct)) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nRemaining);
         qint64 nReadPos = nRemaining - nChunkSize;
 
@@ -1837,17 +1855,20 @@ bool XDataConvertor::convertReverse(QIODevice *pDeviceIn, QIODevice *pDeviceOut,
 
         nRemaining -= nChunkSize;
 
-        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nInSize - nRemaining);
+        bProgressOwnerAlive = XBinary::setPdStructCurrentChecked(pPdStruct, nFreeIndex, nInSize - nRemaining, progressLifetime);
     }
 
     delete[] pBuffer;
 
-    return bResult && (!XBinary::isPdStructStopped(pPdStruct));
+    return bProgressOwnerAlive && bResult && (!XBinary::isPdStructStopped(pPdStruct));
 }
 
 bool XDataConvertor::convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
     bool bResult = false;
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
 
     bool bHex = (m_method == CMETHOD_HEX_ENCODE);
     bool bBase64Url = (m_method == CMETHOD_BASE64URL_ENCODE);
@@ -1873,7 +1894,7 @@ bool XDataConvertor::convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
     }
     bResult = true;
 
-    for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
+    for (qint64 nOffset = 0; bProgressOwnerAlive && (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
         bool bLast = ((nOffset + nChunkSize) >= nInSize);
 
@@ -1904,16 +1925,20 @@ bool XDataConvertor::convertEncode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
 
         nOffset += nChunkSize;
 
-        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+        bProgressOwnerAlive = XBinary::setPdStructCurrentChecked(pPdStruct, nFreeIndex, nOffset, progressLifetime);
     }
 
     delete[] pBuffer;
 
-    return bResult && (!XBinary::isPdStructStopped(pPdStruct));
+    return bProgressOwnerAlive && bResult && (!XBinary::isPdStructStopped(pPdStruct));
 }
 
 bool XDataConvertor::convertDecode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
+
     const bool bHex = (m_method == CMETHOD_HEX_DECODE);
     const bool bBase64Url = (m_method == CMETHOD_BASE64URL_DECODE);
     const qint64 nInSize = pDeviceIn->size();
@@ -1967,7 +1992,7 @@ bool XDataConvertor::convertDecode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
         return true;
     };
 
-    for (qint64 nOffset = 0; (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
+    for (qint64 nOffset = 0; bProgressOwnerAlive && (nOffset < nInSize) && XBinary::isPdStructNotCanceled(pPdStruct);) {
         const qint64 nChunkSize = qMin((qint64)nBufferSize, nInSize - nOffset);
 
         if (!readExact(pDeviceIn, pBuffer, nChunkSize, pPdStruct)) {
@@ -2036,10 +2061,10 @@ bool XDataConvertor::convertDecode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
             break;
         }
 
-        XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+        bProgressOwnerAlive = XBinary::setPdStructCurrentChecked(pPdStruct, nFreeIndex, nOffset, progressLifetime);
     }
 
-    if (bResult && XBinary::isPdStructNotCanceled(pPdStruct)) {
+    if (bProgressOwnerAlive && bResult && XBinary::isPdStructNotCanceled(pPdStruct)) {
         QByteArray baTail;
         if (bHex) {
             bResult = (nHexNibble < 0);
@@ -2068,11 +2093,15 @@ bool XDataConvertor::convertDecode(QIODevice *pDeviceIn, QIODevice *pDeviceOut, 
 
     delete[] pBuffer;
 
-    return bResult && (!XBinary::isPdStructStopped(pPdStruct));
+    return bProgressOwnerAlive && bResult && (!XBinary::isPdStructStopped(pPdStruct));
 }
 
 bool XDataConvertor::convertWhole(QIODevice *pDeviceIn, QIODevice *pDeviceOut, XBinary::PDSTRUCT *pPdStruct, qint32 nFreeIndex)
 {
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return false;
+
     // These formats are not cleanly chunk-independent. Bound their in-memory
     // representation (and the quadratic Base58 implementation more tightly).
     const qint64 nInSize = pDeviceIn->size();
@@ -2108,7 +2137,8 @@ bool XDataConvertor::convertWhole(QIODevice *pDeviceIn, QIODevice *pDeviceOut, X
                 return false;
             }
             nOffset += nChunkSize;
-            XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
+            bProgressOwnerAlive = XBinary::setPdStructCurrentChecked(pPdStruct, nFreeIndex, nOffset, progressLifetime);
+            if (!bProgressOwnerAlive) return false;
         }
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
@@ -2168,6 +2198,9 @@ void XDataConvertor::process()
     if (!pPdStruct) {
         pPdStruct = &pdStructEmpty;
     }
+    const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
+    bool bProgressOwnerAlive = progressLifetime.isValid();
+    if (!bProgressOwnerAlive) return;
 
     qint32 _nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, 0);
     XBinary::clearPdStructInfoString(pPdStruct);
@@ -2191,6 +2224,8 @@ void XDataConvertor::process()
 
     const auto calculateEntropy = [&](QIODevice *pDevice, double *pEntropy) -> bool {
         *pEntropy = XBinary::getEntropy(pDevice, getConvertBufferSize(pPdStruct), pPdStruct);
+        bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+        if (!bProgressOwnerAlive) return false;
         return XBinary::isPdStructNotCanceled(pPdStruct) && XBinary::getPdStructErrorString(pPdStruct).isEmpty();
     };
 
@@ -2262,12 +2297,17 @@ void XDataConvertor::process()
             } else {
                 bOperationOk = convertWhole(m_pDeviceIn, pNewTmpFile, pPdStruct, _nFreeIndex);
             }
+            bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
         } catch (const std::bad_alloc &) {
-            XBinary::setPdStructInfoString(pPdStruct, tr("Memory allocation error"));
+            bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
+            if (bProgressOwnerAlive) {
+                XBinary::setPdStructInfoString(pPdStruct, tr("Memory allocation error"));
+            }
             bOperationOk = false;
         }
 
-        if (!bOperationOk) {
+        if (!bProgressOwnerAlive || !bOperationOk) {
+            bOperationOk = false;
             break;
         }
         if (!pNewTmpFile->flush()) {
@@ -2290,11 +2330,13 @@ void XDataConvertor::process()
     } while (false);
 
     if (bRestorePosition && m_pDeviceIn && !m_pDeviceIn->seek(nOriginalPosition)) {
-        XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
+        if (bProgressOwnerAlive) {
+            XBinary::setPdStructInfoString(pPdStruct, tr("Seek error"));
+        }
         bOperationOk = false;
     }
 
-    if (!bOperationOk && XBinary::isPdStructStopped(pPdStruct) && XBinary::getPdStructInfoString(pPdStruct).isEmpty()) {
+    if (bProgressOwnerAlive && !bOperationOk && XBinary::isPdStructStopped(pPdStruct) && XBinary::getPdStructInfoString(pPdStruct).isEmpty()) {
         XBinary::setPdStructInfoString(pPdStruct, tr("Canceled"));
     }
 
@@ -2323,5 +2365,7 @@ void XDataConvertor::process()
         delete pPreviousTmpFile;
     }
 
-    XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    if (bProgressOwnerAlive) {
+        XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
+    }
 }
