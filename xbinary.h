@@ -442,6 +442,10 @@ public:
         QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
         QMap<FPART_PROP, QVariant> mapArchiveProperties;  // Archive-level properties (e.g., FPART_PROP_FILEMD5)
         void *pContext;                                   // Format-specific context
+        // Opaque XArchive streaming-session identity.  It is deliberately
+        // separate from archive properties so callers never observe internal
+        // source-validation metadata in records or format property maps.
+        QByteArray baUnpackSourceToken;
     };
 
     enum PATH_MODE {
@@ -1634,23 +1638,23 @@ public:
 
     QString read_UUID(qint64 nOffset, bool bIsBigEndian = false);
 
-    static quint8 _read_uint8(char *pData);
-    static qint8 _read_int8(char *pData);
-    static quint16 _read_uint16(char *pData, bool bIsBigEndian = false);
-    static qint16 _read_int16(char *pData, bool bIsBigEndian = false);
-    static quint32 _read_uint24(char *pData, bool bIsBigEndian = false);
-    static quint32 _read_uint32(char *pData, bool bIsBigEndian = false);
-    static qint32 _read_int32(char *pData, bool bIsBigEndian = false);
-    static quint64 _read_uint64(char *pData, bool bIsBigEndian = false);
-    static qint64 _read_int64(char *pData, bool bIsBigEndian = false);
-    static QString _read_ansiString(char *pData, qint32 nMaxSize = 50);
-    static QByteArray _read_byteArray(char *pData, qint32 nSize);
-    static float _read_float(char *pData,
+    static quint8 _read_uint8(const char *pData);
+    static qint8 _read_int8(const char *pData);
+    static quint16 _read_uint16(const char *pData, bool bIsBigEndian = false);
+    static qint16 _read_int16(const char *pData, bool bIsBigEndian = false);
+    static quint32 _read_uint24(const char *pData, bool bIsBigEndian = false);
+    static quint32 _read_uint32(const char *pData, bool bIsBigEndian = false);
+    static qint32 _read_int32(const char *pData, bool bIsBigEndian = false);
+    static quint64 _read_uint64(const char *pData, bool bIsBigEndian = false);
+    static qint64 _read_int64(const char *pData, bool bIsBigEndian = false);
+    static QString _read_ansiString(const char *pData, qint32 nMaxSize = 50);
+    static QByteArray _read_byteArray(const char *pData, qint32 nSize);
+    static float _read_float(const char *pData,
                              bool bIsBigEndian = false);  // TODO Check
-    static double _read_double(char *pData,
+    static double _read_double(const char *pData,
                                bool bIsBigEndian = false);  // TODO Check
 
-    static quint64 _read_value(MODE mode, char *pData, bool bIsBigEndian = false);
+    static quint64 _read_value(MODE mode, const char *pData, bool bIsBigEndian = false);
     // TODO read uin64, freg
 
     static quint8 _read_uint8_safe(char *pBuffer, qint32 nBufferSize, qint32 nOffset);
@@ -1859,6 +1863,7 @@ public:
     static bool _isMemoryNotAnsi(char *pSource, qint64 nSize);
     static bool _isMemoryNotAnsiAndNull(char *pSource, qint64 nSize);
     static bool _isMemoryAnsiNumber(char *pSource, qint64 nSize);
+    static bool devicesAlias(QIODevice *pFirstDevice, QIODevice *pSecondDevice);
     static bool copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
     bool copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize = 1, bool bReverse = false);
     bool zeroFill(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
@@ -2170,6 +2175,7 @@ public:
     static quint32 getStringCustomCRC32(const QString &sString);
 
     QIODevice *getDevice();
+    quint64 getDeviceGeneration() const;
 
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr);
     static bool isValid(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, PDSTRUCT *pPdStruct = nullptr);
@@ -2751,6 +2757,7 @@ private:
     static qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
 
 protected:
+    virtual bool isDeviceReplacementAllowed() const;
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(const QString &sErrorMessage, PDSTRUCT *pPdStruct = nullptr);
     void _infoMessage(const QString &sInfoMessage, PDSTRUCT *pPdStruct = nullptr);
@@ -2766,9 +2773,12 @@ private:
     // lifetime so a destroyed external device cannot leave every format parser
     // with a dangling pointer.
     QPointer<QIODevice> m_pDevice;
+    quint64 m_nDeviceGeneration;
     const char *m_pConstMemory;
     QString m_sFileName;
-    QFile *m_pFile;
+    // Filename construction owns this QFile independently of whichever
+    // external device is later selected through setData()/setDevice().
+    QPointer<QFile> m_pFile;
     QMutex *m_pReadWriteMutex;
     bool m_bIsImage;
     XADDR m_nBaseAddress;

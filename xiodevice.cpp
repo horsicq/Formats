@@ -20,6 +20,8 @@
  */
 #include "xiodevice.h"
 
+#include <QPointer>
+
 XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
 {
     m_nSize = 0;
@@ -67,17 +69,21 @@ bool XIODevice::isSequential() const
 bool XIODevice::seek(qint64 nPos)
 {
     bool bResult = false;
+    QPointer<XIODevice> guardedThis(this);
 
-    if ((nPos <= size()) && (nPos >= 0)) {
+    const qint64 nDeviceSize = size();
+    if (guardedThis && (nPos <= nDeviceSize) && (nPos >= 0)) {
         bResult = QIODevice::seek(nPos);
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 bool XIODevice::reset()
 {
-    return seek(0);
+    QPointer<XIODevice> guardedThis(this);
+    const bool bResult = seek(0);
+    return guardedThis && bResult;
 }
 
 bool XIODevice::open(OpenMode mode)
@@ -92,8 +98,11 @@ bool XIODevice::open(OpenMode mode)
 
 bool XIODevice::atEnd() const
 {
+    QPointer<XIODevice> guardedThis(const_cast<XIODevice *>(this));
     const qint64 nPosition = pos();
+    if (!guardedThis) return true;
     const qint64 nDeviceSize = size();
+    if (!guardedThis) return true;
 
     return !isOpen() || (nPosition < 0) || (nDeviceSize < 0) || (nPosition >= nDeviceSize);
 }

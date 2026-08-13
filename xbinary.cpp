@@ -160,20 +160,43 @@ bool compareMS_RECORD(const XBinary::MS_RECORD &a, const XBinary::MS_RECORD &b)
 
 static bool writeAllToDevice(QIODevice *pDevice, const char *pData, qint64 nSize)
 {
-    if (!pDevice || !pDevice->isWritable() || (nSize < 0) || ((nSize > 0) && !pData)) {
+    if (!pDevice || (nSize < 0) || ((nSize > 0) && !pData)) {
         return false;
     }
 
+    QPointer<QIODevice> guardedDevice(pDevice);
+    if (!guardedDevice || !guardedDevice->isWritable() || !guardedDevice) {
+        return false;
+    }
+    const bool bSeekable = !guardedDevice->isSequential();
+    if (!guardedDevice) return false;
+    const qint64 nStart = bSeekable ? guardedDevice->pos() : -1;
+    const qint64 nMax = (std::numeric_limits<qint64>::max)();
+    if (!guardedDevice || (bSeekable && (nStart < 0))) return false;
+
     qint64 nWrittenTotal = 0;
     while (nWrittenTotal < nSize) {
-        const qint64 nWritten = pDevice->write(pData + nWrittenTotal, nSize - nWrittenTotal);
+        if (!guardedDevice ||
+            (bSeekable && (nWrittenTotal > nMax - nStart))) return false;
+        if (bSeekable) {
+            const bool bSeeked = guardedDevice->seek(
+                nStart + nWrittenTotal);
+            if (!guardedDevice || !bSeeked) return false;
+        }
+        const qint64 nWritten = guardedDevice->write(
+            pData + nWrittenTotal, nSize - nWrittenTotal);
+        if (!guardedDevice) return false;
         if ((nWritten <= 0) || (nWritten > (nSize - nWrittenTotal))) {
             return false;
         }
         nWrittenTotal += nWritten;
     }
 
-    return true;
+    if (!guardedDevice) return false;
+    if (!bSeekable) return true;
+    if (nSize > nMax - nStart) return false;
+    const bool bSeeked = guardedDevice->seek(nStart + nSize);
+    return guardedDevice && bSeeked;
 }
 
 static Qt::CaseSensitivity fileSystemPathCaseSensitivity()
@@ -196,7 +219,13 @@ static bool isDirectCanonicalPath(const QFileInfo &fileInfo)
            (sAbsolutePath.compare(sCanonicalPath, fileSystemPathCaseSensitivity()) == 0);
 }
 
-static QString getOpenQFilePath(const QFile *pFile)
+enum FILE_IDENTITY_RESULT {
+    FILE_IDENTITY_UNKNOWN = 0,
+    FILE_IDENTITY_SAME,
+    FILE_IDENTITY_DISTINCT
+};
+
+static QString getOpenQFilePath(const QFileDevice *pFile)
 {
     if (!pFile || !pFile->isOpen() || (pFile->handle() < 0)) return QString();
 
@@ -232,37 +261,115 @@ static QString getOpenQFilePath(const QFile *pFile)
 #endif
 }
 
-static bool areDistinctOpenFiles(QFile *pFirst, QFile *pSecond)
+static FILE_IDENTITY_RESULT compareOpenFileIdentity(const QFileDevice *pFirst, const QFileDevice *pSecond)
 {
+    if (pFirst == pSecond) return pFirst ? FILE_IDENTITY_SAME : FILE_IDENTITY_UNKNOWN;
     if (!pFirst || !pSecond || !pFirst->isOpen() || !pSecond->isOpen() ||
         (pFirst->handle() < 0) || (pSecond->handle() < 0)) {
-        return false;
+        return FILE_IDENTITY_UNKNOWN;
     }
 
 #ifdef Q_OS_WIN
     const intptr_t nFirstHandle = _get_osfhandle(pFirst->handle());
     const intptr_t nSecondHandle = _get_osfhandle(pSecond->handle());
-    if ((nFirstHandle == -1) || (nSecondHandle == -1)) return false;
+    if ((nFirstHandle == -1) || (nSecondHandle == -1)) return FILE_IDENTITY_UNKNOWN;
 
     BY_HANDLE_FILE_INFORMATION firstInformation = {};
     BY_HANDLE_FILE_INFORMATION secondInformation = {};
     if (!GetFileInformationByHandle(reinterpret_cast<HANDLE>(nFirstHandle), &firstInformation) ||
         !GetFileInformationByHandle(reinterpret_cast<HANDLE>(nSecondHandle), &secondInformation)) {
-        return false;
+        return FILE_IDENTITY_UNKNOWN;
     }
 
-    return (firstInformation.dwVolumeSerialNumber != secondInformation.dwVolumeSerialNumber) ||
-           (firstInformation.nFileIndexHigh != secondInformation.nFileIndexHigh) ||
-           (firstInformation.nFileIndexLow != secondInformation.nFileIndexLow);
+    return ((firstInformation.dwVolumeSerialNumber == secondInformation.dwVolumeSerialNumber) &&
+            (firstInformation.nFileIndexHigh == secondInformation.nFileIndexHigh) &&
+            (firstInformation.nFileIndexLow == secondInformation.nFileIndexLow))
+               ? FILE_IDENTITY_SAME
+               : FILE_IDENTITY_DISTINCT;
 #elif defined(Q_OS_UNIX)
     struct stat firstStatus = {};
     struct stat secondStatus = {};
-    if ((fstat(pFirst->handle(), &firstStatus) != 0) || (fstat(pSecond->handle(), &secondStatus) != 0)) return false;
+    if ((fstat(pFirst->handle(), &firstStatus) != 0) || (fstat(pSecond->handle(), &secondStatus) != 0)) return FILE_IDENTITY_UNKNOWN;
 
-    return (firstStatus.st_dev != secondStatus.st_dev) || (firstStatus.st_ino != secondStatus.st_ino);
+    return ((firstStatus.st_dev == secondStatus.st_dev) && (firstStatus.st_ino == secondStatus.st_ino))
+               ? FILE_IDENTITY_SAME
+               : FILE_IDENTITY_DISTINCT;
 #else
-    return false;
+    return FILE_IDENTITY_UNKNOWN;
 #endif
+}
+
+static FILE_IDENTITY_RESULT compareNamedFileIdentity(const QString &sFirstFileName, const QString &sSecondFileName)
+{
+    if (sFirstFileName.isEmpty() || sSecondFileName.isEmpty()) return FILE_IDENTITY_UNKNOWN;
+
+    QFile firstFile(sFirstFileName);
+    QFile secondFile(sSecondFileName);
+    if (!firstFile.open(QIODevice::ReadOnly) || !secondFile.open(QIODevice::ReadOnly)) return FILE_IDENTITY_UNKNOWN;
+
+    return compareOpenFileIdentity(&firstFile, &secondFile);
+}
+
+static FILE_IDENTITY_RESULT compareFileDeviceIdentity(const QFileDevice *pFirst, const QFileDevice *pSecond)
+{
+    FILE_IDENTITY_RESULT result = compareOpenFileIdentity(pFirst, pSecond);
+    if (result != FILE_IDENTITY_UNKNOWN) return result;
+    if (!pFirst || !pSecond) return FILE_IDENTITY_UNKNOWN;
+
+    const QString sFirstOpenPath = getOpenQFilePath(pFirst);
+    const QString sSecondOpenPath = getOpenQFilePath(pSecond);
+    const QString sFirstFileName = sFirstOpenPath.isEmpty() ? pFirst->fileName() : sFirstOpenPath;
+    const QString sSecondFileName = sSecondOpenPath.isEmpty() ? pSecond->fileName() : sSecondOpenPath;
+    const QString sFirstCanonicalPath = QDir::fromNativeSeparators(QFileInfo(sFirstFileName).canonicalFilePath());
+    const QString sSecondCanonicalPath = QDir::fromNativeSeparators(QFileInfo(sSecondFileName).canonicalFilePath());
+
+    if (!sFirstCanonicalPath.isEmpty() && !sSecondCanonicalPath.isEmpty() &&
+        (QDir::cleanPath(sFirstCanonicalPath).compare(QDir::cleanPath(sSecondCanonicalPath), fileSystemPathCaseSensitivity()) == 0)) {
+        return FILE_IDENTITY_SAME;
+    }
+
+    result = compareNamedFileIdentity(sFirstFileName, sSecondFileName);
+    return result;
+}
+
+struct DEVICE_ROOT_VIEW {
+    QIODevice *pRoot;
+    qint64 nBaseOffset;
+    bool bValid;
+};
+
+static DEVICE_ROOT_VIEW getDeviceRootView(QIODevice *pDevice)
+{
+    DEVICE_ROOT_VIEW result = {};
+    result.pRoot = pDevice;
+    QSet<QIODevice *> stVisited;
+    const qint64 nMax = (std::numeric_limits<qint64>::max)();
+
+    while (result.pRoot) {
+        if (stVisited.contains(result.pRoot)) return DEVICE_ROOT_VIEW();
+        stVisited.insert(result.pRoot);
+
+        SubDevice *pSubDevice = dynamic_cast<SubDevice *>(result.pRoot);
+        if (!pSubDevice) {
+            result.bValid = true;
+            return result;
+        }
+
+        const quint64 nInitLocation = pSubDevice->getInitLocation();
+        if ((nInitLocation > (quint64)nMax) ||
+            (result.nBaseOffset > nMax - (qint64)nInitLocation)) {
+            return DEVICE_ROOT_VIEW();
+        }
+        result.nBaseOffset += (qint64)nInitLocation;
+        result.pRoot = pSubDevice->getOrigDevice();
+    }
+
+    return DEVICE_ROOT_VIEW();
+}
+
+static bool areDistinctOpenFiles(QFile *pFirst, QFile *pSecond)
+{
+    return compareOpenFileIdentity(pFirst, pSecond) == FILE_IDENTITY_DISTINCT;
 }
 
 static bool areDistinctRegularFiles(const QString &sFirstFileName, const QString &sSecondFileName)
@@ -943,6 +1050,7 @@ QMap<quint64, QString> XBinary::XIDSTRING_createMapPrefix(XIDSTRING *pRecords, q
 
 QMap<XBinary::UNPACK_PROP, QVariant> XBinary::getDefaultUnpackProperties()
 {
+    QPointer<XBinary> guardedThis(this);
     QMap<XBinary::UNPACK_PROP, QVariant> result;
 
     result.insert(UNPACK_PROP_FIXFILENAMES, true);
@@ -952,11 +1060,32 @@ QMap<XBinary::UNPACK_PROP, QVariant> XBinary::getDefaultUnpackProperties()
     UNPACK_STATE state = {};
     QMap<UNPACK_PROP, QVariant> mapProperties;
 
-    if (initUnpack(&state, mapProperties, &pdStruct)) {
-        qint32 nNumberOfRecords = qMax((qint32)0, state.nNumberOfRecords);
+    const bool bInitialized = guardedThis &&
+        guardedThis->initUnpack(&state, mapProperties, &pdStruct);
+    if (guardedThis && bInitialized) {
+        const qint32 nNumberOfRecords = state.nNumberOfRecords;
+        bool bEnumerationValid = (state.nCurrentIndex == 0) &&
+                                 (nNumberOfRecords >= 0) &&
+                                 (state.nCurrentIndex <= nNumberOfRecords);
+        QMap<UNPACK_PROP, QVariant> mapDiscoveredProperties;
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(&pdStruct); i++) {
-            ARCHIVERECORD record = infoCurrent(&state, &pdStruct);
+        for (qint32 i = 0; guardedThis && bEnumerationValid &&
+             (i < nNumberOfRecords) &&
+             isPdStructNotCanceled(&pdStruct); i++) {
+            const qint32 nExpectedIndex = state.nCurrentIndex;
+            ARCHIVERECORD record = guardedThis->infoCurrent(
+                &state, &pdStruct);
+            if (!guardedThis || !isPdStructNotCanceled(&pdStruct) ||
+                record.mapProperties.isEmpty() ||
+                (record.nStreamOffset < 0) ||
+                (record.nStreamSize < 0) ||
+                (state.nCurrentIndex < 0) ||
+                (state.nCurrentIndex >= state.nNumberOfRecords) ||
+                (state.nCurrentIndex != nExpectedIndex) ||
+                (state.nNumberOfRecords != nNumberOfRecords)) {
+                bEnumerationValid = false;
+                break;
+            }
             CRC_TYPE crcType = (CRC_TYPE)record.mapProperties.value(FPART_PROP_CRC_TYPE, CRC_TYPE_UNKNOWN).toUInt();
 
             if ((crcType != CRC_TYPE_UNKNOWN) && record.mapProperties.contains(FPART_PROP_RESULTCRC)) {
@@ -969,15 +1098,33 @@ QMap<XBinary::UNPACK_PROP, QVariant> XBinary::getDefaultUnpackProperties()
                     unpackProperty = UNPACK_PROP_CHECKCRC;
                 }
 
-                result.insert(unpackProperty, true);
+                mapDiscoveredProperties.insert(unpackProperty, true);
             }
 
-            if ((i + 1 >= nNumberOfRecords) || !moveToNext(&state, &pdStruct)) {
-                break;
+            if (i + 1 < nNumberOfRecords) {
+                const qint32 nPreviousIndex = state.nCurrentIndex;
+                const bool bMoved = guardedThis->moveToNext(
+                    &state, &pdStruct);
+                if (!guardedThis || !bMoved ||
+                    !isPdStructNotCanceled(&pdStruct) ||
+                    (state.nCurrentIndex != (nPreviousIndex + 1)) ||
+                    (state.nCurrentIndex >= nNumberOfRecords) ||
+                    (state.nNumberOfRecords != nNumberOfRecords)) {
+                    bEnumerationValid = false;
+                    break;
+                }
             }
         }
 
-        finishUnpack(&state, &pdStruct);
+        const bool bFinished = guardedThis &&
+            guardedThis->finishUnpack(&state, nullptr);
+        if (guardedThis && bEnumerationValid && bFinished &&
+            isPdStructNotCanceled(&pdStruct)) {
+            for (auto it = mapDiscoveredProperties.constBegin();
+                 it != mapDiscoveredProperties.constEnd(); ++it) {
+                result.insert(it.key(), it.value());
+            }
+        }
     }
 
     return result;
@@ -985,7 +1132,8 @@ QMap<XBinary::UNPACK_PROP, QVariant> XBinary::getDefaultUnpackProperties()
 
 bool XBinary::hasUnpackCRC(PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
+    QPointer<XBinary> guardedThis(this);
+    bool bFound = false;
     PDSTRUCT pdStructEmpty = createPdStruct();
 
     if (!pPdStruct) {
@@ -995,27 +1143,60 @@ bool XBinary::hasUnpackCRC(PDSTRUCT *pPdStruct)
     UNPACK_STATE state = {};
     QMap<UNPACK_PROP, QVariant> mapProperties;
 
-    if (initUnpack(&state, mapProperties, pPdStruct)) {
-        qint32 nNumberOfRecords = qMax((qint32)0, state.nNumberOfRecords);
+    const bool bInitialized = guardedThis &&
+        guardedThis->initUnpack(&state, mapProperties, pPdStruct);
+    if (guardedThis && bInitialized) {
+        const qint32 nNumberOfRecords = state.nNumberOfRecords;
+        bool bEnumerationValid = (state.nCurrentIndex == 0) &&
+                                 (nNumberOfRecords >= 0) &&
+                                 (state.nCurrentIndex <= nNumberOfRecords);
 
-        for (qint32 i = 0; (i < nNumberOfRecords) && isPdStructNotCanceled(pPdStruct); i++) {
-            ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+        for (qint32 i = 0; guardedThis && bEnumerationValid &&
+             (i < nNumberOfRecords) &&
+             isPdStructNotCanceled(pPdStruct); i++) {
+            const qint32 nExpectedIndex = state.nCurrentIndex;
+            ARCHIVERECORD record = guardedThis->infoCurrent(
+                &state, pPdStruct);
+            if (!guardedThis || !isPdStructNotCanceled(pPdStruct) ||
+                record.mapProperties.isEmpty() ||
+                (record.nStreamOffset < 0) ||
+                (record.nStreamSize < 0) ||
+                (state.nCurrentIndex < 0) ||
+                (state.nCurrentIndex >= state.nNumberOfRecords) ||
+                (state.nCurrentIndex != nExpectedIndex) ||
+                (state.nNumberOfRecords != nNumberOfRecords)) {
+                bEnumerationValid = false;
+                break;
+            }
             CRC_TYPE crcType = (CRC_TYPE)record.mapProperties.value(FPART_PROP_CRC_TYPE, CRC_TYPE_UNKNOWN).toUInt();
 
             if ((crcType != CRC_TYPE_UNKNOWN) && record.mapProperties.contains(FPART_PROP_RESULTCRC)) {
-                bResult = true;
+                bFound = true;
                 break;
             }
 
-            if ((i + 1 >= nNumberOfRecords) || !moveToNext(&state, pPdStruct)) {
-                break;
+            if (i + 1 < nNumberOfRecords) {
+                const qint32 nPreviousIndex = state.nCurrentIndex;
+                const bool bMoved = guardedThis->moveToNext(
+                    &state, pPdStruct);
+                if (!guardedThis || !bMoved ||
+                    !isPdStructNotCanceled(pPdStruct) ||
+                    (state.nCurrentIndex != (nPreviousIndex + 1)) ||
+                    (state.nCurrentIndex >= nNumberOfRecords) ||
+                    (state.nNumberOfRecords != nNumberOfRecords)) {
+                    bEnumerationValid = false;
+                    break;
+                }
             }
         }
 
-        finishUnpack(&state, nullptr);
+        const bool bFinished = guardedThis &&
+            guardedThis->finishUnpack(&state, nullptr);
+        return guardedThis && bEnumerationValid && bFinished && bFound &&
+               isPdStructNotCanceled(pPdStruct);
     }
 
-    return bResult;
+    return false;
 }
 
 XBinary::UNPACK_PROP XBinary::getUnpackCRCProperty(CRC_TYPE crcType)
@@ -1074,18 +1255,31 @@ bool XBinary::isUnpackCRCEnabled(const QMap<UNPACK_PROP, QVariant> &mapPropertie
 
 qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
 {
+    QPointer<XBinary> guardedThis(this);
     qint64 nResult = 0;
+
+    if (!isPdStructNotCanceled(pPdStruct)) return 0;
 
     UNPACK_STATE state = {};
     QMap<UNPACK_PROP, QVariant> mapProperties;
 
     // Initialize the streaming archive state.
-    if (initUnpack(&state, mapProperties, pPdStruct)) {
-        nResult = state.nNumberOfRecords;
+    const bool bInitialized = guardedThis &&
+        guardedThis->initUnpack(&state, mapProperties, pPdStruct);
+    if (guardedThis && bInitialized) {
+        const bool bStateValid = (state.nCurrentIndex == 0) &&
+                                 (state.nNumberOfRecords >= 0) &&
+                                 (state.nCurrentIndex <=
+                                  state.nNumberOfRecords);
+        nResult = bStateValid ? state.nNumberOfRecords : 0;
 
         // A successful initUnpack() owns its context until finishUnpack(),
         // even when the caller was canceled while initialization completed.
-        finishUnpack(&state, nullptr);
+        const bool bFinished = guardedThis->finishUnpack(&state, nullptr);
+        if (!guardedThis || !bFinished || !bStateValid ||
+            !isPdStructNotCanceled(pPdStruct)) {
+            nResult = 0;
+        }
     }
 
     return nResult;
@@ -1093,6 +1287,7 @@ qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
 
 QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT *pPdStruct)
 {
+    QPointer<XBinary> guardedThis(this);
     QList<XBinary::ARCHIVERECORD> listResult;
 
     if ((nLimit == 0) || (nLimit < -1)) return listResult;
@@ -1110,18 +1305,32 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
     UNPACK_STATE state = {};
     QMap<UNPACK_PROP, QVariant> mapProperties;
 
-    if (initUnpack(&state, mapProperties, pPdStruct)) {
+    const bool bInitialized = guardedThis &&
+        guardedThis->initUnpack(&state, mapProperties, pPdStruct);
+    if (guardedThis && bInitialized) {
+        const qint32 nNumberOfRecords = state.nNumberOfRecords;
         qint32 nCount = 0;
-        bool bEnumerationValid = (state.nCurrentIndex >= 0) && (state.nNumberOfRecords >= 0) &&
-                                 (state.nCurrentIndex <= state.nNumberOfRecords);
+        bool bEnumerationValid = (state.nCurrentIndex == 0) &&
+                                 (nNumberOfRecords >= 0) &&
+                                 (state.nCurrentIndex <= nNumberOfRecords);
 
         // Iterate through records using streaming API
-        while (bEnumerationValid && isPdStructNotCanceled(pPdStruct) && (state.nCurrentIndex < state.nNumberOfRecords)) {
+        while (guardedThis && bEnumerationValid &&
+               isPdStructNotCanceled(pPdStruct) &&
+               (state.nCurrentIndex < nNumberOfRecords)) {
             // Get current record info
-            ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+            const qint32 nExpectedIndex = state.nCurrentIndex;
+            ARCHIVERECORD record = guardedThis->infoCurrent(
+                &state, pPdStruct);
 
-            if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
-                (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+            if (!guardedThis || !isPdStructNotCanceled(pPdStruct) ||
+                record.mapProperties.isEmpty() ||
+                (record.nStreamOffset < 0) ||
+                (record.nStreamSize < 0) ||
+                (state.nCurrentIndex < 0) ||
+                (state.nCurrentIndex != nExpectedIndex) ||
+                (state.nNumberOfRecords != nNumberOfRecords) ||
+                (state.nCurrentIndex >= nNumberOfRecords)) {
                 bEnumerationValid = false;
                 break;
             }
@@ -1136,22 +1345,33 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
 
             // Move to next record
             const qint32 nPreviousIndex = state.nCurrentIndex;
-            if (!moveToNext(&state, pPdStruct)) {
-                if ((nPreviousIndex + 1) < state.nNumberOfRecords) {
+            const bool bMoved = guardedThis->moveToNext(
+                &state, pPdStruct);
+            if (!guardedThis || !isPdStructNotCanceled(pPdStruct) ||
+                (state.nNumberOfRecords != nNumberOfRecords)) {
+                bEnumerationValid = false;
+                break;
+            }
+            if (!bMoved) {
+                if (((nPreviousIndex + 1) != nNumberOfRecords) ||
+                    ((state.nCurrentIndex != nPreviousIndex) &&
+                     (state.nCurrentIndex != nNumberOfRecords))) {
                     bEnumerationValid = false;
                 }
                 break;
             }
-            if ((state.nCurrentIndex <= nPreviousIndex) || (state.nCurrentIndex < 0) ||
-                (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+            if ((state.nCurrentIndex != (nPreviousIndex + 1)) ||
+                (state.nCurrentIndex >= nNumberOfRecords)) {
                 bEnumerationValid = false;
                 break;
             }
         }
 
         // Cleanup must not inherit a canceled enumeration token.
-        const bool bFinished = finishUnpack(&state, nullptr);
-        if (!bEnumerationValid || !bFinished || !isPdStructNotCanceled(pPdStruct)) {
+        const bool bFinished = guardedThis &&
+            guardedThis->finishUnpack(&state, nullptr);
+        if (!guardedThis || !bEnumerationValid || !bFinished ||
+            !isPdStructNotCanceled(pPdStruct)) {
             listResult.clear();
         }
     }
@@ -1161,6 +1381,8 @@ QList<XBinary::ARCHIVERECORD> XBinary::getArchiveRecords(qint32 nLimit, PDSTRUCT
 
 bool XBinary::packFolderToDevice(QIODevice *pDevice, const QMap<PACK_PROP, QVariant> &mapProperties, const QString &sFolderName, PDSTRUCT *pPdStruct)
 {
+    QPointer<XBinary> guardedThis(this);
+    QPointer<QIODevice> guardedOutput(pDevice);
     bool bResult = false;
 
     PDSTRUCT pdStructEmpty = createPdStruct();
@@ -1186,16 +1408,21 @@ bool XBinary::packFolderToDevice(QIODevice *pDevice, const QMap<PACK_PROP, QVari
     }
 
     // Initialize packing (this writes signature/header)
-    if (!initPack(&state, pDevice, _mapProperties, pPdStruct)) {
+    if (!guardedThis || !guardedOutput ||
+        !guardedThis->initPack(&state, guardedOutput.data(),
+                               _mapProperties, pPdStruct) ||
+        !guardedThis || !guardedOutput) {
         return false;
     }
 
     // Add entire folder contents
-    bResult = addFolder(&state, sFolderName, pPdStruct);
+    bResult = guardedThis->addFolder(&state, sFolderName, pPdStruct);
+    if (!guardedThis || !guardedOutput) return false;
 
     // Finish packing (writes end marker and cleans up)
     // Always call finishPack() even if addFolder() failed, to ensure cleanup
-    bool bFinish = finishPack(&state, pPdStruct);
+    bool bFinish = guardedThis->finishPack(&state, pPdStruct);
+    if (!guardedThis || !guardedOutput) return false;
 
     // Return true only if both operations succeeded
     return bResult && bFinish;
@@ -1203,6 +1430,7 @@ bool XBinary::packFolderToDevice(QIODevice *pDevice, const QMap<PACK_PROP, QVari
 
 QList<QString> XBinary::getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
+    QPointer<XBinary> guardedThis(this);
     QList<QString> listResult;
 
     PDSTRUCT pdStructEmpty = createPdStruct();
@@ -1217,17 +1445,31 @@ QList<QString> XBinary::getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVar
     // Initialize unpack state
     UNPACK_STATE state = {};
 
-    if (initUnpack(&state, mapProperties, pPdStruct)) {
-        bool bEnumerationValid = (state.nCurrentIndex >= 0) && (state.nNumberOfRecords >= 0) &&
-                                 (state.nCurrentIndex <= state.nNumberOfRecords);
+    const bool bInitialized = guardedThis &&
+        guardedThis->initUnpack(&state, mapProperties, pPdStruct);
+    if (guardedThis && bInitialized) {
+        const qint32 nNumberOfRecords = state.nNumberOfRecords;
+        bool bEnumerationValid = (state.nCurrentIndex == 0) &&
+                                 (nNumberOfRecords >= 0) &&
+                                 (state.nCurrentIndex <= nNumberOfRecords);
 
         // Iterate through records using streaming API
-        while (bEnumerationValid && isPdStructNotCanceled(pPdStruct) && (state.nCurrentIndex < state.nNumberOfRecords)) {
+        while (guardedThis && bEnumerationValid &&
+               isPdStructNotCanceled(pPdStruct) &&
+               (state.nCurrentIndex < nNumberOfRecords)) {
             // Get current record info
-            ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+            const qint32 nExpectedIndex = state.nCurrentIndex;
+            ARCHIVERECORD record = guardedThis->infoCurrent(
+                &state, pPdStruct);
 
-            if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
-                (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+            if (!guardedThis || !isPdStructNotCanceled(pPdStruct) ||
+                record.mapProperties.isEmpty() ||
+                (record.nStreamOffset < 0) ||
+                (record.nStreamSize < 0) ||
+                (state.nCurrentIndex < 0) ||
+                (state.nCurrentIndex != nExpectedIndex) ||
+                (state.nNumberOfRecords != nNumberOfRecords) ||
+                (state.nCurrentIndex >= nNumberOfRecords)) {
                 bEnumerationValid = false;
                 break;
             }
@@ -1242,22 +1484,33 @@ QList<QString> XBinary::getListOfArchiveRecordNames(const QMap<UNPACK_PROP, QVar
 
             // Move to next record
             const qint32 nPreviousIndex = state.nCurrentIndex;
-            if (!moveToNext(&state, pPdStruct)) {
-                if ((nPreviousIndex + 1) < state.nNumberOfRecords) {
+            const bool bMoved = guardedThis->moveToNext(
+                &state, pPdStruct);
+            if (!guardedThis || !isPdStructNotCanceled(pPdStruct) ||
+                (state.nNumberOfRecords != nNumberOfRecords)) {
+                bEnumerationValid = false;
+                break;
+            }
+            if (!bMoved) {
+                if (((nPreviousIndex + 1) != nNumberOfRecords) ||
+                    ((state.nCurrentIndex != nPreviousIndex) &&
+                     (state.nCurrentIndex != nNumberOfRecords))) {
                     bEnumerationValid = false;
                 }
                 break;
             }
-            if ((state.nCurrentIndex <= nPreviousIndex) || (state.nCurrentIndex < 0) ||
-                (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+            if ((state.nCurrentIndex != (nPreviousIndex + 1)) ||
+                (state.nCurrentIndex >= nNumberOfRecords)) {
                 bEnumerationValid = false;
                 break;
             }
         }
 
         // Cleanup must not inherit a canceled enumeration token.
-        const bool bFinished = finishUnpack(&state, nullptr);
-        if (!bEnumerationValid || !bFinished || !isPdStructNotCanceled(pPdStruct)) {
+        const bool bFinished = guardedThis &&
+            guardedThis->finishUnpack(&state, nullptr);
+        if (!guardedThis || !bEnumerationValid || !bFinished ||
+            !isPdStructNotCanceled(pPdStruct)) {
             listResult.clear();
         }
     }
@@ -1269,17 +1522,46 @@ static qint64 readDeviceWithBoundedProgress(QIODevice *pDevice, char *pBuffer, q
 {
     if (!pDevice || (nSize < 0) || ((nSize > 0) && !pBuffer)) return -1;
 
+    QPointer<QIODevice> guardedDevice(pDevice);
+    if (!guardedDevice) return -1;
+    const bool bSeekable = !guardedDevice->isSequential();
+    if (!guardedDevice) return -1;
+    const qint64 nStart = bSeekable ? guardedDevice->pos() : -1;
+    const qint64 nMax = (std::numeric_limits<qint64>::max)();
+    if (!guardedDevice || (bSeekable && (nStart < 0))) return -1;
+
     // Sequential/nonblocking QIODevice implementations may transiently return
     // zero without being at EOF.  Give them a small bounded opportunity to
     // become readable; a real EOF or persistent no-progress condition is still
     // returned to the decoder promptly.
     for (qint32 i = 0; i < 3; i++) {
-        const qint64 nResult = pDevice->read(pBuffer, nSize);
-        if ((nResult != 0) || (nSize == 0) || pDevice->atEnd()) return nResult;
-        if (i != 2) pDevice->waitForReadyRead(10);
+        if (!guardedDevice) return -1;
+        if (bSeekable) {
+            const bool bSeeked = guardedDevice->seek(nStart);
+            if (!guardedDevice || !bSeeked) return -1;
+        }
+        const qint64 nResult = guardedDevice->read(pBuffer, nSize);
+        if (!guardedDevice || (nResult < 0) || (nResult > nSize)) return -1;
+        bool bAtEnd = false;
+        if ((nResult == 0) && (nSize != 0)) {
+            bAtEnd = guardedDevice->atEnd();
+            if (!guardedDevice) return -1;
+        }
+        if ((nResult != 0) || (nSize == 0) || bAtEnd) {
+            if (bSeekable) {
+                if ((nResult > nMax - nStart) || !guardedDevice) return -1;
+                const bool bSeeked = guardedDevice->seek(nStart + nResult);
+                if (!guardedDevice || !bSeeked) return -1;
+            }
+            return nResult;
+        }
+        if (i != 2) {
+            guardedDevice->waitForReadyRead(10);
+            if (!guardedDevice) return -1;
+        }
     }
 
-    return 0;
+    return -1;
 }
 
 qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE *pState)
@@ -1296,9 +1578,12 @@ qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE
     if (pState->nInputLimit != -1) {
         nReadSize = (qint32)(std::min)((qint64)nReadSize, pState->nInputLimit - pState->nCountInput);
     }
-    const qint64 nReadResult = readDeviceWithBoundedProgress(pState->pDeviceInput, pBuffer, nReadSize);
+    QPointer<QIODevice> guardedInput(pState->pDeviceInput);
+    const qint64 nReadResult = readDeviceWithBoundedProgress(
+        guardedInput.data(), pBuffer, nReadSize);
 
-    if ((nReadResult < 0) || (nReadResult > (qint64)nReadSize) ||
+    if (!guardedInput || (nReadResult < 0) ||
+        (nReadResult > (qint64)nReadSize) ||
         ((nReadResult > 0) && (pState->nCountInput > ((std::numeric_limits<qint64>::max)() - nReadResult)))) {
         pState->bReadError = true;
         return -1;
@@ -1308,15 +1593,20 @@ qint32 XBinary::_readDevice(char *pBuffer, qint32 nBufferSize, DATAPROCESS_STATE
     if (nRead > 0) {
         pState->nCountInput += nRead;
     } else if ((nReadSize > 0) &&
-               (((pState->nInputLimit != -1) &&
-                 (pState->nCountInput < pState->nInputLimit)) ||
-                ((pState->nInputLimit == -1) &&
-                 !pState->pDeviceInput->atEnd()))) {
+               ((pState->nInputLimit != -1) &&
+                (pState->nCountInput < pState->nInputLimit))) {
         // QIODevice is allowed to return a positive short read.  Treat only an
         // actual error/EOF before the requested bounded input is complete as a
         // read failure; callers will request the remaining bytes on the next
         // iteration.
         pState->bReadError = true;
+    } else if ((nReadSize > 0) && (pState->nInputLimit == -1)) {
+        if (!guardedInput) {
+            pState->bReadError = true;
+        } else {
+            const bool bAtEnd = guardedInput->atEnd();
+            if (!guardedInput || !bAtEnd) pState->bReadError = true;
+        }
     }
 
     return nRead;
@@ -1337,9 +1627,12 @@ qint32 XBinary::_readDevice(DATAPROCESS_STATE *pState)
     if (pState->nInputLimit != -1) {
         nReadSize = (qint32)(std::min)((qint64)nReadSize, pState->nInputLimit - pState->nCountInput);
     }
-    const qint64 nReadResult = readDeviceWithBoundedProgress(pState->pDeviceInput, pState->pInputBuffer, nReadSize);
+    QPointer<QIODevice> guardedInput(pState->pDeviceInput);
+    const qint64 nReadResult = readDeviceWithBoundedProgress(
+        guardedInput.data(), pState->pInputBuffer, nReadSize);
 
-    if ((nReadResult < 0) || (nReadResult > (qint64)nReadSize) ||
+    if (!guardedInput || (nReadResult < 0) ||
+        (nReadResult > (qint64)nReadSize) ||
         ((nReadResult > 0) && (pState->nCountInput > ((std::numeric_limits<qint64>::max)() - nReadResult)))) {
         pState->bReadError = true;
         return -1;
@@ -1349,11 +1642,16 @@ qint32 XBinary::_readDevice(DATAPROCESS_STATE *pState)
     if (nRead > 0) {
         pState->nCountInput += nRead;
     } else if ((nReadSize > 0) &&
-               (((pState->nInputLimit != -1) &&
-                 (pState->nCountInput < pState->nInputLimit)) ||
-                ((pState->nInputLimit == -1) &&
-                 !pState->pDeviceInput->atEnd()))) {
+               ((pState->nInputLimit != -1) &&
+                (pState->nCountInput < pState->nInputLimit))) {
         pState->bReadError = true;
+    } else if ((nReadSize > 0) && (pState->nInputLimit == -1)) {
+        if (!guardedInput) {
+            pState->bReadError = true;
+        } else {
+            const bool bAtEnd = guardedInput->atEnd();
+            if (!guardedInput || !bAtEnd) pState->bReadError = true;
+        }
     }
 
     return nRead;
@@ -1397,20 +1695,88 @@ qint32 XBinary::_writeDevice(const char *pBuffer, qint32 nBufferSize, DATAPROCES
             bWriteOK = false;
         } else {
             qint64 nWrittenTotal = 0;
+            QPointer<QIODevice> guardedOutput(pState->pDeviceOutput);
+            if (!guardedOutput) {
+                pState->bWriteError = true;
+                bWriteOK = false;
+            }
+            if (!bWriteOK) {
+                pState->nCountOutput = nChunkEnd;
+                return 0;
+            }
+            const bool bSeekableOutput = !guardedOutput->isSequential();
+            if (!guardedOutput) {
+                pState->bWriteError = true;
+                bWriteOK = false;
+            }
+            qint64 nOutputStart = -1;
+            if (bWriteOK && bSeekableOutput) {
+                nOutputStart = guardedOutput->pos();
+                if (!guardedOutput) {
+                    pState->bWriteError = true;
+                    bWriteOK = false;
+                }
+            }
+
+            if (!guardedOutput || (bSeekableOutput && (nOutputStart < 0))) {
+                pState->bWriteError = true;
+                bWriteOK = false;
+            }
 
             // Positive short writes are legal for QIODevice (especially
             // sequential/custom devices).  Drain the complete chunk and fail
-            // only when the device reports an error or makes no progress.
-            while (nWrittenTotal < nRealSize) {
-                qint64 nWritten = pState->pDeviceOutput->write(pBuffer + nSkip + nWrittenTotal, nRealSize - nWrittenTotal);
+            // only when the device reports an error or makes no progress.  A
+            // write callback may re-enter code that moves the same seekable
+            // cursor, so restore the absolute continuation point before every
+            // retry.
+            while (bWriteOK && (nWrittenTotal < nRealSize)) {
+                if (!guardedOutput ||
+                    (bSeekableOutput &&
+                     (nWrittenTotal > (nMax - nOutputStart)))) {
+                    pState->bWriteError = true;
+                    bWriteOK = false;
+                    break;
+                }
+                if (bSeekableOutput) {
+                    const bool bSeeked = guardedOutput->seek(
+                        nOutputStart + nWrittenTotal);
+                    if (!guardedOutput || !bSeeked) {
+                        pState->bWriteError = true;
+                        bWriteOK = false;
+                        break;
+                    }
+                }
 
-                if ((nWritten <= 0) || (nWritten > (nRealSize - nWrittenTotal))) {
+                qint64 nWritten = guardedOutput->write(
+                    pBuffer + nSkip + nWrittenTotal,
+                    nRealSize - nWrittenTotal);
+
+                if (!guardedOutput || (nWritten <= 0) ||
+                    (nWritten > (nRealSize - nWrittenTotal))) {
                     pState->bWriteError = true;
                     bWriteOK = false;
                     break;
                 }
 
                 nWrittenTotal += nWritten;
+            }
+
+            if (bWriteOK && bSeekableOutput &&
+                (!guardedOutput ||
+                 (nRealSize > (nMax - nOutputStart)))) {
+                // A full final write can still run a re-entrant callback that
+                // displaces the cursor.  Reassert the absolute continuation
+                // point before reporting this produced chunk as successful.
+                pState->bWriteError = true;
+                bWriteOK = false;
+            }
+            if (bWriteOK && bSeekableOutput) {
+                const bool bSeeked = guardedOutput->seek(
+                    nOutputStart + nRealSize);
+                if (!guardedOutput || !bSeeked) {
+                    pState->bWriteError = true;
+                    bWriteOK = false;
+                }
             }
         }
     }
@@ -2184,11 +2550,13 @@ QString XBinary::xfHeaderToString(const XFHEADER &xfHeader, const QString &sStru
 }
 
 XBinary::XBinary(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
+    : m_nDeviceGeneration(0)
 {
     setData(pDevice, bIsImage, nModuleAddress);
 }
 
 XBinary::XBinary(const QString &sFileName)
+    : m_nDeviceGeneration(0)
 {
     QFile *pFile = new QFile(sFileName);
 
@@ -2201,22 +2569,36 @@ XBinary::XBinary(const QString &sFileName)
 
 XBinary::~XBinary()
 {
-    if (m_pFile) {
-        m_pFile->close();
-
-        delete m_pFile;
+    QFile *pOwnedFile = m_pFile.data();
+    m_pFile.clear();
+    if (pOwnedFile) {
+        pOwnedFile->close();
+        delete pOwnedFile;
     }
 }
 
 void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
+    QPointer<XBinary> guardedThis(this);
+    if (!isDeviceReplacementAllowed() || !guardedThis) return;
+
     m_pReadWriteMutex = nullptr;
     m_nSize = 0;
     m_nFileFormatSize = 0;
-    m_pFile = nullptr;
     m_pConstMemory = nullptr;
 
+    const quint64 nGenerationBefore = m_nDeviceGeneration;
     setDevice(pDevice);
+    if (!guardedThis) return;
+    quint64 nExpectedGeneration = nGenerationBefore + 1;
+    if (nExpectedGeneration == 0) nExpectedGeneration = 1;
+    if ((m_nDeviceGeneration != nExpectedGeneration) ||
+        (m_pDevice.data() != pDevice)) {
+        // setDevice() invoked a caller-controlled size() implementation.  A
+        // re-entrant setData()/setDevice() won ownership of the object; never
+        // overwrite its freshly established metadata with the outer call.
+        return;
+    }
     setIsImage(bIsImage);
     XBinary::setBaseAddress(0);
     setModuleAddress(nModuleAddress);
@@ -2234,14 +2616,23 @@ void XBinary::setData(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
     setIsArchive(false);
     setIsInternalInfoHandled(false);
 
-    if (pDevice) {
+    if (pDevice && (pDevice == m_pDevice.data())) {
         // qDebug("%s",XBinary::valueToHex((quint64)pDevice).toLatin1().data());
-        setFileFormatSize(pDevice->size());
+        const quint64 nGeneration = m_nDeviceGeneration;
+        const qint64 nDeviceSize = pDevice->size();
+        if ((nGeneration == m_nDeviceGeneration) &&
+            (pDevice == m_pDevice.data())) {
+            setFileFormatSize(nDeviceSize);
+        }
     }
 }
 
 void XBinary::setDevice(QIODevice *pDevice)
 {
+    QPointer<XBinary> guardedThis(this);
+    if (!isDeviceReplacementAllowed() || !guardedThis) return;
+    ++m_nDeviceGeneration;
+    if (m_nDeviceGeneration == 0) ++m_nDeviceGeneration;
     m_pDevice = pDevice;
     m_pConstMemory = nullptr;
     m_nSize = 0;
@@ -2251,20 +2642,30 @@ void XBinary::setDevice(QIODevice *pDevice)
     // Invalidate through the virtual setter so format-specific caches cannot
     // survive an explicit device replacement (including replacement by null).
     setInternalInfo(nullptr);
+    if (!guardedThis) return;
 
-    if (m_pDevice) {
+    QPointer<QIODevice> guardedDevice = m_pDevice;
+    if (guardedDevice) {
         // Do not cache pointers obtained from QBuffer::buffer().  Even a buffer
         // opened read-only can have its backing QByteArray replaced or detached
         // by its owner without going through this XBinary instance.  Device
         // reads preserve the same semantics without retaining borrowed storage.
-        if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
-
         // qDebug("%s",XBinary::valueToHex((quint64)m_pDevice).toLatin1().data());
+        const quint64 nGeneration = m_nDeviceGeneration;
+        const qint64 nDeviceSize = guardedDevice->size();
+        if (!guardedThis || !guardedDevice ||
+            (nGeneration != guardedThis->m_nDeviceGeneration) ||
+            (guardedDevice.data() != guardedThis->m_pDevice.data())) return;
 
-        m_nSize = m_pDevice->size();
-        m_nFileFormatSize = m_nSize;
-
-        if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
+        QMutex *pReadWriteMutex = guardedThis->m_pReadWriteMutex;
+        QMutexLocker locker(pReadWriteMutex);
+        if (guardedThis &&
+            (nGeneration == guardedThis->m_nDeviceGeneration) &&
+            guardedDevice &&
+            (guardedDevice.data() == guardedThis->m_pDevice.data())) {
+            guardedThis->m_nSize = nDeviceSize;
+            guardedThis->m_nFileFormatSize = nDeviceSize;
+        }
     }
 }
 
@@ -2281,10 +2682,24 @@ void XBinary::setFileName(const QString &sFileName)
 qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint64 nMaxLen, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
+    QPointer<XBinary> guardedThis(this);
 
-    if (!pDevice || !pDevice->isReadable() || (nPos < 0) || (nMaxLen < 0) || ((nMaxLen > 0) && !pData) || !isPdStructNotCanceled(pPdStruct)) {
+    if (!pDevice || (nPos < 0) || (nMaxLen < 0) ||
+        ((nMaxLen > 0) && !pData) ||
+        !isPdStructNotCanceled(pPdStruct)) {
         return nResult;
     }
+
+    QPointer<QIODevice> guardedDevice(pDevice);
+    const bool bOpen = guardedDevice->isOpen();
+    if (!guardedThis || !guardedDevice || !bOpen) return nResult;
+    const bool bReadable = guardedDevice->isReadable();
+    if (!guardedThis || !guardedDevice || !bReadable) return nResult;
+    const bool bSequential = guardedDevice->isSequential();
+    if (!guardedThis || !guardedDevice || bSequential) return nResult;
+    const QIODevice::OpenMode openMode = guardedDevice->openMode();
+    if (!guardedThis || !guardedDevice ||
+        openMode.testFlag(QIODevice::Text)) return nResult;
 
     const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
 
@@ -2293,15 +2708,32 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
     }
 
     const qint64 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
-    if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
+    QMutex *pReadWriteMutex = guardedThis->m_pReadWriteMutex;
+    QMutexLocker locker(pReadWriteMutex);
+    bool bPositionEstablished = false;
 
-    if ((nMaxLen == 0) || (pDevice->size() > nPos)) {
-        if (pDevice->seek(nPos)) {
+    const qint64 nDeviceSize = guardedDevice ? guardedDevice->size() : -1;
+    if (!guardedThis || !guardedDevice) return 0;
+    if ((nMaxLen == 0) || (nDeviceSize > nPos)) {
+        if (nMaxLen == 0) {
+            const bool bSeeked = guardedDevice->seek(nPos);
+            bPositionEstablished = guardedDevice && bSeeked;
+        } else {
             while ((nMaxLen > 0) && isPdStructNotCanceled(pPdStruct)) {
                 const qint64 nRequestedSize = qMin(nMaxLen, nBufferSize);
-                const qint64 nCurrentSize = pDevice->read(pData, nRequestedSize);
+                // A custom device may synchronously re-enter public read APIs
+                // and move this same cursor while returning a short read.
+                // Reassert the absolute position before every drained chunk.
+                if (nResult > (std::numeric_limits<qint64>::max)() - nPos)
+                    break;
+                if (!guardedThis || !guardedDevice) break;
+                const bool bSeeked = guardedDevice->seek(nPos + nResult);
+                if (!guardedThis || !guardedDevice || !bSeeked) break;
+                bPositionEstablished = true;
+                const qint64 nCurrentSize = guardedDevice->read(pData, nRequestedSize);
 
-                if ((nCurrentSize <= 0) || (nCurrentSize > nRequestedSize)) {
+                if (!guardedThis || !guardedDevice || (nCurrentSize <= 0) ||
+                    (nCurrentSize > nRequestedSize)) {
                     break;
                 }
 
@@ -2309,10 +2741,6 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
                 pData += nCurrentSize;
                 nResult += nCurrentSize;
             }
-        } else {
-#ifdef QT_DEBUG
-            qDebug("Cannot seek");
-#endif
         }
 
     } else {
@@ -2321,18 +2749,40 @@ qint64 XBinary::safeReadData(QIODevice *pDevice, qint64 nPos, char *pData, qint6
 #endif
     }
 
-    if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
+    if (bPositionEstablished) {
+        if (!guardedThis || !guardedDevice ||
+            (nResult > (std::numeric_limits<qint64>::max)() - nPos)) {
+            nResult = 0;
+        } else {
+            const bool bSeeked = guardedDevice->seek(nPos + nResult);
+            if (!guardedThis || !guardedDevice || !bSeeked) nResult = 0;
+        }
+    }
 
-    return nResult;
+    return guardedThis ? nResult : 0;
 }
 
 qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen, PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
+    QPointer<XBinary> guardedThis(this);
 
-    if (!pDevice || !pDevice->isWritable() || (nPos < 0) || (nLen < 0) || ((nLen > 0) && !pData) || !isPdStructNotCanceled(pPdStruct)) {
+    if (!pDevice || (nPos < 0) || (nLen < 0) ||
+        ((nLen > 0) && !pData) ||
+        !isPdStructNotCanceled(pPdStruct)) {
         return nResult;
     }
+
+    QPointer<QIODevice> guardedDevice(pDevice);
+    const bool bOpen = guardedDevice->isOpen();
+    if (!guardedThis || !guardedDevice || !bOpen) return nResult;
+    const bool bWritable = guardedDevice->isWritable();
+    if (!guardedThis || !guardedDevice || !bWritable) return nResult;
+    const bool bSequential = guardedDevice->isSequential();
+    if (!guardedThis || !guardedDevice || bSequential) return nResult;
+    const QIODevice::OpenMode openMode = guardedDevice->openMode();
+    if (!guardedThis || !guardedDevice ||
+        (openMode & (QIODevice::Append | QIODevice::Text))) return nResult;
 
     const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
 
@@ -2342,32 +2792,43 @@ qint64 XBinary::safeWriteData(QIODevice *pDevice, qint64 nPos, const char *pData
 
     const qint64 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
 
-    if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
+    QMutex *pReadWriteMutex = guardedThis->m_pReadWriteMutex;
+    QMutexLocker locker(pReadWriteMutex);
 
-    const qint64 nDeviceSize = pDevice->size();
+    const qint64 nDeviceSize = guardedDevice ? guardedDevice->size() : -1;
 
-    if ((nDeviceSize < 0) || (nPos > nDeviceSize) || (nLen > nDeviceSize - nPos)) {
-        if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
+    if (!guardedThis || !guardedDevice || (nDeviceSize < 0) || (nPos > nDeviceSize) ||
+        (nLen > nDeviceSize - nPos)) {
         return nResult;
     }
 
-    if (pDevice->seek(nPos)) {
-        while ((nLen > 0) && isPdStructNotCanceled(pPdStruct)) {
-            const qint64 nRequestedSize = qMin(nLen, nBufferSize);
-            const qint64 nCurrentSize = pDevice->write(pData, nRequestedSize);
+    while ((nLen > 0) && isPdStructNotCanceled(pPdStruct)) {
+        if (nResult > (std::numeric_limits<qint64>::max)() - nPos)
+            break;
+        if (!guardedThis || !guardedDevice) break;
+        const bool bSeeked = guardedDevice->seek(nPos + nResult);
+        if (!guardedThis || !guardedDevice || !bSeeked) break;
+        const qint64 nRequestedSize = qMin(nLen, nBufferSize);
+        const qint64 nCurrentSize = guardedDevice->write(pData, nRequestedSize);
 
-            if ((nCurrentSize <= 0) || (nCurrentSize > nRequestedSize)) {
-                setPdStructErrorString(pPdStruct, tr("Write error"));
-                break;
-            }
-
-            nLen -= nCurrentSize;
-            pData += nCurrentSize;
-            nResult += nCurrentSize;
+        if (!guardedThis || !guardedDevice || (nCurrentSize <= 0) ||
+            (nCurrentSize > nRequestedSize)) {
+            setPdStructErrorString(pPdStruct, tr("Write error"));
+            break;
         }
+
+        nLen -= nCurrentSize;
+        pData += nCurrentSize;
+        nResult += nCurrentSize;
     }
 
-    if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
+    if (!guardedThis || !guardedDevice ||
+        (nResult > (std::numeric_limits<qint64>::max)() - nPos)) {
+        nResult = 0;
+    } else {
+        const bool bSeeked = guardedDevice->seek(nPos + nResult);
+        if (!guardedThis || !guardedDevice || !bSeeked) nResult = 0;
+    }
 
     return nResult;
 }
@@ -2376,18 +2837,33 @@ qint64 XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qi
 {
     // qDebug("%X %X pos: %X maxlen: %X", this, pDevice, nPos, nMaxLen);
     qint64 nResult = 0;
+    QPointer<XBinary> guardedThis(this);
 
-    if (!pDevice || !pDevice->isReadable() || (nPos < 0) ||
+    if (!pDevice || (nPos < 0) ||
         (nMaxLen < 0) || ((nMaxLen > 0) && !pData) ||
         (nMaxLen == 0)) {
         return nResult;
     }
 
-    if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
+    QMutex *pReadWriteMutex = guardedThis ? guardedThis->m_pReadWriteMutex : nullptr;
+    QMutexLocker locker(pReadWriteMutex);
+    QPointer<QIODevice> guardedDevice(pDevice);
+    const bool bReadable = guardedDevice->isReadable();
+    if (!guardedThis || !guardedDevice || !bReadable) return nResult;
 
-    if ((pDevice->size() > nPos) && (nPos >= 0)) {
-        if (pDevice->seek(nPos)) {
-            nResult = pDevice->read(pData, nMaxLen);
+    const qint64 nDeviceSize = guardedDevice ? guardedDevice->size() : -1;
+    if (guardedThis && guardedDevice && (nDeviceSize > nPos) && (nPos >= 0)) {
+        const bool bSeeked = guardedDevice->seek(nPos);
+        if (guardedThis && guardedDevice && bSeeked) {
+            nResult = guardedDevice->read(pData, nMaxLen);
+            if (!guardedThis || !guardedDevice || (nResult < 0) || (nResult > nMaxLen) ||
+                (nResult > (std::numeric_limits<qint64>::max)() - nPos)) {
+                nResult = 0;
+            } else {
+                const bool bFinalSeeked =
+                    guardedDevice->seek(nPos + nResult);
+                if (!guardedThis || !guardedDevice || !bFinalSeeked) nResult = 0;
+            }
         } else {
 #ifdef QT_DEBUG
             qDebug("Cannot seek");
@@ -2395,13 +2871,13 @@ qint64 XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, char *pData, qi
         }
     } else {
 #ifdef QT_DEBUG
-        qDebug("Invalid pos: %llX Size: %llX", nPos, getSize());
+            if (guardedThis)
+                qDebug("Invalid pos: %llX Size: %llX", nPos,
+                       guardedThis->getSize());
 #endif
     }
 
-    if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
-
-    return nResult;
+    return guardedThis ? nResult : 0;
 }
 
 static bool resizeByteArrayForRead(QByteArray *pData, qint64 nSize)
@@ -2446,40 +2922,56 @@ QByteArray XBinary::_readDataSimple(QIODevice *pDevice, qint64 nPos, qint64 nSiz
 qint64 XBinary::_writeDataSimple(QIODevice *pDevice, qint64 nPos, const char *pData, qint64 nLen)
 {
     qint64 nResult = 0;
+    QPointer<XBinary> guardedThis(this);
 
-    if (!pDevice || !pDevice->isWritable() || (nPos < 0) || (nLen < 0) || ((nLen > 0) && !pData)) {
+    if (!pDevice || (nPos < 0) || (nLen < 0) ||
+        ((nLen > 0) && !pData)) {
         return nResult;
     }
 
-    if (m_pReadWriteMutex) m_pReadWriteMutex->lock();
+    QMutex *pReadWriteMutex = guardedThis ? guardedThis->m_pReadWriteMutex : nullptr;
+    QMutexLocker locker(pReadWriteMutex);
+    QPointer<QIODevice> guardedDevice(pDevice);
+    const bool bWritable = guardedDevice->isWritable();
+    if (!guardedThis || !guardedDevice || !bWritable) return nResult;
 
-    const qint64 nDeviceSize = pDevice->size();
+    const qint64 nDeviceSize = guardedDevice ? guardedDevice->size() : -1;
 
-    if ((nDeviceSize >= 0) && (nPos <= nDeviceSize) && (nLen <= (nDeviceSize - nPos))) {
-        if (pDevice->seek(nPos)) {
-            while (nResult < nLen) {
-                const qint64 nWritten = pDevice->write(pData + nResult, nLen - nResult);
+    if (guardedThis && guardedDevice && (nDeviceSize >= 0) && (nPos <= nDeviceSize) &&
+        (nLen <= (nDeviceSize - nPos))) {
+        while (nResult < nLen) {
+            if (nResult > (std::numeric_limits<qint64>::max)() - nPos)
+                break;
+            if (!guardedThis || !guardedDevice) break;
+            const bool bSeeked = guardedDevice->seek(nPos + nResult);
+            if (!guardedThis || !guardedDevice || !bSeeked) break;
+            const qint64 nWritten = guardedDevice->write(
+                pData + nResult, nLen - nResult);
 
-                if ((nWritten <= 0) || (nWritten > (nLen - nResult))) {
-                    break;
-                }
-
-                nResult += nWritten;
+            if (!guardedThis || !guardedDevice || (nWritten <= 0) ||
+                (nWritten > (nLen - nResult))) {
+                break;
             }
+
+            nResult += nWritten;
+        }
+        if (!guardedThis || !guardedDevice ||
+            (nResult > (std::numeric_limits<qint64>::max)() - nPos)) {
+            nResult = 0;
         } else {
-#ifdef QT_DEBUG
-            qDebug("Cannot seek");
-#endif
+            const bool bFinalSeeked =
+                guardedDevice->seek(nPos + nResult);
+            if (!guardedThis || !guardedDevice || !bFinalSeeked) nResult = 0;
         }
     } else {
 #ifdef QT_DEBUG
-        qDebug("Invalid pos: %llX Size: %llX", nPos, getSize());
+        if (guardedThis)
+            qDebug("Invalid pos: %llX Size: %llX", nPos,
+                   guardedThis->getSize());
 #endif
     }
 
-    if (m_pReadWriteMutex) m_pReadWriteMutex->unlock();
-
-    return nResult;
+    return guardedThis ? nResult : 0;
 }
 
 qint64 XBinary::getSize()
@@ -4343,17 +4835,17 @@ QString XBinary::read_UUID(qint64 nOffset, bool bIsBigEndian)
     return sResult;
 }
 
-quint8 XBinary::_read_uint8(char *pData)
+quint8 XBinary::_read_uint8(const char *pData)
 {
     return *(quint8 *)pData;
 }
 
-qint8 XBinary::_read_int8(char *pData)
+qint8 XBinary::_read_int8(const char *pData)
 {
     return *(qint8 *)pData;
 }
 
-quint16 XBinary::_read_uint16(char *pData, bool bIsBigEndian)
+quint16 XBinary::_read_uint16(const char *pData, bool bIsBigEndian)
 {
     quint16 result = *(quint16 *)pData;
 
@@ -4366,7 +4858,7 @@ quint16 XBinary::_read_uint16(char *pData, bool bIsBigEndian)
     return result;
 }
 
-qint16 XBinary::_read_int16(char *pData, bool bIsBigEndian)
+qint16 XBinary::_read_int16(const char *pData, bool bIsBigEndian)
 {
     qint16 result = *(qint16 *)pData;
 
@@ -4379,7 +4871,7 @@ qint16 XBinary::_read_int16(char *pData, bool bIsBigEndian)
     return result;
 }
 
-quint32 XBinary::_read_uint24(char *pData, bool bIsBigEndian)
+quint32 XBinary::_read_uint24(const char *pData, bool bIsBigEndian)
 {
     quint32 result = 0;
 
@@ -4394,7 +4886,7 @@ quint32 XBinary::_read_uint24(char *pData, bool bIsBigEndian)
     return (result & (0xFFFFFF));
 }
 
-quint32 XBinary::_read_uint32(char *pData, bool bIsBigEndian)
+quint32 XBinary::_read_uint32(const char *pData, bool bIsBigEndian)
 {
     quint32 result = *(quint32 *)pData;
 
@@ -4407,7 +4899,7 @@ quint32 XBinary::_read_uint32(char *pData, bool bIsBigEndian)
     return result;
 }
 
-qint32 XBinary::_read_int32(char *pData, bool bIsBigEndian)
+qint32 XBinary::_read_int32(const char *pData, bool bIsBigEndian)
 {
     qint32 result = *(qint32 *)pData;
 
@@ -4420,7 +4912,7 @@ qint32 XBinary::_read_int32(char *pData, bool bIsBigEndian)
     return result;
 }
 
-quint64 XBinary::_read_uint64(char *pData, bool bIsBigEndian)
+quint64 XBinary::_read_uint64(const char *pData, bool bIsBigEndian)
 {
     quint64 result = *(quint64 *)pData;
 
@@ -4433,7 +4925,7 @@ quint64 XBinary::_read_uint64(char *pData, bool bIsBigEndian)
     return result;
 }
 
-qint64 XBinary::_read_int64(char *pData, bool bIsBigEndian)
+qint64 XBinary::_read_int64(const char *pData, bool bIsBigEndian)
 {
     qint64 result = *(qint64 *)pData;
 
@@ -4446,7 +4938,7 @@ qint64 XBinary::_read_int64(char *pData, bool bIsBigEndian)
     return result;
 }
 
-QString XBinary::_read_ansiString(char *pData, qint32 nMaxSize)
+QString XBinary::_read_ansiString(const char *pData, qint32 nMaxSize)
 {
     QString sResult;
 
@@ -4456,12 +4948,12 @@ QString XBinary::_read_ansiString(char *pData, qint32 nMaxSize)
     return sResult;
 }
 
-QByteArray XBinary::_read_byteArray(char *pData, qint32 nSize)
+QByteArray XBinary::_read_byteArray(const char *pData, qint32 nSize)
 {
     return QByteArray(pData, nSize);
 }
 
-float XBinary::_read_float(char *pData, bool bIsBigEndian)
+float XBinary::_read_float(const char *pData, bool bIsBigEndian)
 {
     float result = *(float *)pData;
 
@@ -4470,7 +4962,7 @@ float XBinary::_read_float(char *pData, bool bIsBigEndian)
     return result;
 }
 
-double XBinary::_read_double(char *pData, bool bIsBigEndian)
+double XBinary::_read_double(const char *pData, bool bIsBigEndian)
 {
     double result = *(double *)pData;
 
@@ -4479,7 +4971,7 @@ double XBinary::_read_double(char *pData, bool bIsBigEndian)
     return result;
 }
 
-quint64 XBinary::_read_value(MODE mode, char *pData, bool bIsBigEndian)
+quint64 XBinary::_read_value(MODE mode, const char *pData, bool bIsBigEndian)
 {
     quint64 nResult = 0;
 
@@ -8613,23 +9105,59 @@ bool XBinary::_isMemoryAnsiNumber(char *pSource, qint64 nSize)
 #endif
 }
 
+bool XBinary::devicesAlias(QIODevice *pFirstDevice, QIODevice *pSecondDevice)
+{
+    if (!pFirstDevice || !pSecondDevice) return false;
+
+    const DEVICE_ROOT_VIEW firstView = getDeviceRootView(pFirstDevice);
+    const DEVICE_ROOT_VIEW secondView = getDeviceRootView(pSecondDevice);
+
+    // A broken/cyclic SubDevice chain cannot safely be proven independent.
+    if (!firstView.bValid || !secondView.bValid) return true;
+    if (firstView.pRoot == secondView.pRoot) return true;
+
+    QBuffer *pFirstBuffer = qobject_cast<QBuffer *>(firstView.pRoot);
+    QBuffer *pSecondBuffer = qobject_cast<QBuffer *>(secondView.pRoot);
+    if (pFirstBuffer && pSecondBuffer &&
+        (&pFirstBuffer->buffer() == &pSecondBuffer->buffer())) {
+        return true;
+    }
+
+    QFileDevice *pFirstFile = qobject_cast<QFileDevice *>(firstView.pRoot);
+    QFileDevice *pSecondFile = qobject_cast<QFileDevice *>(secondView.pRoot);
+    if (pFirstFile && pSecondFile) {
+        // Unknown file identity is intentionally fail-closed: hard links and
+        // platform-specific aliases must not pass a destructive preflight.
+        return compareFileDeviceIdentity(pFirstFile, pSecondFile) != FILE_IDENTITY_DISTINCT;
+    }
+
+    return false;
+}
+
 bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, QIODevice *pDestDevice, qint64 nDestOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     const qint64 nMax = (std::numeric_limits<qint64>::max)();
-    if (!pSourceDevice || !pDestDevice || !pSourceDevice->isReadable() || !pDestDevice->isWritable() ||
+    QPointer<QIODevice> guardedSource(pSourceDevice);
+    QPointer<QIODevice> guardedDestination(pDestDevice);
+    if (!guardedSource || !guardedDestination ||
+        !guardedSource->isReadable() || !guardedSource ||
+        !guardedDestination->isWritable() || !guardedDestination ||
         (nSourceOffset < 0) || (nDestOffset < 0) || (nSize < 0) ||
         (nSourceOffset > (nMax - nSize)) || (nDestOffset > (nMax - nSize)) ||
         !isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
 
-    const qint64 nSourceSize = pSourceDevice->size();
-    if ((nSourceSize < 0) || (nSourceOffset > nSourceSize) || (nSize > (nSourceSize - nSourceOffset))) {
+    const qint64 nSourceSize = guardedSource->size();
+    if (!guardedSource || (nSourceSize < 0) ||
+        (nSourceOffset > nSourceSize) ||
+        (nSize > (nSourceSize - nSourceOffset))) {
         return false;
     }
 
-    if (nSize == 0 || ((pSourceDevice == pDestDevice) && (nSourceOffset == nDestOffset))) {
-        return true;
+    if (nSize == 0 || ((guardedSource.data() == guardedDestination.data()) &&
+                       (nSourceOffset == nDestOffset))) {
+        return guardedSource && guardedDestination;
     }
 
     const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
@@ -8643,8 +9171,125 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, Q
         return false;
     }
 
-    const bool bReverse = (pSourceDevice == pDestDevice) && (nDestOffset > nSourceOffset) &&
-                          (nDestOffset < (nSourceOffset + nSize));
+    const DEVICE_ROOT_VIEW sourceView = getDeviceRootView(guardedSource.data());
+    if (!guardedSource || !guardedDestination) {
+        delete[] pBuffer;
+        return false;
+    }
+    const DEVICE_ROOT_VIEW destinationView = getDeviceRootView(
+        guardedDestination.data());
+    if (!guardedSource || !guardedDestination || !sourceView.bValid ||
+        !destinationView.bValid ||
+        (sourceView.nBaseOffset > nMax - nSourceOffset) ||
+        (destinationView.nBaseOffset > nMax - nDestOffset)) {
+        delete[] pBuffer;
+        return false;
+    }
+
+    const qint64 nAbsoluteSourceOffset = sourceView.nBaseOffset + nSourceOffset;
+    const qint64 nAbsoluteDestOffset = destinationView.nBaseOffset + nDestOffset;
+    if ((nAbsoluteSourceOffset > nMax - nSize) ||
+        (nAbsoluteDestOffset > nMax - nSize)) {
+        delete[] pBuffer;
+        return false;
+    }
+
+    const bool bPotentialAlias = XBinary::devicesAlias(
+        guardedSource.data(), guardedDestination.data());
+    if (!guardedSource || !guardedDestination) {
+        delete[] pBuffer;
+        return false;
+    }
+
+    const bool bOverlappingAlias =
+        bPotentialAlias &&
+        (nAbsoluteSourceOffset < nAbsoluteDestOffset + nSize) &&
+        (nAbsoluteDestOffset < nAbsoluteSourceOffset + nSize);
+
+    const auto readExactAt = [nMax, pPdStruct](QIODevice *pDevice, qint64 nOffset,
+                                               char *pData, qint64 nLength) -> bool {
+        if (!pDevice || (nOffset < 0) || (nLength < 0) ||
+            ((nLength > 0) && !pData) || (nLength > nMax - nOffset)) {
+            return false;
+        }
+        QPointer<QIODevice> guardedDevice(pDevice);
+        qint64 nDone = 0;
+        while ((nDone < nLength) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            if (!guardedDevice || (nDone > nMax - nOffset)) return false;
+            const bool bSeeked = guardedDevice->seek(nOffset + nDone);
+            if (!guardedDevice || !bSeeked) return false;
+            const qint64 nRead = guardedDevice->read(
+                pData + nDone, nLength - nDone);
+            if (!guardedDevice) return false;
+            if ((nRead <= 0) || (nRead > nLength - nDone)) return false;
+            nDone += nRead;
+        }
+        if (!guardedDevice || (nDone != nLength) ||
+            !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+        const bool bSeeked = guardedDevice->seek(nOffset + nLength);
+        return guardedDevice && bSeeked;
+    };
+
+    const auto writeExactAt = [nMax, pPdStruct](QIODevice *pDevice, qint64 nOffset,
+                                                const char *pData, qint64 nLength) -> bool {
+        if (!pDevice || (nOffset < 0) || (nLength < 0) ||
+            ((nLength > 0) && !pData) || (nLength > nMax - nOffset)) {
+            return false;
+        }
+        QPointer<QIODevice> guardedDevice(pDevice);
+        qint64 nDone = 0;
+        while ((nDone < nLength) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            if (!guardedDevice || (nDone > nMax - nOffset)) return false;
+            const bool bSeeked = guardedDevice->seek(nOffset + nDone);
+            if (!guardedDevice || !bSeeked) return false;
+            const qint64 nWritten = guardedDevice->write(
+                pData + nDone, nLength - nDone);
+            if (!guardedDevice) return false;
+            if ((nWritten <= 0) || (nWritten > nLength - nDone)) return false;
+            nDone += nWritten;
+        }
+        if (!guardedDevice || (nDone != nLength) ||
+            !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+        const bool bSeeked = guardedDevice->seek(nOffset + nLength);
+        return guardedDevice && bSeeked;
+    };
+
+    QIODevice *pStagingDevice = nullptr;
+    QIODevice *pEffectiveSourceDevice = pSourceDevice;
+    qint64 nEffectiveSourceOffset = nSourceOffset;
+
+    if (bOverlappingAlias) {
+        pStagingDevice = XBinary::createFileBuffer(nSize, pPdStruct);
+        if (!pStagingDevice) {
+            delete[] pBuffer;
+            return false;
+        }
+
+        qint64 nStaged = 0;
+        bool bStaged = true;
+        while ((nStaged < nSize) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            const qint64 nChunkSize = qMin(nSize - nStaged, (qint64)nBufferSize);
+            if (!guardedSource || !guardedDestination ||
+                !readExactAt(guardedSource.data(), nSourceOffset + nStaged,
+                             pBuffer, nChunkSize) ||
+                !writeExactAt(pStagingDevice, nStaged, pBuffer, nChunkSize)) {
+                bStaged = false;
+                break;
+            }
+            nStaged += nChunkSize;
+        }
+
+        if (!bStaged || (nStaged != nSize) ||
+            !XBinary::isPdStructNotCanceled(pPdStruct)) {
+            XBinary::freeFileBuffer(&pStagingDevice);
+            delete[] pBuffer;
+            return false;
+        }
+
+        pEffectiveSourceDevice = pStagingDevice;
+        nEffectiveSourceOffset = 0;
+    }
+
     const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nSize);
 
     qint64 nRemaining = nSize;
@@ -8653,38 +9298,14 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, Q
 
     while ((nRemaining > 0) && isPdStructNotCanceled(pPdStruct)) {
         const qint64 nChunkSize = qMin(nRemaining, (qint64)nBufferSize);
-        const qint64 nChunkSourceOffset = bReverse ? (nSourceOffset + nRemaining - nChunkSize) : (nSourceOffset + nProcessed);
-        const qint64 nChunkDestOffset = bReverse ? (nDestOffset + nRemaining - nChunkSize) : (nDestOffset + nProcessed);
+        const qint64 nChunkSourceOffset = nEffectiveSourceOffset + nProcessed;
+        const qint64 nChunkDestOffset = nDestOffset + nProcessed;
 
-        if (!pSourceDevice->seek(nChunkSourceOffset)) {
-            bResult = false;
-            break;
-        }
-
-        qint64 nReadTotal = 0;
-        while ((nReadTotal < nChunkSize) && isPdStructNotCanceled(pPdStruct)) {
-            const qint64 nRead = pSourceDevice->read(pBuffer + nReadTotal, nChunkSize - nReadTotal);
-            if ((nRead <= 0) || (nRead > (nChunkSize - nReadTotal))) {
-                bResult = false;
-                break;
-            }
-            nReadTotal += nRead;
-        }
-        if (!bResult || (nReadTotal != nChunkSize) || !pDestDevice->seek(nChunkDestOffset)) {
-            bResult = false;
-            break;
-        }
-
-        qint64 nWrittenTotal = 0;
-        while ((nWrittenTotal < nChunkSize) && isPdStructNotCanceled(pPdStruct)) {
-            const qint64 nWritten = pDestDevice->write(pBuffer + nWrittenTotal, nChunkSize - nWrittenTotal);
-            if ((nWritten <= 0) || (nWritten > (nChunkSize - nWrittenTotal))) {
-                bResult = false;
-                break;
-            }
-            nWrittenTotal += nWritten;
-        }
-        if (!bResult || (nWrittenTotal != nChunkSize)) {
+        if (!guardedSource || !guardedDestination ||
+            !readExactAt(pEffectiveSourceDevice, nChunkSourceOffset,
+                         pBuffer, nChunkSize) ||
+            !writeExactAt(guardedDestination.data(), nChunkDestOffset,
+                          pBuffer, nChunkSize)) {
             bResult = false;
             break;
         }
@@ -8694,10 +9315,12 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, Q
         XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nProcessed);
     }
 
+    XBinary::freeFileBuffer(&pStagingDevice);
     delete[] pBuffer;
     XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
 
-    return bResult && (nRemaining == 0) && isPdStructNotCanceled(pPdStruct);
+    return bResult && guardedSource && guardedDestination &&
+           (nRemaining == 0) && isPdStructNotCanceled(pPdStruct);
 }
 
 bool XBinary::copyMemory(qint64 nSourceOffset, qint64 nDestOffset, qint64 nSize, quint32 nBufferSize, bool bReverse)
@@ -10257,7 +10880,7 @@ bool XBinary::moveMemory(QIODevice *pDevice, qint64 nSourceOffset, qint64 nDestO
 XBinary::REMOVE_MEMORY_RESULT XBinary::removeMemoryEx(qint64 nOffset, qint64 nSize)
 {
     REMOVE_MEMORY_RESULT result = REMOVE_MEMORY_RESULT_FAILED;
-    QIODevice *pOriginalDevice = m_pDevice;
+    QIODevice *pOriginalDevice = m_pDevice.data();
     QIODevice *pOriginalData = nullptr;
     QPointer<QBuffer> pMemoryPropertyBuffer;
     bool bRefreshDevice = false;
@@ -10293,7 +10916,7 @@ XBinary::REMOVE_MEMORY_RESULT XBinary::removeMemoryEx(qint64 nOffset, qint64 nSi
         }
         nNewPosition = qBound((qint64)0, nNewPosition, nNewSize);
 
-        if (QBuffer *pBuffer = qobject_cast<QBuffer *>(m_pDevice)) {
+        if (QBuffer *pBuffer = qobject_cast<QBuffer *>(m_pDevice.data())) {
             if ((nMaxSize > (std::numeric_limits<qint32>::max)()) ||
                 (nOffset > (std::numeric_limits<qint32>::max)()) ||
                 (nSize > (std::numeric_limits<qint32>::max)())) {
@@ -10330,7 +10953,7 @@ XBinary::REMOVE_MEMORY_RESULT XBinary::removeMemoryEx(qint64 nOffset, qint64 nSi
                 bRefreshDevice = !bPositionRestored;
             }
         } else {
-            QFileDevice *pFileDevice = qobject_cast<QFileDevice *>(m_pDevice);
+            QFileDevice *pFileDevice = qobject_cast<QFileDevice *>(m_pDevice.data());
             if (!pFileDevice) {
                 return result;
             }
@@ -10521,13 +11144,19 @@ bool XBinary::dumpToFile(const QString &sFileName, qint64 nDataOffset, qint64 nD
 
 bool XBinary::dumpToFile(const QString &sFileName, QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
-    if (!pDevice || (pDevice->size() < 0)) {
+    QPointer<QIODevice> guardedDevice(pDevice);
+    if (!guardedDevice) {
         return false;
     }
+    const qint64 nDeviceSize = guardedDevice->size();
+    if (!guardedDevice || (nDeviceSize < 0)) return false;
 
-    XBinary binary(pDevice);
+    XBinary binary(guardedDevice.data());
+    if (!guardedDevice) return false;
 
-    return binary.dumpToFile(sFileName, 0, pDevice->size(), pPdStruct);
+    const bool bResult = binary.dumpToFile(
+        sFileName, 0, nDeviceSize, pPdStruct);
+    return guardedDevice && bResult;
 }
 
 bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct)
@@ -10545,7 +11174,7 @@ bool XBinary::patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64
     // A second QFile object hides same-device overlap from copyDeviceMemory.
     // Reject aliases up front so a forward patch cannot overwrite source data
     // that a later chunk still has to read.
-    const QFile *pDestinationFile = dynamic_cast<const QFile *>(m_pDevice);
+    const QFile *pDestinationFile = dynamic_cast<const QFile *>(m_pDevice.data());
 
     if (pDestinationFile) {
         const QFileInfo destinationInfo(pDestinationFile->fileName());
@@ -12221,19 +12850,29 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
     }
     const QSharedPointer<PDSTRUCT_CALLBACK_STATE> pProgressLifetime = pPdStruct->_pdCallbackState;
 
-    if (!pDevice1 || !pDevice2 || !pDevice1->isReadable() || !pDevice2->isReadable() || pDevice1->isSequential() || pDevice2->isSequential() ||
+    QPointer<QIODevice> guardedDevice1(pDevice1);
+    QPointer<QIODevice> guardedDevice2(pDevice2);
+    if (!guardedDevice1 || !guardedDevice2 ||
+        !guardedDevice1->isReadable() || !guardedDevice1 ||
+        !guardedDevice2->isReadable() || !guardedDevice2 ||
+        guardedDevice1->isSequential() || !guardedDevice1 ||
+        guardedDevice2->isSequential() || !guardedDevice2 ||
         ((fixupWidth != FIXUP_WIDTH_32) && (fixupWidth != FIXUP_WIDTH_64)) || !isPdStructNotCanceled(pPdStruct)) {
         return listResult;
     }
 
     const qint32 nValueSize = (qint32)fixupWidth;
 
-    const qint64 nOriginalPosition1 = pDevice1->pos();
-    const qint64 nOriginalPosition2 = pDevice2->pos();
-    if ((nOriginalPosition1 < 0) || (nOriginalPosition2 < 0)) return listResult;
+    const qint64 nOriginalPosition1 = guardedDevice1->pos();
+    if (!guardedDevice1 || !guardedDevice2) return listResult;
+    const qint64 nOriginalPosition2 = guardedDevice2->pos();
+    if (!guardedDevice1 || !guardedDevice2 ||
+        (nOriginalPosition1 < 0) || (nOriginalPosition2 < 0)) return listResult;
 
-    const qint64 nSize1 = pDevice1->size();
-    const qint64 nSize2 = pDevice2->size();
+    const qint64 nSize1 = guardedDevice1->size();
+    if (!guardedDevice1 || !guardedDevice2) return listResult;
+    const qint64 nSize2 = guardedDevice2->size();
+    if (!guardedDevice1 || !guardedDevice2) return listResult;
 
     if ((nSize1 >= 0) && (nSize1 == nSize2)) {
         qint64 nSize = nSize1;
@@ -12277,8 +12916,13 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
                 nTemp = (qint32)nSize;
             }
 
-            if ((binary.safeReadData(pDevice1, nOffset, pBuffer1, nTemp, pPdStruct) != nTemp) ||
-                (binary.safeReadData(pDevice2, nOffset, pBuffer2, nTemp, pPdStruct) != nTemp)) {
+            if (!guardedDevice1 || !guardedDevice2 ||
+                (binary.safeReadData(guardedDevice1.data(), nOffset,
+                                     pBuffer1, nTemp, pPdStruct) != nTemp) ||
+                !guardedDevice1 || !guardedDevice2 ||
+                (binary.safeReadData(guardedDevice2.data(), nOffset,
+                                     pBuffer2, nTemp, pPdStruct) != nTemp) ||
+                !guardedDevice1 || !guardedDevice2) {
                 bReadError = true;
                 break;
             }
@@ -12321,7 +12965,8 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
             nSize -= nStep;
             nOffset += nStep;
             XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nOffset);
-            if (!isPdCallbackOwnerAlive(pProgressLifetime)) {
+            if (!guardedDevice1 || !guardedDevice2 ||
+                !isPdCallbackOwnerAlive(pProgressLifetime)) {
                 bProgressOwnerAlive = false;
                 break;
             }
@@ -12339,9 +12984,18 @@ QList<qint64> XBinary::getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qi
         }
     }
 
-    const bool bPosition1Restored = pDevice1->seek(nOriginalPosition1);
-    const bool bPosition2Restored = pDevice2->seek(nOriginalPosition2);
-    if (!bPosition1Restored || !bPosition2Restored) {
+    if (!guardedDevice1 || !guardedDevice2) {
+        listResult.clear();
+        return listResult;
+    }
+    const bool bPosition1Restored = guardedDevice1->seek(nOriginalPosition1);
+    if (!guardedDevice1 || !guardedDevice2) {
+        listResult.clear();
+        return listResult;
+    }
+    const bool bPosition2Restored = guardedDevice2->seek(nOriginalPosition2);
+    if (!guardedDevice1 || !guardedDevice2 ||
+        !bPosition1Restored || !bPosition2Restored) {
         listResult.clear();
     }
     return listResult;
@@ -12367,21 +13021,25 @@ QString XBinary::getHash(XBinary::HASH hash, QIODevice *pDevice, PDSTRUCT *pPdSt
 {
     QString sResult;
 
-    if (!pDevice || !pDevice->isReadable() || pDevice->isSequential()) {
+    QPointer<QIODevice> guardedDevice(pDevice);
+    if (!guardedDevice || !guardedDevice->isReadable() || !guardedDevice ||
+        guardedDevice->isSequential() || !guardedDevice) {
         return sResult;
     }
 
-    const qint64 nOriginalPosition = pDevice->pos();
+    const qint64 nOriginalPosition = guardedDevice->pos();
 
-    if (nOriginalPosition < 0) {
+    if (!guardedDevice || (nOriginalPosition < 0)) {
         return sResult;
     }
 
-    XBinary binary(pDevice);
+    XBinary binary(guardedDevice.data());
 
     sResult = binary.getHash(hash, 0, -1, pPdStruct);
 
-    if (!pDevice->seek(nOriginalPosition)) {
+    if (!guardedDevice) return QString();
+    const bool bRestored = guardedDevice->seek(nOriginalPosition);
+    if (!guardedDevice || !bRestored) {
         sResult.clear();
     }
 
@@ -12616,18 +13274,22 @@ quint32 XBinary::getAdler32(const QString &sFileName)
 quint32 XBinary::getAdler32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = 0;
+    QPointer<QIODevice> guardedDevice(pDevice);
 
-    if (!pDevice) {
+    if (!guardedDevice) {
         return nResult;
     }
 
-    pDevice->reset();
+    guardedDevice->reset();
+    if (!guardedDevice) return 0;
 
-    XBinary binary(pDevice);
+    XBinary binary(guardedDevice.data());
 
     nResult = binary.getAdler32(0, -1, pPdStruct);
+    if (!guardedDevice) return 0;
 
-    pDevice->reset();
+    guardedDevice->reset();
+    if (!guardedDevice) return 0;
 
     return nResult;
 }
@@ -12750,16 +13412,19 @@ quint32 XBinary::_getCRC32(const QString &sFileName, PDSTRUCT *pPdStruct)
 quint32 XBinary::_getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = 0;
+    QPointer<QIODevice> guardedDevice(pDevice);
 
-    if (!pDevice) {
+    if (!guardedDevice) {
         return nResult;
     }
 
-    XBinary binary(pDevice);
+    XBinary binary(guardedDevice.data());
 
     nResult = binary._getCRC32(0, -1, 0xFFFFFFFF, _getCRC32Table_EDB88320(), pPdStruct);
+    if (!guardedDevice) return 0;
 
-    pDevice->reset();
+    guardedDevice->reset();
+    if (!guardedDevice) return 0;
 
     //    quint32 nResult2 = binary._getCRC32_2(0, -1);
 
@@ -12769,14 +13434,16 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 quint32 XBinary::_getCRC32(QIODevice *pDevice, quint32 nInit, quint32 *pCRCTable, PDSTRUCT *pPdStruct)
 {
     quint32 nResult = nInit;
+    QPointer<QIODevice> guardedDevice(pDevice);
 
-    if (!pDevice || !pCRCTable) {
+    if (!guardedDevice || !pCRCTable) {
         return nResult;
     }
 
-    XBinary binary(pDevice);
+    XBinary binary(guardedDevice.data());
 
     OFFSETSIZE osRegion = binary.convertOffsetAndSize(0, -1);
+    if (!guardedDevice) return 0;
     qint64 nOffset = osRegion.nOffset;
     qint64 nSize = osRegion.nSize;
 
@@ -12789,14 +13456,14 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, quint32 nInit, quint32 *pCRCTable
         const qint32 nRequestedBufferSize = binary.getBufferSize(pPdStruct);
         if (nRequestedBufferSize <= 0) {
             XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
-            pDevice->reset();
+            if (guardedDevice) guardedDevice->reset();
             return 0;
         }
         const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
         char *pBuffer = new (std::nothrow) char[nBufferSize];
         if (!pBuffer) {
             XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
-            pDevice->reset();
+            if (guardedDevice) guardedDevice->reset();
             return 0;
         }
 
@@ -12805,6 +13472,10 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, quint32 nInit, quint32 *pCRCTable
 
             if (binary.read_array_process(nOffset, pBuffer, nTemp, pPdStruct) != nTemp) {
                 XBinary::setPdStructInfoString(pPdStruct, QObject::tr("Read error"));
+                nResult = 0;
+                break;
+            }
+            if (!guardedDevice) {
                 nResult = 0;
                 break;
             }
@@ -12820,7 +13491,9 @@ quint32 XBinary::_getCRC32(QIODevice *pDevice, quint32 nInit, quint32 *pCRCTable
         delete[] pBuffer;
     }
 
-    pDevice->reset();
+    if (!guardedDevice) return 0;
+    guardedDevice->reset();
+    if (!guardedDevice) return 0;
 
     XBinary::setPdStructFinished(pPdStruct, _nFreeIndex);
 
@@ -12893,7 +13566,9 @@ bool XBinary::checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDS
                                 (crcType == CRC_TYPE_CRC16) || (crcType == CRC_TYPE_CRC16ARC) ||
                                 (crcType == CRC_TYPE_RAR14);
 
-    if (!pDevice || !pDevice->isReadable() || !bExpectedCRCValid || !bSupportedType ||
+    QPointer<QIODevice> guardedDevice(pDevice);
+    if (!guardedDevice || !guardedDevice->isReadable() || !guardedDevice ||
+        !bExpectedCRCValid || !bSupportedType ||
         !isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
@@ -12901,11 +13576,14 @@ bool XBinary::checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDS
     // A checksum value of zero is valid for several algorithms (and for an
     // empty input).  Keep completion state separate from the numeric result so
     // that a read error or cancellation can never authenticate as CRC zero.
-    const qint64 nExpectedSize = pDevice->size();
+    const qint64 nExpectedSize = guardedDevice->size();
     const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
-    if ((nExpectedSize < 0) || (nRequestedBufferSize <= 0) || !pDevice->seek(0)) {
+    if (!guardedDevice || (nExpectedSize < 0) ||
+        (nRequestedBufferSize <= 0)) {
         return false;
     }
+    const bool bInitialSeek = guardedDevice->seek(0);
+    if (!guardedDevice || !bInitialSeek) return false;
 
     qint32 nBufferSize = nRequestedBufferSize;
 
@@ -12934,14 +13612,24 @@ bool XBinary::checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDS
     bool bCRCComputed = true;
 
     const qint32 nFreeIndex = XBinary::reservePdStructRecord(pPdStruct, nExpectedSize);
+    if (!guardedDevice) return false;
 
     while ((nProcessedSize < nExpectedSize) && isPdStructNotCanceled(pPdStruct)) {
         const qint64 nToRead = qMin((qint64)nBufferSize, nExpectedSize - nProcessedSize);
-        const qint64 nRead = pDevice->read(baBuffer.data(), nToRead);
+        if (!guardedDevice) {
+            bCRCComputed = false;
+            break;
+        }
+        const bool bPositioned = guardedDevice->seek(nProcessedSize);
+        if (!guardedDevice || !bPositioned) {
+            bCRCComputed = false;
+            break;
+        }
+        const qint64 nRead = guardedDevice->read(baBuffer.data(), nToRead);
 
         // Positive short reads are legal; zero before the declared extent,
         // negative reads, and oversized results are incomplete computations.
-        if ((nRead <= 0) || (nRead > nToRead)) {
+        if (!guardedDevice || (nRead <= 0) || (nRead > nToRead)) {
             setPdStructErrorString(pPdStruct, tr("Read error"));
             bCRCComputed = false;
             break;
@@ -12965,15 +13653,24 @@ bool XBinary::checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDS
 
         nProcessedSize += nRead;
         XBinary::setPdStructCurrent(pPdStruct, nFreeIndex, nProcessedSize);
+        if (!guardedDevice) {
+            bCRCComputed = false;
+            break;
+        }
     }
 
-    if (!isPdStructNotCanceled(pPdStruct) || (nProcessedSize != nExpectedSize) ||
-        (pDevice->size() != nExpectedSize)) {
+    qint64 nFinalSize = -1;
+    if (guardedDevice) nFinalSize = guardedDevice->size();
+    if (!guardedDevice || !isPdStructNotCanceled(pPdStruct) ||
+        (nProcessedSize != nExpectedSize) ||
+        (nFinalSize != nExpectedSize)) {
         bCRCComputed = false;
     }
 
     XBinary::setPdStructFinished(pPdStruct, nFreeIndex);
-    pDevice->reset();
+    if (!guardedDevice) return false;
+    const bool bReset = guardedDevice->reset();
+    if (!guardedDevice || !bReset) return false;
 
     if (!bCRCComputed) {
         return false;
@@ -13180,16 +13877,19 @@ double XBinary::getEntropy(const QString &sFileName, PDSTRUCT *pPdStruct)
 double XBinary::getEntropy(QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
     double dResult = 0;
+    QPointer<QIODevice> guardedDevice(pDevice);
 
-    if (!pDevice) {
+    if (!guardedDevice) {
         return dResult;
     }
 
-    XBinary binary(pDevice);
+    XBinary binary(guardedDevice.data());
 
     dResult = binary.getBinaryStatus(BSTATUS_ENTROPY, 0, -1, pPdStruct);
+    if (!guardedDevice) return 0;
 
-    pDevice->reset();
+    guardedDevice->reset();
+    if (!guardedDevice) return 0;
 
     return dResult;
 }
@@ -13202,12 +13902,15 @@ double XBinary::getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, P
 double XBinary::getEntropy(QIODevice *pDevice, qint32 nBufferSize, PDSTRUCT *pPdStruct)
 {
     double dResult = 0;
+    QPointer<QIODevice> guardedDevice(pDevice);
 
-    if (!pDevice || (nBufferSize <= 0)) return dResult;
+    if (!guardedDevice || (nBufferSize <= 0)) return dResult;
 
-    XBinary binary(pDevice);
+    XBinary binary(guardedDevice.data());
     dResult = binary.getBinaryStatus(BSTATUS_ENTROPY, 0, -1, pPdStruct, nBufferSize);
-    pDevice->reset();
+    if (!guardedDevice) return 0;
+    guardedDevice->reset();
+    if (!guardedDevice) return 0;
 
     return dResult;
 }
@@ -13478,6 +14181,7 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
     }
 
     if (!m_pDevice || !m_pDevice->isReadable() || !m_pDevice->isWritable() || m_pDevice->isSequential() ||
+        (m_pDevice->openMode() & (QIODevice::Append | QIODevice::Text)) ||
         !isPdStructNotCanceled(pPdStruct)) {
         return;
     }
@@ -13534,9 +14238,11 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
         qint64 nResult = 0;
         *pbValid = false;
 
-        if (!pDevice || !pData || (nPosition < 0) || (nLength < 0) || !pDevice->seek(nPosition)) {
+        if (!pDevice || !pData || (nPosition < 0) || (nLength < 0)) {
             return nResult;
         }
+
+        if ((nLength == 0) && !pDevice->seek(nPosition)) return nResult;
 
         while (nResult < nLength) {
             if (bHonorCancellation && !XBinary::isPdStructNotCanceled(pProgress)) {
@@ -13544,6 +14250,10 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
             }
 
             const qint64 nRemaining = nLength - nResult;
+            if ((nResult > (std::numeric_limits<qint64>::max)() - nPosition) ||
+                !pDevice->seek(nPosition + nResult)) {
+                return nResult;
+            }
             const qint64 nCurrent = pDevice->read(pData + nResult, nRemaining);
 
             if ((nCurrent <= 0) || (nCurrent > nRemaining)) {
@@ -13562,9 +14272,11 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
         qint64 nResult = 0;
         *pbValid = false;
 
-        if (!pDevice || !pData || (nPosition < 0) || (nLength < 0) || !pDevice->seek(nPosition)) {
+        if (!pDevice || !pData || (nPosition < 0) || (nLength < 0)) {
             return nResult;
         }
+
+        if ((nLength == 0) && !pDevice->seek(nPosition)) return nResult;
 
         while (nResult < nLength) {
             if (bHonorCancellation && !XBinary::isPdStructNotCanceled(pProgress)) {
@@ -13572,6 +14284,10 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
             }
 
             const qint64 nRemaining = nLength - nResult;
+            if ((nResult > (std::numeric_limits<qint64>::max)() - nPosition) ||
+                !pDevice->seek(nPosition + nResult)) {
+                return nResult;
+            }
             const qint64 nCurrent = pDevice->write(pData + nResult, nRemaining);
 
             if (nCurrent > nRemaining) {
@@ -13596,8 +14312,8 @@ void XBinary::_xor(quint8 nXorValue, qint64 nOffset, qint64 nSize, PDSTRUCT *pPd
     {
         QMutexLocker locker(m_pReadWriteMutex);
         const qint64 nOriginalPosition = m_pDevice->pos();
-        QBuffer *pQBuffer = qobject_cast<QBuffer *>(m_pDevice);
-        QFileDevice *pFileDevice = qobject_cast<QFileDevice *>(m_pDevice);
+        QBuffer *pQBuffer = qobject_cast<QBuffer *>(m_pDevice.data());
+        QFileDevice *pFileDevice = qobject_cast<QFileDevice *>(m_pDevice.data());
         QByteArray baQBufferOriginal;
         bool bHaveQBufferSnapshot = false;
         qint64 nCommitted = 0;
@@ -13801,6 +14517,16 @@ quint32 XBinary::getStringCustomCRC32(const QString &sString)
 QIODevice *XBinary::getDevice()
 {
     return m_pDevice.data();
+}
+
+quint64 XBinary::getDeviceGeneration() const
+{
+    return m_nDeviceGeneration;
+}
+
+bool XBinary::isDeviceReplacementAllowed() const
+{
+    return true;
 }
 
 bool XBinary::isValid(PDSTRUCT *pPdStruct)
@@ -14056,7 +14782,7 @@ bool XBinary::compareSignatureStrings(const QString &sBaseSignature, const QStri
 void XBinary::_errorMessage(const QString &sErrorMessage, PDSTRUCT *pPdStruct)
 {
 #ifdef QT_DEBUG
-    QFile *pFile = dynamic_cast<QFile *>(m_pDevice);
+    QFile *pFile = dynamic_cast<QFile *>(m_pDevice.data());
 
     if (pFile) {
         qDebug("Filename: %s", pFile->fileName().toUtf8().data());
@@ -14980,14 +15706,15 @@ XBinary::UNICODE_TYPE XBinary::getUnicodeType(QByteArray *pbaData)
 
 bool XBinary::tryToOpen(QIODevice *pDevice)
 {
-    if (!pDevice) {
+    QPointer<QIODevice> guardedDevice(pDevice);
+    if (!guardedDevice) {
         return false;
     }
 
     bool bResult = false;
     bool bCheck = false;
 
-    QFile *pFile = dynamic_cast<QFile *>(pDevice);
+    QFile *pFile = dynamic_cast<QFile *>(guardedDevice.data());
 
     if (pFile) {
         bCheck = (pFile->fileName() != "");
@@ -14996,14 +15723,15 @@ bool XBinary::tryToOpen(QIODevice *pDevice)
     }
 
     if (bCheck) {
-        bResult = pDevice->open(QIODevice::ReadWrite);
+        bResult = guardedDevice->open(QIODevice::ReadWrite);
 
+        if (!guardedDevice) return false;
         if (!bResult) {
-            bResult = pDevice->open(QIODevice::ReadOnly);
+            bResult = guardedDevice->open(QIODevice::ReadOnly);
         }
     }
 
-    return bResult;
+    return guardedDevice && bResult;
 }
 
 bool XBinary::checkOffsetSize(XBinary::OFFSETSIZE osRegion)
@@ -15067,21 +15795,24 @@ bool XBinary::isResizeEnable(QIODevice *pDevice)
 
 bool XBinary::resize(QIODevice *pDevice, qint64 nSize)
 {
-    if (!pDevice || (nSize < 0)) {
+    QPointer<QIODevice> guardedDevice(pDevice);
+    if (!guardedDevice || (nSize < 0)) {
         return false;
     }
 
-    if (QBuffer *pBuffer = qobject_cast<QBuffer *>(pDevice)) {
+    if (QBuffer *pBuffer = qobject_cast<QBuffer *>(guardedDevice.data())) {
         if (nSize > (std::numeric_limits<qint32>::max)()) {
             return false;
         }
 
         pBuffer->buffer().resize((qint32)nSize);
-        return true;
+        return guardedDevice;
     }
 
-    if (QFileDevice *pFileDevice = qobject_cast<QFileDevice *>(pDevice)) {
-        return pFileDevice->resize(nSize);
+    if (QFileDevice *pFileDevice =
+            qobject_cast<QFileDevice *>(guardedDevice.data())) {
+        const bool bResult = pFileDevice->resize(nSize);
+        return guardedDevice && bResult;
     }
 
     return false;
@@ -15639,7 +16370,7 @@ bool XBinary::addOverlay(char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct)
 
     // resize() operates on the device directly; refresh the cached extent and
     // invalidate any format-specific parse state before returning to callers.
-    setDevice(m_pDevice);
+    setDevice(m_pDevice.data());
 
     return bResult;
 }
@@ -15660,7 +16391,7 @@ bool XBinary::addOverlay(const QString &sFileName, PDSTRUCT *pPdStruct)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        const QFile *pDestinationFile = dynamic_cast<const QFile *>(m_pDevice);
+        const QFile *pDestinationFile = dynamic_cast<const QFile *>(m_pDevice.data());
         if (pDestinationFile) {
             QFileInfo destinationInfo(pDestinationFile->fileName());
             QFileInfo sourceInfo(file.fileName());
@@ -15697,7 +16428,7 @@ bool XBinary::addOverlay(const QString &sFileName, PDSTRUCT *pPdStruct)
             resize(m_pDevice, nOldSize);
         }
 
-        setDevice(m_pDevice);
+        setDevice(m_pDevice.data());
         file.close();
         return bResult;
     }
@@ -19670,7 +20401,8 @@ XBinary::ARCHIVERECORD XBinary::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdS
 
 bool XBinary::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct)
 {
-    if ((!pState) || (!pDevice)) {
+    QPointer<QIODevice> guardedDevice(pDevice);
+    if ((!pState) || !guardedDevice) {
         return false;
     }
 
@@ -19678,7 +20410,8 @@ bool XBinary::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *
         return false;
     }
 
-    return unpack(pDevice, pPdStruct);
+    const bool bResult = unpack(guardedDevice.data(), pPdStruct);
+    return guardedDevice && bResult;
 }
 
 bool XBinary::writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const char *pData, qint64 nSize, PDSTRUCT *pPdStruct)
@@ -19691,39 +20424,51 @@ bool XBinary::writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const ch
     // Never leave a successful preceding record's byte count visible.
     pState->nCurrentOffset = 0;
 
-    if (!pDevice || !pDevice->isWritable() || (nSize < 0) || ((nSize > 0) && !pData) || !isPdStructNotCanceled(pPdStruct)) {
+    if (!pDevice ||
+        (nSize < 0) || ((nSize > 0) && !pData) ||
+        !isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
 
-    const bool bSeekableOutput = !pDevice->isSequential();
+    QPointer<QIODevice> guardedOutput(pDevice);
+    const bool bWritable = guardedOutput->isWritable();
+    if (!guardedOutput || !bWritable) return false;
+    const bool bSequential = guardedOutput->isSequential();
+    if (!guardedOutput || bSequential) return false;
+    const QIODevice::OpenMode openMode = guardedOutput->openMode();
+    if (!guardedOutput ||
+        (openMode & (QIODevice::Append | QIODevice::Text))) return false;
+    const bool bSeekableOutput = true;
 
     // Exact replacement and rollback both require truncation.  A custom
     // random-access QIODevice may implement seek()/write() but provide no
     // resize operation; reject it before the first byte instead of promising
     // rollback and leaving a partial result on failure.
-    if (bSeekableOutput && !isResizeEnable(pDevice)) {
+    if (!isResizeEnable(pDevice)) {
         return false;
     }
-    auto failOutput = [&]() -> bool {
-        if (bSeekableOutput) {
-            resize(pDevice, 0);
-            pDevice->seek(0);
+    auto failOutput = [&guardedOutput, bSeekableOutput, pState]() -> bool {
+        if (guardedOutput && bSeekableOutput) {
+            resize(guardedOutput.data(), 0);
+            if (guardedOutput) guardedOutput->seek(0);
         }
         pState->nCurrentOffset = 0;
         return false;
     };
 
-    if (bSeekableOutput) {
-        if (!pDevice->seek(0)) {
-            return false;
-        }
+    if (!guardedOutput) return false;
+    const bool bInitialSeek = guardedOutput->seek(0);
+    if (!guardedOutput || !bInitialSeek) return false;
 
-        // A reused seekable output must not retain a tail from the preceding
-        // record.  Refuse devices that cannot provide the required truncate
-        // operation instead of reporting a corrupt output as successful.
-        if ((pDevice->size() != 0) && (!resize(pDevice, 0) || !pDevice->seek(0))) {
-            return false;
-        }
+    // A reused seekable output must not retain a tail from the preceding
+    // record.  Refuse devices that cannot provide the required truncate
+    // operation instead of reporting a corrupt output as successful.
+    const qint64 nOldSize = guardedOutput->size();
+    if (!guardedOutput) return false;
+    if (nOldSize != 0) {
+        if (!resize(guardedOutput.data(), 0) || !guardedOutput) return false;
+        const bool bSeeked = guardedOutput->seek(0);
+        if (!guardedOutput || !bSeeked) return false;
     }
 
     qint64 nWrittenTotal = 0;
@@ -19734,11 +20479,16 @@ bool XBinary::writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const ch
         }
 
         const qint64 nChunkSize = qMin<qint64>(1ll << 20, nSize - nWrittenTotal);
-        const qint64 nWritten = pDevice->write(pData + nWrittenTotal, nChunkSize);
+        if (!guardedOutput) return failOutput();
+        const bool bSeeked = guardedOutput->seek(nWrittenTotal);
+        if (!guardedOutput || !bSeeked) return failOutput();
+        const qint64 nWritten = guardedOutput->write(
+            pData + nWrittenTotal, nChunkSize);
 
         // Positive short writes are legal for QIODevice.  Keep draining the
         // requested data and reject only errors, stalls, or impossible counts.
-        if ((nWritten <= 0) || (nWritten > nChunkSize)) {
+        if (!guardedOutput || (nWritten <= 0) ||
+            (nWritten > nChunkSize)) {
             return failOutput();
         }
 
@@ -19749,6 +20499,10 @@ bool XBinary::writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const ch
     if (!isPdStructNotCanceled(pPdStruct)) {
         return failOutput();
     }
+
+    if (!guardedOutput) return failOutput();
+    const bool bFinalSeek = guardedOutput->seek(nWrittenTotal);
+    if (!guardedOutput || !bFinalSeek) return failOutput();
 
     return true;
 }
@@ -19848,9 +20602,31 @@ QVariant XBinary::calculateHash(const QString &sFileName, PDSTRUCT *pPdStruct)
 
 bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
-    bool bResult = false;
+    QPointer<XBinary> guardedThis(this);
+    QPointer<QIODevice> guardedOutput(pOutDevice);
+    QPointer<QIODevice> guardedSource(getDevice());
+    const auto isOutputUsable = [&guardedOutput]() -> bool {
+        if (!guardedOutput) return false;
+        const bool bOpen = guardedOutput->isOpen();
+        if (!guardedOutput || !bOpen) return false;
+        const bool bWritable = guardedOutput->isWritable();
+        if (!guardedOutput || !bWritable) return false;
+        const bool bSequential = guardedOutput->isSequential();
+        if (!guardedOutput || bSequential) return false;
+        const QIODevice::OpenMode openMode = guardedOutput->openMode();
+        return guardedOutput &&
+               !(openMode & (QIODevice::Append | QIODevice::Text));
+    };
 
-    if (!pOutDevice || !pOutDevice->isWritable()) {
+    // Publishing a verified stream is an exact-replacement transaction.  A
+    // sequential or non-truncatable destination cannot be rolled back, and an
+    // aliased destination could overwrite the archive before decoding ends.
+    if (!guardedThis || !isOutputUsable() || !guardedThis ||
+        !isResizeEnable(guardedOutput.data()) || !guardedThis ||
+        !guardedOutput ||
+        (guardedSource &&
+         devicesAlias(guardedSource.data(), guardedOutput.data())) ||
+        !guardedThis || !guardedOutput) {
         return false;
     }
 
@@ -19865,143 +20641,230 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
     }
 
     UNPACK_STATE state = {};
+    const bool bInitialized = guardedThis &&
+        guardedThis->initUnpack(&state, mapProperties, pPdStruct);
+    if (!guardedThis || !bInitialized) return false;
 
-    if (initUnpack(&state, mapProperties, pPdStruct)) {
-        state.mapUnpackProperties = mapProperties;
+    bool bResult = true;
+    state.mapUnpackProperties = mapProperties;
+    const qint32 nInitialIndex = state.nCurrentIndex;
+    const qint32 nNumberOfRecords = state.nNumberOfRecords;
+    if ((nInitialIndex != 0) || (nNumberOfRecords <= 0) ||
+        (state.nCurrentIndex >= state.nNumberOfRecords) ||
+        !isOutputUsable() || !isPdStructNotCanceled(pPdStruct)) {
+        bResult = false;
+    }
 
-        if ((state.nCurrentIndex < 0) || (state.nNumberOfRecords <= 0) ||
-            (state.nCurrentIndex >= state.nNumberOfRecords) || !isPdStructNotCanceled(pPdStruct)) {
-            finishUnpack(&state, nullptr);
-            return false;
+    ARCHIVERECORD record = {};
+    if (bResult) {
+        record = guardedThis->infoCurrent(&state, pPdStruct);
+        if (!guardedThis) bResult = false;
+    }
+    if (bResult && (!guardedThis || !isOutputUsable() || !guardedThis ||
+                    record.mapProperties.isEmpty() ||
+                    (record.nStreamOffset < 0) ||
+                    (record.nStreamSize < 0) ||
+                    (state.nCurrentIndex != nInitialIndex) ||
+                    (state.nNumberOfRecords != nNumberOfRecords) ||
+                    !isPdStructNotCanceled(pPdStruct))) {
+        bResult = false;
+    }
+
+    const CRC_TYPE crcType = (CRC_TYPE)record.mapProperties
+        .value(FPART_PROP_CRC_TYPE, CRC_TYPE_UNKNOWN).toUInt();
+    const bool bCheckCRC =
+        isUnpackCRCEnabled(mapProperties, crcType) &&
+        (crcType != CRC_TYPE_UNKNOWN) &&
+        record.mapProperties.contains(FPART_PROP_RESULTCRC);
+    const bool bHasExpectedSize = record.mapProperties.contains(
+        FPART_PROP_UNCOMPRESSEDSIZE);
+    const qint64 nExpectedSize = bHasExpectedSize
+        ? record.mapProperties.value(FPART_PROP_UNCOMPRESSEDSIZE).toLongLong()
+        : -1;
+    if (bResult && bHasExpectedSize && (nExpectedSize < 0)) bResult = false;
+    QIODevice *pWorkDevice = nullptr;
+    if (bResult && (nExpectedSize >= 0)) {
+        pWorkDevice = createFileBuffer(nExpectedSize, pPdStruct);
+        if (!guardedThis) bResult = false;
+    } else if (bResult) {
+        // Unknown-size streams (notably XZ) must not be forced into a QBuffer
+        // merely because their size is absent.  A growable temporary file
+        // retains large-stream support while keeping publication private.
+        QTemporaryFile *pTemporaryFile =
+            new (std::nothrow) QTemporaryFile();
+        if (pTemporaryFile && pTemporaryFile->open() &&
+            isPdStructNotCanceled(pPdStruct)) {
+            pWorkDevice = pTemporaryFile;
+        } else {
+            delete pTemporaryFile;
         }
+        if (!guardedThis) bResult = false;
+    }
+    if (bResult && !pWorkDevice) bResult = false;
+    QPointer<QIODevice> guardedWorkDevice(pWorkDevice);
 
-        ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
-        if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
-            (state.nNumberOfRecords <= 0) || (state.nCurrentIndex >= state.nNumberOfRecords)) {
-            finishUnpack(&state, nullptr);
-            return false;
+    // Always decode to private storage.  CRC failure, finish failure, source
+    // mutation, and cancellation therefore happen before the caller-owned
+    // destination is changed.
+    if (bResult) {
+        bResult = guardedThis->unpackCurrent(
+            &state, guardedWorkDevice.data(), pPdStruct);
+        if (!guardedThis || !guardedWorkDevice ||
+            (state.nCurrentIndex != nInitialIndex) ||
+            (state.nNumberOfRecords != nNumberOfRecords)) {
+            bResult = false;
         }
-        CRC_TYPE crcType = (CRC_TYPE)record.mapProperties.value(FPART_PROP_CRC_TYPE, CRC_TYPE_UNKNOWN).toUInt();
-        bool bCheckCRC = isUnpackCRCEnabled(mapProperties, crcType) && (crcType != CRC_TYPE_UNKNOWN) && record.mapProperties.contains(FPART_PROP_RESULTCRC);
-        QIODevice *pWorkDevice = pOutDevice;
-        QIODevice *pCRCBuffer = nullptr;
-
-        // Decoder-level checking requires read access.  Preserve support for a
-        // normal WriteOnly QFile by unpacking into a bounded memory/temp-file
-        // buffer, checking it, and copying the verified bytes to the caller.
-        if (bCheckCRC && !pOutDevice->isReadable()) {
-            qint64 nExpectedSize = record.mapProperties.value(FPART_PROP_UNCOMPRESSEDSIZE, (qint64)0).toLongLong();
-            pCRCBuffer = createFileBuffer(qMax((qint64)0, nExpectedSize), pPdStruct);
-            pWorkDevice = pCRCBuffer;
-        }
-
-        if (pWorkDevice) {
-            bResult = unpackCurrent(&state, pWorkDevice, pPdStruct);
-
-            if (bResult && bCheckCRC) {
-                if (!pWorkDevice->isReadable() || !pWorkDevice->seek(0)) {
-                    bResult = false;
-                    setPdStructErrorString(pPdStruct, tr("CRC check requires a readable output device"));
-                } else if (!checkCRC(pWorkDevice, crcType, record.mapProperties.value(FPART_PROP_RESULTCRC), pPdStruct)) {
-                    bResult = false;
-                    setPdStructErrorString(pPdStruct, tr("Invalid CRC"));
-                }
+    }
+    if (bResult && bCheckCRC) {
+        const bool bReadable = guardedWorkDevice->isReadable();
+        if (!guardedThis || !guardedWorkDevice || !bReadable) {
+            bResult = false;
+            setPdStructErrorString(
+                pPdStruct, tr("CRC check requires a readable output device"));
+        } else {
+            const bool bSeeked = guardedWorkDevice->seek(0);
+            if (!guardedThis || !guardedWorkDevice || !bSeeked) {
+                bResult = false;
+                setPdStructErrorString(
+                    pPdStruct,
+                    tr("CRC check requires a readable output device"));
+            } else if (!checkCRC(
+                           guardedWorkDevice.data(), crcType,
+                           record.mapProperties.value(FPART_PROP_RESULTCRC),
+                           pPdStruct) || !guardedThis ||
+                       !guardedWorkDevice) {
+                bResult = false;
+                setPdStructErrorString(pPdStruct, tr("Invalid CRC"));
             }
-
-            if (bResult && pCRCBuffer) {
-                bResult = pCRCBuffer->seek(0);
-
-                if (bResult && !pOutDevice->isSequential()) {
-                    qint64 nVerifiedSize = pCRCBuffer->size();
-
-                    if (QBuffer *pBuffer = qobject_cast<QBuffer *>(pOutDevice)) {
-                        pBuffer->buffer().clear();
-                        bResult = pBuffer->seek(0);
-                    } else if (QFileDevice *pFileDevice = qobject_cast<QFileDevice *>(pOutDevice)) {
-                        bResult = pFileDevice->resize(0) && pFileDevice->seek(0);
-                    } else {
-                        // QIODevice has no generic truncate operation. Avoid
-                        // reporting success when an older tail would survive.
-                        bResult = ((pOutDevice->size() < 0) || (pOutDevice->size() <= nVerifiedSize)) && pOutDevice->seek(0);
-                    }
-                }
-
-                const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
-                QByteArray baBuffer;
-                if (nRequestedBufferSize <= 0) {
-                    bResult = false;
-                } else {
-                    const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
-                    try {
-                        baBuffer.resize(nBufferSize);
-                    } catch (const std::bad_alloc &) {
-                        bResult = false;
-                    }
-                    if (baBuffer.size() != nBufferSize) {
-                        bResult = false;
-                    }
-                }
-                qint64 nRemaining = pCRCBuffer->size();
-                if (nRemaining < 0) {
-                    bResult = false;
-                }
-
-                while (bResult && (nRemaining > 0) && isPdStructNotCanceled(pPdStruct)) {
-                    qint64 nChunkSize = qMin(nRemaining, (qint64)baBuffer.size());
-                    qint64 nRead = pCRCBuffer->read(baBuffer.data(), nChunkSize);
-
-                    if (nRead != nChunkSize) {
-                        bResult = false;
-                        break;
-                    }
-
-                    qint64 nWrittenTotal = 0;
-                    while (bResult && (nWrittenTotal < nRead) && isPdStructNotCanceled(pPdStruct)) {
-                        qint64 nWritten = pOutDevice->write(baBuffer.constData() + nWrittenTotal, nRead - nWrittenTotal);
-                        if ((nWritten <= 0) || (nWritten > (nRead - nWrittenTotal))) {
-                            bResult = false;
-                            break;
-                        }
-                        nWrittenTotal += nWritten;
-                    }
-
-                    if (nWrittenTotal != nRead) {
-                        bResult = false;
-                        break;
-                    }
-
-                    nRemaining -= nRead;
-                }
-
-                if (!isPdStructNotCanceled(pPdStruct)) {
-                    bResult = false;
-                }
-
-                if (!bResult) {
-                    if (!pOutDevice->isSequential()) {
-                        resize(pOutDevice, 0);
-                        pOutDevice->seek(0);
-                    }
-                    setPdStructErrorString(pPdStruct, tr("Cannot write unpacked output"));
-                }
-            }
-        }
-
-        freeFileBuffer(&pCRCBuffer);
-
-        const bool bFinished = finishUnpack(&state, nullptr);
-        bResult = bResult && bFinished && isPdStructNotCanceled(pPdStruct);
-        if (!bResult && !pOutDevice->isSequential()) {
-            resize(pOutDevice, 0);
-            pOutDevice->seek(0);
         }
     }
 
+    bool bFinished = false;
+    if (guardedThis) {
+        bFinished = guardedThis->finishUnpack(&state, nullptr);
+        if (!guardedThis) bFinished = false;
+    }
+    bResult = bResult && bFinished && guardedThis && guardedWorkDevice &&
+              isOutputUsable() && guardedThis &&
+              isPdStructNotCanceled(pPdStruct);
+
+    const auto rollbackOutput = [&guardedOutput]() {
+        if (!guardedOutput) return;
+        const bool bOpen = guardedOutput->isOpen();
+        if (!guardedOutput || !bOpen) return;
+        const bool bSequential = guardedOutput->isSequential();
+        if (!guardedOutput || bSequential) return;
+        XBinary::resize(guardedOutput.data(), 0);
+        if (guardedOutput) guardedOutput->seek(0);
+    };
+
+    if (bResult) {
+        const bool bWorkSeeked = guardedWorkDevice->seek(0);
+        bResult = guardedThis && guardedWorkDevice && bWorkSeeked &&
+                  resize(guardedOutput.data(), 0) && guardedThis &&
+                  guardedOutput;
+        if (bResult) {
+            const bool bOutputSeeked = guardedOutput->seek(0);
+            bResult = guardedThis && guardedOutput && bOutputSeeked;
+        }
+
+        const qint32 nRequestedBufferSize = getBufferSize(pPdStruct);
+        QByteArray baBuffer;
+        if (bResult && (nRequestedBufferSize > 0)) {
+            const qint32 nBufferSize = qBound(
+                (qint32)0x1000, nRequestedBufferSize,
+                (qint32)0x100000);
+            try {
+                baBuffer.resize(nBufferSize);
+            } catch (const std::bad_alloc &) {
+                bResult = false;
+            }
+            if (baBuffer.size() != nBufferSize) bResult = false;
+        } else {
+            bResult = false;
+        }
+
+        qint64 nWorkSize = -1;
+        if (bResult) {
+            nWorkSize = guardedWorkDevice->size();
+            if (!guardedThis || !guardedWorkDevice || (nWorkSize < 0))
+                bResult = false;
+        }
+        qint64 nPublished = 0;
+        while (bResult && (nPublished < nWorkSize) &&
+               isPdStructNotCanceled(pPdStruct)) {
+            const qint64 nChunkSize = qMin(
+                nWorkSize - nPublished, (qint64)baBuffer.size());
+            const bool bWorkChunkSeeked = guardedWorkDevice->seek(nPublished);
+            if (!guardedThis || !guardedWorkDevice || !bWorkChunkSeeked) {
+                bResult = false;
+                break;
+            }
+            const qint64 nRead = guardedWorkDevice->read(
+                baBuffer.data(), nChunkSize);
+            if (!guardedThis || !guardedWorkDevice || (nRead <= 0) ||
+                (nRead > nChunkSize)) {
+                bResult = false;
+                break;
+            }
+
+            qint64 nChunkWritten = 0;
+            while (bResult && (nChunkWritten < nRead) &&
+                   isPdStructNotCanceled(pPdStruct)) {
+                if (!guardedThis || !isOutputUsable() || !guardedThis) {
+                    bResult = false;
+                    break;
+                }
+                const bool bSought = guardedOutput->seek(
+                    nPublished + nChunkWritten);
+                if (!guardedThis || !guardedOutput || !bSought) {
+                    bResult = false;
+                    break;
+                }
+                const qint64 nWritten = guardedOutput->write(
+                    baBuffer.constData() + nChunkWritten,
+                    nRead - nChunkWritten);
+                if (!guardedThis || !guardedOutput || (nWritten <= 0) ||
+                    (nWritten > nRead - nChunkWritten)) {
+                    bResult = false;
+                    break;
+                }
+                nChunkWritten += nWritten;
+            }
+            if (nChunkWritten != nRead) bResult = false;
+            nPublished += nChunkWritten;
+        }
+
+        bResult = bResult && guardedThis && guardedWorkDevice &&
+                  (nPublished == nWorkSize) && isOutputUsable() &&
+                  guardedThis;
+        qint64 nPublishedSize = -1;
+        if (bResult) {
+            nPublishedSize = guardedOutput->size();
+            bResult = guardedThis && guardedOutput &&
+                      (nPublishedSize == nWorkSize);
+        }
+        if (bResult) {
+            const bool bSought = guardedOutput->seek(nWorkSize);
+            bResult = guardedThis && guardedOutput && bSought;
+        }
+        bResult = bResult && guardedThis &&
+                  isPdStructNotCanceled(pPdStruct);
+        if (!bResult) {
+            rollbackOutput();
+            setPdStructErrorString(
+                pPdStruct, tr("Cannot write unpacked output"));
+        }
+    }
+
+    if (!guardedWorkDevice) pWorkDevice = nullptr;
+    freeFileBuffer(&pWorkDevice);
     return bResult;
 }
 
 bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
+    QPointer<XBinary> guardedThis(this);
     bool bResult = false;
 
     PDSTRUCT pdStructEmpty = createPdStruct();
@@ -20218,27 +21081,44 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
         UNPACK_STATE state = {};
 
-        if (initUnpack(&state, mapEffectiveProperties, pPdStruct)) {
+        const bool bInitialized = guardedThis &&
+            guardedThis->initUnpack(&state, mapEffectiveProperties,
+                                    pPdStruct);
+        if (guardedThis && bInitialized) {
+            const qint32 nNumberOfRecords = state.nNumberOfRecords;
             state.mapUnpackProperties = mapEffectiveProperties;
 
-            if ((state.nCurrentIndex < 0) || (state.nNumberOfRecords < 0) ||
-                (state.nCurrentIndex > state.nNumberOfRecords)) {
-                finishUnpack(&state, nullptr);
+            if ((state.nCurrentIndex != 0) || (nNumberOfRecords < 0) ||
+                (state.nCurrentIndex > nNumberOfRecords)) {
+                if (guardedThis)
+                    guardedThis->finishUnpack(&state, nullptr);
                 return false;
             }
-            if (state.nCurrentIndex == state.nNumberOfRecords) {
-                return finishUnpack(&state, nullptr) && isPdStructNotCanceled(pPdStruct);
+            if (state.nCurrentIndex == nNumberOfRecords) {
+                const bool bFinished = guardedThis->finishUnpack(
+                    &state, nullptr);
+                return guardedThis && bFinished &&
+                       isPdStructNotCanceled(pPdStruct);
             }
 
             bResult = true;
             bool bContinue = false;
 
             do {
-                if (isPdStructNotCanceled(pPdStruct)) {
-                    ARCHIVERECORD record = infoCurrent(&state, pPdStruct);
+                if (guardedThis && isPdStructNotCanceled(pPdStruct)) {
+                    const qint32 nExpectedIndex = state.nCurrentIndex;
+                    ARCHIVERECORD record = guardedThis->infoCurrent(
+                        &state, pPdStruct);
 
-                    if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
-                        (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+                    if (!guardedThis ||
+                        !isPdStructNotCanceled(pPdStruct) ||
+                        record.mapProperties.isEmpty() ||
+                        (record.nStreamOffset < 0) ||
+                        (record.nStreamSize < 0) ||
+                        (state.nCurrentIndex < 0) ||
+                        (state.nCurrentIndex != nExpectedIndex) ||
+                        (state.nNumberOfRecords != nNumberOfRecords) ||
+                        (state.nCurrentIndex >= nNumberOfRecords)) {
                         bResult = false;
                         break;
                     }
@@ -20382,7 +21262,15 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                 QTemporaryFile temporaryFile(QDir(sDirectoryPath).filePath(QLatin1String(".xunpack-XXXXXX")));
 
                                 if (temporaryFile.open()) {
-                                    if (!unpackCurrent(&state, &temporaryFile, pPdStruct)) {
+                                    const bool bUnpacked = guardedThis &&
+                                        guardedThis->unpackCurrent(
+                                            &state, &temporaryFile,
+                                            pPdStruct);
+                                    if (!guardedThis || !bUnpacked ||
+                                        (state.nCurrentIndex !=
+                                         nExpectedIndex) ||
+                                        (state.nNumberOfRecords !=
+                                         nNumberOfRecords)) {
 #ifdef QT_DEBUG
                                         qDebug() << "Cannot unpack" << sFilePath;
 #endif
@@ -20407,7 +21295,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                         if (temporaryFile.seek(0)) {
                                             QVariant varCRC = record.mapProperties.value(XBinary::FPART_PROP_RESULTCRC, 0);
                                             bool bCRCOk = checkCRC(&temporaryFile, crcType, varCRC, pPdStruct);
-                                            bResult = bCRCOk;
+                                            bResult = guardedThis && bCRCOk;
 #ifdef QT_DEBUG
                                             if (!bCRCOk) {
                                                 qDebug() << "CRC is false for" << sFilePath << ": stored=" << QString::number(varCRC.toUInt(), 16);
@@ -20552,31 +21440,39 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                 }
 
                 const qint32 nPreviousIndex = state.nCurrentIndex;
-                bContinue = moveToNext(&state, pPdStruct);
+                bContinue = guardedThis &&
+                    guardedThis->moveToNext(&state, pPdStruct);
 
-                if (!isPdStructNotCanceled(pPdStruct) || (state.nCurrentIndex < 0) ||
-                    (state.nNumberOfRecords < 0) || (state.nCurrentIndex > state.nNumberOfRecords)) {
+                if (!guardedThis || !isPdStructNotCanceled(pPdStruct) ||
+                    (state.nCurrentIndex < 0) ||
+                    (state.nNumberOfRecords != nNumberOfRecords) ||
+                    (state.nCurrentIndex > nNumberOfRecords)) {
                     bResult = false;
                     break;
                 }
                 if (bContinue) {
-                    if (state.nCurrentIndex <= nPreviousIndex) {
+                    if ((state.nCurrentIndex != (nPreviousIndex + 1)) ||
+                        (state.nCurrentIndex >= nNumberOfRecords)) {
                         bResult = false;
                         break;
                     }
-                } else if ((nPreviousIndex + 1) < state.nNumberOfRecords) {
+                } else if (((nPreviousIndex + 1) != nNumberOfRecords) ||
+                           ((state.nCurrentIndex != nPreviousIndex) &&
+                            (state.nCurrentIndex != nNumberOfRecords))) {
                     bResult = false;
                     break;
                 }
 
             } while (bContinue);
 
-            const bool bFinished = finishUnpack(&state, nullptr);
-            bResult = bResult && bFinished && isPdStructNotCanceled(pPdStruct);
+            const bool bFinished = guardedThis &&
+                guardedThis->finishUnpack(&state, nullptr);
+            bResult = bResult && guardedThis && bFinished &&
+                      isPdStructNotCanceled(pPdStruct);
         }
     }
 
-    return bResult;
+    return guardedThis && bResult;
 }
 
 bool XBinary::initFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
@@ -20614,7 +21510,9 @@ XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *p
         return result;
     }
 
-    qint64 nTotalSize = pDevice->size();
+    QPointer<QIODevice> guardedDevice(pDevice);
+    qint64 nTotalSize = guardedDevice->size();
+    if (!guardedDevice || (nTotalSize < 0)) return result;
     qint64 nStartOffset = pState->nCurrentOffset;
     qint64 nSearchSize = -1;
 
@@ -20633,6 +21531,7 @@ XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *p
 
             if (!sSignature.isEmpty()) {
                 qint64 nCandidate = find_signature(nullptr, nStartOffset, nSearchSize, sSignature, nullptr, pPdStruct);
+                if (!guardedDevice) return result;
 
                 if ((nCandidate != -1) && ((nFoundOffset == -1) || (nCandidate < nFoundOffset))) {
                     nFoundOffset = nCandidate;
@@ -20648,7 +21547,7 @@ XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *p
         FT fileType = FT_UNKNOWN;
 
         {
-            SubDevice subdevice(pDevice, nFoundOffset, -1);
+            SubDevice subdevice(guardedDevice.data(), nFoundOffset, -1);
 
             if (subdevice.open(QIODevice::ReadOnly)) {
                 XBinary *pInstance = createInstance(&subdevice);
@@ -20666,6 +21565,7 @@ XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *p
                 subdevice.close();
             }
         }
+        if (!guardedDevice) return result;
 
         if (nEmbeddedSize > 0) {
             if ((pState->nSize > 0) && ((nFoundOffset + nEmbeddedSize) > (pState->nStartOffset + pState->nSize))) {
@@ -20679,7 +21579,7 @@ XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *p
                 continue;
             }
 
-            SubDevice subdevice(pDevice, nFoundOffset, nEmbeddedSize);
+            SubDevice subdevice(guardedDevice.data(), nFoundOffset, nEmbeddedSize);
 
             if (subdevice.open(QIODevice::ReadOnly)) {
                 XBinary *pInstance = createInstance(&subdevice);
@@ -20690,7 +21590,7 @@ XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *p
                     delete pInstance;
                     pInstance = nullptr;
 
-                    if (formatInfo.bIsValid) {
+                    if (guardedDevice && formatInfo.bIsValid) {
                         result.bIsValid = true;
                         result.fileTYPE = (fileType != FT_UNKNOWN) ? fileType : formatInfo.fileType;
                         result.nOffset = nFoundOffset;
@@ -20701,13 +21601,15 @@ XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *p
                         pState->nCurrentOffset = nFoundOffset + nEmbeddedSize;
 
                         subdevice.close();
-                        return result;
+                        if (guardedDevice) return result;
+                        return FFSEARCH_INFO();
                     }
                 }
 
                 subdevice.close();
             }
         }
+        if (!guardedDevice) return FFSEARCH_INFO();
 
         nStartOffset = nFoundOffset + 1;
 
