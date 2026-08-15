@@ -403,7 +403,8 @@ public:
         UNPACK_PROP_CHECKCRC16,      // Check format-designated CRC-16 values
         UNPACK_PROP_CHECKCRC16ARC,   // Check CRC-16/ARC values
         UNPACK_PROP_CHECKADLER32,    // Check Adler-32 values
-        UNPACK_PROP_CHECKRAR14       // Check the RAR 1.4 rotate/add checksum
+        UNPACK_PROP_CHECKRAR14,      // Check the RAR 1.4 rotate/add checksum
+        UNPACK_PROP_METADATAONLY
     };
 
     virtual QMap<UNPACK_PROP, QVariant> getDefaultUnpackProperties();
