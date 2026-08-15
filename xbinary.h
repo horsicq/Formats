@@ -606,6 +606,7 @@ public:
         FT_TAR_Z,
         FT_TAR_ZSTD,
         FT_ARCHIVE,
+        FT_FLAG_ARCHIVES,
         FT_CAB,
         FT_DEX,
         FT_DOCUMENT,
