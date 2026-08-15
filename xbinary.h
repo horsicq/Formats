@@ -608,6 +608,7 @@ public:
         FT_ARCHIVE,
         FT_FLAG_ARCHIVES,
         FT_FLAG_FORMATS,
+        FT_FLAG_IMAGES,
         FT_CAB,
         FT_DEX,
         FT_DOCUMENT,
