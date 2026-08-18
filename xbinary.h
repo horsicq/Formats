@@ -278,7 +278,16 @@ public:
         HANDLE_METHOD_ZOO_LZD,       // ZOO method 1: LZD (13-bit LZW)
         HANDLE_METHOD_ZOO_LZH,       // ZOO method 2: LZH (lh5-compatible)
         HANDLE_METHOD_ASCIIHEX,      // PDF /ASCIIHexDecode
-        HANDLE_METHOD_RUNLENGTH      // PDF /RunLengthDecode (PackBits-style)
+        HANDLE_METHOD_RUNLENGTH,     // PDF /RunLengthDecode (PackBits-style)
+        HANDLE_METHOD_LZ4,           // LZ4 frame/legacy stream
+        // Logical record decoded by its owning archive object.  This is a
+        // routing marker, not a raw compression codec.
+        HANDLE_METHOD_ARCHIVE_STREAM,
+        // Decoder-only methods imported from the 7-Zip ZS capability set.
+        // Keep them at the end so persisted values of existing methods do not
+        // change.
+        HANDLE_METHOD_LZ5,
+        HANDLE_METHOD_LIZARD
         // TODO check more methods
     };
 
@@ -387,6 +396,18 @@ public:
         FPART_PROP_PASSWORD_MODIFIER,  // ARJ garble password modifier byte
         FPART_PROP_GEN,                // PDF object generation number (for the per-object decryption key)
         FPART_PROP_RAR5_HASHMAC,       // RAR5 stored hash uses the password-derived MAC transform
+        // Zero-based logical record index for HANDLE_METHOD_ARCHIVE_STREAM.
+        FPART_PROP_ARCHIVE_RECORD_INDEX,
+        // Opaque identity digest for HANDLE_METHOD_ARCHIVE_STREAM.  It is not a
+        // coordinate and resolves to nothing on any device; it exists so that
+        // two members whose published metadata is otherwise identical still
+        // have distinguishable records (see XBinary::markArchiveStreamRecord).
+        FPART_PROP_ARCHIVE_RECORD_TOKEN,
+        // Optional native output/install directory, populated only by formats that store the
+        // path separately from the filename (e.g. NSIS SetOutPath / $OUTDIR). ORIGINALNAME still
+        // carries the full relative path; this is the format-native directory value and is only
+        // surfaced in the UI's advanced mode.
+        FPART_PROP_OPTIONAL_PATH,
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -404,7 +425,7 @@ public:
         UNPACK_PROP_CHECKCRC16ARC,   // Check CRC-16/ARC values
         UNPACK_PROP_CHECKADLER32,    // Check Adler-32 values
         UNPACK_PROP_CHECKRAR14,      // Check the RAR 1.4 rotate/add checksum
-        UNPACK_PROP_METADATAONLY
+        UNPACK_PROP_METADATAONLY     // Enumerate bounded directory metadata without requiring decodable payload streams
     };
 
     virtual QMap<UNPACK_PROP, QVariant> getDefaultUnpackProperties();
@@ -606,10 +627,6 @@ public:
         FT_TAR_Z,
         FT_TAR_ZSTD,
         FT_ARCHIVE,
-        FT_FLAG_ARCHIVES,
-        FT_FLAG_FORMATS,
-        FT_FLAG_EXECUTABLES,
-        FT_FLAG_IMAGES,
         FT_CAB,
         FT_DEX,
         FT_DOCUMENT,
@@ -689,6 +706,42 @@ public:
         FT_XAR,
         FT_ZOO,
         FT_PDB,
+        // Native readers added from the capability-gap audit.  Keep these at
+        // the end so persisted numeric IDs of existing formats do not move.
+        FT_WARC,
+        FT_MTREE,
+        FT_UU,
+        FT_TAR_LZ4,
+        FT_LZ5,
+        FT_LIZARD,
+
+        // XStaticUnpacker file types. Keep at the end so persisted numeric IDs
+        // of existing formats do not move.
+        FT_PE32_7ZSFX, FT_PE64_7ZSFX,
+        FT_PE32_ACTUALINSTALLER, FT_PE64_ACTUALINSTALLER,
+        FT_PE32_ADVANCEDINSTALLER, FT_PE64_ADVANCEDINSTALLER,
+        FT_PE32_ASPACK,
+        FT_PE32_AUTOIT, FT_PE64_AUTOIT,
+        FT_PE32_BOXEDAPP, FT_PE64_BOXEDAPP,
+        FT_PE32_CLICKTEAM, FT_PE64_CLICKTEAM,
+        FT_PE32_CREATEINSTALL, FT_PE64_CREATEINSTALL,
+        FT_PE32_ENIGMAVB, FT_PE64_ENIGMAVB,
+        FT_PE32_FSG,
+        FT_PE32_IEXPRESS, FT_PE64_IEXPRESS,
+        FT_PE32_INNOSETUP, FT_PE64_INNOSETUP,
+        FT_PE32_INSTALLFORGE, FT_PE64_INSTALLFORGE,
+        FT_PE32_INSTALLSIMPLE, FT_PE64_INSTALLSIMPLE,
+        FT_PE32_MEW,
+        FT_CFBF_MSI,
+        FT_PE32_NSIS, FT_PE64_NSIS,
+        FT_PE32_NSPACK, FT_PE32_PETITE,
+        FT_PE32_SFX, FT_PE64_SFX,
+        FT_PE32_SMARTINSTALL, FT_PE64_SMARTINSTALL,
+        FT_PE32_TARMA, FT_PE64_TARMA,
+        FT_PE32_UPX, FT_PE64_UPX,
+        FT_PE32_WINRARSFX, FT_PE64_WINRARSFX,
+        FT_CFBF_WIX,
+        FT_PE32_YODA,
 
         // TODO more
     };
@@ -999,6 +1052,59 @@ public:
         QString sName;
         quint32 nType;
         quint32 nID;
+    };
+
+    enum XMETADATA_ID {
+        XMETADATA_ID_UNKNOWN = 0,
+        XMETADATA_ID_UUID,
+        XMETADATA_ID_DATETIME_CREATED,
+        XMETADATA_ID_MODIFICATED,
+        XMETADATA_ID_DATETIME_ACCESSED,
+        XMETADATA_ID_TITLE,
+        XMETADATA_ID_AUTHOR,
+        XMETADATA_ID_SUBJECT,
+        XMETADATA_ID_KEYWORDS,
+        XMETADATA_ID_CREATOR,
+        XMETADATA_ID_PRODUCER,
+        XMETADATA_ID_ARTIST,
+        XMETADATA_ID_ALBUM,
+        XMETADATA_ID_GENRE,
+        XMETADATA_ID_TRACK_NUMBER,
+        XMETADATA_ID_TRACK_COUNT,
+        XMETADATA_ID_DURATION,
+        XMETADATA_ID_BITRATE,
+        XMETADATA_ID_SAMPLE_RATE,
+        XMETADATA_ID_CHANNELS,
+        XMETADATA_ID_CODEC,
+        XMETADATA_ID_FRAME_WIDTH,
+        XMETADATA_ID_FRAME_HEIGHT,
+        XMETADATA_ID_FRAME_COUNT,
+        XMETADATA_ID_FRAME_RATE,
+        XMETADATA_ID_BIT_DEPTH,
+        XMETADATA_ID_COLOR_TYPE,
+        XMETADATA_ID_COLOR_SPACE,
+        XMETADATA_ID_COMMENTS,
+        XMETADATA_ID_COMPANY_NAME,
+        XMETADATA_ID_FILE_DESCRIPTION,
+        XMETADATA_ID_FILE_VERSION,
+        XMETADATA_ID_INTERNAL_NAME,
+        XMETADATA_ID_LEGAL_COPYRIGHT,
+        XMETADATA_ID_LEGAL_TRADEMARKS,
+        XMETADATA_ID_ORIGINAL_FILENAME,
+        XMETADATA_ID_PRIVATE_BUILD,
+        XMETADATA_ID_PRODUCT_NAME,
+        XMETADATA_ID_PRODUCT_VERSION,
+        XMETADATA_ID_SPECIAL_BUILD,
+        XMETADATA_ID_TRANSLATION
+    };
+
+    struct XMETADATA_STRUCT {
+        qint64 nOffset;
+        qint64 nSize;
+        XADDR nAddress;
+        XMETADATA_ID id;
+        QString sName;
+        QVariant varValue;
     };
 
     enum HASH {
@@ -2047,23 +2153,28 @@ public:
 
     bool patchFromFile(const QString &sFileName, qint64 nDataOffset, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
 
-    QSet<FT> getFileTypes(bool bExtra = false);
-    static QSet<FT> getFileTypes(QIODevice *pDevice,
-                                 bool bExtra = false);  // mb TODO isImage
-    static QSet<FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra = false);
-    static QSet<FT> getFileTypes(const QString &sFileName, bool bExtra = false);
-    static QSet<FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
+    enum FT_FLAG : quint32 {
+        FT_FLAG_EXECUTABLES = 0x00000001U,
+        FT_FLAG_ARCHIVES = 0x00000002U,
+        FT_FLAG_DOCUMENTS = 0x00000004U,
+        FT_FLAG_IMAGES = 0x00000008U,
+        FT_FLAG_AUDIO = 0x00000010U,
+        FT_FLAG_VIDEO = 0x00000020U,
+        FT_FLAG_TEXT = 0x00000040U,
+        FT_FLAG_STATICUNPACKERS = 0x00000080U,
+        FT_FLAG_SYMBOLS = 0x00000100U,
+        FT_FLAG_FORMATS = FT_FLAG_EXECUTABLES | FT_FLAG_ARCHIVES | FT_FLAG_DOCUMENTS | FT_FLAG_IMAGES | FT_FLAG_AUDIO | FT_FLAG_VIDEO | FT_FLAG_TEXT
+    };
+
+    QSet<FT> getFileTypes(quint32 nFTFlags);
+    static QSet<FT> getFileTypes(QIODevice *pDevice, quint32 nFTFlags);  // mb TODO isImage
+    static QSet<FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, quint32 nFTFlags);
+    static QSet<FT> getFileTypes(const QString &sFileName, quint32 nFTFlags);
+    static QSet<FT> getFileTypes(QByteArray *pbaData, quint32 nFTFlags);
 
     static FT _getPrefFileType(const QSet<XBinary::FT> *pStFileTypes);
 
-    enum TL_OPTION {
-        TL_OPTION_DEFAULT = 0,
-        TL_OPTION_ALL,
-        TL_OPTION_EXECUTABLE,
-        TL_OPTION_SYMBOLS
-    };
-
-    static QList<FT> _getFileTypeListFromSet(const QSet<FT> &stFileTypes, TL_OPTION tlOption);
+    static QList<FT> _getFileTypeListFromSet(const QSet<FT> &stFileTypes, quint32 nFileTypeFlags = FT_FLAG_FORMATS);
 
     static QString valueToHex(quint8 nValue);
     static QString valueToHex(qint8 nValue);
@@ -2222,11 +2333,13 @@ public:
     virtual bool isImportPresent();
     virtual bool isResourcesPresent();
     virtual bool isSymbolsPresent();
+    virtual bool isMetadataPresent();
 
     virtual QVector<XIMPORT_STRUCT> getImportStructs();
     virtual QVector<XEXPORT_STRUCT> getExportStructs();
     virtual QVector<XSYMBOL_STRUCT> getSymbolStructs();
     virtual QVector<XRESOURCE_STRUCT> getResourceStructs();
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs();
 
     static QString getSignature(QIODevice *pDevice, qint64 nOffset, qint64 nSize);
     QString getSignature(qint64 nOffset, qint64 nSize);
@@ -2678,6 +2791,16 @@ public:
     // Streaming unpacking API
     virtual bool initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
     virtual ARCHIVERECORD infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
+    // Device that ARCHIVERECORD::nStreamOffset/nStreamSize address for the
+    // session described by pState.  Raw record coordinates only mean something
+    // together with the device they were measured on, and every offset-based
+    // consumer (XArchive::RECORD, _decompressRecord, ...) reads getDevice().
+    // The default therefore declares exactly that contract.  A format that
+    // parses a private decoded buffer must either publish index-paired records
+    // through markArchiveStreamRecord() or override this, so that the mismatch
+    // is detected and reported instead of being silently reinterpreted as
+    // member data.
+    virtual QIODevice *getRecordStreamDevice(UNPACK_STATE *pState);
     virtual bool unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     virtual bool moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
     virtual bool finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
@@ -2698,6 +2821,17 @@ public:
 
     bool unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
     bool unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
+
+protected:
+    // Shared, transaction-safe implementation used by archive wrappers that
+    // expose logical records from a private decoded transport stream.
+    bool _unpackRecordByIndex(qint32 nRecordIndex,
+                              const ARCHIVERECORD *pExpectedRecord,
+                              QIODevice *pOutDevice,
+                              const QMap<UNPACK_PROP, QVariant> &mapProperties,
+                              PDSTRUCT *pPdStruct = nullptr);
+
+public:
 
     struct FFSEARCH_STATE {
         QIODevice *pDevice;     // Input device
@@ -2730,6 +2864,55 @@ public:
 
     static QString getArchiveRecordComment(const ARCHIVERECORD &record);
     static QString getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties);
+    // The coordinates an archive-stream record publishes instead of an extent.
+    // Such a record describes a member of a PRIVATE decoded stream, so it has
+    // no addressable extent on the caller-visible device at all.  Publishing
+    // the transport envelope (offset 0, size = the whole container) instead
+    // would hand every offset-based consumer a fully valid (offset,size) pair
+    // over the raw container, with nothing but a single mutable method field
+    // between it and a read: forge the method and the container's own bytes
+    // are copied out at the member's declared length.  The record therefore
+    // carries coordinates that cannot address anything, which every existing
+    // "offset/size must be >= 0" guard already rejects, so the capability is
+    // removed rather than merely guarded.
+    static const qint64 ARCHIVE_STREAM_NO_EXTENT;
+    // True only for the exact no-extent coordinate pair above.
+    static bool isArchiveStreamNoExtent(qint64 nStreamOffset,
+                                        qint64 nStreamSize);
+    // Coordinate/identity consistency for a record just produced by a session:
+    // an index-paired archive-stream record must carry no extent, and every
+    // other record must carry a non-negative one measured on the session's own
+    // device.  Every enumerator uses this so the two record shapes cannot be
+    // confused for one another.
+    static bool isArchiveRecordExtentValid(const ARCHIVERECORD &record);
+    // Convert an inner archive record into a safe public record for transport
+    // wrappers whose decoded stream is not the caller-visible source device.
+    static bool markArchiveStreamRecord(ARCHIVERECORD *pRecord,
+                                        qint32 nRecordIndex);
+    // An opaque per-member digest, derived from the member's position inside
+    // the PRIVATE decoded stream plus its own descriptive metadata.  It is a
+    // hex string, never a number: no consumer can resolve it against a device,
+    // and it does not disclose the private layout it was derived from.  Its
+    // only purpose is to keep archive-stream records distinguishable from one
+    // another once their coordinates - the field that used to tell two members
+    // apart - are gone.
+    static QString archiveStreamRecordToken(
+        qint32 nRecordIndex, qint64 nStreamOffset, qint64 nStreamSize,
+        const QMap<FPART_PROP, QVariant> &mapProperties);
+    // Does a caller-supplied record describe the same member as one this
+    // session just produced?  For an archive-stream record the comparison must
+    // not rest on the logical index alone: the index is exactly the field a
+    // caller supplies, so two members with identical metadata would otherwise
+    // validate against each other's record.  The identity token settles it.
+    static bool isSameArchiveRecordIdentity(const ARCHIVERECORD &record,
+                                            const ARCHIVERECORD &expectedRecord);
+    // Returns true only for the exact pseudo-method/index contract.  Numeric
+    // strings, floating-point values and out-of-range indices are rejected.
+    static bool getArchiveStreamRecordIndex(
+        const QMap<FPART_PROP, QVariant> &mapProperties,
+        qint32 *pnRecordIndex);
+    static bool getArchiveStreamRecordIndex(const ARCHIVERECORD &record,
+                                            qint32 *pnRecordIndex);
     // Decode a coder's raw property bytes into 7-Zip-style parameters, e.g. LZMA2
     // dictionary byte 0x00 -> "12" (2^12 = 4 KiB), LZMA -> "<dictexp>[:lcN:lpN:pbN]".
     // Returns an empty string for methods without decodable parameters.

@@ -345,6 +345,7 @@ public:
     virtual QVector<XIMPORT_STRUCT> getImportStructs() override;
     virtual QVector<XEXPORT_STRUCT> getExportStructs() override;
     virtual QVector<XSYMBOL_STRUCT> getSymbolStructs() override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
     QVector<XSYMBOL_STRUCT> _getSymbolStructs();
 
     quint32 getCommandId(qint32 nIndex, QList<COMMAND_RECORD> *pListCommandRecords);

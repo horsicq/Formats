@@ -279,6 +279,64 @@ QString XPNG::getInfo(PDSTRUCT *pPdStruct)
     return sResult;
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XPNG::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    qint64 nOffset = 8;
+    qint32 nChunkCount = 0;
+
+    const CHUNK ihdr = _readChunk(nOffset);
+    if (ihdr.bValid && (ihdr.sName == QString("IHDR")) && (ihdr.nDataSize == 13) && _isChunkCRCValid(ihdr, nullptr)) {
+        auto appendMetadata = [this, &listResult, &ihdr](qint64 nRelativeOffset, qint64 nSize, XMETADATA_ID id, const QString &sName,
+                                                         const QVariant &varValue) {
+            XMETADATA_STRUCT record = {};
+            record.nOffset = ihdr.nDataOffset + nRelativeOffset;
+            record.nSize = nSize;
+            record.nAddress = offsetToAddress(record.nOffset);
+            record.id = id;
+            record.sName = sName;
+            record.varValue = varValue;
+            listResult.append(record);
+        };
+
+        appendMetadata(0, 4, XMETADATA_ID_FRAME_WIDTH, QString("Width"), read_uint32(ihdr.nDataOffset, true));
+        appendMetadata(4, 4, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), read_uint32(ihdr.nDataOffset + 4, true));
+        appendMetadata(8, 1, XMETADATA_ID_BIT_DEPTH, QString("Bit depth"), read_uint8(ihdr.nDataOffset + 8));
+        appendMetadata(9, 1, XMETADATA_ID_COLOR_TYPE, QString("Color type"), read_uint8(ihdr.nDataOffset + 9));
+    }
+
+    while ((nOffset + 12 <= getSize()) && (nChunkCount++ < PNG_MAX_CHUNK_COUNT)) {
+        const CHUNK chunk = _readChunk(nOffset);
+        if (!chunk.bValid) {
+            break;
+        }
+
+        if ((chunk.sName == QString("tIME")) && (chunk.nDataSize == 7) && _isChunkCRCValid(chunk, nullptr)) {
+            const QDate date(read_uint16(chunk.nDataOffset, true), read_uint8(chunk.nDataOffset + 2), read_uint8(chunk.nDataOffset + 3));
+            const QTime time(read_uint8(chunk.nDataOffset + 4), read_uint8(chunk.nDataOffset + 5), read_uint8(chunk.nDataOffset + 6));
+            const QDateTime dateTime(date, time, Qt::UTC);
+
+            if (dateTime.isValid()) {
+                XMETADATA_STRUCT record = {};
+                record.nOffset = chunk.nDataOffset;
+                record.nSize = chunk.nDataSize;
+                record.nAddress = offsetToAddress(chunk.nDataOffset);
+                record.id = XMETADATA_ID_MODIFICATED;
+                record.sName = QString("Last modification time");
+                record.varValue = dateTime;
+                listResult.append(record);
+            }
+        }
+
+        nOffset += 12 + chunk.nDataSize;
+        if (chunk.sName == QString("IEND")) {
+            break;
+        }
+    }
+
+    return listResult;
+}
+
 XBinary::ENDIAN XPNG::getEndian()
 {
     return ENDIAN_BIG;  // PNG is always big-endian

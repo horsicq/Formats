@@ -366,6 +366,46 @@ QList<XBinary::FPART> XXM::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
     return listResult;
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XXM::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    if (!isValid((PDSTRUCT *)nullptr)) {
+        return listResult;
+    }
+
+    const HEADER header = _read_HEADER(0);
+    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    QString sTitle = QString::fromLatin1(header.module_name, sizeof(header.module_name));
+    sTitle.remove(QChar('\0'));
+    sTitle = sTitle.trimmed();
+    if (!sTitle.isEmpty()) {
+        appendMetadata(offsetof(HEADER, module_name), sizeof(header.module_name), XMETADATA_ID_TITLE, QString("Module title"), sTitle);
+    }
+
+    QString sTracker = QString::fromLatin1(header.tracker_name, sizeof(header.tracker_name));
+    sTracker.remove(QChar('\0'));
+    sTracker = sTracker.trimmed();
+    if (!sTracker.isEmpty()) {
+        appendMetadata(offsetof(HEADER, tracker_name), sizeof(header.tracker_name), XMETADATA_ID_CREATOR, QString("Tracker"), sTracker);
+    }
+
+    appendMetadata(offsetof(HEADER, channels), 2, XMETADATA_ID_CHANNELS, QString("Channels"), header.channels);
+    appendMetadata(offsetof(HEADER, num_patterns), 2, XMETADATA_ID_FRAME_COUNT, QString("Pattern count"), header.num_patterns);
+    appendMetadata(0, sizeof(header.id_text), XMETADATA_ID_CODEC, QString("Format"), QString("FastTracker II Extended Module"));
+
+    return listResult;
+}
+
 QString XXM::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, g_tableXxmStructId, sizeof(g_tableXxmStructId) / sizeof(XBinary::XCONVERT));

@@ -213,6 +213,40 @@ XICC::HEADER XICC::getHeader()
     return result;
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XICC::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    if (!checkOffsetSize(24, 12)) {
+        return listResult;
+    }
+
+    XMETADATA_STRUCT colorSpaceRecord = {};
+    colorSpaceRecord.nOffset = 16;
+    colorSpaceRecord.nSize = 4;
+    colorSpaceRecord.nAddress = offsetToAddress(16);
+    colorSpaceRecord.id = XMETADATA_ID_COLOR_SPACE;
+    colorSpaceRecord.sName = QString("Data color space");
+    colorSpaceRecord.varValue = read_ansiString(16, 4).trimmed();
+    listResult.append(colorSpaceRecord);
+
+    const QDate date(read_uint16(24, true), read_uint16(26, true), read_uint16(28, true));
+    const QTime time(read_uint16(30, true), read_uint16(32, true), read_uint16(34, true));
+    const QDateTime dateTime(date, time, Qt::UTC);
+
+    if (dateTime.isValid()) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = 24;
+        record.nSize = 12;
+        record.nAddress = offsetToAddress(24);
+        record.id = XMETADATA_ID_DATETIME_CREATED;
+        record.sName = QString("Profile creation time");
+        record.varValue = dateTime;
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
 QList<XICC::TAG> XICC::getTags(PDSTRUCT *pPdStruct)
 {
     QList<TAG> listResult;

@@ -161,6 +161,12 @@ public:
     // virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
+    virtual QVector<XIMPORT_STRUCT> getImportStructs() override;
+    virtual QVector<XEXPORT_STRUCT> getExportStructs() override;
+    virtual QVector<XSYMBOL_STRUCT> getSymbolStructs() override;
+    virtual QVector<XRESOURCE_STRUCT> getResourceStructs() override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
+
     // .NET / CLI metadata parsing (moved from XPE)
     CLI_INFO getCliInfo(bool bFindHidden = false, PDSTRUCT *pPdStruct = nullptr);
 

@@ -131,6 +131,61 @@ XBinary::_MEMORY_MAP XAVI::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     return _getMemoryMap(FILEPART_DATA | FILEPART_OVERLAY, pPdStruct);
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XAVI::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    if (!isValid((PDSTRUCT *)nullptr)) {
+        return listResult;
+    }
+
+    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    const qint64 nAvihOffset = find_ansiString(12, getSize() - 12, QString("avih"), nullptr);
+    if ((nAvihOffset >= 0) && checkOffsetSize(nAvihOffset, 48) && (read_uint32(nAvihOffset + 4, false) >= 40)) {
+        const qint64 nDataOffset = nAvihOffset + 8;
+        const quint32 nMicrosecondsPerFrame = read_uint32(nDataOffset, false);
+        const quint32 nMaxBytesPerSecond = read_uint32(nDataOffset + 4, false);
+        const quint32 nTotalFrames = read_uint32(nDataOffset + 16, false);
+        appendMetadata(nDataOffset + 32, 4, XMETADATA_ID_FRAME_WIDTH, QString("Frame width"), read_uint32(nDataOffset + 32, false));
+        appendMetadata(nDataOffset + 36, 4, XMETADATA_ID_FRAME_HEIGHT, QString("Frame height"), read_uint32(nDataOffset + 36, false));
+        appendMetadata(nDataOffset + 16, 4, XMETADATA_ID_FRAME_COUNT, QString("Frame count"), nTotalFrames);
+        appendMetadata(nDataOffset + 24, 4, XMETADATA_ID_TRACK_COUNT, QString("Stream count"), read_uint32(nDataOffset + 24, false));
+        appendMetadata(nDataOffset + 4, 4, XMETADATA_ID_BITRATE, QString("Maximum bitrate"), (quint64)nMaxBytesPerSecond * 8);
+        if (nMicrosecondsPerFrame) {
+            appendMetadata(nDataOffset, 4, XMETADATA_ID_FRAME_RATE, QString("Frame rate"), 1000000.0 / nMicrosecondsPerFrame);
+            appendMetadata(nDataOffset + 16, 4, XMETADATA_ID_DURATION, QString("Duration"),
+                           (double)nTotalFrames * nMicrosecondsPerFrame / 1000000.0);
+        }
+    }
+
+    qint64 nSearchOffset = 12;
+    for (qint32 i = 0; (i < 64) && (nSearchOffset < getSize()); ++i) {
+        const qint64 nStrhOffset = find_ansiString(nSearchOffset, getSize() - nSearchOffset, QString("strh"), nullptr);
+        if (nStrhOffset < 0) {
+            break;
+        }
+        if (checkOffsetSize(nStrhOffset, 16) && (read_uint32(nStrhOffset + 4, false) >= 8)) {
+            const QString sStreamType = read_ansiString(nStrhOffset + 8, 4);
+            const QString sCodec = read_ansiString(nStrhOffset + 12, 4).trimmed();
+            if (!sCodec.isEmpty()) {
+                appendMetadata(nStrhOffset + 12, 4, XMETADATA_ID_CODEC, QString("%1 stream codec").arg(sStreamType.trimmed()), sCodec);
+            }
+        }
+        nSearchOffset = nStrhOffset + 4;
+    }
+
+    return listResult;
+}
+
 // QList<XBinary::DATA_HEADER> XAVI::getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct)
 // {
 //     QList<DATA_HEADER> listResult;

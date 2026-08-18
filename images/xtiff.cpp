@@ -250,6 +250,93 @@ QList<XTiff::CHUNK> XTiff::_getChunksByTag(QList<CHUNK> *pListChunks, quint16 nT
     return listResult;
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XTiff::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    QList<CHUNK> listChunks = getChunks(nullptr);
+    const bool bIsBigEndian = (getEndian() == ENDIAN_BIG);
+
+    // DateTimeOriginal and DateTimeDigitized normally live in the Exif sub-IFD.
+    const QList<CHUNK> listExifPointers = _getChunksByTag(&listChunks, 0x8769);
+    for (qint32 i = 0; i < listExifPointers.count(); ++i) {
+        const CHUNK &pointer = listExifPointers.at(i);
+        if (!checkOffsetSize(pointer.nOffset, sizeof(quint32))) {
+            continue;
+        }
+
+        const quint32 nExifIfdOffset = read_uint32(pointer.nOffset, bIsBigEndian);
+        IFD_INFO info = {};
+        if (!getIFDInfo(nExifIfdOffset, bIsBigEndian, getSize(), &info, nullptr)) {
+            continue;
+        }
+
+        qint64 nEntryOffset = info.nOffset + (qint64)sizeof(quint16);
+        for (quint32 j = 0; j < info.nCount; ++j, nEntryOffset += (qint64)sizeof(IFD_ENTRY)) {
+            CHUNK chunk = {};
+            if (getIFDChunk(nEntryOffset, bIsBigEndian, getSize(), &chunk, nullptr, nullptr)) {
+                listChunks.append(chunk);
+            }
+        }
+    }
+
+    auto appendUnsignedTag = [this, &listResult, &listChunks, bIsBigEndian](quint16 nTag, XMETADATA_ID id, const QString &sName,
+                                                                           bool bForceUInt16) {
+        const QList<CHUNK> listValues = _getChunksByTag(&listChunks, nTag);
+        for (qint32 i = 0; i < listValues.count(); ++i) {
+            const CHUNK &chunk = listValues.at(i);
+            if (chunk.nSize < 2) {
+                continue;
+            }
+
+            const quint32 nValue = (!bForceUInt16 && (chunk.nSize == 4)) ? read_uint32(chunk.nOffset, bIsBigEndian)
+                                                                         : read_uint16(chunk.nOffset, bIsBigEndian);
+            XMETADATA_STRUCT record = {};
+            record.nOffset = chunk.nOffset;
+            record.nSize = bForceUInt16 || (chunk.nSize != 4) ? 2 : 4;
+            record.nAddress = offsetToAddress(chunk.nOffset);
+            record.id = id;
+            record.sName = (listValues.count() > 1) ? QString("Image %1: %2").arg(i + 1).arg(sName) : sName;
+            record.varValue = nValue;
+            listResult.append(record);
+        }
+    };
+
+    appendUnsignedTag(0x0100, XMETADATA_ID_FRAME_WIDTH, QString("Width"), false);
+    appendUnsignedTag(0x0101, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), false);
+    appendUnsignedTag(0x0102, XMETADATA_ID_BIT_DEPTH, QString("Bits per sample"), true);
+    appendUnsignedTag(0x0106, XMETADATA_ID_COLOR_TYPE, QString("Photometric interpretation"), true);
+
+    auto appendDateTag = [this, &listResult, &listChunks](quint16 nTag, XMETADATA_ID id, const QString &sName) {
+        const QList<CHUNK> listDates = _getChunksByTag(&listChunks, nTag);
+        for (qint32 i = 0; i < listDates.count(); ++i) {
+            const CHUNK &chunk = listDates.at(i);
+            QString sValue = read_ansiString(chunk.nOffset, chunk.nSize).trimmed();
+            QDateTime dateTime = QDateTime::fromString(sValue, QString("yyyy:MM:dd HH:mm:ss"));
+            if (!dateTime.isValid()) {
+                dateTime = QDateTime::fromString(sValue, Qt::ISODate);
+            }
+            if (!dateTime.isValid()) {
+                continue;
+            }
+
+            XMETADATA_STRUCT record = {};
+            record.nOffset = chunk.nOffset;
+            record.nSize = chunk.nSize;
+            record.nAddress = offsetToAddress(chunk.nOffset);
+            record.id = id;
+            record.sName = sName;
+            record.varValue = dateTime;
+            listResult.append(record);
+        }
+    };
+
+    appendDateTag(0x0132, XMETADATA_ID_MODIFICATED, QString("Date/time"));
+    appendDateTag(0x9003, XMETADATA_ID_DATETIME_CREATED, QString("Date/time original"));
+    appendDateTag(0x9004, XMETADATA_ID_DATETIME_CREATED, QString("Date/time digitized"));
+
+    return listResult;
+}
+
 QString XTiff::getExifCameraName(QIODevice *pDevice, OFFSETSIZE osExif, QList<CHUNK> *pListChunks)
 {
     QString sResult;

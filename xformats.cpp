@@ -23,9 +23,11 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSaveFile>
+#include <QTemporaryFile>
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 namespace {
 class DevicePositionGuard {
@@ -53,6 +55,36 @@ bool isReadableSeekableDevice(QIODevice *pDevice)
 {
     return pDevice && pDevice->isOpen() && pDevice->isReadable() && !pDevice->isSequential() && (pDevice->size() >= 0);
 }
+
+bool isBrotliDetectionCandidate(QIODevice *pDevice)
+{
+    if (!isReadableSeekableDevice(pDevice)) return false;
+
+    const QString sSuffix = XBinary::getDeviceFileSuffix(pDevice).toLower();
+    if ((sSuffix == QLatin1String("br")) ||
+        (sSuffix == QLatin1String("brotli")) ||
+        (sSuffix == QLatin1String("tbr"))) {
+        return true;
+    }
+
+    // Ordinary RFC 7932 Brotli has no fixed magic, so extension-neutral
+    // probing would create false positives.  The fork's MT envelope is
+    // unambiguous and can safely be recognized by its complete header tuple.
+    DevicePositionGuard positionGuard(pDevice);
+    if (!pDevice->seek(0)) return false;
+    const QByteArray baHeader = pDevice->read(16);
+    return (baHeader.size() == 16) &&
+           baHeader.startsWith(QByteArray::fromHex("502A4D1808000000")) &&
+           (baHeader.mid(12, 2) == QByteArray("BR", 2));
+}
+
+#ifdef USE_ARCHIVE
+bool isValidBrotliArchive(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct)
+{
+    XBrotli archive(pDevice);
+    return archive.isValid(pPdStruct);
+}
+#endif
 
 bool isValidDeviceRange(QIODevice *pDevice, qint64 nOffset, qint64 nSize)
 {
@@ -492,7 +524,8 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
     else if (XBinary::checkFileType(XBinary::FT_TAR_GZ, fileType) || XBinary::checkFileType(XBinary::FT_TAR_BZIP2, fileType) ||
              XBinary::checkFileType(XBinary::FT_TAR_LZIP, fileType) || XBinary::checkFileType(XBinary::FT_TAR_LZMA, fileType) ||
              XBinary::checkFileType(XBinary::FT_TAR_LZOP, fileType) || XBinary::checkFileType(XBinary::FT_TAR_XZ, fileType) ||
-             XBinary::checkFileType(XBinary::FT_TAR_Z, fileType) || XBinary::checkFileType(XBinary::FT_TAR_ZSTD, fileType)) {
+             XBinary::checkFileType(XBinary::FT_TAR_Z, fileType) || XBinary::checkFileType(XBinary::FT_TAR_ZSTD, fileType) ||
+             XBinary::checkFileType(XBinary::FT_TAR_LZ4, fileType)) {
         XTARCOMPRESSED::COMPRESSION_TYPE compressionType = XTARCOMPRESSED::detectCompressionType(pDevice);
         XArchive *pArchive = (XArchive *)XTARCOMPRESSED::getCompressionClassInstance(compressionType, pDevice);
 
@@ -507,8 +540,13 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
         if (XBinary::checkFileType(XBinary::FT_TAR_XZ, fileType)) return new XTAR_XZ(pDevice);
         if (XBinary::checkFileType(XBinary::FT_TAR_Z, fileType)) return new XTAR_COMPRESS(pDevice);
         if (XBinary::checkFileType(XBinary::FT_TAR_ZSTD, fileType)) return new XTAR_ZSTD(pDevice);
+        if (XBinary::checkFileType(XBinary::FT_TAR_LZ4, fileType)) return new XTAR_LZ4(pDevice);
 
         return new XTAR_GZ(pDevice);
+    } else if (XFilteredArchive::isFilterFileType(fileType) &&
+               !XFilteredArchive::isRecursionSuppressed(pDevice) &&
+               XFilteredArchive::isValid(pDevice, fileType)) {
+        return new XFilteredArchive(pDevice, fileType);
     } else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return new XGzip(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ZLIB, fileType)) return new XZlib(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_LHA, fileType)) return new XLHA(pDevice);
@@ -519,6 +557,8 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
     else if (XBinary::checkFileType(XBinary::FT_BZIP2, fileType)) return new XBZIP2(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_BROTLI, fileType)) return new XBrotli(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_LZ4, fileType)) return new XLZ4(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_LZ5, fileType)) return new XLZ5(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_LIZARD, fileType)) return new XLizard(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_LZMA, fileType)) return new XLZMA(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_LZO, fileType)) return new XLzo(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_COMPRESS, fileType)) return new XCompressZ(pDevice);
@@ -537,8 +577,46 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
     else if (XBinary::checkFileType(XBinary::FT_ASAR, fileType)) return new XASAR(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_XAR, fileType)) return new XXAR(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ZOO, fileType)) return new XZOO(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_ARC, fileType)) return new XSEAARC(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_FREEARC, fileType)) return new XFREEARC(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_SQUASHFS, fileType)) return new XSquashfs(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_MINIDUMP, fileType)) return new XMiniDump(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_WARC, fileType)) return new XWARC(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_MTREE, fileType)) return new XMTree(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_UU, fileType)) return new XUU(pDevice);
 
     else if (XBinary::checkFileType(XBinary::FT_DOS4G, fileType) || XBinary::checkFileType(XBinary::FT_DOS16M, fileType)) return new XDOS16(pDevice);
+#ifdef USE_STATICUNPACKER
+    // XStaticUnpacker packer/protector/installer handle-method file types.
+    else if (XBinary::checkFileType(XBinary::FT_PE32_7ZSFX, fileType) || XBinary::checkFileType(XBinary::FT_PE64_7ZSFX, fileType)) return new X7ZSFX(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_ACTUALINSTALLER, fileType) || XBinary::checkFileType(XBinary::FT_PE64_ACTUALINSTALLER, fileType)) return new XActualInstaller(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_ADVANCEDINSTALLER, fileType) || XBinary::checkFileType(XBinary::FT_PE64_ADVANCEDINSTALLER, fileType)) return new XAdvancedInstaller(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_ASPACK, fileType)) return new XASPACK(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_AUTOIT, fileType) || XBinary::checkFileType(XBinary::FT_PE64_AUTOIT, fileType)) return new XAUTOIT(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_BOXEDAPP, fileType) || XBinary::checkFileType(XBinary::FT_PE64_BOXEDAPP, fileType)) return new XBoxedApp(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_CLICKTEAM, fileType) || XBinary::checkFileType(XBinary::FT_PE64_CLICKTEAM, fileType)) return new XClickteam(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_CREATEINSTALL, fileType) || XBinary::checkFileType(XBinary::FT_PE64_CREATEINSTALL, fileType)) return new XCreateInstall(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_ENIGMAVB, fileType) || XBinary::checkFileType(XBinary::FT_PE64_ENIGMAVB, fileType)) return new XEnigmaVB(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_FSG, fileType)) return new XFSG(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_IEXPRESS, fileType) || XBinary::checkFileType(XBinary::FT_PE64_IEXPRESS, fileType)) return new XIExpress(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_INNOSETUP, fileType) || XBinary::checkFileType(XBinary::FT_PE64_INNOSETUP, fileType)) return new XInnoSetup(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_INSTALLFORGE, fileType) || XBinary::checkFileType(XBinary::FT_PE64_INSTALLFORGE, fileType)) return new XInstallForge(pDevice, bIsImage, nModuleAddress);
+#ifdef USE_XEMULATOR
+    else if (XBinary::checkFileType(XBinary::FT_PE32_INSTALLSIMPLE, fileType) || XBinary::checkFileType(XBinary::FT_PE64_INSTALLSIMPLE, fileType)) return new XInstallSimple(pDevice, bIsImage, nModuleAddress);
+#endif
+    else if (XBinary::checkFileType(XBinary::FT_PE32_MEW, fileType)) return new XMEW(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_CFBF_MSI, fileType)) return new XMSI(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_NSIS, fileType) || XBinary::checkFileType(XBinary::FT_PE64_NSIS, fileType)) return new XNSIS(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_NSPACK, fileType)) return new XNSPACK(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_PETITE, fileType)) return new XPETITE(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_SFX, fileType) || XBinary::checkFileType(XBinary::FT_PE64_SFX, fileType)) return new XSFX(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_SMARTINSTALL, fileType) || XBinary::checkFileType(XBinary::FT_PE64_SMARTINSTALL, fileType)) return new XSmartInstall(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_TARMA, fileType) || XBinary::checkFileType(XBinary::FT_PE64_TARMA, fileType)) return new XTarma(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_UPX, fileType) || XBinary::checkFileType(XBinary::FT_PE64_UPX, fileType)) return new XUPX(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_WINRARSFX, fileType) || XBinary::checkFileType(XBinary::FT_PE64_WINRARSFX, fileType)) return new XWinRarSfx(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_CFBF_WIX, fileType)) return new XWiX(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_YODA, fileType)) return new XYODA(pDevice, bIsImage, nModuleAddress);
+#endif
 #endif
     else {
 #ifdef QT_DEBUG
@@ -589,7 +667,7 @@ XBinary::_MEMORY_MAP XFormats::getMemoryMap(const QString &sFileName, XBinary::M
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = getMemoryMap(XFormats::getPrefFileType(&file, true), mapMode, &file, bIsImage, nModuleAddress, pPdStruct);
+        result = getMemoryMap(XFormats::getPrefFileType(&file, XBinary::FT_FLAG_FORMATS), mapMode, &file, bIsImage, nModuleAddress, pPdStruct);
 
         file.close();
     }
@@ -677,6 +755,7 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_TAR_XZ);
     listResult.append(XBinary::FT_TAR_Z);
     listResult.append(XBinary::FT_TAR_ZSTD);
+    listResult.append(XBinary::FT_TAR_LZ4);
     listResult.append(XBinary::FT_GZIP);
     listResult.append(XBinary::FT_ZLIB);
     listResult.append(XBinary::FT_LHA);
@@ -687,6 +766,8 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_BZIP2);
     listResult.append(XBinary::FT_BROTLI);
     listResult.append(XBinary::FT_LZ4);
+    listResult.append(XBinary::FT_LZ5);
+    listResult.append(XBinary::FT_LIZARD);
     listResult.append(XBinary::FT_LZMA);
     listResult.append(XBinary::FT_LZO);
     listResult.append(XBinary::FT_COMPRESS);
@@ -699,12 +780,16 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_CPIO);
     listResult.append(XBinary::FT_ISO9660);
     listResult.append(XBinary::FT_UDF);
+    listResult.append(XBinary::FT_SQUASHFS);
     listResult.append(XBinary::FT_WIM);
     listResult.append(XBinary::FT_RPM);
     listResult.append(XBinary::FT_KWAJ);
     listResult.append(XBinary::FT_ASAR);
     listResult.append(XBinary::FT_XAR);
     listResult.append(XBinary::FT_ZOO);
+    listResult.append(XBinary::FT_WARC);
+    listResult.append(XBinary::FT_MTREE);
+    listResult.append(XBinary::FT_UU);
     listResult.append(XBinary::FT_DOS4G);
     listResult.append(XBinary::FT_DOS16M);
 #endif
@@ -808,7 +893,7 @@ XBinary::OFFSETSIZE XFormats::getSignOffsetSize(const QString &sFileName)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = getSignOffsetSize(XFormats::getPrefFileType(&file, true), &file);
+        result = getSignOffsetSize(XFormats::getPrefFileType(&file, XBinary::FT_FLAG_EXECUTABLES), &file);
 
         file.close();
     }
@@ -824,7 +909,7 @@ bool XFormats::isSigned(const QString &sFileName)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        bResult = isSigned(XFormats::getPrefFileType(&file, true), &file);
+        bResult = isSigned(XFormats::getPrefFileType(&file, XBinary::FT_FLAG_EXECUTABLES), &file);
 
         file.close();
     }
@@ -847,7 +932,7 @@ QList<XBinary::SYMBOL_RECORD> XFormats::getSymbolRecords(XBinary::FT fileType, Q
     return listResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct)
 {
     QSet<XBinary::FT> result;
     if (!isReadableSeekableDevice(pDevice) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
@@ -862,7 +947,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, bool bExtra, XBinar
     }
 
     DevicePositionGuard positionGuard(pDevice);
-    result = _getFileTypes(pDevice, bExtra, pPdStruct);
+    result = _getFileTypes(pDevice, nFTFlags, pPdStruct);
     if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
         result.clear();
     }
@@ -1042,7 +1127,7 @@ bool XFormats::savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> 
     return bResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct)
 {
     QSet<XBinary::FT> result;
 
@@ -1051,7 +1136,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qin
         SubDevice sd(pDevice, nOffset, nSize);
 
         if (sd.open(QIODevice::ReadOnly)) {
-            result = getFileTypes(&sd, bExtra, pPdStruct);
+            result = getFileTypes(&sd, nFTFlags, pPdStruct);
 
             sd.close();
         }
@@ -1060,7 +1145,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, qint64 nOffset, qin
     return result;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(const QString &sFileName, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
+QSet<XBinary::FT> XFormats::getFileTypes(const QString &sFileName, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct)
 {
     QSet<XBinary::FT> stResult;
 
@@ -1068,7 +1153,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(const QString &sFileName, bool bExtra, 
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        stResult = getFileTypes(&file, bExtra, pPdStruct);
+        stResult = getFileTypes(&file, nFTFlags, pPdStruct);
 
         file.close();
     }
@@ -1076,7 +1161,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(const QString &sFileName, bool bExtra, 
     return stResult;
 }
 
-QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, quint32 nFTFlags)
 {
     QSet<XBinary::FT> stResult;
 
@@ -1089,7 +1174,7 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
     buffer.setBuffer(pbaData);
 
     if (buffer.open(QIODevice::ReadOnly)) {
-        stResult = getFileTypes(&buffer, bExtra);
+        stResult = getFileTypes(&buffer, nFTFlags);
 
         buffer.close();
     }
@@ -1097,14 +1182,14 @@ QSet<XBinary::FT> XFormats::getFileTypes(QByteArray *pbaData, bool bExtra)
     return stResult;
 }
 
-XBinary::FT XFormats::getPrefFileType(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
+XBinary::FT XFormats::getPrefFileType(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct)
 {
-    QSet<XBinary::FT> stFileTypes = getFileTypes(pDevice, bExtra, pPdStruct);
+    QSet<XBinary::FT> stFileTypes = getFileTypes(pDevice, nFTFlags, pPdStruct);
 
     return XBinary::_getPrefFileType(&stFileTypes);
 }
 
-XBinary::FT XFormats::getPrefFileType(const QString &sFileName, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
+XBinary::FT XFormats::getPrefFileType(const QString &sFileName, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct)
 {
     XBinary::FT fileType = XBinary::FT_UNKNOWN;
 
@@ -1112,7 +1197,7 @@ XBinary::FT XFormats::getPrefFileType(const QString &sFileName, bool bExtra, XBi
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        fileType = getPrefFileType(&file, bExtra, pPdStruct);
+        fileType = getPrefFileType(&file, nFTFlags, pPdStruct);
 
         file.close();
     }
@@ -1492,6 +1577,13 @@ bool XFormats::isArchive(XBinary::FT fileType)
     return bResult;
 }
 
+bool XFormats::isStaticUnpacker(XBinary::FT fileType)
+{
+    // The XStaticUnpacker packer/installer handle-method file types occupy a contiguous range in
+    // the FT enum (FT_PE32_7ZSFX .. FT_PE32_YODA, including the FT_CFBF_MSI/FT_CFBF_WIX entries).
+    return (fileType >= XBinary::FT_PE32_7ZSFX) && (fileType <= XBinary::FT_PE32_YODA);
+}
+
 bool XFormats::isArchive(const QString &sFileName)
 {
     bool bResult = false;
@@ -1500,7 +1592,7 @@ bool XFormats::isArchive(const QString &sFileName)
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        bResult = isArchive(XFormats::getPrefFileType(&file, true));
+        bResult = isArchive(XFormats::getPrefFileType(&file, XBinary::FT_FLAG_ARCHIVES));
 
         file.close();
     }
@@ -1650,7 +1742,7 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
 
     // Fall back to device detection if no file type in string
     if (fileType == XBinary::FT_UNKNOWN) {
-        QSet<XBinary::FT> stFileTypes = XFormats::getFileTypes(pDevice, false, pPdStruct);
+        QSet<XBinary::FT> stFileTypes = XFormats::getFileTypes(pDevice, XBinary::FT_FLAG_EXECUTABLES, pPdStruct);
         fileType = XBinary::_getPrefFileType(&stFileTypes);
     }
 
@@ -1691,17 +1783,17 @@ XBinary::XFHEADER XFormats::getXFHeaderFromStructName(QIODevice *pDevice, const 
     return result;
 }
 #ifdef USE_ARCHIVE
-QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra)
+QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, quint32 nFTFlags)
 {
     Q_UNUSED(pDevice)
     Q_UNUSED(pRecord)
-    Q_UNUSED(bExtra)
+    Q_UNUSED(nFTFlags)
 
     QSet<XBinary::FT> stResult;
 
     // QByteArray baData = XArchives::decompress(pDevice, pRecord, 0, 0, 0x200);
 
-    // stResult = XFormats::getFileTypes(&baData, bExtra);
+    // stResult = XFormats::getFileTypes(&baData, nFTFlags);
 
     return stResult;
 }
@@ -1785,7 +1877,7 @@ QSet<XBinary::FT> XFormats::getFileTypesTBZIP2(QIODevice *pDevice, QList<XArchiv
     //     const XArchive::RECORD &record = pListRecords->at(0);
     //     QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
 
-    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, XBinary::FT_FLAG_FORMATS);
 
     //     if (stFileTypes.contains(XBinary::FT_TAR)) {
     //         stResult.insert(XBinary::FT_TAR_BZIP2);
@@ -1808,7 +1900,7 @@ QSet<XBinary::FT> XFormats::getFileTypesTXZ(QIODevice *pDevice, QList<XArchive::
     //     const XArchive::RECORD &record = pListRecords->at(0);
     //     QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
 
-    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, XBinary::FT_FLAG_FORMATS);
 
     //     if (stFileTypes.contains(XBinary::FT_TAR)) {
     //         stResult.insert(XBinary::FT_TAR_XZ);
@@ -1831,7 +1923,7 @@ QSet<XBinary::FT> XFormats::getFileTypesTLZIP(QIODevice *pDevice, QList<XArchive
     //     const XArchive::RECORD &record = pListRecords->at(0);
     //     QByteArray baData = XArchives::decompress(pDevice, &record, nullptr, 0, 0x200);
 
-    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, true);
+    //     QSet<XBinary::FT> stFileTypes = getFileTypes(&baData, XBinary::FT_FLAG_FORMATS);
 
     //     if (stFileTypes.contains(XBinary::FT_TAR)) {
     //         stResult.insert(XBinary::FT_TAR_LZIP);
@@ -1870,7 +1962,7 @@ QSet<XBinary::FT> XFormats::getFileTypesGZIP(QIODevice *pDevice, QList<XArchive:
     //     const XArchive::RECORD &record = pListRecords->at(0);
     //     QByteArray baData = XArchives::decompress(pDevice, &record, pPdStruct, 0, 0x200);
 
-    //     QSet<XBinary::FT> _ft = getFileTypes(&baData, true);
+    //     QSet<XBinary::FT> _ft = getFileTypes(&baData, XBinary::FT_FLAG_FORMATS);
 
     //     if (_ft.contains(XBinary::FT_TAR)) {
     //         XTAR_GZ xtarGz(pDevice);
@@ -1918,7 +2010,7 @@ QSet<XBinary::FT> XFormats::getFileTypesLZIP(QIODevice *pDevice, QList<XArchive:
 }
 #endif
 
-QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct)
+QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct)
 {
 #ifdef QT_DEBUG
     qDebug("XFormats::_getFileTypes(): Timer started");
@@ -1942,43 +2034,52 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
         sFileTypes.clear();
     } else if (!sFileTypes.isEmpty() && !bCacheValid) {
         sFileTypes.clear();
+    } else if (nFTFlags != XBinary::FT_FLAG_FORMATS) {
+        // The external annotation has no flag-mask metadata. Re-detect for a
+        // narrowed request so categories outside the requested mask cannot leak.
+        sFileTypes.clear();
     }
 
     if (sFileTypes.isEmpty()) {
         // No cached file types, proceed with detection
         stResult.insert(XBinary::FT_BINARY);
 
-        if (XMSDOS::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
-            stResult.insert(XBinary::FT_MSDOS);
+        if ((nFTFlags & (XBinary::FT_FLAG_EXECUTABLES | XBinary::FT_FLAG_ARCHIVES)) && XMSDOS::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
+            if (nFTFlags & XBinary::FT_FLAG_EXECUTABLES) {
+                stResult.insert(XBinary::FT_MSDOS);
 
-            if (XPE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
-                stResult.insert(XBinary::FT_PE);
+                if (XPE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
+                    stResult.insert(XBinary::FT_PE);
 
-                XPE xpe(pDevice, false, (XADDR)-1);
+                    XPE xpe(pDevice, false, (XADDR)-1);
 
-                if (xpe.isValid(pPdStruct)) {
-                    stResult.insert(xpe.getFileType());
-                }
-            } else if (XNE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
-                stResult.insert(XBinary::FT_NE);
-            } else if (XLE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
-                stResult.insert(XBinary::FT_LE);
+                    if (xpe.isValid(pPdStruct)) {
+                        stResult.insert(xpe.getFileType());
+                    }
+                } else if (XNE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
+                    stResult.insert(XBinary::FT_NE);
+                } else if (XLE::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
+                    stResult.insert(XBinary::FT_LE);
 
-                XLE xle(pDevice, false, (XADDR)-1);
+                    XLE xle(pDevice, false, (XADDR)-1);
 
-                if (xle.isValid(pPdStruct)) {
-                    stResult.insert(xle.getFileType());
+                    if (xle.isValid(pPdStruct)) {
+                        stResult.insert(xle.getFileType());
+                    }
                 }
             }
 #ifdef USE_ARCHIVE
-            if (XDOS16::isValid(pDevice, pPdStruct)) {
+            if ((nFTFlags & (XBinary::FT_FLAG_EXECUTABLES | XBinary::FT_FLAG_ARCHIVES)) && XDOS16::isValid(pDevice, pPdStruct)) {
                 XDOS16 xdos16(pDevice);
                 if (xdos16.isValid(pPdStruct)) {
+                    if (nFTFlags & XBinary::FT_FLAG_ARCHIVES) {
+                        stResult.insert(XBinary::FT_ARCHIVE);
+                    }
                     stResult.insert(xdos16.getFileType());
                 }
             }
 #endif
-        } else if (XELF::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
+        } else if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && XELF::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
             stResult.insert(XBinary::FT_ELF);
 
             XELF xelf(pDevice, false, (XADDR)-1);
@@ -1986,7 +2087,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             if (xelf.isValid(pPdStruct)) {
                 stResult.insert(xelf.getFileType());
             }
-        } else if (XMACH::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
+        } else if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && XMACH::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
             stResult.insert(XBinary::FT_MACHO);
 
             XMACH xmach(pDevice);
@@ -1998,41 +2099,46 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
-        if (stResult.size() <= 1) {
+        if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && (stResult.size() <= 1)) {
             if (XAmigaHunk::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_AMIGAHUNK);
             }
         }
 
-        if (stResult.size() <= 1) {
+        if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && (stResult.size() <= 1)) {
             if (XAtariST::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
                 stResult.insert(XBinary::FT_ATARIST);
             }
         }
 
 #ifdef USE_PDF
-        if (stResult.size() <= 1) {
+        if ((nFTFlags & XBinary::FT_FLAG_DOCUMENTS) && (stResult.size() <= 1)) {
             if (XPDF::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_PDF);
             }
         }
 #endif
 #ifdef USE_PDB
-        if (stResult.size() <= 1) {
+        if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && (stResult.size() <= 1)) {
             if (XPDB::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_PDB);
             }
         }
 #endif
 #ifdef USE_DEX
-        if (stResult.size() <= 1) {
+        if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && (stResult.size() <= 1)) {
             if (XDEX::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_DEX);
             }
         }
 #endif
 #ifdef USE_ARCHIVE
-        if (stResult.size() <= 1) {
+        if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && !(nFTFlags & XBinary::FT_FLAG_ARCHIVES) && (stResult.size() <= 1) &&
+            XMACHOFat::isValid(pDevice, pPdStruct)) {
+            stResult.insert(XBinary::FT_MACHOFAT);
+        }
+
+        if ((nFTFlags & XBinary::FT_FLAG_ARCHIVES) && (stResult.size() <= 1)) {
             if (XZip::isValid(pDevice, pPdStruct)) {
                 XZip xzip(pDevice);
                 if (xzip.isValid(pPdStruct)) {
@@ -2055,15 +2161,27 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 if (XDEB::isValid(pDevice, pPdStruct)) {
                     stResult.insert(XBinary::FT_DEB);
                 }
+            } else if (XTAR_GZ::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR_GZ);
             } else if (XGzip::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_GZIP);
+            } else if (XTAR_BZIP2::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR_BZIP2);
             } else if (XBZIP2::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_BZIP2);
+            } else if (XTAR_XZ::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR_XZ);
             } else if (XXZ::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_XZ);
+            } else if (XTAR_LZIP::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR_LZIP);
             } else if (XLzip::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_LZIP);
@@ -2084,7 +2202,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
-        if (bExtra && (stResult.size() <= 1)) {
+        if ((nFTFlags & XBinary::FT_FLAG_ARCHIVES) && (stResult.size() <= 1)) {
             if (XZlib::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_ZLIB);
@@ -2094,21 +2212,52 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
             } else if (XCab::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_CAB);
+            } else if (XTAR_LZ4::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR_LZ4);
             } else if (XLZ4::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_LZ4);
+            } else if (XLZ5::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LZ5);
+            } else if (XLizard::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LIZARD);
+            } else if (isBrotliDetectionCandidate(pDevice) &&
+                       isValidBrotliArchive(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_BROTLI);
+            } else if (XTAR_LZMA::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR_LZMA);
             } else if (XLZMA::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_LZMA);
+            } else if (XTAR_LZOP::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR_LZOP);
             } else if (XLzo::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_LZO);
+            } else if (XTAR_COMPRESS::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_TAR_Z);
             } else if (XCompressZ::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_COMPRESS);
             } else if (XCPIO::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_CPIO);
+            } else if (XWARC::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_WARC);
+            } else if (XMTree::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_MTREE);
+            } else if (XUU::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_UU);
             } else if (XRPM::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_RPM);
@@ -2146,16 +2295,21 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_SZDD);
             } else if (XZstd::isValid(pDevice, pPdStruct)) {
+                // Zstd has a strong fixed magic while proving TAR requires a
+                // complete decompression.  Class creation can still select
+                // XFilteredArchive and expose a small nested TAR/CPIO/WARC,
+                // but raw-format detection itself must remain constant-time.
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_ZSTD);
-            } else if (XCFBF::isValid(pDevice, pPdStruct)) {
-                stResult.insert(XBinary::FT_CFBF);
             } else if (XISO9660::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_ISO9660);
             } else if (XUDF::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_UDF);
+            } else if (XSquashfs::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_SQUASHFS);
             } else if (XMACHOFat::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_MACHOFAT);
@@ -2170,7 +2324,18 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 #endif
 
-        if (bExtra && (stResult.size() <= 1)) {
+        if ((nFTFlags & (XBinary::FT_FLAG_DOCUMENTS | XBinary::FT_FLAG_ARCHIVES)) && (stResult.size() <= 1)) {
+            if (XCFBF::isValid(pDevice, pPdStruct)) {
+                if (nFTFlags & XBinary::FT_FLAG_ARCHIVES) {
+                    stResult.insert(XBinary::FT_ARCHIVE);
+                }
+                stResult.insert(XBinary::FT_CFBF);
+            }
+        }
+
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
+
+        if ((nFTFlags & XBinary::FT_FLAG_IMAGES) && (stResult.size() <= 1)) {
             if (XPNG::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_IMAGE);
                 stResult.insert(XBinary::FT_PNG);
@@ -2199,29 +2364,31 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
-        if (bExtra && (stResult.size() <= 1)) {
-            if (XMP3::isValid(pDevice, pPdStruct)) {
+        if ((nFTFlags & (XBinary::FT_FLAG_IMAGES | XBinary::FT_FLAG_AUDIO | XBinary::FT_FLAG_VIDEO)) && (stResult.size() <= 1)) {
+            if ((nFTFlags & XBinary::FT_FLAG_AUDIO) && XMP3::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_AUDIO);
                 stResult.insert(XBinary::FT_MP3);
-            } else if (XMP4::isValid(pDevice, pPdStruct)) {
+            } else if ((nFTFlags & XBinary::FT_FLAG_VIDEO) && XMP4::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_VIDEO);
                 stResult.insert(XBinary::FT_MP4);
-            } else if (XXM::isValid(pDevice, pPdStruct)) {
+            } else if ((nFTFlags & XBinary::FT_FLAG_AUDIO) && XXM::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_AUDIO);
                 stResult.insert(XBinary::FT_XM);
-            } else if (XAVI::isValid(pDevice, pPdStruct)) {
+            } else if ((nFTFlags & XBinary::FT_FLAG_VIDEO) && XAVI::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_RIFF);
                 stResult.insert(XBinary::FT_VIDEO);
                 stResult.insert(XBinary::FT_AVI);
-            } else if (XWEBP::isValid(pDevice, pPdStruct)) {
+            } else if ((nFTFlags & XBinary::FT_FLAG_IMAGES) && XWEBP::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_RIFF);
                 stResult.insert(XBinary::FT_IMAGE);
                 stResult.insert(XBinary::FT_WEBP);
-            } else if (XWAV::isValid(pDevice, pPdStruct)) {
+            } else if ((nFTFlags & XBinary::FT_FLAG_AUDIO) && XWAV::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_RIFF);
                 stResult.insert(XBinary::FT_AUDIO);
                 stResult.insert(XBinary::FT_WAV);
-            } else if (XRiff::isValid(pDevice, pPdStruct)) {
+            } else if (((nFTFlags & (XBinary::FT_FLAG_IMAGES | XBinary::FT_FLAG_AUDIO | XBinary::FT_FLAG_VIDEO)) ==
+                        (XBinary::FT_FLAG_IMAGES | XBinary::FT_FLAG_AUDIO | XBinary::FT_FLAG_VIDEO)) &&
+                       XRiff::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_RIFF);
             }
         }
@@ -2229,9 +2396,9 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
-        if (bExtra && (stResult.size() <= 1)) {
+        if ((nFTFlags & (XBinary::FT_FLAG_EXECUTABLES | XBinary::FT_FLAG_DOCUMENTS)) && (stResult.size() <= 1)) {
 #ifdef USE_DEX
-            if (XAndroidBinary::isValid(pDevice, pPdStruct)) {
+            if ((nFTFlags & XBinary::FT_FLAG_DOCUMENTS) && XAndroidBinary::isValid(pDevice, pPdStruct)) {
                 XAndroidBinary xandroid(pDevice);
                 stResult.insert(xandroid.getFileType());  // FT_ANDROIDXML or FT_ANDROIDASRC
             } else
@@ -2241,13 +2408,13 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
                 //     stResult.insert(XBinary::FT_DER);
                 // } else
 
-                if (XJavaClass::isValid(pDevice, pPdStruct)) {
+                if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && XJavaClass::isValid(pDevice, pPdStruct)) {
                     stResult.insert(XBinary::FT_JAVACLASS);
-                } else if (XPYC::isValid(pDevice, pPdStruct)) {
+                } else if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && XPYC::isValid(pDevice, pPdStruct)) {
                     stResult.insert(XBinary::FT_PYC);
-                } else if (XTTF::isValid(pDevice, pPdStruct)) {
+                } else if ((nFTFlags & XBinary::FT_FLAG_DOCUMENTS) && XTTF::isValid(pDevice, pPdStruct)) {
                     stResult.insert(XBinary::FT_TTF);
-                } else if (XDJVU::isValid(pDevice, pPdStruct)) {
+                } else if ((nFTFlags & XBinary::FT_FLAG_DOCUMENTS) && XDJVU::isValid(pDevice, pPdStruct)) {
                     stResult.insert(XBinary::FT_DJVU);
                 }
         }
@@ -2255,7 +2422,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
-        if (bExtra) {
+        if (nFTFlags & XBinary::FT_FLAG_TEXT) {
             if (XText::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_TEXT);
                 XText xtext(pDevice);
@@ -2283,13 +2450,56 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, bool bExtra, XBina
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
-        if ((stResult.size() <= 1) || (stResult.contains(XBinary::FT_PLAINTEXT)) || (XBinary::getDeviceFileSuffix(pDevice).toUpper() == "COM")) {
+        if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) &&
+            ((stResult.size() <= 1) || (stResult.contains(XBinary::FT_PLAINTEXT)) || (XBinary::getDeviceFileSuffix(pDevice).toUpper() == "COM"))) {
             if (XCOM::isValid(pDevice, false, (XADDR)-1, pPdStruct)) {
                 if (XBinary::getDeviceFileSuffix(pDevice).toUpper() == "COM") {
                     stResult.insert(XBinary::FT_COM);
                 }
             }
         }
+
+#ifdef USE_STATICUNPACKER
+        // Packer/protector/installer (XStaticUnpacker) file types. These are only
+        // produced when the caller explicitly asks for them (off by default),
+        // because they require probing every XStaticUnpacker class. PE-container
+        // packers are only probed when a PE was detected; MSI/WiX only when a
+        // CFBF (OLE compound) container was detected.
+        if ((nFTFlags & XBinary::FT_FLAG_STATICUNPACKERS) && XBinary::isPdStructNotCanceled(pPdStruct)) {
+            if (stResult.contains(XBinary::FT_PE)) {
+                { X7ZSFX x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XActualInstaller x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XAdvancedInstaller x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XASPACK x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XAUTOIT x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XBoxedApp x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XClickteam x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XCreateInstall x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XEnigmaVB x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XFSG x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XIExpress x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XInnoSetup x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XInstallForge x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+#ifdef USE_XEMULATOR
+                { XInstallSimple x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+#endif
+                { XMEW x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XNSIS x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XNSPACK x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XPETITE x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XSFX x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XSmartInstall x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XTarma x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XUPX x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XWinRarSfx x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XYODA x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+            }
+            if (stResult.contains(XBinary::FT_CFBF)) {
+                { XWiX x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+                { XMSI x(pDevice); if (x.isValid(pPdStruct)) stResult.insert(x.getFileType()); }
+            }
+        }
+#endif
     } else {
         // Cached file types available, return them
         stResult = stCachedFileTypes;
@@ -2352,7 +2562,7 @@ bool XFormats::unpackDeviceToFolder(XBinary::FT fileType, QIODevice *pDevice, QS
     }
 
     if (fileType == XBinary::FT_UNKNOWN) {
-        fileType = XFormats::getPrefFileType(pDevice, true, pPdStruct);
+        fileType = XFormats::getPrefFileType(pDevice, XBinary::FT_FLAG_FORMATS, pPdStruct);
         if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) return false;
     }
 
@@ -2412,6 +2622,7 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
         connect(&xDecompress, &XDecompress::errorMessage, this, &XThreadObject::errorMessage);
         connect(&xDecompress, &XDecompress::warningMessage, this, &XThreadObject::warningMessage);
         connect(&xDecompress, &XDecompress::infoMessage, this, &XThreadObject::infoMessage);
+        std::unique_ptr<XBinary> pArchiveStreamOwner;
 #endif
 
         if (XBinary::createDirectory(sFolderName)) {
@@ -2430,6 +2641,10 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 
             for (qint32 i = 0; bProgressOwnerAlive && (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
                 QString sPrefName = pListRecords->at(i).mapProperties.value(XBinary::FPART_PROP_ORIGINALNAME).toString();
+                const bool bIsFolder = pListRecords->at(i).mapProperties
+                    .value(XBinary::FPART_PROP_ISFOLDER, false).toBool() ||
+                    sPrefName.endsWith(QLatin1Char('/')) ||
+                    sPrefName.endsWith(QLatin1Char('\\'));
 #ifdef QT_DEBUG
                 qDebug("XFormats::extractArchiveRecordsToFolder: Processing record %d/%d: %s", i + 1, nNumberOfRecords, sPrefName.toLatin1().data());
 #endif
@@ -2472,7 +2687,28 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
                     const QString sResultFileName = QDir(sCanonicalParent).absoluteFilePath(sBaseName);
                     QFileInfo fi(sResultFileName);
 
-                    if (fi.isDir() || fi.isSymLink() || !isPathBelowRoot(sCanonicalRoot, sResultFileName)) {
+                    if (fi.isSymLink() || !isPathBelowRoot(sCanonicalRoot, sResultFileName)) {
+                        emit errorMessage(QString("%1: %2").arg(tr("Cannot create")).arg(sResultFileName));
+                        bResult = false;
+                        bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, nGlobalIndex, progressLifetime);
+                        if (!bProgressOwnerAlive) return false;
+                        continue;
+                    }
+
+                    if (bIsFolder) {
+                        const bool bFolderResult = fi.exists()
+                            ? fi.isDir()
+                            : XBinary::createDirectory(sResultFileName);
+                        if (!bFolderResult) {
+                            emit errorMessage(QString("%1: %2").arg(tr("Cannot create")).arg(sResultFileName));
+                            bResult = false;
+                        }
+                        bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, nGlobalIndex, progressLifetime);
+                        if (!bProgressOwnerAlive) return false;
+                        continue;
+                    }
+
+                    if (fi.isDir()) {
                         emit errorMessage(QString("%1: %2").arg(tr("Cannot create")).arg(sResultFileName));
                         bResult = false;
                         bProgressOwnerAlive = XBinary::setPdStructCurrentIncrementChecked(pPdStruct, nGlobalIndex, progressLifetime);
@@ -2488,8 +2724,63 @@ bool XFormats::extractArchiveRecordsToFolder(QList<XBinary::ARCHIVERECORD> *pLis
 
 #ifdef USE_ARCHIVE
                         QMap<XBinary::UNPACK_PROP, QVariant> mapUnpackProperties;
+                        qint32 nArchiveStreamIndex = -1;
+                        if (XBinary::getArchiveStreamRecordIndex(
+                                archiveRecord, &nArchiveStreamIndex)) {
+                            Q_UNUSED(nArchiveStreamIndex)
+                            XArchive *pArchive = dynamic_cast<XArchive *>(
+                                pArchiveStreamOwner.get());
+                            if (!pArchiveStreamOwner) {
+                                DevicePositionGuard positionGuard(pDevice);
+                                const XBinary::FT ownerType = getPrefFileType(
+                                    pDevice, XBinary::FT_FLAG_ARCHIVES,
+                                    pPdStruct);
+                                if (XBinary::isPdStructLifetimeAlive(
+                                        progressLifetime) &&
+                                    XBinary::isPdStructNotCanceled(pPdStruct)) {
+                                    pArchiveStreamOwner.reset(
+                                        createClass(ownerType, pDevice));
+                                }
+                                pArchive = dynamic_cast<XArchive *>(
+                                    pArchiveStreamOwner.get());
+                            }
 
-                        bRecordResult = xDecompress.decompressArchiveRecord(archiveRecord, pDevice, &file, mapUnpackProperties, pPdStruct);
+                            QTemporaryFile stagedFile(
+                                QDir(sCanonicalParent).filePath(
+                                    QLatin1String(".xformats-XXXXXX")));
+                            bRecordResult = pArchive && stagedFile.open() &&
+                                pArchive->unpackArchiveStreamRecord(
+                                    archiveRecord, &stagedFile,
+                                    mapUnpackProperties, pPdStruct);
+                            if (bRecordResult) {
+                                const qint64 nStagedSize = stagedFile.size();
+                                bRecordResult = (nStagedSize >= 0) &&
+                                    XBinary::copyDeviceMemory(
+                                        &stagedFile, 0, &file, 0,
+                                        nStagedSize, pPdStruct);
+                            }
+                        } else {
+                            // QSaveFile is write-only, while the decoder rereads
+                            // its complete output to verify the record's stored
+                            // checksum - so decoding straight into it fails for
+                            // every format that carries one (ZIP, for instance).
+                            // Stage into a readable temporary exactly as the
+                            // archive-stream branch above does, then publish.
+                            QTemporaryFile stagedFile(
+                                QDir(sCanonicalParent).filePath(
+                                    QLatin1String(".xformats-XXXXXX")));
+                            bRecordResult = stagedFile.open() &&
+                                xDecompress.decompressArchiveRecord(
+                                    archiveRecord, pDevice, &stagedFile,
+                                    mapUnpackProperties, pPdStruct);
+                            if (bRecordResult) {
+                                const qint64 nStagedSize = stagedFile.size();
+                                bRecordResult = (nStagedSize >= 0) &&
+                                    XBinary::copyDeviceMemory(
+                                        &stagedFile, 0, &file, 0,
+                                        nStagedSize, pPdStruct);
+                            }
+                        }
                         bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
                         if (!bProgressOwnerAlive) {
                             file.cancelWriting();
@@ -2581,16 +2872,18 @@ bool XFormats::packFolderToDevice(XBinary::FT fileType, QIODevice *pDevice, cons
 }
 
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, XBinary::TL_OPTION tlOption)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, quint32 nFileTypeFlags)
 {
     const bool bBlocked1 = pComboBox->blockSignals(true);
 
     QList<XBinary::FT> listFileTypes;
 
     if (fileType != XBinary::FT_REGION) {
-        QSet<XBinary::FT> stFileType = XFormats::getFileTypes(pDevice, true);
+        // Always detect the standard formats (so category/symbols filtering has something to work
+        // with), plus the packer/installer handle-method types only when explicitly requested.
+        QSet<XBinary::FT> stFileType = XFormats::getFileTypes(pDevice, XBinary::FT_FLAG_FORMATS | (nFileTypeFlags & XBinary::FT_FLAG_STATICUNPACKERS));
 
-        listFileTypes = XBinary::_getFileTypeListFromSet(stFileType, tlOption);
+        listFileTypes = XBinary::_getFileTypeListFromSet(stFileType, nFileTypeFlags);
     } else {
         listFileTypes.append(XBinary::FT_REGION);
     }
@@ -2618,7 +2911,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevi
 }
 #endif
 #ifdef QT_GUI_LIB
-XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox, XBinary::TL_OPTION tlOption)
+XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox, quint32 nFileTypeFlags)
 {
     XBinary::FT result = XBinary::FT_UNKNOWN;
 
@@ -2626,7 +2919,7 @@ XBinary::FT XFormats::setFileTypeComboBox(XBinary::FT fileType, const QString &s
     file.setFileName(sFileName);
 
     if (file.open(QIODevice::ReadOnly)) {
-        result = setFileTypeComboBox(fileType, &file, pComboBox, tlOption);
+        result = setFileTypeComboBox(fileType, &file, pComboBox, nFileTypeFlags);
 
         file.close();
     }
@@ -2920,7 +3213,7 @@ QVector<XBinary::KeyValueItem> XFormats::getEntropy(QIODevice *pDevice, bool bIs
 
     if (!bProgressOwnerAlive || !XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
-    XBinary::FT fileType = getPrefFileType(pDevice, true, pPdStruct);
+    XBinary::FT fileType = getPrefFileType(pDevice, XBinary::FT_FLAG_FORMATS, pPdStruct);
     bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
     if (!bProgressOwnerAlive || !XBinary::isPdStructNotCanceled(pPdStruct)) return {};
     XBinary::_MEMORY_MAP memoryMap = getMemoryMap(fileType, XBinary::MAPMODE_UNKNOWN, pDevice, bIsImage, nModuleAddress, pPdStruct);
@@ -2961,7 +3254,7 @@ QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bI
     if (!bProgressOwnerAlive || !isReadableSeekableDevice(pDevice) || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
     DevicePositionGuard positionGuard(pDevice);
 
-    XBinary::FT fileType = getPrefFileType(pDevice, true, pPdStruct);
+    XBinary::FT fileType = getPrefFileType(pDevice, XBinary::FT_FLAG_FORMATS, pPdStruct);
     bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
     if (!bProgressOwnerAlive || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
     XBinary *pBinary = createClass(fileType, pDevice, bIsImage, nModuleAddress);

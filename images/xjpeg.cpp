@@ -34,11 +34,6 @@ const qint64 JPEG_EXIF_DATA_OFFSET = 10;
 const qint32 JPEG_MAX_COMMENT_SIZE = 100;
 const qint32 JPEG_MAX_CHUNK_COUNT = 65536;
 
-const qint64 JFIF_ID_OFFSET = 6;
-const qint32 JFIF_ID_SIZE = 5;
-const qint64 JFIF_VERSION_MAJOR_OFFSET = 0x0B;
-const qint64 JFIF_VERSION_MINOR_OFFSET = 0x0C;
-
 const quint8 JPEG_MARKER_PREFIX = 0xFF;
 const quint8 JPEG_MARKER_STUFFED_ZERO = 0x00;
 const quint8 JPEG_MARKER_RST0 = 0xD0;
@@ -47,6 +42,7 @@ const quint8 JPEG_MARKER_SOI = 0xD8;
 const quint8 JPEG_MARKER_EOI = 0xD9;
 const quint8 JPEG_MARKER_SOS = 0xDA;
 const quint8 JPEG_MARKER_DQT = 0xDB;
+const quint8 JPEG_MARKER_APP0 = 0xE0;
 const quint8 JPEG_MARKER_APP1 = 0xE1;
 const quint8 JPEG_MARKER_COM = 0xFE;
 
@@ -167,14 +163,18 @@ qint64 XJpeg::getFileFormatSize(PDSTRUCT *pPdStruct)
 QString XJpeg::getVersion()
 {
     QString sResult;
+    QList<CHUNK> listChunks = getChunks();
+    const OFFSETSIZE osJFIF = getJFIF(&listChunks);
 
-    QString sIdent = read_ansiString(JFIF_ID_OFFSET, JFIF_ID_SIZE);
-
-    if (sIdent == "JFIF") {
-        quint8 nMajor = read_uint8(JFIF_VERSION_MAJOR_OFFSET);
-        quint8 nMinor = read_uint8(JFIF_VERSION_MINOR_OFFSET);
-
-        sResult = QString("%1.%2").arg(QString::number(nMajor)).arg(QString::number(nMinor));
+    if (getDevice() && isJFIFPresent(osJFIF)) {
+        SubDevice subDevice(getDevice(), osJFIF.nOffset, osJFIF.nSize);
+        if (subDevice.open(QIODevice::ReadOnly)) {
+            XJFIF jfif(&subDevice);
+            if (jfif.isValid()) {
+                sResult = jfif.getVersion();
+            }
+            subDevice.close();
+        }
     }
 
     return sResult;
@@ -409,6 +409,36 @@ bool XJpeg::isChunkPresent(QList<CHUNK> *pListChunks, quint8 nId)
     return bResult;
 }
 
+XBinary::OFFSETSIZE XJpeg::getJFIF(QList<CHUNK> *pListChunks)
+{
+    OFFSETSIZE result = {};
+
+    if (!pListChunks) {
+        return result;
+    }
+
+    const QList<CHUNK> listAPP0 = _getChunksById(pListChunks, JPEG_MARKER_APP0);
+
+    for (qint32 i = 0; i < listAPP0.count(); ++i) {
+        const CHUNK &chunk = listAPP0.at(i);
+
+        if ((chunk.nDataSize >= JPEG_SEGMENT_HEADER_SIZE + 14) && (chunk.nDataOffset >= 0) &&
+            (chunk.nDataOffset <= getSize() - chunk.nDataSize) &&
+            (read_array(chunk.nDataOffset + JPEG_SEGMENT_HEADER_SIZE, 5) == QByteArray("JFIF\0", 5))) {
+            result.nOffset = chunk.nDataOffset + JPEG_SEGMENT_HEADER_SIZE;
+            result.nSize = chunk.nDataSize - JPEG_SEGMENT_HEADER_SIZE;
+            break;
+        }
+    }
+
+    return result;
+}
+
+bool XJpeg::isJFIFPresent(OFFSETSIZE osJFIF)
+{
+    return osJFIF.nSize > 0;
+}
+
 XBinary::OFFSETSIZE XJpeg::getExif(QList<CHUNK> *pListChunks)
 {
     OFFSETSIZE result = {};
@@ -442,6 +472,82 @@ bool XJpeg::isExifPresent(OFFSETSIZE osExif)
 QString XJpeg::getMIMEString()
 {
     return "image/jpeg";
+}
+
+QVector<XBinary::XMETADATA_STRUCT> XJpeg::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    QList<CHUNK> listChunks = getChunks(nullptr);
+
+    for (qint32 i = 0; i < listChunks.count(); ++i) {
+        const CHUNK &chunk = listChunks.at(i);
+        const bool bStartOfFrame = ((chunk.nId >= 0xC0) && (chunk.nId <= 0xC3)) || ((chunk.nId >= 0xC5) && (chunk.nId <= 0xC7)) ||
+                                   ((chunk.nId >= 0xC9) && (chunk.nId <= 0xCB)) || ((chunk.nId >= 0xCD) && (chunk.nId <= 0xCF));
+        if (!bStartOfFrame || (chunk.nDataSize < 9)) {
+            continue;
+        }
+
+        auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName,
+                                                  const QVariant &varValue) {
+            XMETADATA_STRUCT record = {};
+            record.nOffset = nOffset;
+            record.nSize = nSize;
+            record.nAddress = offsetToAddress(nOffset);
+            record.id = id;
+            record.sName = sName;
+            record.varValue = varValue;
+            listResult.append(record);
+        };
+
+        appendMetadata(chunk.nDataOffset + 5, 2, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), read_uint16(chunk.nDataOffset + 5, true));
+        appendMetadata(chunk.nDataOffset + 7, 2, XMETADATA_ID_FRAME_WIDTH, QString("Width"), read_uint16(chunk.nDataOffset + 7, true));
+        appendMetadata(chunk.nDataOffset + 4, 1, XMETADATA_ID_BIT_DEPTH, QString("Sample precision"), read_uint8(chunk.nDataOffset + 4));
+        break;
+    }
+
+    const OFFSETSIZE osJFIF = getJFIF(&listChunks);
+
+    if (getDevice() && isJFIFPresent(osJFIF)) {
+        SubDevice subDevice(getDevice(), osJFIF.nOffset, osJFIF.nSize);
+        if (subDevice.open(QIODevice::ReadOnly)) {
+            XJFIF jfif(&subDevice);
+            if (jfif.isValid()) {
+                QVector<XMETADATA_STRUCT> listJFIFMetadata = jfif.getMetadataStructs();
+                for (qint32 i = 0; i < listJFIFMetadata.count(); ++i) {
+                    XMETADATA_STRUCT &record = listJFIFMetadata[i];
+                    record.nOffset += osJFIF.nOffset;
+                    record.nAddress = offsetToAddress(record.nOffset);
+                }
+                listResult += listJFIFMetadata;
+            }
+            subDevice.close();
+        }
+    }
+
+    const OFFSETSIZE osExif = getExif(&listChunks);
+
+    if (!getDevice() || (osExif.nOffset < 0) || (osExif.nSize <= 0)) {
+        return listResult;
+    }
+
+    SubDevice subDevice(getDevice(), osExif.nOffset, osExif.nSize);
+    if (!subDevice.open(QIODevice::ReadOnly)) {
+        return listResult;
+    }
+
+    XTiff tiff(&subDevice);
+    if (tiff.isValid()) {
+        QVector<XMETADATA_STRUCT> listExifMetadata = tiff.getMetadataStructs();
+        for (qint32 i = 0; i < listExifMetadata.count(); ++i) {
+            XMETADATA_STRUCT &record = listExifMetadata[i];
+            record.nOffset += osExif.nOffset;
+            record.nAddress = offsetToAddress(record.nOffset);
+        }
+        listResult += listExifMetadata;
+    }
+
+    subDevice.close();
+    return listResult;
 }
 
 QString XJpeg::structIDToString(quint32 nID)

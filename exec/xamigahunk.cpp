@@ -204,7 +204,8 @@ qint64 XAmigaHunk::_getHunkSize(qint64 nOffset, PDSTRUCT *pPdStruct)
         quint32 nCodeSize = read_uint32(nCurrentOffset, true);
         nCurrentOffset += 4;
         nCurrentOffset += (nCodeSize * 4);
-    } else if (nId == XAMIGAHUNK_DEF::HUNK_RELOC32) {
+    } else if ((nId == XAMIGAHUNK_DEF::HUNK_RELOC32) || (nId == XAMIGAHUNK_DEF::HUNK_RELOC16) || (nId == XAMIGAHUNK_DEF::HUNK_RELOC8) ||
+               (nId == XAMIGAHUNK_DEF::HUNK_DREL32) || (nId == XAMIGAHUNK_DEF::HUNK_DREL16) || (nId == XAMIGAHUNK_DEF::HUNK_DREL8)) {
         while (XBinary::isPdStructNotCanceled(pPdStruct)) {
             quint32 nRelocSize = read_uint32(nCurrentOffset, true);
             nCurrentOffset += 4;
@@ -216,6 +217,59 @@ qint64 XAmigaHunk::_getHunkSize(qint64 nOffset, PDSTRUCT *pPdStruct)
             // quint32 nHunk = read_uint32(nCurrentOffset + 4, true);
             nCurrentOffset += 4;
             nCurrentOffset += (nRelocSize * 4);
+        }
+    } else if ((nId == XAMIGAHUNK_DEF::HUNK_UNIT) || (nId == XAMIGAHUNK_DEF::HUNK_NAME)) {
+        const quint32 nNameSize = read_uint32(nCurrentOffset, true);
+        nCurrentOffset += 4 + (qint64)nNameSize * 4;
+    } else if (nId == XAMIGAHUNK_DEF::HUNK_EXT) {
+        qint32 nGuard = 0;
+
+        while (XBinary::isPdStructNotCanceled(pPdStruct) && checkOffsetSize(nCurrentOffset, 4) && (nGuard++ < 0x10000)) {
+            const quint32 nTypeLength = read_uint32(nCurrentOffset, true);
+            nCurrentOffset += 4;
+            if (nTypeLength == 0) {
+                break;
+            }
+
+            const quint8 nType = (quint8)(nTypeLength >> 24);
+            const quint32 nNameLongs = nTypeLength & 0x00FFFFFF;
+            const qint64 nNameSize = (qint64)nNameLongs * 4;
+            if (!checkOffsetSize(nCurrentOffset, nNameSize)) {
+                bStop = true;
+                break;
+            }
+            nCurrentOffset += nNameSize;
+
+            if (nType <= 3) {  // EXT_SYMB/DEF/ABS/RES
+                if (!checkOffsetSize(nCurrentOffset, 4)) {
+                    bStop = true;
+                    break;
+                }
+                nCurrentOffset += 4;
+            } else if (nType >= 0x80) {  // EXT_REF* / EXT_COMMON
+                if (nType == 0x82) {     // EXT_COMMON: common size precedes the reference count
+                    if (!checkOffsetSize(nCurrentOffset, 4)) {
+                        bStop = true;
+                        break;
+                    }
+                    nCurrentOffset += 4;
+                }
+
+                if (!checkOffsetSize(nCurrentOffset, 4)) {
+                    bStop = true;
+                    break;
+                }
+                const quint32 nReferences = read_uint32(nCurrentOffset, true);
+                nCurrentOffset += 4;
+                if ((nReferences > 0x100000) || !checkOffsetSize(nCurrentOffset, (qint64)nReferences * 4)) {
+                    bStop = true;
+                    break;
+                }
+                nCurrentOffset += (qint64)nReferences * 4;
+            } else {
+                bStop = true;
+                break;
+            }
         }
     } else if (nId == XAMIGAHUNK_DEF::HUNK_BSS) {
         nCurrentOffset += 4;
@@ -292,6 +346,157 @@ QList<XAmigaHunk::HUNK> XAmigaHunk::getHunks(PDSTRUCT *pPdStruct)
 
         if (nCurrentOffset >= nTotalSize) {
             break;
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XAmigaHunk::getSymbolStructs()
+{
+    QVector<XSYMBOL_STRUCT> listResult;
+    const QList<HUNK> listHunks = getHunks();
+    XADDR nCurrentAddress = XAMIGAHUNK_DEF::IMAGE_BASE;
+    XADDR nCurrentHunkAddress = nCurrentAddress;
+
+    for (qint32 i = 0; i < listHunks.count(); ++i) {
+        const HUNK &hunk = listHunks.at(i);
+
+        if ((hunk.nId == XAMIGAHUNK_DEF::HUNK_CODE) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_DATA) || (hunk.nId == XAMIGAHUNK_DEF::HUNK_BSS) ||
+            (hunk.nId == XAMIGAHUNK_DEF::HUNK_PPC_CODE)) {
+            nCurrentHunkAddress = nCurrentAddress;
+            const quint32 nLongwords = read_uint32(hunk.nOffset + 4, true);
+            nCurrentAddress += (XADDR)align_up((XADDR)nLongwords * 4, 16);
+            continue;
+        }
+
+        if (hunk.nId == XAMIGAHUNK_DEF::HUNK_SYMBOL) {
+            qint64 nOffset = hunk.nOffset + 4;
+            const qint64 nEnd = hunk.nOffset + hunk.nSize;
+            qint32 nGuard = 0;
+
+            while ((nOffset + 4 <= nEnd) && (nGuard++ < 0x10000)) {
+                const qint64 nEntryOffset = nOffset;
+                const quint32 nNameLongs = read_uint32(nOffset, true);
+                nOffset += 4;
+                if (nNameLongs == 0) {
+                    break;
+                }
+
+                const qint64 nNameSize = (qint64)nNameLongs * 4;
+                if ((nNameSize > nEnd - nOffset) || (nOffset + nNameSize > nEnd - 4)) {
+                    break;
+                }
+
+                QByteArray baName = read_array(nOffset, nNameSize);
+                const qint32 nZero = baName.indexOf('\0');
+                if (nZero >= 0) baName.truncate(nZero);
+                nOffset += nNameSize;
+                const quint32 nValue = read_uint32(nOffset, true);
+                nOffset += 4;
+
+                XSYMBOL_STRUCT record = {};
+                record.nOffset = nEntryOffset;
+                record.nSize = nOffset - nEntryOffset;
+                record.nAddress = nCurrentHunkAddress + nValue;
+                record.sName = QString::fromLatin1(baName);
+                record.symbolType = SYMBOL_TYPE_LABEL;
+                if (!record.sName.isEmpty()) listResult.append(record);
+            }
+        } else if (hunk.nId == XAMIGAHUNK_DEF::HUNK_EXT) {
+            qint64 nOffset = hunk.nOffset + 4;
+            const qint64 nEnd = hunk.nOffset + hunk.nSize;
+            qint32 nGuard = 0;
+
+            while ((nOffset + 4 <= nEnd) && (nGuard++ < 0x10000)) {
+                const qint64 nEntryOffset = nOffset;
+                const quint32 nTypeLength = read_uint32(nOffset, true);
+                nOffset += 4;
+                if (nTypeLength == 0) {
+                    break;
+                }
+
+                const quint8 nType = (quint8)(nTypeLength >> 24);
+                const qint64 nNameSize = (qint64)(nTypeLength & 0x00FFFFFF) * 4;
+                if ((nNameSize > nEnd - nOffset) || !checkOffsetSize(nOffset, nNameSize)) {
+                    break;
+                }
+
+                QByteArray baName = read_array(nOffset, nNameSize);
+                const qint32 nZero = baName.indexOf('\0');
+                if (nZero >= 0) baName.truncate(nZero);
+                nOffset += nNameSize;
+
+                XSYMBOL_STRUCT record = {};
+                record.nOffset = nEntryOffset;
+                record.nAddress = (XADDR)-1;
+                record.sName = QString::fromLatin1(baName);
+                record.symbolType = SYMBOL_TYPE_UNKNOWN;
+
+                if ((nType <= 3) && (nOffset + 4 <= nEnd)) {
+                    const quint32 nValue = read_uint32(nOffset, true);
+                    nOffset += 4;
+                    record.nAddress = (nType == 2) ? nValue : nCurrentHunkAddress + nValue;
+                    record.symbolType = (nType == 0) ? SYMBOL_TYPE_LABEL : SYMBOL_TYPE_EXPORT;
+                } else if ((nType >= 0x80) && (nOffset + 4 <= nEnd)) {
+                    if (nType == 0x82) {
+                        nOffset += 4;
+                    }
+                    if (nOffset + 4 > nEnd) break;
+                    const quint32 nReferences = read_uint32(nOffset, true);
+                    nOffset += 4;
+                    if ((nReferences > 0x100000) || ((qint64)nReferences * 4 > nEnd - nOffset)) break;
+                    nOffset += (qint64)nReferences * 4;
+                    record.symbolType = SYMBOL_TYPE_IMPORT;
+                } else {
+                    break;
+                }
+
+                record.nSize = nOffset - nEntryOffset;
+                if (!record.sName.isEmpty() && (record.symbolType != SYMBOL_TYPE_UNKNOWN)) listResult.append(record);
+            }
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XAmigaHunk::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+    const QVector<XSYMBOL_STRUCT> listSymbols = getSymbolStructs();
+
+    for (qint32 i = 0; i < listSymbols.count(); ++i) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+        if (symbol.symbolType == SYMBOL_TYPE_IMPORT) {
+            XIMPORT_STRUCT record = {};
+            record.nOffset = symbol.nOffset;
+            record.nSize = symbol.nSize;
+            record.nAddress = symbol.nAddress;
+            record.sFunction = symbol.sName;
+            record.nOrdinal = -1;
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XAmigaHunk::getExportStructs()
+{
+    QVector<XEXPORT_STRUCT> listResult;
+    const QVector<XSYMBOL_STRUCT> listSymbols = getSymbolStructs();
+
+    for (qint32 i = 0; i < listSymbols.count(); ++i) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+        if (symbol.symbolType == SYMBOL_TYPE_EXPORT) {
+            XEXPORT_STRUCT record = {};
+            record.nOffset = symbol.nOffset;
+            record.nSize = symbol.nSize;
+            record.nAddress = symbol.nAddress;
+            record.sFunction = symbol.sName;
+            record.nOrdinal = -1;
+            listResult.append(record);
         }
     }
 

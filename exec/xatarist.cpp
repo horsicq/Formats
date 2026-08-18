@@ -91,6 +91,99 @@ XATARIST_DEF::HEADER XAtariST::getHeader()
     return result;
 }
 
+QVector<XBinary::XSYMBOL_STRUCT> XAtariST::getSymbolStructs()
+{
+    QVector<XSYMBOL_STRUCT> listResult;
+    const XATARIST_DEF::HEADER header = getHeader();
+    const qint64 nSymbolOffset = 28 + (qint64)header.nTextSize + header.nDataSize;
+    const qint64 nSymbolSize = qMin<qint64>(header.nSymbolSize, 14LL * 0x20000);
+    const qint64 nRecordSize = 14;
+
+    if ((nSymbolSize <= 0) || !checkOffsetSize(nSymbolOffset, nSymbolSize)) {
+        return listResult;
+    }
+
+    const quint16 SYMBOL_DEFINED = 0x8000;
+    const quint16 SYMBOL_GLOBAL = 0x2000;
+    const quint16 SYMBOL_EXTERNAL = 0x0800;
+    const qint64 nCount = nSymbolSize / nRecordSize;
+    listResult.reserve((qint32)nCount);
+
+    for (qint64 i = 0; i < nCount; ++i) {
+        const qint64 nOffset = nSymbolOffset + i * nRecordSize;
+        QByteArray baName = read_array(nOffset, 8);
+        const qint32 nZero = baName.indexOf('\0');
+        if (nZero >= 0) {
+            baName.truncate(nZero);
+        }
+
+        const quint16 nType = read_uint16(nOffset + 8, true);
+        const quint32 nValue = read_uint32(nOffset + 10, true);
+
+        XSYMBOL_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nRecordSize;
+        record.nAddress = (nType & SYMBOL_EXTERNAL) ? (XADDR)-1 : getModuleAddress() + nValue;
+        record.sName = QString::fromLatin1(baName).trimmed();
+
+        if (nType & SYMBOL_EXTERNAL) {
+            record.symbolType = SYMBOL_TYPE_IMPORT;
+        } else if ((nType & SYMBOL_GLOBAL) && (nType & SYMBOL_DEFINED)) {
+            record.symbolType = SYMBOL_TYPE_EXPORT;
+        } else {
+            record.symbolType = SYMBOL_TYPE_LABEL;
+        }
+
+        if (!record.sName.isEmpty()) {
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XAtariST::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+    const QVector<XSYMBOL_STRUCT> listSymbols = getSymbolStructs();
+
+    for (qint32 i = 0; i < listSymbols.count(); ++i) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+        if (symbol.symbolType == SYMBOL_TYPE_IMPORT) {
+            XIMPORT_STRUCT record = {};
+            record.nOffset = symbol.nOffset;
+            record.nSize = symbol.nSize;
+            record.nAddress = symbol.nAddress;
+            record.sFunction = symbol.sName;
+            record.nOrdinal = -1;
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XAtariST::getExportStructs()
+{
+    QVector<XEXPORT_STRUCT> listResult;
+    const QVector<XSYMBOL_STRUCT> listSymbols = getSymbolStructs();
+
+    for (qint32 i = 0; i < listSymbols.count(); ++i) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+        if (symbol.symbolType == SYMBOL_TYPE_EXPORT) {
+            XEXPORT_STRUCT record = {};
+            record.nOffset = symbol.nOffset;
+            record.nSize = symbol.nSize;
+            record.nAddress = symbol.nAddress;
+            record.sFunction = symbol.sName;
+            record.nOrdinal = -1;
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
 QList<XBinary::MAPMODE> XAtariST::getMapModesList()
 {
     QList<XBinary::MAPMODE> listResult;

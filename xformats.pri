@@ -132,6 +132,11 @@ contains(XCONFIG, use_archive) {
     include($$PWD/images/xpng.pri)
 }
 
+!contains(XCONFIG, xjfif) {
+    XCONFIG += xjfif
+    include($$PWD/images/xjfif.pri)
+}
+
 !contains(XCONFIG, xjpeg) {
     XCONFIG += xjpeg
     include($$PWD/images/xjpeg.pri)

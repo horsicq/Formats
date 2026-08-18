@@ -1308,12 +1308,89 @@ QList<XLE_DEF::o32_map> XLE::getMapsLX()
 
 bool XLE::isImportPresent()
 {
-    return (getImageVxdHeader_impmodcnt() != 0);
+    return !getImportStructs().isEmpty();
 }
 
 bool XLE::isResourcesPresent()
 {
-    return (getImageVxdHeader_rsrccnt() != 0);
+    return !getResourceStructs().isEmpty();
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XLE::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+    const quint32 nCount = qMin<quint32>(getImageVxdHeader_impmodcnt(), 0x10000);
+    const qint64 nHeaderOffset = getImageVxdHeaderOffset();
+
+    if ((nCount == 0) || (nHeaderOffset < 0)) {
+        return listResult;
+    }
+
+    qint64 nCurrentOffset = nHeaderOffset + getImageVxdHeader_impmod();
+
+    for (quint32 i = 0; (i < nCount) && checkOffsetSize(nCurrentOffset, 1); ++i) {
+        const quint8 nLength = read_uint8(nCurrentOffset);
+        if (!checkOffsetSize(nCurrentOffset + 1, nLength)) {
+            break;
+        }
+
+        XIMPORT_STRUCT record = {};
+        record.nOffset = nCurrentOffset;
+        record.nSize = 1 + nLength;
+        record.nAddress = (XADDR)-1;
+        record.sLibrary = QString::fromLatin1(read_array(nCurrentOffset + 1, nLength));
+        record.nOrdinal = -1;
+        listResult.append(record);
+
+        nCurrentOffset += 1 + nLength;
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XRESOURCE_STRUCT> XLE::getResourceStructs()
+{
+    QVector<XRESOURCE_STRUCT> listResult;
+    const quint32 nCount = qMin<quint32>(getImageVxdHeader_rsrccnt(), 0x10000);
+    const qint64 nHeaderOffset = getImageVxdHeaderOffset();
+    const qint64 nRecordSize = 14;  // LX/LE rsrc: type, name, size, object, offset
+
+    if ((nCount == 0) || (nHeaderOffset < 0)) {
+        return listResult;
+    }
+
+    const qint64 nTableOffset = nHeaderOffset + getImageVxdHeader_rsrctab();
+    if (!checkOffsetSize(nTableOffset, (qint64)nCount * nRecordSize)) {
+        return listResult;
+    }
+
+    const QList<XLE_DEF::o32_obj> listObjects = getObjects();
+    _MEMORY_MAP memoryMap = getMemoryMap();
+    listResult.reserve((qint32)nCount);
+
+    for (quint32 i = 0; i < nCount; ++i) {
+        const qint64 nOffset = nTableOffset + (qint64)i * nRecordSize;
+        const quint16 nType = read_uint16(nOffset);
+        const quint16 nName = read_uint16(nOffset + 2);
+        const quint32 nSize = read_uint32(nOffset + 4);
+        const quint16 nObject = read_uint16(nOffset + 8);
+        const quint32 nObjectOffset = read_uint32(nOffset + 10);
+
+        if ((nObject == 0) || (nObject > listObjects.count())) {
+            continue;
+        }
+
+        XRESOURCE_STRUCT record = {};
+        record.nSize = nSize;
+        record.nAddress = (XADDR)listObjects.at(nObject - 1).o32_base + nObjectOffset;
+        record.nOffset = addressToOffset(&memoryMap, record.nAddress);
+        record.nType = nType;
+        record.nID = nName;
+        record.sName = QString("Resource_%1").arg(nName);
+        listResult.append(record);
+    }
+
+    return listResult;
 }
 
 XBinary::_MEMORY_MAP XLE::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)

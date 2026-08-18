@@ -93,6 +93,7 @@ public:
     virtual quint32 ftStringToStructID(const QString &sFtString) override;
     virtual QList<XFHEADER> getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *pPdStruct) override;
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
 
     // TTF-specific
     static QString tagToString(quint32 tag);

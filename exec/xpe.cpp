@@ -20,6 +20,7 @@
  */
 #include "xpe.h"
 #include "xcliassembly.h"
+#include <algorithm>
 #include <limits>
 
 
@@ -4230,10 +4231,19 @@ quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResu
                 }
 
                 if (nLevel == 3) {
-                    QString sValue = read_unicodeString(nOffset + nDelta);
+                    const qint64 nValueCharacters = qMin<qint64>(vi.wValueLength, qMax<qint64>(0, (vi.wLength - nDelta) / sizeof(quint16)));
+                    QString sValue = read_unicodeString(nOffset + nDelta, nValueCharacters);
                     _sPrefix += QString(":%1").arg(sValue);
 
                     pResourcesVersionResult->listRecords.append(_sPrefix);
+
+                    RESOURCE_VERSION_RECORD record = {};
+                    record.nOffset = nOffset + nDelta;
+                    record.nSize = nValueCharacters * sizeof(quint16);
+                    record.sPath = _sPrefix.section(":", 0, 0);
+                    record.sKey = sTitle;
+                    record.sValue = sValue;
+                    pResourcesVersionResult->listVersionRecords.append(record);
                 }
 
                 if (_sPrefix == "VS_VERSION_INFO.VarFileInfo.Translation") {
@@ -4243,6 +4253,14 @@ quint32 XPE::__getResourcesVersion(XPE::RESOURCES_VERSION *pResourcesVersionResu
                         _sPrefix += QString(":%1").arg(sValue);
 
                         pResourcesVersionResult->listRecords.append(_sPrefix);
+
+                        RESOURCE_VERSION_RECORD record = {};
+                        record.nOffset = nOffset + nDelta;
+                        record.nSize = sizeof(quint32);
+                        record.sPath = _sPrefix.section(":", 0, 0);
+                        record.sKey = sTitle;
+                        record.sValue = sValue;
+                        pResourcesVersionResult->listVersionRecords.append(record);
                     }
                 }
 
@@ -14543,7 +14561,16 @@ QList<qint64> XPE::getRelocsAsRVAList()
         }
     }
 
-    return stResult.values();
+    // SORTED, and not merely because ascending RVAs read better. QSet iteration order is a
+    // function of Qt's per-PROCESS random hash seed, so returning stResult.values() straight
+    // out would hand every caller of this public API a list whose order changes from one run
+    // to the next, for the very same file. Sorting costs nothing here and makes the result a
+    // function of the input alone.
+    QList<qint64> listResult = stResult.values();
+
+    std::sort(listResult.begin(), listResult.end());
+
+    return listResult;
 }
 
 QList<XPE::RELOCS_HEADER> XPE::getRelocsHeaders(PDSTRUCT *pPdStruct)
@@ -15047,6 +15074,138 @@ QVector<XBinary::XRESOURCE_STRUCT> XPE::getResourceStructs()
         record.sName = resource.irin[1].bIsName ? resource.irin[1].sName : resource.irin[0].sName;
 
         listResult.append(record);
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XMETADATA_STRUCT> XPE::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+
+    auto versionKeyToMetadataId = [](const QString &sKey) -> XMETADATA_ID {
+        const QString sNormalizedKey = sKey.toLower();
+
+        if (sNormalizedKey == "comments") return XMETADATA_ID_COMMENTS;
+        if (sNormalizedKey == "companyname") return XMETADATA_ID_COMPANY_NAME;
+        if (sNormalizedKey == "filedescription") return XMETADATA_ID_FILE_DESCRIPTION;
+        if (sNormalizedKey == "fileversion") return XMETADATA_ID_FILE_VERSION;
+        if (sNormalizedKey == "internalname") return XMETADATA_ID_INTERNAL_NAME;
+        if (sNormalizedKey == "legalcopyright") return XMETADATA_ID_LEGAL_COPYRIGHT;
+        if (sNormalizedKey == "legaltrademarks") return XMETADATA_ID_LEGAL_TRADEMARKS;
+        if (sNormalizedKey == "originalfilename") return XMETADATA_ID_ORIGINAL_FILENAME;
+        if (sNormalizedKey == "privatebuild") return XMETADATA_ID_PRIVATE_BUILD;
+        if (sNormalizedKey == "productname") return XMETADATA_ID_PRODUCT_NAME;
+        if (sNormalizedKey == "productversion") return XMETADATA_ID_PRODUCT_VERSION;
+        if (sNormalizedKey == "specialbuild") return XMETADATA_ID_SPECIAL_BUILD;
+        if (sNormalizedKey == "translation") return XMETADATA_ID_TRANSLATION;
+
+        return XMETADATA_ID_UNKNOWN;
+    };
+
+    const qint64 nTimeDateStampOffset = getFileHeaderOffset() + offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp);
+    if (checkOffsetSize(nTimeDateStampOffset, sizeof(quint32))) {
+        const quint32 nTimeDateStamp = getFileHeader_TimeDateStamp();
+        // Deterministic managed builds may use the high-bit value as a content ID rather than a UNIX timestamp.
+        if ((nTimeDateStamp != 0) && !((nTimeDateStamp & 0x80000000U) && isNETPresent())) {
+            const QDateTime dateTime = valueToTime(nTimeDateStamp, DT_TYPE_UNIXTIME);
+            if (dateTime.isValid()) {
+                XMETADATA_STRUCT record = {};
+                record.nOffset = nTimeDateStampOffset;
+                record.nSize = sizeof(quint32);
+                record.nAddress = offsetToAddress(nTimeDateStampOffset);
+                record.id = XMETADATA_ID_DATETIME_CREATED;
+                record.sName = QString("COFF timestamp");
+                record.varValue = dateTime;
+                listResult.append(record);
+            }
+        }
+    }
+
+    if (isDebugPresent()) {
+        const QList<XPE_DEF::S_IMAGE_DEBUG_DIRECTORY> listDebug = getDebugList();
+        _MEMORY_MAP memoryMap = getMemoryMap();
+
+        for (qint32 i = 0; i < listDebug.count(); ++i) {
+            const XPE_DEF::S_IMAGE_DEBUG_DIRECTORY &debug = listDebug.at(i);
+            if ((debug.Type != XPE_DEF::S_IMAGE_DEBUG_TYPE_CODEVIEW) || (debug.SizeOfData < 24)) {
+                continue;
+            }
+
+            qint64 nDataOffset = debug.PointerToRawData;
+            if (!checkOffsetSize(nDataOffset, debug.SizeOfData) && (debug.AddressOfRawData != 0)) {
+                nDataOffset = relAddressToOffset(&memoryMap, debug.AddressOfRawData);
+            }
+
+            if (checkOffsetSize(nDataOffset, 24) && (read_uint32(nDataOffset) == 0x53445352U)) {  // "RSDS"
+                const qint64 nGuidOffset = nDataOffset + sizeof(quint32);
+                XMETADATA_STRUCT record = {};
+                record.nOffset = nGuidOffset;
+                record.nSize = 16;
+                record.nAddress = offsetToAddress(nGuidOffset);
+                record.id = XMETADATA_ID_UUID;
+                record.sName = QString("CodeView GUID");
+                record.varValue = read_UUID(nGuidOffset);
+                listResult.append(record);
+            }
+        }
+    }
+
+    QList<RESOURCE_RECORD> listResourceRecords = getResources(10000);
+    if (isResourceVersionPresent(&listResourceRecords)) {
+        const RESOURCES_VERSION resourcesVersion = getResourcesVersion(&listResourceRecords);
+        bool bFileVersionPresent = false;
+        bool bProductVersionPresent = false;
+
+        for (qint32 i = 0; i < resourcesVersion.listVersionRecords.count(); ++i) {
+            const RESOURCE_VERSION_RECORD &versionRecord = resourcesVersion.listVersionRecords.at(i);
+            if (!checkOffsetSize(versionRecord.nOffset, versionRecord.nSize)) {
+                continue;
+            }
+
+            XMETADATA_STRUCT record = {};
+            record.nOffset = versionRecord.nOffset;
+            record.nSize = versionRecord.nSize;
+            record.nAddress = offsetToAddress(versionRecord.nOffset);
+            record.id = versionKeyToMetadataId(versionRecord.sKey);
+            record.sName = versionRecord.sKey;
+            record.varValue = versionRecord.sValue;
+            listResult.append(record);
+
+            bFileVersionPresent |= (record.id == XMETADATA_ID_FILE_VERSION);
+            bProductVersionPresent |= (record.id == XMETADATA_ID_PRODUCT_VERSION);
+        }
+
+        const qint64 nFixedFileInfoOffset = resourcesVersion.nFixedFileInfoOffset;
+        const bool bFixedFileInfoValid =
+            checkOffsetSize(nFixedFileInfoOffset, sizeof(XPE_DEF::tagVS_FIXEDFILEINFO)) &&
+            (resourcesVersion.fileInfo.dwSignature == 0xFEEF04BD);
+
+        if (bFixedFileInfoValid && !bFileVersionPresent) {
+            const qint64 nOffset = nFixedFileInfoOffset + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwFileVersionMS);
+            XMETADATA_STRUCT record = {};
+            record.nOffset = nOffset;
+            record.nSize = sizeof(quint32) * 2;
+            record.nAddress = offsetToAddress(nOffset);
+            record.id = XMETADATA_ID_FILE_VERSION;
+            record.sName = QString("FileVersion");
+            record.varValue = QString("%1.%2").arg(get_uint32_version(resourcesVersion.fileInfo.dwFileVersionMS))
+                                  .arg(get_uint32_version(resourcesVersion.fileInfo.dwFileVersionLS));
+            listResult.append(record);
+        }
+
+        if (bFixedFileInfoValid && !bProductVersionPresent) {
+            const qint64 nOffset = nFixedFileInfoOffset + offsetof(XPE_DEF::tagVS_FIXEDFILEINFO, dwProductVersionMS);
+            XMETADATA_STRUCT record = {};
+            record.nOffset = nOffset;
+            record.nSize = sizeof(quint32) * 2;
+            record.nAddress = offsetToAddress(nOffset);
+            record.id = XMETADATA_ID_PRODUCT_VERSION;
+            record.sName = QString("ProductVersion");
+            record.varValue = QString("%1.%2").arg(get_uint32_version(resourcesVersion.fileInfo.dwProductVersionMS))
+                                  .arg(get_uint32_version(resourcesVersion.fileInfo.dwProductVersionLS));
+            listResult.append(record);
+        }
     }
 
     return listResult;

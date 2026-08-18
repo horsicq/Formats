@@ -48,6 +48,7 @@ public:
     qint64 getFileFormatSize(PDSTRUCT *pPdStruct) override;
     FT getFileType() override;
     QString getMIMEString() override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
     virtual QString structIDToString(quint32 nID) override;
     virtual QString structIDToFtString(quint32 nID) override;
     virtual quint32 ftStringToStructID(const QString &sFtString) override;

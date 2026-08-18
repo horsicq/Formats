@@ -189,6 +189,31 @@ QString XGif::getMIMEString()
     return "image/gif";
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XGif::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    if (!isValid((PDSTRUCT *)nullptr) || !checkOffsetSize(6, 5)) {
+        return listResult;
+    }
+
+    auto appendMetadata = [this, &listResult](qint64 nOffset, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = (id == XMETADATA_ID_BIT_DEPTH) ? 1 : 2;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    appendMetadata(6, XMETADATA_ID_FRAME_WIDTH, QString("Logical screen width"), read_uint16(6, false));
+    appendMetadata(8, XMETADATA_ID_FRAME_HEIGHT, QString("Logical screen height"), read_uint16(8, false));
+    appendMetadata(10, XMETADATA_ID_BIT_DEPTH, QString("Color resolution"), ((read_uint8(10) >> 4) & 7) + 1);
+
+    return listResult;
+}
+
 QString XGif::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XGIF_STRUCTID, sizeof(_TABLE_XGIF_STRUCTID) / sizeof(XBinary::XCONVERT));

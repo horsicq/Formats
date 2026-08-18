@@ -242,11 +242,19 @@ public:
         //        bool bSaveIAT;
     };
 
+    struct RESOURCE_VERSION_RECORD {
+        qint64 nOffset;
+        qint64 nSize;
+        QString sPath;
+        QString sKey;
+        QString sValue;
+    };
+
     struct RESOURCES_VERSION {
         qint64 nFixedFileInfoOffset;
         XPE_DEF::tagVS_FIXEDFILEINFO fileInfo;
         QList<QString> listRecords;  // TODO rename
-        // TODO VarFileInfo
+        QList<RESOURCE_VERSION_RECORD> listVersionRecords;
     };
 
     struct CLI_METADATA_HEADER {
@@ -790,6 +798,7 @@ public:
     virtual QVector<XEXPORT_STRUCT> getExportStructs() override;
     virtual QVector<XSYMBOL_STRUCT> getSymbolStructs() override;
     virtual QVector<XRESOURCE_STRUCT> getResourceStructs() override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
 
     qint64 getTLSHeaderOffset();
     qint64 getTLSHeaderSize();

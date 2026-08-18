@@ -22,6 +22,7 @@
 #define XJPEG_H
 
 #include "xbinary.h"
+#include "xjfif.h"
 #include "xtiff.h"
 
 class XJpeg : public XBinary {
@@ -71,6 +72,8 @@ public:
 
     bool isChunkPresent(QList<CHUNK> *pListChunks, quint8 nId);
 
+    OFFSETSIZE getJFIF(QList<CHUNK> *pListChunks);
+    bool isJFIFPresent(OFFSETSIZE osJFIF);
     OFFSETSIZE getExif(QList<CHUNK> *pListChunks);
     bool isExifPresent(OFFSETSIZE osExif);
 
@@ -84,6 +87,7 @@ public:
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
     // virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct);
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
 
 private:
     CHUNK _readChunk(qint64 nOffset);

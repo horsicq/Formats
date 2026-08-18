@@ -85,6 +85,7 @@ public:
     QList<ICONDIRENTRY> getIconDirectories(PDSTRUCT *pPdStruct = nullptr);
     QList<GRPICONDIRENTRY> getIconGPRDirectories(PDSTRUCT *pPdStruct = nullptr);
     virtual QString getMIMEString() override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
 
     // Data headers/inspection
     virtual QString structIDToString(quint32 nID) override;

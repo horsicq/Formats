@@ -61,6 +61,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/images/xicc.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xicon.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xicon.h
+    ${CMAKE_CURRENT_LIST_DIR}/images/xjfif.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/images/xjfif.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xjpeg.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xjpeg.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xpng.cpp

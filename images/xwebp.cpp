@@ -272,6 +272,60 @@ QString XWEBP::getMIMEString()
     return "image/webp";
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XWEBP::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    if (!isValid((PDSTRUCT *)nullptr)) {
+        return listResult;
+    }
+
+    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    const qint64 nDeclaredEnd = 8 + (qint64)read_uint32(4, false);
+    const QByteArray baFirstType = read_array(12, 4);
+    const qint64 nFirstDataOffset = 20;
+    quint32 nWidth = 0;
+    quint32 nHeight = 0;
+    bool bAlpha = false;
+
+    if (baFirstType == QByteArrayLiteral("VP8X")) {
+        nWidth = read_uint24(nFirstDataOffset + 4, false) + 1;
+        nHeight = read_uint24(nFirstDataOffset + 7, false) + 1;
+        appendMetadata(nFirstDataOffset + 4, 3, XMETADATA_ID_FRAME_WIDTH, QString("Canvas width"), nWidth);
+        appendMetadata(nFirstDataOffset + 7, 3, XMETADATA_ID_FRAME_HEIGHT, QString("Canvas height"), nHeight);
+    } else if (_webpIsValidImageChunk(this, baFirstType, nFirstDataOffset, read_uint32(16, false), &nWidth, &nHeight, &bAlpha)) {
+        const qint64 nDimensionOffset = nFirstDataOffset + ((baFirstType == QByteArrayLiteral("VP8 ")) ? 6 : 1);
+        const qint64 nDimensionSize = (baFirstType == QByteArrayLiteral("VP8 ")) ? 2 : 4;
+        appendMetadata(nDimensionOffset, nDimensionSize, XMETADATA_ID_FRAME_WIDTH, QString("Width"), nWidth);
+        appendMetadata(nDimensionOffset, nDimensionSize, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), nHeight);
+    }
+
+    qint32 nFrameCount = 0;
+    qint64 nOffset = 12;
+    while (nOffset + 8 <= nDeclaredEnd) {
+        const QByteArray baType = read_array(nOffset, 4);
+        const quint32 nChunkSize = read_uint32(nOffset + 4, false);
+        if (baType == QByteArrayLiteral("ANMF")) {
+            ++nFrameCount;
+        }
+        nOffset += 8 + (qint64)nChunkSize + (nChunkSize & 1);
+    }
+
+    appendMetadata(12, 4, XMETADATA_ID_CODEC, QString("Codec"), QString::fromLatin1(baFirstType).trimmed());
+    appendMetadata(12, nDeclaredEnd - 12, XMETADATA_ID_FRAME_COUNT, QString("Frame count"), nFrameCount ? nFrameCount : 1);
+
+    return listResult;
+}
+
 QString XWEBP::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XWEBP_STRUCTID, sizeof(_TABLE_XWEBP_STRUCTID) / sizeof(XBinary::XCONVERT));

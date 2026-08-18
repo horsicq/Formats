@@ -453,6 +453,37 @@ QList<XIcon::GRPICONDIRENTRY> XIcon::getIconGPRDirectories(PDSTRUCT *pPdStruct)
     return listResult;
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XIcon::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    const QList<ICONDIRENTRY> entries = getIconDirectories(nullptr);
+
+    for (qint32 i = 0; i < entries.count(); ++i) {
+        const ICONDIRENTRY &entry = entries.at(i);
+        const qint64 nEntryOffset = (qint64)sizeof(ICONDIR) + (qint64)i * sizeof(ICONDIRENTRY);
+
+        auto appendMetadata = [this, &listResult, i, nEntryOffset](qint64 nRelativeOffset, qint64 nSize, XMETADATA_ID id, const QString &sName,
+                                                                  const QVariant &varValue) {
+            XMETADATA_STRUCT record = {};
+            record.nOffset = nEntryOffset + nRelativeOffset;
+            record.nSize = nSize;
+            record.nAddress = offsetToAddress(record.nOffset);
+            record.id = id;
+            record.sName = QString("Image %1: %2").arg(i + 1).arg(sName);
+            record.varValue = varValue;
+            listResult.append(record);
+        };
+
+        appendMetadata(offsetof(ICONDIRENTRY, bWidth), 1, XMETADATA_ID_FRAME_WIDTH, QString("Width"), entry.bWidth ? entry.bWidth : 256);
+        appendMetadata(offsetof(ICONDIRENTRY, bHeight), 1, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), entry.bHeight ? entry.bHeight : 256);
+        if (entry.wBitCount) {
+            appendMetadata(offsetof(ICONDIRENTRY, wBitCount), 2, XMETADATA_ID_BIT_DEPTH, QString("Bit depth"), entry.wBitCount);
+        }
+    }
+
+    return listResult;
+}
+
 QString XIcon::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XICON_STRUCTID, sizeof(_TABLE_XICON_STRUCTID) / sizeof(XBinary::XCONVERT));

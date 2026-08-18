@@ -215,6 +215,41 @@ QString XTTF::getVersion(QList<TTF_TABLE_RECORD> *pListTables, PDSTRUCT *pPdStru
     return sResult;
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XTTF::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    const TTF_HEADER header = readHeader();
+    QList<TTF_TABLE_RECORD> listTables = getTableDirectory(header.numTables);
+    const TTF_TABLE_RECORD headTable = getTableRecord(0x68656164, &listTables);  // "head"
+
+    if ((headTable.tag != 0x68656164) || (headTable.length < 36) || !checkOffsetSize((qint64)headTable.offset + 20, 16)) {
+        return listResult;
+    }
+
+    const qint64 nMacToUnixEpoch = 2082844800LL;
+    auto appendLongDateTime = [this, &listResult, nMacToUnixEpoch](qint64 nOffset, XMETADATA_ID id, const QString &sName) {
+        const qint64 nMacSeconds = (qint64)read_uint64(nOffset, true);
+        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch(nMacSeconds - nMacToUnixEpoch, Qt::UTC);
+        if (!dateTime.isValid()) {
+            return;
+        }
+
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = sizeof(quint64);
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = dateTime;
+        listResult.append(record);
+    };
+
+    appendLongDateTime((qint64)headTable.offset + 20, XMETADATA_ID_DATETIME_CREATED, QString("Created"));
+    appendLongDateTime((qint64)headTable.offset + 28, XMETADATA_ID_MODIFICATED, QString("Modified"));
+
+    return listResult;
+}
+
 bool XTTF::isEncrypted()
 {
     return false;

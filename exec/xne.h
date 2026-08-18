@@ -142,6 +142,10 @@ public:
     virtual bool isExportPresent() override;
     virtual bool isResourcesPresent() override;
 
+    virtual QVector<XIMPORT_STRUCT> getImportStructs() override;
+    virtual QVector<XEXPORT_STRUCT> getExportStructs() override;
+    virtual QVector<XRESOURCE_STRUCT> getResourceStructs() override;
+
     QList<XNE_DEF::NE_SEGMENT> getSegmentList();
     XNE_DEF::NE_SEGMENT _read_NE_SEGMENT(qint64 nOffset);
 

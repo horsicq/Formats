@@ -30,6 +30,7 @@
 #include "xgif.h"
 #include "xicc.h"
 #include "xicon.h"
+#include "xjfif.h"
 #include "xjpeg.h"
 #include "xle.h"
 #include "xmach.h"
@@ -74,6 +75,7 @@
 #include "xcab.h"
 #include "xcfbf.h"
 #include "xcompressz.h"
+#include "xfilteredarchive.h"
 #include "xcpio.h"
 #include "xdeb.h"
 #include "xdmg.h"
@@ -86,6 +88,8 @@
 #include "xlha.h"
 #include "xlzip.h"
 #include "xlz4.h"
+#include "xlz5.h"
+#include "xlizard.h"
 #include "xlzma.h"
 #include "xlzo.h"
 #include "xmachofat.h"
@@ -103,6 +107,7 @@
 #include "xtar_lzip.h"
 #include "xtar_lzma.h"
 #include "xtar_lzop.h"
+#include "xtar_lz4.h"
 #include "xtar_xz.h"
 #include "xtar_zstd.h"
 #include "xtarcompressed.h"
@@ -117,6 +122,39 @@
 #include "xzip.h"
 #include "xzlib.h"
 #include "xzstd.h"
+#include "xwarc.h"
+#include "xmtree.h"
+#include "xuu.h"
+#endif
+#ifdef USE_STATICUNPACKER
+#include "../XStaticUnpacker/x7zsfx.h"
+#include "../XStaticUnpacker/xactualinstaller.h"
+#include "../XStaticUnpacker/xadvancedinstaller.h"
+#include "../XStaticUnpacker/xaspack.h"
+#include "../XStaticUnpacker/xautoit.h"
+#include "../XStaticUnpacker/xboxedapp.h"
+#include "../XStaticUnpacker/xclickteam.h"
+#include "../XStaticUnpacker/xcreateinstall.h"
+#include "../XStaticUnpacker/xenigmavb.h"
+#include "../XStaticUnpacker/xfsg.h"
+#include "../XStaticUnpacker/xiexpress.h"
+#include "../XStaticUnpacker/xinnosetup.h"
+#include "../XStaticUnpacker/xinstallforge.h"
+#ifdef USE_XEMULATOR
+#include "../XStaticUnpacker/xinstallsimple.h"
+#endif
+#include "../XStaticUnpacker/xmew.h"
+#include "../XStaticUnpacker/xmsi.h"
+#include "../XStaticUnpacker/xnsis.h"
+#include "../XStaticUnpacker/xnspack.h"
+#include "../XStaticUnpacker/xpetite.h"
+#include "../XStaticUnpacker/xsfx.h"
+#include "../XStaticUnpacker/xsmartinstall.h"
+#include "../XStaticUnpacker/xtarma.h"
+#include "../XStaticUnpacker/xupx.h"
+#include "../XStaticUnpacker/xwinrarsfx.h"
+#include "../XStaticUnpacker/xwix.h"
+#include "../XStaticUnpacker/xyoda.h"
 #endif
 #ifdef QT_GUI_LIB
 #include <QComboBox>  // TODO Check TESTLIB !!!
@@ -168,12 +206,13 @@ public:
     static XBinary::OFFSETSIZE getSignOffsetSize(const QString &sFileName);
     static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                           XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL);  // TODO pdStruct
-    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static QSet<XBinary::FT> getFileTypes(const QString &sFileName, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, bool bExtra = false);
-    static XBinary::FT getPrefFileType(QIODevice *pDevice, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static XBinary::FT getPrefFileType(const QString &sFileName, bool bExtra = false, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, quint32 nFTFlags,
+                                          XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QSet<XBinary::FT> getFileTypes(const QString &sFileName, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, quint32 nFTFlags);
+    static XBinary::FT getPrefFileType(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static XBinary::FT getPrefFileType(const QString &sFileName, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct = nullptr);
 
     static XBinary::FILEFORMATINFO getFileFormatInfo(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                      XBinary::PDSTRUCT *pPdStruct = nullptr, qint64 nOffset = 0, qint64 nSize = -1);
@@ -199,6 +238,9 @@ public:
     static QString getFileFormatExtsString(XBinary::FT fileType);
     static bool isArchive(XBinary::FT fileType);
     static bool isArchive(const QString &sFileName);
+    // True for the XStaticUnpacker packer/installer handle-method file types (FT_PE32_*/FT_CFBF_*),
+    // which are enumerated via the XBinary streaming API (initUnpack/infoCurrent) rather than XArchive.
+    static bool isStaticUnpacker(XBinary::FT fileType);
     static bool isExecutable(XBinary::FT fileType);
     static QString getXFHeaderStructName(const XBinary::XFHEADER &header);
     static bool isXFStruct(const QString &sStruct);
@@ -216,7 +258,7 @@ public:
                                                        XBinary::PDSTRUCT *pPdStruct = nullptr);
 
 #ifdef USE_ARCHIVE
-    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, bool bExtra = false);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, quint32 nFTFlags);
     static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
@@ -230,9 +272,9 @@ public:
     static QSet<XBinary::FT> getFileTypesLZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
 #endif
 #ifdef QT_GUI_LIB
-    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, XBinary::TL_OPTION tlOption = XBinary::TL_OPTION_DEFAULT);
+    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, quint32 nFileTypeFlags = XBinary::FT_FLAG_FORMATS);
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox,
-                                           XBinary::TL_OPTION tlOption = XBinary::TL_OPTION_DEFAULT);
+                                           quint32 nFileTypeFlags = XBinary::FT_FLAG_FORMATS);
     static QVariant setComboBoxCurrent(QComboBox *pComboBox, QVariant varValue);
     static XBinary::ENDIAN setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian);
     static XBinary::CODEPAGE setCodepageComboBox(QComboBox *pComboBox, XBinary::CODEPAGE codepage);
@@ -246,7 +288,7 @@ public:
     static bool savePE_ICOToFile(QIODevice *pDevice, QList<XPE::RESOURCE_RECORD> *pListResourceRecords, XPE::RESOURCE_RECORD resourceRecord, const QString &sFileName);
 
 private:
-    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, bool bExtra, XBinary::PDSTRUCT *pPdStruct);
+    static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct);
 
 public:
     void setData(MODE mode, XBinary::FT fileFormat, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);

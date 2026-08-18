@@ -66,6 +66,68 @@ QString XWAV::getMIMEString()
     return "audio/x-wav";
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XWAV::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    if (!isValid((PDSTRUCT *)nullptr)) {
+        return listResult;
+    }
+
+    qint64 nFmtOffset = -1;
+    quint32 nFmtSize = 0;
+    qint64 nDataOffset = -1;
+    quint32 nDataSize = 0;
+    const qint64 nEnd = qMin<qint64>(getSize(), 8 + (qint64)read_uint32(4, false));
+
+    for (qint64 nOffset = 12; nOffset + 8 <= nEnd;) {
+        const QString sType = read_ansiString(nOffset, 4);
+        const quint32 nSize = read_uint32(nOffset + 4, false);
+        if ((qint64)nSize > nEnd - nOffset - 8) {
+            break;
+        }
+        if ((sType == QString("fmt ")) && (nSize >= 16) && (nFmtOffset == -1)) {
+            nFmtOffset = nOffset + 8;
+            nFmtSize = nSize;
+        } else if ((sType == QString("data")) && (nDataOffset == -1)) {
+            nDataOffset = nOffset + 8;
+            nDataSize = nSize;
+        }
+        nOffset += 8 + (qint64)nSize + (nSize & 1);
+    }
+
+    if (nFmtOffset == -1) {
+        return listResult;
+    }
+
+    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    const quint16 nFormat = read_uint16(nFmtOffset, false);
+    const quint16 nChannels = read_uint16(nFmtOffset + 2, false);
+    const quint32 nSampleRate = read_uint32(nFmtOffset + 4, false);
+    const quint32 nByteRate = read_uint32(nFmtOffset + 8, false);
+    const quint16 nBitsPerSample = read_uint16(nFmtOffset + 14, false);
+    appendMetadata(nFmtOffset, 2, XMETADATA_ID_CODEC, QString("Audio format"), QString("0x%1").arg(nFormat, 4, 16, QChar('0')));
+    appendMetadata(nFmtOffset + 2, 2, XMETADATA_ID_CHANNELS, QString("Channels"), nChannels);
+    appendMetadata(nFmtOffset + 4, 4, XMETADATA_ID_SAMPLE_RATE, QString("Sample rate"), nSampleRate);
+    appendMetadata(nFmtOffset + 8, 4, XMETADATA_ID_BITRATE, QString("Bitrate"), (quint64)nByteRate * 8);
+    appendMetadata(nFmtOffset + 14, 2, XMETADATA_ID_BIT_DEPTH, QString("Bits per sample"), nBitsPerSample);
+    if ((nDataOffset != -1) && nByteRate) {
+        appendMetadata(nDataOffset, nDataSize, XMETADATA_ID_DURATION, QString("Duration"), (double)nDataSize / nByteRate);
+    }
+
+    Q_UNUSED(nFmtSize)
+    return listResult;
+}
+
 QList<QString> XWAV::getSearchSignatures()
 {
     QList<QString> listResult;

@@ -104,6 +104,7 @@ public:
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
     // virtual QList<DATA_HEADER> getDataHeaders(const DATA_HEADERS_OPTIONS &dataHeadersOptions, PDSTRUCT *pPdStruct) override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
 
 private:
     TAG _readTag(qint64 nOffset);

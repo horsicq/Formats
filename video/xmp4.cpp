@@ -88,6 +88,189 @@ XBinary::FT XMP4::getFileType()
     return FT_MP4;
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XMP4::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    const qint64 nTotalSize = getSize();
+    const qint64 nMacToUnixEpoch = 2082844800LL;
+    const qint32 nMaxBoxes = 65536;
+
+    struct BOX_RANGE {
+        qint64 nOffset;
+        qint64 nEnd;
+        qint32 nDepth;
+    };
+
+    QVector<BOX_RANGE> listRanges;
+    listRanges.append({0, nTotalSize, 0});
+    qint32 nBoxCount = 0;
+    qint32 nTrackCount = 0;
+    quint32 nMovieTimescale = 0;
+
+    auto appendValue = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    auto appendDateTime = [this, &listResult, nMacToUnixEpoch](qint64 nOffset, qint64 nSize, quint64 nMacSeconds, XMETADATA_ID id,
+                                                              const QString &sName) {
+        if ((nMacSeconds == 0) || (nMacSeconds > 0x7FFFFFFFFFFFFFFFULL)) {
+            return;
+        }
+
+        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch((qint64)nMacSeconds - nMacToUnixEpoch, Qt::UTC);
+        if (!dateTime.isValid()) {
+            return;
+        }
+
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = dateTime;
+        listResult.append(record);
+    };
+
+    while (!listRanges.isEmpty() && (nBoxCount < nMaxBoxes)) {
+        const BOX_RANGE range = listRanges.takeLast();
+        qint64 nOffset = range.nOffset;
+
+        while ((nOffset >= 0) && (nOffset + 8 <= range.nEnd) && (nBoxCount++ < nMaxBoxes)) {
+            const quint32 nSize32 = read_uint32(nOffset, true);
+            const QString sType = read_ansiString(nOffset + 4, 4);
+            qint64 nHeaderSize = 8;
+            quint64 nBoxSize = nSize32;
+
+            if (nSize32 == 0) {
+                nBoxSize = (quint64)(range.nEnd - nOffset);
+            } else if (nSize32 == 1) {
+                if (nOffset + 16 > range.nEnd) {
+                    break;
+                }
+                nHeaderSize = 16;
+                nBoxSize = read_uint64(nOffset + 8, true);
+            }
+
+            if ((nBoxSize < (quint64)nHeaderSize) || (nBoxSize > (quint64)(range.nEnd - nOffset))) {
+                break;
+            }
+
+            const qint64 nDataOffset = nOffset + nHeaderSize;
+            const qint64 nBoxEnd = nOffset + (qint64)nBoxSize;
+
+            if ((sType == QString("uuid")) && (nDataOffset + 16 <= nBoxEnd)) {
+                XMETADATA_STRUCT record = {};
+                record.nOffset = nDataOffset;
+                record.nSize = 16;
+                record.nAddress = offsetToAddress(nDataOffset);
+                record.id = XMETADATA_ID_UUID;
+                record.sName = QString("Box UUID");
+                record.varValue = read_UUID_bytes(nDataOffset);
+                listResult.append(record);
+            } else if ((sType == QString("mvhd")) && (nDataOffset + 24 <= nBoxEnd)) {
+                const quint8 nVersion = read_uint8(nDataOffset);
+                if ((nVersion == 0) && (nDataOffset + 24 <= nBoxEnd)) {
+                    appendDateTime(nDataOffset + 4, 4, read_uint32(nDataOffset + 4, true), XMETADATA_ID_DATETIME_CREATED,
+                                   QString("Movie creation time"));
+                    appendDateTime(nDataOffset + 8, 4, read_uint32(nDataOffset + 8, true), XMETADATA_ID_MODIFICATED,
+                                   QString("Movie modification time"));
+                    nMovieTimescale = read_uint32(nDataOffset + 12, true);
+                    const quint32 nDuration = read_uint32(nDataOffset + 16, true);
+                    if (nMovieTimescale) {
+                        appendValue(nDataOffset + 16, 4, XMETADATA_ID_DURATION, QString("Movie duration"), (double)nDuration / nMovieTimescale);
+                    }
+                } else if ((nVersion == 1) && (nDataOffset + 32 <= nBoxEnd)) {
+                    appendDateTime(nDataOffset + 4, 8, read_uint64(nDataOffset + 4, true), XMETADATA_ID_DATETIME_CREATED,
+                                   QString("Movie creation time"));
+                    appendDateTime(nDataOffset + 12, 8, read_uint64(nDataOffset + 12, true), XMETADATA_ID_MODIFICATED,
+                                   QString("Movie modification time"));
+                    nMovieTimescale = read_uint32(nDataOffset + 20, true);
+                    const quint64 nDuration = read_uint64(nDataOffset + 24, true);
+                    if (nMovieTimescale) {
+                        appendValue(nDataOffset + 24, 8, XMETADATA_ID_DURATION, QString("Movie duration"), (double)nDuration / nMovieTimescale);
+                    }
+                }
+            } else if (sType == QString("tkhd")) {
+                const quint8 nVersion = read_uint8(nDataOffset);
+                const qint64 nTrackIdOffset = nDataOffset + ((nVersion == 1) ? 20 : 12);
+                const qint64 nDurationOffset = nDataOffset + ((nVersion == 1) ? 28 : 20);
+                const qint64 nWidthOffset = nDataOffset + ((nVersion == 1) ? 88 : 76);
+                const qint64 nRequiredSize = (nVersion == 1) ? 96 : 84;
+                if (((nVersion == 0) || (nVersion == 1)) && (nDataOffset + nRequiredSize <= nBoxEnd)) {
+                    ++nTrackCount;
+                    const quint32 nTrackId = read_uint32(nTrackIdOffset, true);
+                    appendValue(nTrackIdOffset, 4, XMETADATA_ID_TRACK_NUMBER, QString("Track ID"), nTrackId);
+
+                    const quint32 nWidth = (read_uint32(nWidthOffset, true) + 0x8000) >> 16;
+                    const quint32 nHeight = (read_uint32(nWidthOffset + 4, true) + 0x8000) >> 16;
+                    if (nWidth) {
+                        appendValue(nWidthOffset, 4, XMETADATA_ID_FRAME_WIDTH, QString("Track width"), nWidth);
+                    }
+                    if (nHeight) {
+                        appendValue(nWidthOffset + 4, 4, XMETADATA_ID_FRAME_HEIGHT, QString("Track height"), nHeight);
+                    }
+
+                    const quint64 nDuration = (nVersion == 1) ? read_uint64(nDurationOffset, true) : read_uint32(nDurationOffset, true);
+                    if (nMovieTimescale && (nDuration != 0xFFFFFFFFFFFFFFFFULL) && (nDuration != 0xFFFFFFFFULL)) {
+                        appendValue(nDurationOffset, (nVersion == 1) ? 8 : 4, XMETADATA_ID_DURATION, QString("Track duration"),
+                                    (double)nDuration / nMovieTimescale);
+                    }
+                }
+            } else if ((sType == QString("stsd")) && (nDataOffset + 16 <= nBoxEnd)) {
+                const quint32 nEntryCount = read_uint32(nDataOffset + 4, true);
+                if (nEntryCount) {
+                    appendValue(nDataOffset + 12, 4, XMETADATA_ID_CODEC, QString("Track codec"), read_ansiString(nDataOffset + 12, 4));
+                }
+            } else if ((sType == QString("stsz")) && (nDataOffset + 12 <= nBoxEnd)) {
+                appendValue(nDataOffset + 8, 4, XMETADATA_ID_FRAME_COUNT, QString("Sample count"), read_uint32(nDataOffset + 8, true));
+            }
+
+            const bool bContainer = (sType == QString("moov")) || (sType == QString("trak")) || (sType == QString("mdia")) ||
+                                    (sType == QString("minf")) || (sType == QString("stbl")) || (sType == QString("edts")) ||
+                                    (sType == QString("dinf")) || (sType == QString("udta")) || (sType == QString("meta")) ||
+                                    (sType == QString("mvex")) || (sType == QString("moof")) || (sType == QString("traf")) ||
+                                    (sType == QString("mfra")) || (sType == QString("ipro")) || (sType == QString("sinf")) ||
+                                    (sType == QString("schi")) || (sType == QString("iprp")) || (sType == QString("ipco"));
+
+            if (bContainer && (range.nDepth < 16)) {
+                qint64 nChildrenOffset = nDataOffset;
+                if (sType == QString("meta")) {
+                    nChildrenOffset += 4;  // FullBox version and flags.
+                }
+                if (nChildrenOffset + 8 <= nBoxEnd) {
+                    listRanges.append({nChildrenOffset, nBoxEnd, range.nDepth + 1});
+                }
+            }
+
+            nOffset = nBoxEnd;
+            if (nSize32 == 0) {
+                break;
+            }
+        }
+    }
+
+    if (nTrackCount) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = -1;
+        record.nSize = 0;
+        record.nAddress = (XADDR)-1;
+        record.id = XMETADATA_ID_TRACK_COUNT;
+        record.sName = QString("Track count");
+        record.varValue = nTrackCount;
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
 bool XMP4::isTagValid(const QString &sTagName)
 {
     bool bResult = false;

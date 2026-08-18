@@ -20,6 +20,36 @@
  */
 #include "xjavaclass.h"
 
+namespace {
+const XJavaClass::cp_info *_getJavaCPInfo(const XJavaClass::INFO &info, quint16 nIndex)
+{
+    quint16 nCurrentIndex = 1;
+
+    for (qint32 i = 0; i < info.listCP.count(); ++i) {
+        const XJavaClass::cp_info &cpInfo = info.listCP.at(i);
+        if (nCurrentIndex == nIndex) {
+            return &cpInfo;
+        }
+
+        nCurrentIndex = (quint16)(nCurrentIndex + ((cpInfo.nTag == XJavaClass::CONSTANT_Long || cpInfo.nTag == XJavaClass::CONSTANT_Double) ? 2 : 1));
+    }
+
+    return nullptr;
+}
+
+QString _getJavaUtf8(const XJavaClass::INFO &info, quint16 nIndex)
+{
+    const XJavaClass::cp_info *pCPInfo = _getJavaCPInfo(info, nIndex);
+    return (pCPInfo && (pCPInfo->nTag == XJavaClass::CONSTANT_Utf8)) ? pCPInfo->varInfo.toString() : QString();
+}
+
+QString _getJavaClassName(const XJavaClass::INFO &info, quint16 nIndex)
+{
+    const XJavaClass::cp_info *pCPInfo = _getJavaCPInfo(info, nIndex);
+    return (pCPInfo && (pCPInfo->nTag == XJavaClass::CONSTANT_Class)) ? _getJavaUtf8(info, (quint16)pCPInfo->varInfo.toUInt()) : QString();
+}
+}  // namespace
+
 XBinary::XCONVERT _TABLE_XJAVACLASS_STRUCTID[] = {
     {XJavaClass::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XJavaClass::STRUCTID_MAGIC, "MAGIC", QString("Magic")},
@@ -441,6 +471,8 @@ qint32 XJavaClass::_read_record_info(qint64 nOffset, record_info *pRecordInfo)
     qint32 nResult = 0;
     qint64 nOriginalOffset = nOffset;
 
+    pRecordInfo->nOffset = nOriginalOffset;
+
     pRecordInfo->nAccessFlags = read_uint16(nOffset, true);
     pRecordInfo->nNameIndex = read_uint16(nOffset + 2, true);
     pRecordInfo->nDescriptorIndex = read_uint16(nOffset + 4, true);
@@ -457,8 +489,140 @@ qint32 XJavaClass::_read_record_info(qint64 nOffset, record_info *pRecordInfo)
     }
 
     nResult = nOffset - nOriginalOffset;
+    pRecordInfo->nSize = nResult;
 
     return nResult;
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XJavaClass::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+    const INFO info = _getInfo();
+    const QString sThisClass = _getJavaClassName(info, info.nThisClass);
+
+    for (qint32 i = 0; i < info.listCP.count(); ++i) {
+        const cp_info &cpInfo = info.listCP.at(i);
+        if ((cpInfo.nTag != CONSTANT_Fieldref) && (cpInfo.nTag != CONSTANT_Methodref) && (cpInfo.nTag != CONSTANT_InterfaceMethodref)) {
+            continue;
+        }
+
+        const quint16 nClassIndex = (quint16)cpInfo.varInfo.toUInt();
+        const quint16 nNameAndTypeIndex = read_uint16(cpInfo.nOffset + 3, true);
+        const cp_info *pNameAndType = _getJavaCPInfo(info, nNameAndTypeIndex);
+        if (!pNameAndType || (pNameAndType->nTag != CONSTANT_NameAndType)) {
+            continue;
+        }
+
+        const QString sClass = _getJavaClassName(info, nClassIndex);
+        if (sClass.isEmpty() || (sClass == sThisClass)) {
+            continue;
+        }
+
+        const QString sName = _getJavaUtf8(info, (quint16)pNameAndType->varInfo.toUInt());
+        const QString sDescriptor = _getJavaUtf8(info, read_uint16(pNameAndType->nOffset + 3, true));
+
+        XIMPORT_STRUCT record = {};
+        record.nOffset = cpInfo.nOffset;
+        record.nSize = 5;
+        record.nAddress = (XADDR)-1;
+        record.sLibrary = sClass;
+        record.sFunction = sName + sDescriptor;
+        record.nOrdinal = -1;
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XJavaClass::getExportStructs()
+{
+    QVector<XEXPORT_STRUCT> listResult;
+    const INFO info = _getInfo();
+    const quint16 ACCESS_PUBLIC = 0x0001;
+    const quint16 ACCESS_PROTECTED = 0x0004;
+    qint32 nOrdinal = 1;
+
+    auto appendRecords = [&listResult, &info, &nOrdinal, ACCESS_PUBLIC, ACCESS_PROTECTED](const QList<record_info> &listRecords) {
+        for (qint32 i = 0; i < listRecords.count(); ++i, ++nOrdinal) {
+            const record_info &source = listRecords.at(i);
+            if ((source.nAccessFlags & (ACCESS_PUBLIC | ACCESS_PROTECTED)) == 0) {
+                continue;
+            }
+
+            XEXPORT_STRUCT record = {};
+            record.nOffset = source.nOffset;
+            record.nSize = source.nSize;
+            record.nAddress = (XADDR)-1;
+            record.sFunction = _getJavaUtf8(info, source.nNameIndex) + _getJavaUtf8(info, source.nDescriptorIndex);
+            record.nOrdinal = nOrdinal;
+            listResult.append(record);
+        }
+    };
+
+    appendRecords(info.listFields);
+    appendRecords(info.listMethods);
+
+    return listResult;
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XJavaClass::getSymbolStructs()
+{
+    QVector<XSYMBOL_STRUCT> listResult;
+    const INFO info = _getInfo();
+    const QString sClassName = _getJavaClassName(info, info.nThisClass);
+    const quint16 ACCESS_PUBLIC = 0x0001;
+    const quint16 ACCESS_PROTECTED = 0x0004;
+
+    auto appendRecords = [&listResult, &info, &sClassName, ACCESS_PUBLIC, ACCESS_PROTECTED](const QList<record_info> &listRecords) {
+        for (qint32 i = 0; i < listRecords.count(); ++i) {
+            const record_info &source = listRecords.at(i);
+            XSYMBOL_STRUCT record = {};
+            record.nOffset = source.nOffset;
+            record.nSize = source.nSize;
+            record.nAddress = (XADDR)-1;
+            record.sName = sClassName;
+            if (!record.sName.isEmpty()) {
+                record.sName += QChar('.');
+            }
+            record.sName += _getJavaUtf8(info, source.nNameIndex) + _getJavaUtf8(info, source.nDescriptorIndex);
+            record.symbolType = (source.nAccessFlags & (ACCESS_PUBLIC | ACCESS_PROTECTED)) ? SYMBOL_TYPE_EXPORT : SYMBOL_TYPE_LABEL;
+            listResult.append(record);
+        }
+    };
+
+    appendRecords(info.listFields);
+    appendRecords(info.listMethods);
+
+    return listResult;
+}
+
+QVector<XBinary::XMETADATA_STRUCT> XJavaClass::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    const INFO info = _getInfo();
+    const QString sClassName = _getJavaClassName(info, info.nThisClass);
+
+    auto appendMetadata = [&listResult](qint64 nOffset, qint64 nSize, const QString &sName, const QVariant &varValue) {
+        if (varValue.toString().isEmpty()) {
+            return;
+        }
+
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = (XADDR)-1;
+        record.id = XMETADATA_ID_UNKNOWN;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    appendMetadata(4, 4, QString("Java version"), _getJDKVersion(info.nMajorVersion, info.nMinorVersion));
+    appendMetadata(4, 4, QString("Class version"), QString("%1.%2").arg(info.nMajorVersion).arg(info.nMinorVersion));
+    appendMetadata(0, 0, QString("Class"), sClassName);
+    appendMetadata(0, 0, QString("Super class"), _getJavaClassName(info, info.nSuperClass));
+
+    return listResult;
 }
 
 XBinary::_MEMORY_MAP XJavaClass::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)

@@ -7,6 +7,11 @@ HEADERS += \
 SOURCES += \
     $$PWD/xjpeg.cpp
 
+!contains(XCONFIG, xjfif) {
+    XCONFIG += xjfif
+    include($$PWD/xjfif.pri)
+}
+
 !contains(XCONFIG, xbinary) {
     XCONFIG += xbinary
     include($$PWD/../xbinary.pri)

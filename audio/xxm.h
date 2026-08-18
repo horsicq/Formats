@@ -141,6 +141,7 @@ public:
 
     QList<MAPMODE> getMapModesList() override;
     _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
     QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
 
     QString structIDToString(quint32 nID) override;

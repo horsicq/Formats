@@ -243,6 +243,32 @@ QString XBMP::getVersion()
     return sResult;
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XBMP::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    if (!isValid((PDSTRUCT *)nullptr)) {
+        return listResult;
+    }
+
+    const BMPINFOHEADER header = getInfoHeader();
+    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    appendMetadata(18, 4, XMETADATA_ID_FRAME_WIDTH, QString("Width"), header.biWidth);
+    appendMetadata(22, 4, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), qAbs((qint64)header.biHeight));
+    appendMetadata(28, 2, XMETADATA_ID_BIT_DEPTH, QString("Bit depth"), header.biBitCount);
+
+    return listResult;
+}
+
 QString XBMP::structIDToString(quint32 nID)
 {
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XBMP_STRUCTID, sizeof(_TABLE_XBMP_STRUCTID) / sizeof(XBinary::XCONVERT));

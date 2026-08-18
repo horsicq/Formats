@@ -50,6 +50,7 @@ public:
     virtual FT getFileType() override;
     virtual QString getVersion() override;
     virtual QString getMIMEString() override;
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
 
     qint64 decodeFrame(qint64 nOffset);
 

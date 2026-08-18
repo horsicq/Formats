@@ -1362,6 +1362,238 @@ QList<QString> XCLIAssembly::getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPd
     return listResult;
 }
 
+QVector<XBinary::XIMPORT_STRUCT> XCLIAssembly::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+    CLI_INFO cliInfo = getCliInfo();
+
+    if (!cliInfo.bValid) {
+        return listResult;
+    }
+
+    const qint32 nTable = XCLIASSEMBLY_DEF::metadata_MemberRef;
+    const qint32 nCount = qMin<qint32>(cliInfo.metaData.Tables_TablesNumberOfIndexes[nTable], 0x20000);
+    const qint64 nRowSize = cliInfo.metaData.Tables_TableElementSizes[nTable];
+
+    for (qint32 i = 0; (i < nCount) && (nRowSize > 0); ++i) {
+        const XCLIASSEMBLY_DEF::S_METADATA_MEMBERREF memberRef = getMetadataMemberRef(&cliInfo, i);
+        const quint32 nParentTag = memberRef.nClass & 0x07;
+
+        // TypeRef, ModuleRef and TypeSpec parents denote references outside the
+        // current type definitions. TypeDef/MethodDef parents are local refs.
+        if ((nParentTag != 1) && (nParentTag != 2) && (nParentTag != 4)) {
+            continue;
+        }
+
+        XIMPORT_STRUCT record = {};
+        record.nOffset = cliInfo.metaData.Tables_TablesOffsets[nTable] + (qint64)i * nRowSize;
+        record.nSize = nRowSize;
+        record.nAddress = (XADDR)-1;
+        record.sLibrary = getMetadataMemberRefParentName(&cliInfo, memberRef);
+        record.sFunction = _read_ansiString_safe(cliInfo.metaData.baStrings.data(), cliInfo.metaData.baStrings.size(), memberRef.nName);
+        record.nOrdinal = -1;
+
+        if (!record.sFunction.isEmpty()) {
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XSYMBOL_STRUCT> XCLIAssembly::getSymbolStructs()
+{
+    QVector<XSYMBOL_STRUCT> listResult;
+    CLI_INFO cliInfo = getCliInfo();
+
+    if (!cliInfo.bValid) {
+        return listResult;
+    }
+
+    const qint32 nMethodTable = XCLIASSEMBLY_DEF::metadata_MethodDef;
+    const qint32 nMethodCount = qMin<qint32>(cliInfo.metaData.Tables_TablesNumberOfIndexes[nMethodTable], 0x20000);
+    const qint64 nMethodRowSize = cliInfo.metaData.Tables_TableElementSizes[nMethodTable];
+    QVector<QString> listTypeNames(nMethodCount);
+
+    const qint32 nTypeCount = qMin<qint32>(cliInfo.metaData.Tables_TablesNumberOfIndexes[XCLIASSEMBLY_DEF::metadata_TypeDef], 0x10000);
+    for (qint32 i = 0; i < nTypeCount; ++i) {
+        const XCLIASSEMBLY_DEF::S_METADATA_TYPEDEF typeDef = getMetadataTypeDef(&cliInfo, i);
+        const quint32 nFirst = typeDef.nMethodList ? typeDef.nMethodList - 1 : 0;
+        quint32 nLast = nMethodCount;
+        if (i + 1 < nTypeCount) {
+            const XCLIASSEMBLY_DEF::S_METADATA_TYPEDEF nextTypeDef = getMetadataTypeDef(&cliInfo, i + 1);
+            nLast = nextTypeDef.nMethodList ? nextTypeDef.nMethodList - 1 : nLast;
+        }
+
+        const QString sNamespace = _read_ansiString_safe(cliInfo.metaData.baStrings.data(), cliInfo.metaData.baStrings.size(), typeDef.nTypeNamespace);
+        QString sTypeName = _read_ansiString_safe(cliInfo.metaData.baStrings.data(), cliInfo.metaData.baStrings.size(), typeDef.nTypeName);
+        if (!sNamespace.isEmpty()) {
+            sTypeName = sNamespace + QChar('.') + sTypeName;
+        }
+
+        for (quint32 j = nFirst; (j < nLast) && (j < (quint32)nMethodCount); ++j) {
+            listTypeNames[(qint32)j] = sTypeName;
+        }
+    }
+
+    const quint32 METHOD_ACCESS_MASK = 0x0007;
+    const quint32 METHOD_FAMILY = 0x0004;
+    const quint32 METHOD_FAM_OR_ASSEM = 0x0005;
+    const quint32 METHOD_PUBLIC = 0x0006;
+
+    for (qint32 i = 0; (i < nMethodCount) && (nMethodRowSize > 0); ++i) {
+        const XCLIASSEMBLY_DEF::S_METADATA_METHODDEF methodDef = getMetadataMethodDef(&cliInfo, i);
+        const quint32 nAccess = methodDef.nFlags & METHOD_ACCESS_MASK;
+        QString sName = _read_ansiString_safe(cliInfo.metaData.baStrings.data(), cliInfo.metaData.baStrings.size(), methodDef.nName);
+
+        if (!listTypeNames.at(i).isEmpty()) {
+            sName = listTypeNames.at(i) + QString("::") + sName;
+        }
+
+        XSYMBOL_STRUCT record = {};
+        record.nOffset = cliInfo.metaData.Tables_TablesOffsets[nMethodTable] + (qint64)i * nMethodRowSize;
+        record.nSize = nMethodRowSize;
+        record.nAddress = (XADDR)-1;
+        record.sName = sName;
+        record.symbolType = ((nAccess == METHOD_PUBLIC) || (nAccess == METHOD_FAMILY) || (nAccess == METHOD_FAM_OR_ASSEM)) ? SYMBOL_TYPE_EXPORT : SYMBOL_TYPE_LABEL;
+
+        if (methodDef.nRVA != 0) {
+            const qint64 nCodeOffset = _rvaToOffset(methodDef.nRVA);
+            if (nCodeOffset >= 0) {
+                record.nAddress = offsetToAddress(nCodeOffset);
+            }
+        }
+
+        if (!record.sName.isEmpty()) {
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XCLIAssembly::getExportStructs()
+{
+    QVector<XEXPORT_STRUCT> listResult;
+    const QVector<XSYMBOL_STRUCT> listSymbols = getSymbolStructs();
+
+    for (qint32 i = 0; i < listSymbols.count(); ++i) {
+        const XSYMBOL_STRUCT &symbol = listSymbols.at(i);
+        if (symbol.symbolType != SYMBOL_TYPE_EXPORT) {
+            continue;
+        }
+
+        XEXPORT_STRUCT record = {};
+        record.nOffset = symbol.nOffset;
+        record.nSize = symbol.nSize;
+        record.nAddress = symbol.nAddress;
+        record.sFunction = symbol.sName;
+        record.nOrdinal = i + 1;
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XRESOURCE_STRUCT> XCLIAssembly::getResourceStructs()
+{
+    QVector<XRESOURCE_STRUCT> listResult;
+    CLI_INFO cliInfo = getCliInfo();
+
+    if (!cliInfo.bValid) {
+        return listResult;
+    }
+
+    const qint32 nTable = XCLIASSEMBLY_DEF::metadata_ManifestResource;
+    const qint32 nCount = qMin<qint32>(cliInfo.metaData.Tables_TablesNumberOfIndexes[nTable], 0x10000);
+    const qint64 nRowSize = cliInfo.metaData.Tables_TableElementSizes[nTable];
+    const qint64 nResourceBase = cliInfo.header.Resources.VirtualAddress ? _rvaToOffset(cliInfo.header.Resources.VirtualAddress) : -1;
+
+    for (qint32 i = 0; (i < nCount) && (nRowSize > 0); ++i) {
+        const qint64 nRowOffset = cliInfo.metaData.Tables_TablesOffsets[nTable] + (qint64)i * nRowSize;
+        if (!checkOffsetSize(nRowOffset, nRowSize)) {
+            break;
+        }
+
+        qint64 nFieldOffset = nRowOffset;
+        const quint32 nRelativeOffset = read_uint32(nFieldOffset);
+        nFieldOffset += 8;  // Offset + Flags
+        const quint32 nNameIndex = (cliInfo.metaData.nStringIndexSize == 4) ? read_uint32(nFieldOffset) : read_uint16(nFieldOffset);
+        nFieldOffset += cliInfo.metaData.nStringIndexSize;
+        const quint32 nImplementation = (cliInfo.metaData.nImplementationSize == 4) ? read_uint32(nFieldOffset) : read_uint16(nFieldOffset);
+
+        XRESOURCE_STRUCT record = {};
+        record.nOffset = nRowOffset;
+        record.nSize = nRowSize;
+        record.nAddress = (XADDR)-1;
+        record.sName = _read_ansiString_safe(cliInfo.metaData.baStrings.data(), cliInfo.metaData.baStrings.size(), nNameIndex);
+        record.nType = nImplementation & 0x03;
+        record.nID = i + 1;
+
+        // Implementation == 0 means the resource bytes are embedded in the
+        // CLI resource directory and prefixed with a four-byte length.
+        if ((nImplementation == 0) && (nResourceBase >= 0)) {
+            const qint64 nLengthOffset = nResourceBase + nRelativeOffset;
+            if (checkOffsetSize(nLengthOffset, 4)) {
+                const quint32 nDataSize = read_uint32(nLengthOffset);
+                if (checkOffsetSize(nLengthOffset + 4, nDataSize)) {
+                    record.nOffset = nLengthOffset + 4;
+                    record.nSize = nDataSize;
+                    record.nAddress = offsetToAddress(record.nOffset);
+                }
+            }
+        }
+
+        listResult.append(record);
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XMETADATA_STRUCT> XCLIAssembly::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    CLI_INFO cliInfo = getCliInfo();
+
+    if (!cliInfo.bValid) {
+        return listResult;
+    }
+
+    auto appendMetadata = [&listResult, &cliInfo](XMETADATA_ID id, qint64 nOffset, qint64 nSize, const QString &sName, const QVariant &varValue) {
+        if (!varValue.isValid() || varValue.toString().isEmpty()) {
+            return;
+        }
+
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = (XADDR)-1;
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    appendMetadata(XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Runtime version"), cliInfo.metaData.header.sVersion);
+    if (cliInfo.metaData.Tables_TablesNumberOfIndexes[XCLIASSEMBLY_DEF::metadata_Module] > 0) {
+        appendMetadata(XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Module"), getMetadataModuleName(&cliInfo, 0));
+
+        const XCLIASSEMBLY_DEF::S_METADATA_MODULE module = getMetadataModule(&cliInfo, 0);
+        if (module.nMvid > 0) {
+            const qint64 nGuidOffset = cliInfo.metaData.osGUID.nOffset + ((qint64)module.nMvid - 1) * 16;
+            if ((nGuidOffset >= cliInfo.metaData.osGUID.nOffset) &&
+                (nGuidOffset + 16 <= cliInfo.metaData.osGUID.nOffset + cliInfo.metaData.osGUID.nSize) && checkOffsetSize(nGuidOffset, 16)) {
+                appendMetadata(XMETADATA_ID_UUID, nGuidOffset, 16, QString("Module version ID"), read_UUID(nGuidOffset));
+            }
+        }
+    }
+    if (cliInfo.metaData.Tables_TablesNumberOfIndexes[XCLIASSEMBLY_DEF::metadata_Assembly] > 0) {
+        appendMetadata(XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Assembly"), getMetadataAssemblyName(&cliInfo, 0));
+    }
+
+    return listResult;
+}
+
 bool XCLIAssembly::isNetGlobalCctorPresent(CLI_INFO *pCliInfo, PDSTRUCT *pPdStruct)
 {
     return isNetMethodPresent(pCliInfo, "", "<Module>", ".cctor", pPdStruct);

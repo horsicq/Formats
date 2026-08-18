@@ -58,6 +58,9 @@ public:
     virtual _MEMORY_MAP getMemoryMap(XBinary::MAPMODE mapMode = XBinary::MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<MAPMODE> getMapModesList() override;
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual QVector<XIMPORT_STRUCT> getImportStructs() override;
+    virtual QVector<XEXPORT_STRUCT> getExportStructs() override;
+    virtual QVector<XSYMBOL_STRUCT> getSymbolStructs() override;
     virtual QString getArch() override;
     virtual MODE getMode() override;
     virtual ENDIAN getEndian() override;

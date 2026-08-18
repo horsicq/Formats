@@ -106,6 +106,172 @@ QString XMP3::getMIMEString()
     return "audio/mpeg";
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XMP3::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    if (!isValid((PDSTRUCT *)nullptr) || !checkOffsetSize(0, 10)) {
+        return listResult;
+    }
+
+    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    auto readSynchsafe = [this](qint64 nOffset) -> quint32 {
+        return ((quint32)(read_uint8(nOffset) & 0x7F) << 21) | ((quint32)(read_uint8(nOffset + 1) & 0x7F) << 14) |
+               ((quint32)(read_uint8(nOffset + 2) & 0x7F) << 7) | (read_uint8(nOffset + 3) & 0x7F);
+    };
+
+    auto decodeText = [](const QByteArray &baData) -> QString {
+        if (baData.isEmpty()) {
+            return QString();
+        }
+
+        const quint8 nEncoding = (quint8)baData.at(0);
+        const QByteArray baText = baData.mid(1);
+        QString sResult;
+        if (nEncoding == 0) {
+            sResult = QString::fromLatin1(baText);
+        } else if (nEncoding == 3) {
+            sResult = QString::fromUtf8(baText);
+        } else if ((nEncoding == 1) || (nEncoding == 2)) {
+            bool bBigEndian = (nEncoding == 2);
+            qint32 nStart = 0;
+            if (baText.size() >= 2) {
+                const quint8 nFirst = (quint8)baText.at(0);
+                const quint8 nSecond = (quint8)baText.at(1);
+                if ((nFirst == 0xFE) && (nSecond == 0xFF)) {
+                    bBigEndian = true;
+                    nStart = 2;
+                } else if ((nFirst == 0xFF) && (nSecond == 0xFE)) {
+                    bBigEndian = false;
+                    nStart = 2;
+                }
+            }
+            for (qint32 i = nStart; i + 1 < baText.size(); i += 2) {
+                const quint16 nCharacter = bBigEndian ? (((quint8)baText.at(i) << 8) | (quint8)baText.at(i + 1))
+                                                       : (((quint8)baText.at(i + 1) << 8) | (quint8)baText.at(i));
+                if (!nCharacter) {
+                    break;
+                }
+                sResult.append(QChar(nCharacter));
+            }
+        }
+        sResult.remove(QChar('\0'));
+        return sResult.trimmed();
+    };
+
+    const quint8 nVersion = read_uint8(3);
+    const quint8 nFlags = read_uint8(5);
+    const quint32 nTagSize = readSynchsafe(6);
+    const qint64 nTagEnd = qMin<qint64>(getSize(), 10 + (qint64)nTagSize);
+    qint64 nFrameOffset = 10;
+
+    if ((nFlags & 0x40) && (nFrameOffset + 4 <= nTagEnd)) {
+        const quint32 nExtendedSize = (nVersion == 4) ? readSynchsafe(nFrameOffset) : read_uint32(nFrameOffset, true);
+        nFrameOffset += (nVersion == 4) ? nExtendedSize : (4 + nExtendedSize);
+    }
+
+    while (nFrameOffset < nTagEnd) {
+        const qint32 nHeaderSize = (nVersion == 2) ? 6 : 10;
+        const qint32 nIdSize = (nVersion == 2) ? 3 : 4;
+        if (nFrameOffset + nHeaderSize > nTagEnd) {
+            break;
+        }
+
+        const QByteArray baId = read_array(nFrameOffset, nIdSize);
+        if (baId.isEmpty() || (baId.at(0) == 0)) {
+            break;
+        }
+
+        quint32 nFrameSize = 0;
+        if (nVersion == 2) {
+            nFrameSize = read_uint24(nFrameOffset + 3, true);
+        } else if (nVersion == 4) {
+            nFrameSize = readSynchsafe(nFrameOffset + 4);
+        } else {
+            nFrameSize = read_uint32(nFrameOffset + 4, true);
+        }
+        const qint64 nValueOffset = nFrameOffset + nHeaderSize;
+        if (!nFrameSize || ((qint64)nFrameSize > nTagEnd - nValueOffset)) {
+            break;
+        }
+
+        XMETADATA_ID id = XMETADATA_ID_UNKNOWN;
+        QString sName;
+        if ((baId == QByteArrayLiteral("TIT2")) || (baId == QByteArrayLiteral("TT2"))) {
+            id = XMETADATA_ID_TITLE;
+            sName = QString("Title");
+        } else if ((baId == QByteArrayLiteral("TPE1")) || (baId == QByteArrayLiteral("TP1"))) {
+            id = XMETADATA_ID_ARTIST;
+            sName = QString("Artist");
+        } else if ((baId == QByteArrayLiteral("TALB")) || (baId == QByteArrayLiteral("TAL"))) {
+            id = XMETADATA_ID_ALBUM;
+            sName = QString("Album");
+        } else if ((baId == QByteArrayLiteral("TCON")) || (baId == QByteArrayLiteral("TCO"))) {
+            id = XMETADATA_ID_GENRE;
+            sName = QString("Genre");
+        } else if ((baId == QByteArrayLiteral("TRCK")) || (baId == QByteArrayLiteral("TRK"))) {
+            id = XMETADATA_ID_TRACK_NUMBER;
+            sName = QString("Track number");
+        }
+
+        if (id != XMETADATA_ID_UNKNOWN) {
+            const QString sValue = decodeText(read_array(nValueOffset, nFrameSize));
+            if (!sValue.isEmpty()) {
+                appendMetadata(nValueOffset, nFrameSize, id, sName, sValue);
+                if ((id == XMETADATA_ID_TRACK_NUMBER) && sValue.contains(QChar('/'))) {
+                    const QString sTrackCount = sValue.section(QChar('/'), 1, 1).trimmed();
+                    if (!sTrackCount.isEmpty()) {
+                        appendMetadata(nValueOffset, nFrameSize, XMETADATA_ID_TRACK_COUNT, QString("Track count"), sTrackCount);
+                    }
+                }
+            }
+        }
+
+        nFrameOffset = nValueOffset + nFrameSize;
+    }
+
+    const qint64 nAudioOffset = 10 + (qint64)nTagSize;
+    if (checkOffsetSize(nAudioOffset, 4)) {
+        const quint32 nHeader = read_uint32(nAudioOffset, true);
+        if ((nHeader & 0xFFE00000U) == 0xFFE00000U) {
+            static const quint16 nMpeg1Layer3Bitrates[] = {0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0};
+            static const quint16 nMpeg2Layer3Bitrates[] = {0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0};
+            static const quint32 nSampleRates[] = {44100, 48000, 32000, 0};
+            const quint8 nMpegVersion = (nHeader >> 19) & 3;
+            const quint8 nLayer = (nHeader >> 17) & 3;
+            const quint8 nBitrateIndex = (nHeader >> 12) & 0xF;
+            const quint8 nSampleRateIndex = (nHeader >> 10) & 3;
+            if ((nMpegVersion != 1) && (nLayer == 1) && (nSampleRateIndex != 3)) {
+                const quint32 nBitrate = ((nMpegVersion == 3) ? nMpeg1Layer3Bitrates[nBitrateIndex] : nMpeg2Layer3Bitrates[nBitrateIndex]) * 1000;
+                quint32 nSampleRate = nSampleRates[nSampleRateIndex];
+                if (nMpegVersion == 2) nSampleRate /= 2;
+                if (nMpegVersion == 0) nSampleRate /= 4;
+                const quint32 nChannels = (((nHeader >> 6) & 3) == 3) ? 1 : 2;
+                appendMetadata(nAudioOffset, 4, XMETADATA_ID_CODEC, QString("Codec"),
+                               (nMpegVersion == 3) ? QString("MPEG-1 Layer III") : ((nMpegVersion == 2) ? QString("MPEG-2 Layer III") : QString("MPEG-2.5 Layer III")));
+                appendMetadata(nAudioOffset, 4, XMETADATA_ID_BITRATE, QString("Bitrate"), nBitrate);
+                appendMetadata(nAudioOffset, 4, XMETADATA_ID_SAMPLE_RATE, QString("Sample rate"), nSampleRate);
+                appendMetadata(nAudioOffset, 4, XMETADATA_ID_CHANNELS, QString("Channels"), nChannels);
+                if (nBitrate) {
+                    appendMetadata(nAudioOffset, getSize() - nAudioOffset, XMETADATA_ID_DURATION, QString("Approximate duration"),
+                                   (double)(getSize() - nAudioOffset) * 8 / nBitrate);
+                }
+            }
+        }
+    }
+
+    return listResult;
+}
+
 qint64 XMP3::decodeFrame(qint64 nOffset)
 {
     qint64 nResult = 0;

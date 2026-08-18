@@ -1637,6 +1637,54 @@ QVector<XBinary::XSYMBOL_STRUCT> XMACH::getSymbolStructs()
     return _getSymbolStructs();
 }
 
+QVector<XBinary::XMETADATA_STRUCT> XMACH::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+
+    const qint64 nUuidCommandOffset = getCommandRecordOffset(XMACH_DEF::S_LC_UUID, 0);
+    if (nUuidCommandOffset != -1) {
+        const qint64 nUuidOffset = nUuidCommandOffset + offsetof(XMACH_DEF::uuid_command, uuid);
+        if (checkOffsetSize(nUuidOffset, 16)) {
+            const QString sUuid = read_UUID_bytes(nUuidOffset);
+            QString sCompactUuid = sUuid;
+            sCompactUuid.remove(QChar('-'));
+            if (sCompactUuid != QString(32, QChar('0'))) {
+                XMETADATA_STRUCT record = {};
+                record.nOffset = nUuidOffset;
+                record.nSize = 16;
+                record.nAddress = offsetToAddress(nUuidOffset);
+                record.id = XMETADATA_ID_UUID;
+                record.sName = QString("Module UUID");
+                record.varValue = sUuid;
+                listResult.append(record);
+            }
+        }
+    }
+
+    const qint64 nDylibCommandOffset = getCommandRecordOffset(XMACH_DEF::S_LC_ID_DYLIB, 0);
+    if (nDylibCommandOffset != -1) {
+        const qint64 nTimestampOffset = nDylibCommandOffset + sizeof(XMACH_DEF::load_command) + offsetof(XMACH_DEF::dylib, timestamp);
+        if (checkOffsetSize(nTimestampOffset, sizeof(quint32))) {
+            const quint32 nTimestamp = read_uint32(nTimestampOffset, isBigEndian());
+            if (nTimestamp != 0) {
+                const QDateTime dateTime = valueToTime(nTimestamp, DT_TYPE_UNIXTIME);
+                if (dateTime.isValid()) {
+                    XMETADATA_STRUCT record = {};
+                    record.nOffset = nTimestampOffset;
+                    record.nSize = sizeof(quint32);
+                    record.nAddress = offsetToAddress(nTimestampOffset);
+                    record.id = XMETADATA_ID_DATETIME_CREATED;
+                    record.sName = QString("Dynamic library timestamp");
+                    record.varValue = dateTime;
+                    listResult.append(record);
+                }
+            }
+        }
+    }
+
+    return listResult;
+}
+
 QStringList XMACH::_getDylibNamesOrdered()
 {
     // dyld assigns a 1-based ordinal to every dylib-loading command in the order

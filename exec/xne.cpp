@@ -875,17 +875,306 @@ qint64 XNE::getNotResindentNameTableOffset()
 
 bool XNE::isImportPresent()
 {
-    return (getImageOS2Header_cmod() != 0);
+    return !getImportStructs().isEmpty();
 }
 
 bool XNE::isExportPresent()
 {
-    return (getImageOS2Header_cbenttab() != 0);
+    return !getExportStructs().isEmpty();
 }
 
 bool XNE::isResourcesPresent()
 {
-    return (getImageOS2Header_cres() != 0);
+    return !getResourceStructs().isEmpty();
+}
+
+QVector<XBinary::XIMPORT_STRUCT> XNE::getImportStructs()
+{
+    QVector<XIMPORT_STRUCT> listResult;
+    const quint16 nModuleCount = qMin<quint16>(getImageOS2Header_cmod(), 0x4000);
+    const qint64 nModuleTableOffset = getModuleReferenceTableOffset();
+    const qint64 nNamesOffset = getImportedNamesTableOffset();
+
+    if ((nModuleCount == 0) || !checkOffsetSize(nModuleTableOffset, (qint64)nModuleCount * 2) || !isOffsetValid(nNamesOffset)) {
+        return listResult;
+    }
+
+    auto readPascalString = [this](qint64 nOffset) -> QString {
+        if (!checkOffsetSize(nOffset, 1)) {
+            return QString();
+        }
+
+        const quint8 nLength = read_uint8(nOffset);
+        if ((nLength == 0) || !checkOffsetSize(nOffset + 1, nLength)) {
+            return QString();
+        }
+
+        return QString::fromLatin1(read_array(nOffset + 1, nLength));
+    };
+
+    QStringList listModules;
+    QVector<bool> listModuleUsed(nModuleCount, false);
+    listModules.reserve(nModuleCount);
+
+    for (quint16 i = 0; i < nModuleCount; ++i) {
+        const quint16 nNameOffset = read_uint16(nModuleTableOffset + (qint64)i * 2);
+        listModules.append(readPascalString(nNamesOffset + nNameOffset));
+    }
+
+    const QList<XNE_DEF::NE_SEGMENT> listSegments = getSegmentList();
+    const quint16 nShift = getImageOS2Header_align();
+
+    if (nShift <= 47) {
+        for (qint32 i = 0; i < listSegments.count(); ++i) {
+            const XNE_DEF::NE_SEGMENT &segment = listSegments.at(i);
+
+            // NSRELOC: the relocation count and eight-byte records follow the segment data.
+            if ((segment.dwFlags & 0x0100) == 0) {
+                continue;
+            }
+
+            const qint64 nSegmentOffset = ((qint64)segment.dwFileOffset) << nShift;
+            const qint64 nSegmentSize = segment.dwFileSize ? segment.dwFileSize : 0x10000;
+            const qint64 nRelocationsOffset = nSegmentOffset + nSegmentSize;
+
+            if (!checkOffsetSize(nRelocationsOffset, 2)) {
+                continue;
+            }
+
+            const quint16 nRelocationCount = qMin<quint16>(read_uint16(nRelocationsOffset), 0x4000);
+            if (!checkOffsetSize(nRelocationsOffset + 2, (qint64)nRelocationCount * 8)) {
+                continue;
+            }
+
+            for (quint16 j = 0; j < nRelocationCount; ++j) {
+                const qint64 nRecordOffset = nRelocationsOffset + 2 + (qint64)j * 8;
+                const quint8 nFlags = read_uint8(nRecordOffset + 1);
+                const quint8 nTargetType = nFlags & 0x03;
+
+                if ((nTargetType != 1) && (nTargetType != 2)) {
+                    continue;
+                }
+
+                const quint16 nSourceOffset = read_uint16(nRecordOffset + 2);
+                const quint16 nModuleIndex = read_uint16(nRecordOffset + 4);
+                const quint16 nTarget = read_uint16(nRecordOffset + 6);
+
+                if ((nModuleIndex == 0) || (nModuleIndex > nModuleCount)) {
+                    continue;
+                }
+
+                XIMPORT_STRUCT record = {};
+                record.nOffset = nRecordOffset;
+                record.nSize = 8;
+                record.nAddress = getModuleAddress() + (XADDR)(i + 1) * 0x10000 + nSourceOffset;
+                record.sLibrary = listModules.at(nModuleIndex - 1);
+                record.nOrdinal = -1;
+
+                if (nTargetType == 1) {
+                    record.nOrdinal = nTarget;
+                } else {
+                    record.sFunction = readPascalString(nNamesOffset + nTarget);
+                }
+
+                listModuleUsed[nModuleIndex - 1] = true;
+                listResult.append(record);
+            }
+        }
+    }
+
+    // Some valid NE files omit per-segment fixups. Preserve their imported-module
+    // information instead of reporting an empty import list.
+    for (qint32 i = 0; i < nModuleCount; ++i) {
+        if (!listModuleUsed.at(i)) {
+            XIMPORT_STRUCT record = {};
+            record.nOffset = nModuleTableOffset + (qint64)i * 2;
+            record.nSize = 2;
+            record.nAddress = (XADDR)-1;
+            record.sLibrary = listModules.at(i);
+            record.nOrdinal = -1;
+            listResult.append(record);
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XEXPORT_STRUCT> XNE::getExportStructs()
+{
+    QVector<XEXPORT_STRUCT> listResult;
+    QMap<quint16, QString> mapNames;
+
+    auto readNameTable = [this, &mapNames](qint64 nOffset, qint64 nSize) {
+        if (!isOffsetValid(nOffset) || (nSize <= 0)) {
+            return;
+        }
+
+        const qint64 nEnd = qMin<qint64>(getSize(), nOffset + nSize);
+        qint32 nGuard = 0;
+
+        while ((nOffset < nEnd) && (nGuard++ < 0x10000)) {
+            const quint8 nLength = read_uint8(nOffset++);
+            if (nLength == 0) {
+                break;
+            }
+            if ((nOffset > nEnd - nLength) || (nOffset + nLength > nEnd - 2)) {
+                break;
+            }
+
+            const QString sName = QString::fromLatin1(read_array(nOffset, nLength));
+            nOffset += nLength;
+            const quint16 nOrdinal = read_uint16(nOffset);
+            nOffset += 2;
+
+            if ((nOrdinal != 0) && !sName.isEmpty()) {
+                mapNames.insert(nOrdinal, sName);
+            }
+        }
+    };
+
+    const qint64 nResidentOffset = getResidentNameTableOffset();
+    const qint64 nModuleOffset = getModuleReferenceTableOffset();
+    readNameTable(nResidentOffset, nModuleOffset - nResidentOffset);
+    readNameTable(getNotResindentNameTableOffset(), getImageOS2Header_cbnrestab());
+
+    const qint64 nEntryOffset = getEntryTableOffset();
+    const qint64 nEntrySize = getEntryTableSize();
+    if (!checkOffsetSize(nEntryOffset, nEntrySize) || (nEntrySize <= 0)) {
+        return listResult;
+    }
+
+    const QList<XNE_DEF::NE_SEGMENT> listSegments = getSegmentList();
+    const quint16 nShift = getImageOS2Header_align();
+    const qint64 nEnd = nEntryOffset + nEntrySize;
+    qint64 nCurrentOffset = nEntryOffset;
+    quint16 nOrdinal = 1;
+    qint32 nGuard = 0;
+
+    while ((nCurrentOffset + 2 <= nEnd) && (nGuard++ < 0x10000)) {
+        const quint8 nCount = read_uint8(nCurrentOffset++);
+        const quint8 nBundleType = read_uint8(nCurrentOffset++);
+        if (nCount == 0) {
+            break;
+        }
+
+        if (nBundleType == 0) {
+            nOrdinal = (quint16)(nOrdinal + nCount);
+            continue;
+        }
+
+        const qint32 nRecordSize = (nBundleType == 0xFF) ? 6 : 3;
+        if (nCurrentOffset > nEnd - (qint64)nCount * nRecordSize) {
+            break;
+        }
+
+        for (quint8 i = 0; i < nCount; ++i, ++nOrdinal) {
+            quint8 nSegment = nBundleType;
+            quint16 nFunctionOffset = 0;
+
+            if (nBundleType == 0xFF) {
+                nSegment = read_uint8(nCurrentOffset + 3);
+                nFunctionOffset = read_uint16(nCurrentOffset + 4);
+            } else {
+                nFunctionOffset = read_uint16(nCurrentOffset + 1);
+            }
+
+            XEXPORT_STRUCT record = {};
+            record.nOffset = -1;
+            record.nSize = 0;
+            record.nAddress = getModuleAddress() + (XADDR)nSegment * 0x10000 + nFunctionOffset;
+            record.sFunction = mapNames.value(nOrdinal, QString("Ordinal_%1").arg(nOrdinal));
+            record.nOrdinal = nOrdinal;
+
+            if ((nShift <= 47) && (nSegment > 0) && (nSegment <= listSegments.count())) {
+                const XNE_DEF::NE_SEGMENT &segment = listSegments.at(nSegment - 1);
+                record.nOffset = (((qint64)segment.dwFileOffset) << nShift) + nFunctionOffset;
+            }
+
+            listResult.append(record);
+            nCurrentOffset += nRecordSize;
+        }
+    }
+
+    return listResult;
+}
+
+QVector<XBinary::XRESOURCE_STRUCT> XNE::getResourceStructs()
+{
+    QVector<XRESOURCE_STRUCT> listResult;
+    const qint64 nTableOffset = getResourceTableOffset();
+
+    if (!checkOffsetSize(nTableOffset, 2)) {
+        return listResult;
+    }
+
+    const quint16 nShift = read_uint16(nTableOffset);
+    if (nShift > 47) {
+        return listResult;
+    }
+
+    auto readResourceName = [this, nTableOffset](quint16 nID) -> QString {
+        if (nID & 0x8000) {
+            return QString();
+        }
+
+        const qint64 nOffset = nTableOffset + nID;
+        if (!checkOffsetSize(nOffset, 1)) {
+            return QString();
+        }
+
+        const quint8 nLength = read_uint8(nOffset);
+        return checkOffsetSize(nOffset + 1, nLength) ? QString::fromLatin1(read_array(nOffset + 1, nLength)) : QString();
+    };
+
+    qint64 nCurrentOffset = nTableOffset + 2;
+    qint32 nGuard = 0;
+
+    while (checkOffsetSize(nCurrentOffset, 8) && (nGuard++ < 0x4000)) {
+        const quint16 nTypeID = read_uint16(nCurrentOffset);
+        if (nTypeID == 0) {
+            break;
+        }
+
+        const quint16 nCount = qMin<quint16>(read_uint16(nCurrentOffset + 2), 0x4000);
+        const QString sTypeName = readResourceName(nTypeID);
+        nCurrentOffset += 8;
+
+        if (!checkOffsetSize(nCurrentOffset, (qint64)nCount * 12)) {
+            break;
+        }
+
+        for (quint16 i = 0; i < nCount; ++i) {
+            const qint64 nNameInfoOffset = nCurrentOffset + (qint64)i * 12;
+            const quint16 nNameID = read_uint16(nNameInfoOffset + 6);
+            const qint64 nResourceOffset = ((qint64)read_uint16(nNameInfoOffset)) << nShift;
+            const qint64 nResourceSize = ((qint64)read_uint16(nNameInfoOffset + 2)) << nShift;
+
+            if (!checkOffsetSize(nResourceOffset, nResourceSize)) {
+                continue;
+            }
+
+            XRESOURCE_STRUCT record = {};
+            record.nOffset = nResourceOffset;
+            record.nSize = nResourceSize;
+            record.nAddress = offsetToAddress(nResourceOffset);
+            record.nType = (nTypeID & 0x8000) ? (nTypeID & 0x7FFF) : 0;
+            record.nID = (nNameID & 0x8000) ? (nNameID & 0x7FFF) : 0;
+            record.sName = readResourceName(nNameID);
+
+            if (record.sName.isEmpty()) {
+                record.sName = sTypeName;
+            }
+            if (record.sName.isEmpty()) {
+                record.sName = QString("Resource_%1").arg(record.nID ? record.nID : (quint32)(listResult.count() + 1));
+            }
+
+            listResult.append(record);
+        }
+
+        nCurrentOffset += (qint64)nCount * 12;
+    }
+
+    return listResult;
 }
 
 QList<XNE_DEF::NE_SEGMENT> XNE::getSegmentList()

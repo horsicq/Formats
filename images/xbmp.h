@@ -79,6 +79,7 @@ public:
 
     BMPFILEHEADER getFileHeader();
     BMPINFOHEADER getInfoHeader();
+    virtual QVector<XMETADATA_STRUCT> getMetadataStructs() override;
 
     QString structIDToString(quint32 nID) override;
     QString structIDToFtString(quint32 nID) override;

@@ -170,11 +170,10 @@ qint64 XPYC::getFileFormatSize(PDSTRUCT *pPdStruct)
 
         // Metadata size
         if ((nMajor > 3) || ((nMajor == 3) && (nMinor >= 7))) {
-            // New layout: flags (4 bytes) + optional hash (8 bytes) + timestamp/source size (4 bytes each)
+            // PEP 552: flags followed by either an 8-byte hash or timestamp + source size.
             nResult += 4;  // Flags
             if (info.bHashBased) {
                 nResult += 8;  // Hash
-                nResult += 4;  // Source size
             } else {
                 nResult += 4;  // Timestamp
                 nResult += 4;  // Source size
@@ -195,6 +194,49 @@ qint64 XPYC::getFileFormatSize(PDSTRUCT *pPdStruct)
 QString XPYC::getMIMEString()
 {
     return "application/x-python-code";
+}
+
+QVector<XBinary::XMETADATA_STRUCT> XPYC::getMetadataStructs()
+{
+    QVector<XMETADATA_STRUCT> listResult;
+    const INFO *pInfo = static_cast<const INFO *>(getInternalInfo(nullptr));
+    if (!pInfo || pInfo->sVersion.isEmpty()) {
+        return listResult;
+    }
+
+    auto appendMetadata = [&listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
+        XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = (XADDR)-1;
+        record.id = id;
+        record.sName = sName;
+        record.varValue = varValue;
+        listResult.append(record);
+    };
+
+    appendMetadata(0, 4, XMETADATA_ID_UNKNOWN, QString("Python version"), pInfo->sVersion);
+    appendMetadata(0, 2, XMETADATA_ID_UNKNOWN, QString("Magic"), QString("0x%1").arg(pInfo->nMagicValue, 4, 16, QChar('0')));
+
+    qint32 nMajor = 0;
+    qint32 nMinor = 0;
+    _parseVersionNumbers(pInfo->sVersion, &nMajor, &nMinor);
+    const bool bNewLayout = (nMajor > 3) || ((nMajor == 3) && (nMinor >= 7));
+
+    if (bNewLayout) {
+        appendMetadata(4, 4, XMETADATA_ID_UNKNOWN, QString("Flags"), QString("0x%1").arg(pInfo->nFlags, 8, 16, QChar('0')));
+        if (pInfo->bHashBased) {
+            appendMetadata(8, 8, XMETADATA_ID_UNKNOWN, QString("Source hash"), QString::fromLatin1(pInfo->baHash.toHex()));
+        } else {
+            appendMetadata(8, 4, XMETADATA_ID_MODIFICATED, QString("Timestamp"), valueToTime(pInfo->nTimestamp, DT_TYPE_UNIXTIME));
+            appendMetadata(12, 4, XMETADATA_ID_UNKNOWN, QString("Source size"), pInfo->nSourceSize);
+        }
+    } else {
+        appendMetadata(4, 4, XMETADATA_ID_MODIFICATED, QString("Timestamp"), valueToTime(pInfo->nTimestamp, DT_TYPE_UNIXTIME));
+        appendMetadata(8, 4, XMETADATA_ID_UNKNOWN, QString("Source size"), pInfo->nSourceSize);
+    }
+
+    return listResult;
 }
 
 QString XPYC::structIDToString(quint32 nID)
@@ -275,7 +317,6 @@ QList<XBinary::XFRECORD> XPYC::getXFRecords(FT fileType, quint32 nStructID, cons
 
             if (info.bHashBased) {
                 listResult.append({"Hash", 8, 8, XFRECORD_FLAG_NONE, VT_BYTE_ARRAY});
-                listResult.append({"SourceSize", 16, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
             } else {
                 listResult.append({"Timestamp", 8, 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
                 listResult.append({"SourceSize", 12, 4, XFRECORD_FLAG_SIZE, VT_UINT32});
@@ -401,11 +442,6 @@ XPYC::INTERNAL_INFO XPYC::_getInternalInfo(PDSTRUCT *pPdStruct)
             if (info.bHashBased) {
                 if (getSize() >= (nOffset + 8)) {
                     info.baHash = read_array(nOffset, 8);
-                    nOffset += 8;
-                }
-
-                if (getSize() >= (nOffset + 4)) {
-                    info.nSourceSize = read_uint32(nOffset);
                 }
             } else {
                 if (getSize() >= (nOffset + 4)) {
@@ -722,7 +758,7 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     if ((nMajor > 3) || ((nMajor == 3) && (nMinor >= 7))) {
         nCodeOffset += 4;  // Flags
         if (info.bHashBased) {
-            nCodeOffset += 8 + 4;  // Hash + source size
+            nCodeOffset += 8;  // Hash
         } else {
             nCodeOffset += 4 + 4;  // Timestamp + source size
         }
@@ -1002,10 +1038,10 @@ QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDST
     _parseVersionNumbers(info.sVersion, &nMajor, &nMinor);
 
     if ((nMajor > 3) || ((nMajor == 3) && (nMinor >= 7))) {
-        // New layout: flags (4 bytes) + optional hash (8 bytes) + timestamp/source size (4 bytes each)
+        // PEP 552: flags followed by either an 8-byte hash or timestamp + source size.
         nHeaderSize += 4;  // Flags
         if (info.bHashBased) {
-            nHeaderSize += 8 + 4;  // Hash + source size
+            nHeaderSize += 8;  // Hash
         } else {
             nHeaderSize += 4 + 4;  // Timestamp + source size
         }

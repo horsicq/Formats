@@ -155,6 +155,9 @@ public:
     virtual bool isImportPresent() override;
     virtual bool isResourcesPresent() override;
 
+    virtual QVector<XIMPORT_STRUCT> getImportStructs() override;
+    virtual QVector<XRESOURCE_STRUCT> getResourceStructs() override;
+
     virtual _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     virtual MODE getMode() override;
     virtual QString getArch() override;
