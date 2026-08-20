@@ -10648,7 +10648,8 @@ void XPE::_appendResourceEntries(QList<XFHEADER> &listResult, const XFSTRUCT &xf
                         if (baName.size() == nNameSize) {
                             resourceName.bIsName = true;
                             resourceName.nNameOffset = (quint32)(nNameOffset - nResourceDirOffset);
-                            resourceName.sName = QString::fromUtf16(reinterpret_cast<const ushort *>(baName.constData()), nNameLength);
+                            resourceName.sName = QString::fromUtf16(
+                                reinterpret_cast<const char16_t *>(baName.constData()), nNameLength);
                         }
                     }
                 }
@@ -14407,7 +14408,8 @@ XPE::RESOURCES_ID_NAME XPE::getResourcesIDName(qint64 nResourceOffset, quint32 n
         nStringLength = qMin((quint16)1024, nStringLength);
 
         QByteArray baName = read_array(nResourceOffset + nValue + 2, nStringLength * 2);
-        result.sName = QString::fromUtf16((quint16 *)(baName.data()), nStringLength);
+        result.sName = QString::fromUtf16(
+            reinterpret_cast<const char16_t *>(baName.constData()), nStringLength);
     } else {
         result.nID = nValue;
         result.sName = "";

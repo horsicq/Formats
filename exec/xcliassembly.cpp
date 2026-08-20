@@ -1351,7 +1351,8 @@ QList<QString> XCLIAssembly::getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPd
             break;
         }
 
-        QString sTemp = QString::fromUtf16((quint16 *)pStringCurrentOffsetOffset, nStringSize / 2);
+        QString sTemp = QString::fromUtf16(
+            reinterpret_cast<const char16_t *>(pStringCurrentOffsetOffset), nStringSize / 2);
 
         listResult.append(sTemp);
 

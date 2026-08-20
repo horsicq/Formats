@@ -27,6 +27,7 @@
 #include <QFileDevice>
 #include <QPointer>
 #include <QSaveFile>
+#include <QTimeZone>
 #include <QWaitCondition>
 #ifdef Q_OS_WIN
 #include <io.h>
@@ -928,6 +929,8 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_PE64_WINRARSFX, "PE64_WINRARSFX", QString("PE64: WinRAR SFX")},
     {XBinary::FT_CFBF_WIX, "CFBF_WIX", QString("MSI: WiX")},
     {XBinary::FT_PE32_YODA, "PE32_YODA", QString("PE32: Yoda's Protector")},
+    {XBinary::FT_PE32_WIXBURN, "PE32_WIXBURN", QString("PE32: WiX Burn bundle")},
+    {XBinary::FT_PE64_WIXBURN, "PE64_WIXBURN", QString("PE64: WiX Burn bundle")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -7600,7 +7603,9 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                         pUnicodeBuffer[nParity][nCurrentUnicodeSize[nParity]] = 0;
 
                         if (ssOptions.bUnicode) {
-                            const QString sString = QString::fromUtf16(pUnicodeBuffer[nParity], (qint32)nCurrentUnicodeSize[nParity]);  // TODO Check Qt6
+                            const QString sString = QString::fromUtf16(
+                                reinterpret_cast<const char16_t *>(pUnicodeBuffer[nParity]),
+                                (qint32)nCurrentUnicodeSize[nParity]);
                             const bool bAdd = !ssOptions.bNullTerminated || ((!bIsUnicodeSymbol) && (nCode == 0));
 
                             if (bAdd) {
@@ -7626,7 +7631,9 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_allStrings(_MEMORY_MAP *pMemory
                         pUnicodeBuffer[nO][nCurrentUnicodeSize[nO]] = 0;
 
                         if (ssOptions.bUnicode) {
-                            const QString sString = QString::fromUtf16(pUnicodeBuffer[nO], (qint32)nCurrentUnicodeSize[nO]);  // TODO Check Qt6
+                            const QString sString = QString::fromUtf16(
+                                reinterpret_cast<const char16_t *>(pUnicodeBuffer[nO]),
+                                (qint32)nCurrentUnicodeSize[nO]);
 
                             MS_RECORD record = {};
                             record.nValueType = VT_U;
@@ -8301,11 +8308,14 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
 
                             if (!bNeedStringFilter) {
                                 record.sValue = QString::fromUtf16(
-                                    pUnicodeBuffer[nParity], (qint32)nCurrentUnicodeSize[nParity]);
+                                    reinterpret_cast<const char16_t *>(pUnicodeBuffer[nParity]),
+                                    (qint32)nCurrentUnicodeSize[nParity]);
                                 listResult.append(record);
                                 bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                             } else {
-                                const QString sString = QString::fromUtf16(pUnicodeBuffer[nParity], (qint32)nCurrentUnicodeSize[nParity]);
+                                const QString sString = QString::fromUtf16(
+                                    reinterpret_cast<const char16_t *>(pUnicodeBuffer[nParity]),
+                                    (qint32)nCurrentUnicodeSize[nParity]);
                                 if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                                     bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                                 }
@@ -8332,12 +8342,15 @@ QVector<XBinary::MS_RECORD> XBinary::multiSearch_unicodeStrings(_MEMORY_MAP *pMe
 
                         if (!bNeedStringFilter) {
                             record.sValue = QString::fromUtf16(
-                                pUnicodeBuffer[nOtherParity], (qint32)nCurrentUnicodeSize[nOtherParity]);
+                                reinterpret_cast<const char16_t *>(pUnicodeBuffer[nOtherParity]),
+                                (qint32)nCurrentUnicodeSize[nOtherParity]);
                             listResult.append(record);
                             bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                         } else {
                             const QString sString =
-                                QString::fromUtf16(pUnicodeBuffer[nOtherParity], (qint32)nCurrentUnicodeSize[nOtherParity]);
+                                QString::fromUtf16(
+                                    reinterpret_cast<const char16_t *>(pUnicodeBuffer[nOtherParity]),
+                                    (qint32)nCurrentUnicodeSize[nOtherParity]);
                             if (_addMultiSearchStringRecordOptimized(&listResult, &record, sString, &ssOptions, pRegex)) {
                                 bLimitReached = _retainBestMSRecords(&listResult, ssOptions.nLimit) || bLimitReached;
                             }
@@ -13012,6 +13025,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         // XStaticUnpacker packer/installer/protector types (FT_FLAG_STATICUNPACKERS).
         // More specific than the base PE/CFBF type, so they must be preferred
         // whenever both a packer type and its base container are detected.
+        FT_PE64_WIXBURN,
         FT_PE64_7ZSFX,
         FT_PE64_ACTUALINSTALLER,
         FT_PE64_ADVANCEDINSTALLER,
@@ -13054,6 +13068,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_PE32_UPX,
         FT_PE32_WINRARSFX,
         FT_PE32_YODA,
+        FT_PE32_WIXBURN,
         FT_CFBF_WIX,  // More specific than MSI (WiX-generated) -> must win over FT_CFBF_MSI.
         FT_CFBF_MSI,
 
@@ -13386,6 +13401,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_PE64_WINRARSFX, FT_FLAG_STATICUNPACKERS},
         {FT_CFBF_WIX, FT_FLAG_STATICUNPACKERS},
         {FT_PE32_YODA, FT_FLAG_STATICUNPACKERS},
+        {FT_PE32_WIXBURN, FT_FLAG_STATICUNPACKERS},
+        {FT_PE64_WIXBURN, FT_FLAG_STATICUNPACKERS},
     };
 
     const qint32 nCount = (qint32)(sizeof(g_arrCategory) / sizeof(g_arrCategory[0]));
@@ -17813,7 +17830,11 @@ QDateTime XBinary::read_ASN_DateTime(qint64 nOffset, qint64 nSize)
     for (const QString &f : fmts) {
         dt = QDateTime::fromString(s, f);
         if (dt.isValid()) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+            dt.setTimeZone(QTimeZone(QTimeZone::UTC));
+#else
             dt.setTimeSpec(Qt::UTC);
+#endif
             return dt;
         }
     }
@@ -18783,7 +18804,7 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
         result.setMSecsSinceEpoch(nValue * 1000);
     } else if (type == DT_TYPE_UNIXTIME) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-        result = QDateTime::fromSecsSinceEpoch((quint32)nValue, Qt::UTC);
+        result = QDateTime::fromSecsSinceEpoch((quint32)nValue, QTimeZone(0));
 #else
         result = QDateTime::fromMSecsSinceEpoch((quint32)nValue * 1000, Qt::UTC);
 #endif
@@ -22832,6 +22853,16 @@ bool XBinary::unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, 
                                 pPdStruct);
 }
 
+bool XBinary::unpackRecordByIndex(qint32 nRecordIndex,
+                                  const ARCHIVERECORD *pExpectedRecord,
+                                  QIODevice *pOutDevice,
+                                  const QMap<UNPACK_PROP, QVariant> &mapProperties,
+                                  PDSTRUCT *pPdStruct)
+{
+    return _unpackRecordByIndex(nRecordIndex, pExpectedRecord, pOutDevice,
+                                mapProperties, pPdStruct);
+}
+
 bool XBinary::_unpackRecordByIndex(
     qint32 nRecordIndex, const ARCHIVERECORD *pExpectedRecord,
     QIODevice *pOutDevice,
@@ -24697,6 +24728,16 @@ QString XBinary::getCoderParamsString(HANDLE_METHOD handleMethod, const QByteArr
 QString XBinary::getHandleMethods(const QMap<FPART_PROP, QVariant> &mapProperties)
 {
     QString sResult;
+
+    // Some metadata sources know the exact human-readable pipeline but do not
+    // expose the format-native coder-property bytes needed to reconstruct it.
+    // Keep that text in its own property: HANDLEMETHOD itself stays numeric for
+    // every decoder and routing consumer.
+    const QString sReportedMethod = mapProperties.value(FPART_PROP_REPORTEDMETHOD).toString().trimmed();
+
+    if (!sReportedMethod.isEmpty()) {
+        return sReportedMethod;
+    }
 
     HANDLE_METHOD handleMethod = (HANDLE_METHOD)(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD).toULongLong());
     HANDLE_METHOD handleMethod2 = (HANDLE_METHOD)(mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD2).toULongLong());

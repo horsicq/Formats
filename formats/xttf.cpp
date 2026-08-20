@@ -20,6 +20,8 @@
  */
 #include "xttf.h"
 
+#include <QTimeZone>
+
 XBinary::XCONVERT _TABLE_XTTF_STRUCTID[] = {
     {XTTF::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XTTF::STRUCTID_HEADER, "HEADER", QObject::tr("Header")},
@@ -229,7 +231,7 @@ QVector<XBinary::XMETADATA_STRUCT> XTTF::getMetadataStructs()
     const qint64 nMacToUnixEpoch = 2082844800LL;
     auto appendLongDateTime = [this, &listResult, nMacToUnixEpoch](qint64 nOffset, XMETADATA_ID id, const QString &sName) {
         const qint64 nMacSeconds = (qint64)read_uint64(nOffset, true);
-        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch(nMacSeconds - nMacToUnixEpoch, Qt::UTC);
+        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch(nMacSeconds - nMacToUnixEpoch, QTimeZone(0));
         if (!dateTime.isValid()) {
             return;
         }

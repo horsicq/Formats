@@ -20,6 +20,8 @@
  */
 #include "xmp4.h"
 
+#include <QTimeZone>
+
 XBinary::XCONVERT _TABLE_XMP4_STRUCTID[] = {
     {XMP4::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XMP4::STRUCTID_BOX, "BOX", QObject::tr("Box")},
@@ -124,7 +126,7 @@ QVector<XBinary::XMETADATA_STRUCT> XMP4::getMetadataStructs()
             return;
         }
 
-        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch((qint64)nMacSeconds - nMacToUnixEpoch, Qt::UTC);
+        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch((qint64)nMacSeconds - nMacToUnixEpoch, QTimeZone(0));
         if (!dateTime.isValid()) {
             return;
         }

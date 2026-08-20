@@ -408,6 +408,19 @@ public:
         // carries the full relative path; this is the format-native directory value and is only
         // surfaced in the UI's advanced mode.
         FPART_PROP_OPTIONAL_PATH,
+        // Exact method description supplied by a metadata provider that cannot
+        // expose native coder properties (notably the compiled 7-Zip source).
+        // HANDLEMETHOD remains a numeric HANDLE_METHOD; this companion keeps
+        // provider text such as "LZMA2:12" without corrupting that contract.
+        // Keep new properties at the end so persisted values do not change.
+        FPART_PROP_REPORTEDMETHOD,
+        // Host platform reported by an archive provider (for example,
+        // "Windows" or "Unix").  Kept separate from FILEMODE/attribute bits.
+        FPART_PROP_HOSTOS,
+        // Non-CRC content digest as provider-supplied hexadecimal text and its
+        // algorithm name (MD5/SHA1/SHA256, etc.).  RESULTCRC remains numeric.
+        FPART_PROP_CHECKSUM,
+        FPART_PROP_CHECKSUMTYPE,
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
@@ -742,6 +755,7 @@ public:
         FT_PE32_WINRARSFX, FT_PE64_WINRARSFX,
         FT_CFBF_WIX,
         FT_PE32_YODA,
+        FT_PE32_WIXBURN, FT_PE64_WIXBURN,
 
         // TODO more
     };
@@ -2821,6 +2835,11 @@ public:
 
     bool unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
     bool unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
+    // Safely re-open the session, revalidate the expected record identity and
+    // publish exactly one member transactionally to a seekable output device.
+    bool unpackRecordByIndex(qint32 nRecordIndex, const ARCHIVERECORD *pExpectedRecord,
+                             QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties,
+                             PDSTRUCT *pPdStruct = nullptr);
 
 protected:
     // Shared, transaction-safe implementation used by archive wrappers that

@@ -128,6 +128,7 @@
 #endif
 #ifdef USE_STATICUNPACKER
 #include "../XStaticUnpacker/x7zsfx.h"
+#include "../XStaticUnpacker/xburn.h"
 #include "../XStaticUnpacker/xactualinstaller.h"
 #include "../XStaticUnpacker/xadvancedinstaller.h"
 #include "../XStaticUnpacker/xaspack.h"
