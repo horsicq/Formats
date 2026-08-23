@@ -82,10 +82,13 @@
 #include "xdos16.h"
 #include "xfreearc.h"
 #include "xgzip.h"
+#include "xgamearchive.h"
 #include "xipa.h"
 #include "xiso9660.h"
 #include "xjar.h"
 #include "xlha.h"
+#include "xsar.h"
+#include "xarx.h"
 #include "xlzip.h"
 #include "xlz4.h"
 #include "xlz5.h"
@@ -239,7 +242,7 @@ public:
     static QString getFileFormatExtsString(XBinary::FT fileType);
     static bool isArchive(XBinary::FT fileType);
     static bool isArchive(const QString &sFileName);
-    // True for the XStaticUnpacker packer/installer handle-method file types (FT_PE32_*/FT_CFBF_*),
+    // True for the XStaticUnpacker packer/installer handle-method file types (FT_UPX/FT_PE32_*/FT_CFBF_*),
     // which are enumerated via the XBinary streaming API (initUnpack/infoCurrent) rather than XArchive.
     static bool isStaticUnpacker(XBinary::FT fileType);
     static bool isExecutable(XBinary::FT fileType);

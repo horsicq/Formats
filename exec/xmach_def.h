@@ -33,6 +33,8 @@ const quint32 S_MH_CIGAM_64 = 0xCFFAEDFE; /* NXSwapInt(MH_MAGIC_64) */
 
 const quint32 S_FAT_MAGIC = 0xCAFEBABE;
 const quint32 S_FAT_CIGAM = 0xBEBAFECA;
+const quint32 S_FAT_MAGIC_64 = 0xCAFEBABF;
+const quint32 S_FAT_CIGAM_64 = 0xBFBAFECA;
 
 const quint32 S_CPU_TYPE_VAX = 0x00000001;
 const quint32 S_CPU_TYPE_ROMP = 0x00000002;
@@ -84,6 +86,15 @@ struct fat_arch {
     quint32 offset;
     quint32 size;
     quint32 align;
+};
+
+struct fat_arch_64 {
+    quint32 cputype;
+    quint32 cpusubtype;
+    quint64 offset;
+    quint64 size;
+    quint32 align;
+    quint32 reserved;
 };
 
 /*

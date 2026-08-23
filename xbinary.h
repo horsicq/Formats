@@ -283,11 +283,27 @@ public:
         // Logical record decoded by its owning archive object.  This is a
         // routing marker, not a raw compression codec.
         HANDLE_METHOD_ARCHIVE_STREAM,
-        // Decoder-only methods imported from the 7-Zip ZS capability set.
-        // Keep them at the end so persisted values of existing methods do not
-        // change.
+        // Decoder-only methods. Keep new values at the end so persisted values
+        // of existing methods do not change. The first three were imported
+        // from the 7-Zip ZS capability set.
         HANDLE_METHOD_LZ5,
-        HANDLE_METHOD_LIZARD
+        HANDLE_METHOD_LIZARD,
+        HANDLE_METHOD_LZH4,
+        HANDLE_METHOD_KWAJ_MSZIP,     // KWAJ method 4: length-prefixed MSZIP blocks
+        // SEA ARC. The run-length stage is part of the method, not a separate
+        // layer: 3/4/6/7/8 apply it, 5/9 do not. Methods 6 and 7 differ only in
+        // the encoder's hash function, so one decoder value covers both.
+        HANDLE_METHOD_ARC_PACK,        // ARC method 3: run-length only
+        HANDLE_METHOD_ARC_SQUEEZE,     // ARC method 4: Huffman + run-length
+        // Reserved for ARC's original hash-table crunch, methods 5 (no
+        // run-length) and 6/7 (with it). That is a different decompressor from
+        // the dynamic LZW below, and no sample has been found to develop it
+        // against, so nothing maps to these yet and method 5-7 records report
+        // HANDLE_METHOD_UNKNOWN.
+        HANDLE_METHOD_ARC_CRUNCH_OLD,
+        HANDLE_METHOD_ARC_CRUNCH,
+        HANDLE_METHOD_ARC_CRUNCH_DYN,  // ARC method 8: dynamic-width LZW + run-length
+        HANDLE_METHOD_ARC_SQUASH       // ARC method 9: dynamic-width LZW, no run-length
         // TODO check more methods
     };
 
@@ -438,7 +454,70 @@ public:
         UNPACK_PROP_CHECKCRC16ARC,   // Check CRC-16/ARC values
         UNPACK_PROP_CHECKADLER32,    // Check Adler-32 values
         UNPACK_PROP_CHECKRAR14,      // Check the RAR 1.4 rotate/add checksum
-        UNPACK_PROP_METADATAONLY     // Enumerate bounded directory metadata without requiring decodable payload streams
+        UNPACK_PROP_METADATAONLY,    // Enumerate bounded directory metadata without requiring decodable payload streams
+        // Maximum number of logical bytes a single member may produce. The
+        // property is optional; when present it must be a non-negative qint64.
+        UNPACK_PROP_MAX_OUTPUT_SIZE,
+        // Optional numeric Windows code page for legacy archive metadata and
+        // password bytes. A zero or missing value requests format inference.
+        UNPACK_PROP_CODEPAGE,
+        // Exact raw password bytes for formats whose legacy password encoding
+        // is not self-describing. This takes precedence over PASSWORD there.
+        UNPACK_PROP_PASSWORD_BYTES
+    };
+
+    // Accounts temporary decoder memory against the process-wide unpack
+    // budget carried by UNPACK_PROP_MAX_OUTPUT_SIZE.  Reservations are
+    // thread-safe, non-copyable, and automatically released on destruction.
+    // A missing limit remains source-compatible (unbounded), but its reserved
+    // bytes still count while any bounded unpack operation is active.
+    class UNPACK_MEMORY_RESERVATION {
+    public:
+        UNPACK_MEMORY_RESERVATION();
+        ~UNPACK_MEMORY_RESERVATION();
+
+        bool acquire(const QMap<UNPACK_PROP, QVariant> &mapProperties,
+                     qint64 nSize);
+        bool resize(qint64 nSize);
+        void release();
+        bool isActive() const;
+        qint64 size() const;
+
+    private:
+        Q_DISABLE_COPY(UNPACK_MEMORY_RESERVATION)
+
+        qint64 m_nSize;
+        qint64 m_nLimit;
+        bool m_bActive;
+    };
+
+    // Journals filesystem publications made by one extract-to-folder
+    // operation.  Existing files are moved to private, same-filesystem
+    // backups before replacement; newly published files and directories are
+    // removed in reverse order if the operation does not commit.  The class
+    // deliberately has no PDSTRUCT dependency so rollback still runs after
+    // cancellation or progress-owner destruction.
+    class UNPACK_FOLDER_TRANSACTION {
+    public:
+        explicit UNPACK_FOLDER_TRANSACTION(const QString &sRootPath);
+        ~UNPACK_FOLDER_TRANSACTION();
+
+        bool isValid() const;
+        bool ensureDirectory(const QString &sDirectoryPath);
+        // Call prepareFile immediately before publishing a verified temporary,
+        // then markFilePublished only after its rename/QSaveFile commit succeeds.
+        bool prepareFile(const QString &sFilePath);
+        bool markFilePublished(const QString &sFilePath);
+        bool commit();
+        bool rollback();
+        QString errorString() const;
+        QString recoveryPath() const;
+
+    private:
+        Q_DISABLE_COPY(UNPACK_FOLDER_TRANSACTION)
+
+        class IMPL;
+        IMPL *m_pImpl;
     };
 
     virtual QMap<UNPACK_PROP, QVariant> getDefaultUnpackProperties();
@@ -728,8 +807,9 @@ public:
         FT_LZ5,
         FT_LIZARD,
 
-        // XStaticUnpacker file types. Keep at the end so persisted numeric IDs
-        // of existing formats do not move.
+        // XStaticUnpacker file types. Keep this block contiguous and do not
+        // insert into it: numeric IDs and the inclusive static-type range are
+        // both persistent contracts.
         FT_PE32_7ZSFX, FT_PE64_7ZSFX,
         FT_PE32_ACTUALINSTALLER, FT_PE64_ACTUALINSTALLER,
         FT_PE32_ADVANCEDINSTALLER, FT_PE64_ADVANCEDINSTALLER,
@@ -756,6 +836,15 @@ public:
         FT_CFBF_WIX,
         FT_PE32_YODA,
         FT_PE32_WIXBURN, FT_PE64_WIXBURN,
+
+        // Native readers appended after the stable XStaticUnpacker range.
+        // Do not insert these between FT_PE32_7ZSFX and FT_PE64_WIXBURN:
+        // XFormats::isStaticUnpackerFileType() relies on that contiguous range.
+        FT_QUAKE_PAK,
+        FT_DOOM_WAD,
+        FT_BUILD_GRP,
+        FT_SAR,
+        FT_ARX,
 
         // TODO more
     };
@@ -2686,6 +2775,7 @@ public:
     static bool isPdStructLifetimeAlive(const PDSTRUCTLIFETIME &lifetime);
     static bool setPdStructCurrentChecked(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue, const PDSTRUCTLIFETIME &lifetime);
     static bool setPdStructCurrentIncrementChecked(PDSTRUCT *pPdStruct, qint32 nIndex, const PDSTRUCTLIFETIME &lifetime);
+    static bool setPdStructFinishedChecked(PDSTRUCT *pPdStruct, qint32 nIndex, const PDSTRUCTLIFETIME &lifetime);
     static bool invokePdStructCallbackChecked(PDSTRUCT *pPdStruct, const PDSTRUCTLIFETIME &lifetime,
                                               qint32 nMinIntervalMs = 100);
     static void invokePdStructCallback(PDSTRUCT *pPdStruct, qint32 nMinIntervalMs = 100);
@@ -2788,6 +2878,9 @@ public:
     static bool isUnpackCRCProperty(UNPACK_PROP unpackProperty);
     static bool isUnpackCRCEnabled(const QMap<UNPACK_PROP, QVariant> &mapProperties);
     static bool isUnpackCRCEnabled(const QMap<UNPACK_PROP, QVariant> &mapProperties, CRC_TYPE crcType);
+    static bool getUnpackOutputLimit(const QMap<UNPACK_PROP, QVariant> &mapProperties, qint64 *pnLimit);
+    static bool isUnpackOutputSizeAllowed(const QMap<UNPACK_PROP, QVariant> &mapProperties, qint64 nSize);
+    static qint64 getReservedUnpackMemory();
     static bool checkCRC(QIODevice *pDevice, CRC_TYPE crcType, QVariant value, PDSTRUCT *pPdStruct = nullptr);
 
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr);
@@ -2879,6 +2972,9 @@ public:
     static qint32 getBufferSize(PDSTRUCT *pPdStruct);
     static qint32 getFileBufferSize(PDSTRUCT *pPdStruct);
     static QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
+    static QIODevice *createUnpackFileBuffer(qint64 nSize,
+                                             const QMap<UNPACK_PROP, QVariant> &mapProperties,
+                                             PDSTRUCT *pPdStruct);
     static void freeFileBuffer(QIODevice **ppBuffer);
 
     static QString getArchiveRecordComment(const ARCHIVERECORD &record);

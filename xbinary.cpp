@@ -27,6 +27,7 @@
 #include <QFileDevice>
 #include <QPointer>
 #include <QSaveFile>
+#include <QTemporaryDir>
 #include <QTimeZone>
 #include <QWaitCondition>
 #ifdef Q_OS_WIN
@@ -124,6 +125,103 @@ private:
     QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE> m_pState;
     QSharedPointer<XBinary::PDSTRUCT_CALLBACK_STATE::ENTRY> m_pEntry;
 };
+
+struct UNPACK_MEMORY_BUDGET_STATE {
+    QMutex mutex;
+    qint64 nReserved = 0;
+    QMap<qint64, qint64> mapActiveLimits;
+};
+
+UNPACK_MEMORY_BUDGET_STATE &unpackMemoryBudgetState()
+{
+    static UNPACK_MEMORY_BUDGET_STATE state;
+    return state;
+}
+
+qint64 unpackMemoryEffectiveLimit(
+    const UNPACK_MEMORY_BUDGET_STATE &state, qint64 nCandidateLimit)
+{
+    qint64 nResult = nCandidateLimit;
+    if (!state.mapActiveLimits.isEmpty()) {
+        const qint64 nActiveLimit = state.mapActiveLimits.constBegin().key();
+        if ((nResult < 0) || (nActiveLimit < nResult)) {
+            nResult = nActiveLimit;
+        }
+    }
+    return nResult;
+}
+
+bool acquireUnpackMemory(qint64 nLimit, qint64 nSize)
+{
+    if ((nLimit < -1) || (nSize < 0)) return false;
+
+    UNPACK_MEMORY_BUDGET_STATE &state = unpackMemoryBudgetState();
+    QMutexLocker locker(&state.mutex);
+    const qint64 nMax = (std::numeric_limits<qint64>::max)();
+    if (state.nReserved > nMax - nSize) return false;
+
+    const qint64 nNewReserved = state.nReserved + nSize;
+    const qint64 nEffectiveLimit =
+        unpackMemoryEffectiveLimit(state, nLimit);
+    if ((nEffectiveLimit >= 0) && (nNewReserved > nEffectiveLimit)) {
+        return false;
+    }
+
+    state.nReserved = nNewReserved;
+    if (nLimit >= 0) {
+        state.mapActiveLimits[nLimit] =
+            state.mapActiveLimits.value(nLimit) + 1;
+    }
+    return true;
+}
+
+bool resizeUnpackMemory(qint64 nLimit, qint64 nOldSize, qint64 nNewSize)
+{
+    if ((nLimit < -1) || (nOldSize < 0) || (nNewSize < 0)) {
+        return false;
+    }
+
+    UNPACK_MEMORY_BUDGET_STATE &state = unpackMemoryBudgetState();
+    QMutexLocker locker(&state.mutex);
+    if (nOldSize > state.nReserved) return false;
+
+    const qint64 nBase = state.nReserved - nOldSize;
+    const qint64 nMax = (std::numeric_limits<qint64>::max)();
+    if (nBase > nMax - nNewSize) return false;
+    const qint64 nNewReserved = nBase + nNewSize;
+
+    // Reducing a reservation must always be possible, including when a later
+    // operation introduced a smaller active ceiling than the current usage.
+    if (nNewSize > nOldSize) {
+        const qint64 nEffectiveLimit =
+            unpackMemoryEffectiveLimit(state, nLimit);
+        if ((nEffectiveLimit >= 0) &&
+            (nNewReserved > nEffectiveLimit)) {
+            return false;
+        }
+    }
+
+    state.nReserved = nNewReserved;
+    return true;
+}
+
+void releaseUnpackMemory(qint64 nLimit, qint64 nSize)
+{
+    UNPACK_MEMORY_BUDGET_STATE &state = unpackMemoryBudgetState();
+    QMutexLocker locker(&state.mutex);
+    state.nReserved = (nSize <= state.nReserved)
+                          ? state.nReserved - nSize
+                          : 0;
+
+    if (nLimit >= 0) {
+        const qint64 nCount = state.mapActiveLimits.value(nLimit);
+        if (nCount <= 1) {
+            state.mapActiveLimits.remove(nLimit);
+        } else {
+            state.mapActiveLimits[nLimit] = nCount - 1;
+        }
+    }
+}
 }  // namespace
 
 bool compareMemoryMapRecord(const XBinary::_MEMORY_RECORD &a, const XBinary::_MEMORY_RECORD &b)
@@ -680,6 +778,8 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_ASCII85, "ASCII85", QString("ASCII85 PDF")},
     {XBinary::HANDLE_METHOD_PPMD7, "PPMD7", QString("PPMD7")},
     {XBinary::HANDLE_METHOD_PPMD8, "PPMD8", QString("PPMD8")},  // TODO
+    {XBinary::HANDLE_METHOD_LZH1, "LZH1", QString("LZH1")},
+    {XBinary::HANDLE_METHOD_LZH4, "LZH4", QString("LZH4")},
     {XBinary::HANDLE_METHOD_LZH5, "LZH5", QString("LZH5")},
     {XBinary::HANDLE_METHOD_LZH6, "LZH6", QString("LZH6")},
     {XBinary::HANDLE_METHOD_LZH7, "LZH7", QString("LZH7")},
@@ -745,6 +845,13 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_ARCHIVE_STREAM, "ARCHIVE_STREAM", QObject::tr("Archive stream")},
     {XBinary::HANDLE_METHOD_LZ5, "LZ5", QString("LZ5")},
     {XBinary::HANDLE_METHOD_LIZARD, "LIZARD", QString("Lizard")},
+    {XBinary::HANDLE_METHOD_KWAJ_MSZIP, "KWAJ_MSZIP", QString("KWAJ MSZIP")},
+    {XBinary::HANDLE_METHOD_ARC_PACK, "ARC_PACK", QString("ARC packed")},
+    {XBinary::HANDLE_METHOD_ARC_SQUEEZE, "ARC_SQUEEZE", QString("ARC squeezed")},
+    {XBinary::HANDLE_METHOD_ARC_CRUNCH_OLD, "ARC_CRUNCH_OLD", QString("ARC crunched (old)")},
+    {XBinary::HANDLE_METHOD_ARC_CRUNCH, "ARC_CRUNCH", QString("ARC crunched")},
+    {XBinary::HANDLE_METHOD_ARC_CRUNCH_DYN, "ARC_CRUNCH_DYN", QString("ARC crunched (dynamic)")},
+    {XBinary::HANDLE_METHOD_ARC_SQUASH, "ARC_SQUASH", QString("ARC squashed")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -839,6 +946,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_UNICODE, "Unicode", QString("Unicode")},
     {XBinary::FT_UNICODE_BE, "UnicodeBE", QString("Unicode BE")},
     {XBinary::FT_UNICODE_LE, "UnicodeLE", QString("Unicode LE")},
+    {XBinary::FT_UPX, "UPX", QString("UPX")},
     {XBinary::FT_XML, "XML", QString("XML")},
     {XBinary::FT_UTF8, "UTF8", QString("UTF8")},
     {XBinary::FT_VIDEO, "Video", QObject::tr("Video")},
@@ -931,6 +1039,11 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_PE32_YODA, "PE32_YODA", QString("PE32: Yoda's Protector")},
     {XBinary::FT_PE32_WIXBURN, "PE32_WIXBURN", QString("PE32: WiX Burn bundle")},
     {XBinary::FT_PE64_WIXBURN, "PE64_WIXBURN", QString("PE64: WiX Burn bundle")},
+    {XBinary::FT_QUAKE_PAK, "QUAKE_PAK", QString("Quake PAK")},
+    {XBinary::FT_DOOM_WAD, "DOOM_WAD", QString("Doom WAD")},
+    {XBinary::FT_BUILD_GRP, "BUILD_GRP", QString("Build GRP")},
+    {XBinary::FT_SAR, "SAR", QString("SAR")},
+    {XBinary::FT_ARX, "ARX", QString("ARX")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -1369,6 +1482,637 @@ bool XBinary::isUnpackCRCEnabled(const QMap<UNPACK_PROP, QVariant> &mapPropertie
     }
 
     return bResult;
+}
+
+bool XBinary::getUnpackOutputLimit(const QMap<UNPACK_PROP, QVariant> &mapProperties, qint64 *pnLimit)
+{
+    if (!pnLimit) return false;
+    *pnLimit = -1;
+
+    if (!mapProperties.contains(UNPACK_PROP_MAX_OUTPUT_SIZE)) return true;
+
+    const QVariant value = mapProperties.value(UNPACK_PROP_MAX_OUTPUT_SIZE);
+    const int nType = value.userType();
+    qint64 nLimit = -1;
+
+    if (nType == QMetaType::ULongLong) {
+        const quint64 nUnsigned = value.toULongLong();
+        if (nUnsigned > (quint64)(std::numeric_limits<qint64>::max)()) return false;
+        nLimit = (qint64)nUnsigned;
+    } else if (nType == QMetaType::UInt) {
+        nLimit = (qint64)value.toUInt();
+    } else if ((nType == QMetaType::LongLong) || (nType == QMetaType::Int)) {
+        bool bOK = false;
+        nLimit = value.toLongLong(&bOK);
+        if (!bOK || (nLimit < 0)) return false;
+    } else {
+        return false;
+    }
+
+    *pnLimit = nLimit;
+    return true;
+}
+
+bool XBinary::isUnpackOutputSizeAllowed(const QMap<UNPACK_PROP, QVariant> &mapProperties, qint64 nSize)
+{
+    qint64 nLimit = -1;
+    return (nSize >= 0) && getUnpackOutputLimit(mapProperties, &nLimit) &&
+           ((nLimit < 0) || (nSize <= nLimit));
+}
+
+XBinary::UNPACK_MEMORY_RESERVATION::UNPACK_MEMORY_RESERVATION()
+    : m_nSize(0), m_nLimit(-1), m_bActive(false)
+{
+}
+
+XBinary::UNPACK_MEMORY_RESERVATION::~UNPACK_MEMORY_RESERVATION()
+{
+    release();
+}
+
+bool XBinary::UNPACK_MEMORY_RESERVATION::acquire(
+    const QMap<UNPACK_PROP, QVariant> &mapProperties, qint64 nSize)
+{
+    if (m_bActive || (nSize < 0)) return false;
+
+    qint64 nLimit = -1;
+    if (!XBinary::getUnpackOutputLimit(mapProperties, &nLimit) ||
+        !acquireUnpackMemory(nLimit, nSize)) {
+        return false;
+    }
+
+    m_nSize = nSize;
+    m_nLimit = nLimit;
+    m_bActive = true;
+    return true;
+}
+
+bool XBinary::UNPACK_MEMORY_RESERVATION::resize(qint64 nSize)
+{
+    if (!m_bActive || (nSize < 0)) return false;
+    if (nSize == m_nSize) return true;
+    if (!resizeUnpackMemory(m_nLimit, m_nSize, nSize)) return false;
+    m_nSize = nSize;
+    return true;
+}
+
+void XBinary::UNPACK_MEMORY_RESERVATION::release()
+{
+    if (!m_bActive) return;
+    releaseUnpackMemory(m_nLimit, m_nSize);
+    m_nSize = 0;
+    m_nLimit = -1;
+    m_bActive = false;
+}
+
+bool XBinary::UNPACK_MEMORY_RESERVATION::isActive() const
+{
+    return m_bActive;
+}
+
+qint64 XBinary::UNPACK_MEMORY_RESERVATION::size() const
+{
+    return m_nSize;
+}
+
+class XBinary::UNPACK_FOLDER_TRANSACTION::IMPL {
+public:
+    struct FILE_STATE {
+        QString sTargetPath;
+        QString sBackupPath;
+        bool bHadOriginal = false;
+        bool bPublished = false;
+    };
+
+    explicit IMPL(const QString &sRequestedRoot)
+        : pJournalDir(nullptr), bValid(false), bFinished(false),
+          bCommitted(false), bRollbackResult(false)
+    {
+        pathCaseSensitivity = fileSystemPathCaseSensitivity();
+
+        if (sRequestedRoot.isEmpty() || sRequestedRoot.contains(QChar(0))) {
+            setError(QStringLiteral("Invalid extraction transaction root"));
+            return;
+        }
+
+        const QFileInfo rootInfo(sRequestedRoot);
+        sRootPath = normalizePath(rootInfo.absoluteFilePath());
+        if (!rootInfo.exists() || !rootInfo.isDir() || sRootPath.isEmpty() ||
+            pathIsUnsafeLink(rootInfo)) {
+            setError(QStringLiteral("Extraction transaction root is not a directory"));
+            return;
+        }
+
+        sCanonicalRoot = normalizePath(rootInfo.canonicalFilePath());
+        if (sCanonicalRoot.isEmpty()) {
+            setError(QStringLiteral("Cannot canonicalize extraction transaction root"));
+            return;
+        }
+
+        pJournalDir = new QTemporaryDir(
+            QDir(sRootPath).filePath(
+                QStringLiteral(".xunpack-rollback-XXXXXX")));
+        if (!pJournalDir || !pJournalDir->isValid()) {
+            setError(QStringLiteral("Cannot create extraction rollback directory"));
+            return;
+        }
+
+        sJournalPath = normalizePath(pJournalDir->path());
+        sCanonicalJournal = normalizePath(
+            QFileInfo(sJournalPath).canonicalFilePath());
+        const QFileInfo journalInfo(sJournalPath);
+        if (sJournalPath.isEmpty() || sCanonicalJournal.isEmpty() ||
+            pathIsUnsafeLink(journalInfo) ||
+            !isStrictChildPath(sJournalPath, sRootPath) ||
+            !isStrictChildPath(sCanonicalJournal, sCanonicalRoot)) {
+            setError(QStringLiteral("Extraction rollback directory escaped its root"));
+            return;
+        }
+
+#ifndef Q_OS_WIN
+        if (!QFile::setPermissions(
+                sJournalPath,
+                QFileDevice::ReadOwner | QFileDevice::WriteOwner |
+                    QFileDevice::ExeOwner)) {
+            setError(QStringLiteral("Cannot secure extraction rollback directory"));
+            return;
+        }
+#endif
+
+        bValid = true;
+    }
+
+    ~IMPL()
+    {
+        if (bValid && !bFinished) rollback();
+        delete pJournalDir;
+    }
+
+    QString normalizePath(const QString &sPath) const
+    {
+        if (sPath.isEmpty()) return QString();
+        return QDir::fromNativeSeparators(
+            QDir::cleanPath(QFileInfo(sPath).absoluteFilePath()));
+    }
+
+    bool pathIsUnsafeLink(const QFileInfo &info) const
+    {
+        if (info.isSymLink()) return true;
+#ifdef Q_OS_WIN
+        const QString sNativePath = QDir::toNativeSeparators(
+            info.absoluteFilePath());
+        const DWORD nAttributes = GetFileAttributesW(
+            reinterpret_cast<LPCWSTR>(sNativePath.utf16()));
+        if (nAttributes == INVALID_FILE_ATTRIBUTES) return info.exists();
+        return (nAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+#else
+        return false;
+#endif
+    }
+
+    QString pathKey(const QString &sPath) const
+    {
+        // Keep lexical spellings distinct even on normally case-insensitive
+        // platforms.  A destination can opt into case-sensitive semantics
+        // (APFS volumes and Windows per-directory case sensitivity), while on
+        // a case-insensitive filesystem stacked journal records still unwind
+        // safely in reverse order.
+        return normalizePath(sPath);
+    }
+
+    bool isSameOrChildPath(const QString &sPath,
+                           const QString &sParentPath) const
+    {
+        const QString sCleanPath = normalizePath(sPath);
+        QString sCleanParent = normalizePath(sParentPath);
+        if (sCleanPath.compare(sCleanParent, pathCaseSensitivity) == 0)
+            return true;
+        if (!sCleanParent.endsWith(QLatin1Char('/')))
+            sCleanParent.append(QLatin1Char('/'));
+        return sCleanPath.startsWith(sCleanParent, pathCaseSensitivity);
+    }
+
+    bool isStrictChildPath(const QString &sPath,
+                           const QString &sParentPath) const
+    {
+        return isSameOrChildPath(sPath, sParentPath) &&
+               (normalizePath(sPath).compare(normalizePath(sParentPath),
+                                             pathCaseSensitivity) != 0);
+    }
+
+    void setError(const QString &sMessage)
+    {
+        if (sError.isEmpty()) sError = sMessage;
+    }
+
+    void setRollbackIncompleteError()
+    {
+        const QString sMessage = QStringLiteral(
+            "Extraction rollback is incomplete; recovery data was retained at %1")
+                                     .arg(sJournalPath);
+        if (sError.isEmpty())
+            sError = sMessage;
+        else if (!sError.contains(sMessage))
+            sError += QStringLiteral("; ") + sMessage;
+    }
+
+    bool normalizeOutputPath(const QString &sPath, QString *pNormalized,
+                             bool bAllowRoot)
+    {
+        if (!pNormalized || sPath.isEmpty() || sPath.contains(QChar(0))) {
+            setError(QStringLiteral("Invalid transaction output path"));
+            return false;
+        }
+
+        const QString sCleanPath = normalizePath(sPath);
+        const bool bIsRoot =
+            sCleanPath.compare(sRootPath, pathCaseSensitivity) == 0;
+        if (sCleanPath.isEmpty() ||
+            !isSameOrChildPath(sCleanPath, sRootPath) ||
+            (!bAllowRoot && bIsRoot)) {
+            setError(QStringLiteral("Transaction output path escapes its root"));
+            return false;
+        }
+        if (isSameOrChildPath(sCleanPath, sJournalPath)) {
+            setError(QStringLiteral(
+                "Archive output collides with the private rollback directory"));
+            return false;
+        }
+
+        *pNormalized = sCleanPath;
+        return true;
+    }
+
+    bool existingDirectoryIsSafe(const QString &sDirectoryPath)
+    {
+        const QFileInfo info(sDirectoryPath);
+        const bool bIsRoot = normalizePath(sDirectoryPath).compare(
+                                 sRootPath, pathCaseSensitivity) == 0;
+        if (!info.exists() || !info.isDir() || pathIsUnsafeLink(info))
+            return false;
+        const QString sCanonical = normalizePath(info.canonicalFilePath());
+        return !sCanonical.isEmpty() &&
+               (!bIsRoot ||
+                (sCanonical.compare(sCanonicalRoot,
+                                    pathCaseSensitivity) == 0)) &&
+               isSameOrChildPath(sCanonical, sCanonicalRoot) &&
+               !isSameOrChildPath(sCanonical, sCanonicalJournal);
+    }
+
+    bool ensureDirectory(const QString &sRequestedPath)
+    {
+        if (!bValid || bFinished) {
+            setError(QStringLiteral("Extraction transaction is not active"));
+            return false;
+        }
+        if (!existingDirectoryIsSafe(sRootPath)) {
+            setError(QStringLiteral("Extraction transaction root became unsafe"));
+            return false;
+        }
+
+        QString sDirectoryPath;
+        if (!normalizeOutputPath(sRequestedPath, &sDirectoryPath, true))
+            return false;
+        if (sDirectoryPath.compare(sRootPath, pathCaseSensitivity) == 0)
+            return true;
+
+        QString sRelative = QDir(sRootPath).relativeFilePath(sDirectoryPath);
+        sRelative = QDir::fromNativeSeparators(QDir::cleanPath(sRelative));
+        if (sRelative.isEmpty() || (sRelative == QLatin1String(".")) ||
+            (sRelative == QLatin1String("..")) ||
+            sRelative.startsWith(QLatin1String("../"))) {
+            setError(QStringLiteral("Invalid transaction directory path"));
+            return false;
+        }
+
+        const QStringList listParts =
+            sRelative.split(QLatin1Char('/'), Qt::SkipEmptyParts);
+        QString sCurrent = sRootPath;
+        for (const QString &sPart : listParts) {
+            sCurrent = normalizePath(QDir(sCurrent).filePath(sPart));
+            QString sChecked;
+            if (!normalizeOutputPath(sCurrent, &sChecked, false)) return false;
+
+            QFileInfo info(sChecked);
+            if (info.exists() || pathIsUnsafeLink(info)) {
+                if (!existingDirectoryIsSafe(sChecked)) {
+                    setError(QStringLiteral("Unsafe extraction directory: %1")
+                                 .arg(sChecked));
+                    return false;
+                }
+                continue;
+            }
+
+            bool bCreated = QDir().mkdir(sChecked);
+            if (!bCreated) {
+                // A benign concurrent creator may have won the mkdir race, but
+                // only an ordinary contained directory is acceptable.
+                if (!existingDirectoryIsSafe(sChecked)) {
+                    setError(QStringLiteral("Cannot create extraction directory: %1")
+                                 .arg(sChecked));
+                    return false;
+                }
+                continue;
+            }
+            if (!existingDirectoryIsSafe(sChecked)) {
+                QDir().rmdir(sChecked);
+                setError(QStringLiteral("Created extraction directory became unsafe: %1")
+                             .arg(sChecked));
+                return false;
+            }
+
+            const QString sKey = pathKey(sChecked);
+            if (!setCreatedDirectoryKeys.contains(sKey)) {
+                setCreatedDirectoryKeys.insert(sKey);
+                listCreatedDirectories.append(sChecked);
+            }
+        }
+        return true;
+    }
+
+    bool prepareFile(const QString &sRequestedPath)
+    {
+        if (!bValid || bFinished) {
+            setError(QStringLiteral("Extraction transaction is not active"));
+            return false;
+        }
+
+        QString sFilePath;
+        if (!normalizeOutputPath(sRequestedPath, &sFilePath, false))
+            return false;
+        if (!ensureDirectory(QFileInfo(sFilePath).absolutePath())) return false;
+        if (!existingDirectoryIsSafe(QFileInfo(sFilePath).absolutePath())) {
+            setError(QStringLiteral("Unsafe extraction file parent: %1")
+                         .arg(sFilePath));
+            return false;
+        }
+
+        const QString sKey = pathKey(sFilePath);
+        if (mapFiles.contains(sKey)) {
+            const QFileInfo currentInfo(sFilePath);
+            if (pathIsUnsafeLink(currentInfo) ||
+                (currentInfo.exists() && !currentInfo.isFile())) {
+                setError(QStringLiteral("Extraction target changed type: %1")
+                             .arg(sFilePath));
+                return false;
+            }
+            return true;
+        }
+
+        FILE_STATE state;
+        state.sTargetPath = sFilePath;
+        const QFileInfo targetInfo(sFilePath);
+        if (pathIsUnsafeLink(targetInfo) ||
+            (targetInfo.exists() && !targetInfo.isFile())) {
+            setError(QStringLiteral("Unsafe extraction file target: %1")
+                         .arg(sFilePath));
+            return false;
+        }
+
+        if (targetInfo.exists()) {
+            const QString sCanonicalTarget =
+                normalizePath(targetInfo.canonicalFilePath());
+            if (sCanonicalTarget.isEmpty() ||
+                !isSameOrChildPath(sCanonicalTarget, sCanonicalRoot) ||
+                isSameOrChildPath(sCanonicalTarget, sCanonicalJournal)) {
+                setError(QStringLiteral("Extraction file target escaped its root: %1")
+                             .arg(sFilePath));
+                return false;
+            }
+            state.sBackupPath = QDir(sJournalPath).filePath(
+                QStringLiteral("original-%1")
+                    .arg(listFileOrder.count(), 12, 16, QLatin1Char('0')));
+            if (QFileInfo::exists(state.sBackupPath) ||
+                !QFile::rename(sFilePath, state.sBackupPath)) {
+                setError(QStringLiteral("Cannot preserve existing output file: %1")
+                             .arg(sFilePath));
+                return false;
+            }
+            state.bHadOriginal = true;
+        }
+
+        mapFiles.insert(sKey, state);
+        listFileOrder.append(sKey);
+        return true;
+    }
+
+    bool markFilePublished(const QString &sRequestedPath)
+    {
+        if (!bValid || bFinished) {
+            setError(QStringLiteral("Extraction transaction is not active"));
+            return false;
+        }
+        QString sFilePath;
+        if (!normalizeOutputPath(sRequestedPath, &sFilePath, false))
+            return false;
+        const QString sKey = pathKey(sFilePath);
+        if (!mapFiles.contains(sKey)) {
+            setError(QStringLiteral("Output file was not prepared for publication: %1")
+                         .arg(sFilePath));
+            return false;
+        }
+
+        FILE_STATE &state = mapFiles[sKey];
+        // The caller reports that publication succeeded. Mark it before the
+        // validation below so a validation failure still removes the new file
+        // during rollback.
+        state.bPublished = true;
+        const QFileInfo targetInfo(sFilePath);
+        const QString sCanonicalTarget =
+            normalizePath(targetInfo.canonicalFilePath());
+        if (!targetInfo.exists() || !targetInfo.isFile() ||
+            pathIsUnsafeLink(targetInfo) || sCanonicalTarget.isEmpty() ||
+            !isSameOrChildPath(sCanonicalTarget, sCanonicalRoot) ||
+            isSameOrChildPath(sCanonicalTarget, sCanonicalJournal) ||
+            !existingDirectoryIsSafe(targetInfo.absolutePath())) {
+            setError(QStringLiteral("Published extraction file is unsafe: %1")
+                         .arg(sFilePath));
+            return false;
+        }
+        return true;
+    }
+
+    bool commit()
+    {
+        if (!bValid || bFinished) {
+            setError(QStringLiteral("Extraction transaction is not active"));
+            return false;
+        }
+
+        for (auto it = mapFiles.constBegin(); it != mapFiles.constEnd(); ++it) {
+            if (!it.value().bPublished) {
+                setError(QStringLiteral(
+                    "Cannot commit an extraction transaction with an unpublished file: %1")
+                             .arg(it.value().sTargetPath));
+                return false;
+            }
+        }
+
+        bCommitted = true;
+        bFinished = true;
+        bool bRemoved = true;
+        if (pJournalDir && QDir(sJournalPath).exists()) {
+            bRemoved = pJournalDir->remove();
+        }
+        if (!bRemoved) {
+            pJournalDir->setAutoRemove(false);
+            sRecovery = sJournalPath;
+            setError(QStringLiteral(
+                         "Extraction committed but rollback-data cleanup failed: %1")
+                         .arg(sJournalPath));
+        }
+        // The destination is fully committed even when obsolete backup data
+        // could not be removed. Returning success prevents an impossible
+        // partial rollback after some backups have already been deleted.
+        return true;
+    }
+
+    bool rollback()
+    {
+        if (!bValid) return false;
+        if (bFinished) return bCommitted ? false : bRollbackResult;
+
+        bool bResult = true;
+        for (qint32 i = listFileOrder.count() - 1; i >= 0; --i) {
+            FILE_STATE &state = mapFiles[listFileOrder.at(i)];
+            QFileInfo targetInfo(state.sTargetPath);
+            const bool bTargetPresent =
+                targetInfo.exists() || pathIsUnsafeLink(targetInfo);
+
+            if (state.bPublished && bTargetPresent) {
+                const QString sCanonicalTarget =
+                    normalizePath(targetInfo.canonicalFilePath());
+                if (pathIsUnsafeLink(targetInfo) || !targetInfo.isFile() ||
+                    sCanonicalTarget.isEmpty() ||
+                    !isSameOrChildPath(sCanonicalTarget, sCanonicalRoot) ||
+                    isSameOrChildPath(sCanonicalTarget, sCanonicalJournal) ||
+                    !existingDirectoryIsSafe(targetInfo.absolutePath()) ||
+                    !QFile::remove(state.sTargetPath)) {
+                    bResult = false;
+                }
+            } else if (!state.bPublished && bTargetPresent) {
+                // Publication did not report success, so this path may belong
+                // to a concurrent writer (or to a failed backend with unclear
+                // final state). Never delete it speculatively.
+                bResult = false;
+            }
+
+            targetInfo.setFile(state.sTargetPath);
+            if (state.bHadOriginal) {
+                const QFileInfo backupInfo(state.sBackupPath);
+                if (targetInfo.exists() || pathIsUnsafeLink(targetInfo) ||
+                    !backupInfo.exists() || !backupInfo.isFile() ||
+                    pathIsUnsafeLink(backupInfo) ||
+                    !existingDirectoryIsSafe(targetInfo.absolutePath()) ||
+                    !QFile::rename(state.sBackupPath, state.sTargetPath)) {
+                    bResult = false;
+                }
+            }
+        }
+
+        for (qint32 i = listCreatedDirectories.count() - 1; i >= 0; --i) {
+            const QString &sDirectoryPath = listCreatedDirectories.at(i);
+            const QFileInfo info(sDirectoryPath);
+            if (!info.exists() && !pathIsUnsafeLink(info)) continue;
+            if (pathIsUnsafeLink(info) || !info.isDir() ||
+                !existingDirectoryIsSafe(sDirectoryPath) ||
+                !QDir().rmdir(sDirectoryPath)) {
+                bResult = false;
+            }
+        }
+
+        if (bResult && pJournalDir && QDir(sJournalPath).exists() &&
+            !pJournalDir->remove()) {
+            bResult = false;
+        }
+
+        bFinished = true;
+        bRollbackResult = bResult;
+        if (!bResult) {
+            if (pJournalDir) pJournalDir->setAutoRemove(false);
+            sRecovery = sJournalPath;
+            setRollbackIncompleteError();
+        }
+        return bResult;
+    }
+
+    QTemporaryDir *pJournalDir;
+    Qt::CaseSensitivity pathCaseSensitivity;
+    QString sRootPath;
+    QString sCanonicalRoot;
+    QString sJournalPath;
+    QString sCanonicalJournal;
+    QString sError;
+    QString sRecovery;
+    QMap<QString, FILE_STATE> mapFiles;
+    QStringList listFileOrder;
+    QStringList listCreatedDirectories;
+    QSet<QString> setCreatedDirectoryKeys;
+    bool bValid;
+    bool bFinished;
+    bool bCommitted;
+    bool bRollbackResult;
+};
+
+XBinary::UNPACK_FOLDER_TRANSACTION::UNPACK_FOLDER_TRANSACTION(
+    const QString &sRootPath)
+    : m_pImpl(new IMPL(sRootPath))
+{
+}
+
+XBinary::UNPACK_FOLDER_TRANSACTION::~UNPACK_FOLDER_TRANSACTION()
+{
+    delete m_pImpl;
+}
+
+bool XBinary::UNPACK_FOLDER_TRANSACTION::isValid() const
+{
+    return m_pImpl && m_pImpl->bValid;
+}
+
+bool XBinary::UNPACK_FOLDER_TRANSACTION::ensureDirectory(
+    const QString &sDirectoryPath)
+{
+    return m_pImpl && m_pImpl->ensureDirectory(sDirectoryPath);
+}
+
+bool XBinary::UNPACK_FOLDER_TRANSACTION::prepareFile(
+    const QString &sFilePath)
+{
+    return m_pImpl && m_pImpl->prepareFile(sFilePath);
+}
+
+bool XBinary::UNPACK_FOLDER_TRANSACTION::markFilePublished(
+    const QString &sFilePath)
+{
+    return m_pImpl && m_pImpl->markFilePublished(sFilePath);
+}
+
+bool XBinary::UNPACK_FOLDER_TRANSACTION::commit()
+{
+    return m_pImpl && m_pImpl->commit();
+}
+
+bool XBinary::UNPACK_FOLDER_TRANSACTION::rollback()
+{
+    return m_pImpl && m_pImpl->rollback();
+}
+
+QString XBinary::UNPACK_FOLDER_TRANSACTION::errorString() const
+{
+    return m_pImpl ? m_pImpl->sError : QString();
+}
+
+QString XBinary::UNPACK_FOLDER_TRANSACTION::recoveryPath() const
+{
+    return m_pImpl ? m_pImpl->sRecovery : QString();
+}
+
+qint64 XBinary::getReservedUnpackMemory()
+{
+    UNPACK_MEMORY_BUDGET_STATE &state = unpackMemoryBudgetState();
+    QMutexLocker locker(&state.mutex);
+    return state.nReserved;
 }
 
 qint64 XBinary::getNumberOfArchiveRecords(PDSTRUCT *pPdStruct)
@@ -1838,12 +2582,21 @@ qint32 XBinary::_writeDevice(const char *pBuffer, qint32 nBufferSize, DATAPROCES
     const qint64 nWindowSize = pState->nProcessedLimit;
     const qint64 nChunkStart = pState->nCountOutput;
     const qint64 nMax = (std::numeric_limits<qint64>::max)();
+    qint64 nOutputLimit = -1;
 
     // nProcessedLimit is the number of bytes requested after
     // nProcessedOffset, not an absolute end position.  Validate the state
     // before doing any arithmetic so a malformed window cannot wrap around.
     if ((nWindowOffset < 0) || (nWindowSize < -1) || (nChunkStart < 0) ||
         (nChunkStart > (nMax - nBufferSize)) || ((nWindowSize != -1) && (nWindowOffset > (nMax - nWindowSize)))) {
+        pState->bWriteError = true;
+        return 0;
+    }
+
+    if (!getUnpackOutputLimit(pState->mapUnpackProperties, &nOutputLimit) ||
+        ((nOutputLimit >= 0) &&
+         ((nChunkStart > nOutputLimit) ||
+          ((qint64)nBufferSize > (nOutputLimit - nChunkStart))))) {
         pState->bWriteError = true;
         return 0;
     }
@@ -12538,7 +13291,57 @@ QSet<XBinary::FT> XBinary::getFileTypes(quint32 nFTFlags)
         bAllFound = true;
 
         if (nFTFlags & FT_FLAG_ARCHIVES) {
-            if (compareSignature(&memoryMap, "'PK'0304", 0) || compareSignature(&memoryMap, "'PK'0506", 0))  // TODO baHeader
+            if ((nSize >= 12) && compareSignature(&memoryMap, "'PACK'", 0) &&
+                ((read_uint32(8) % 64U) == 0U) &&
+                ((read_uint32(8) / 64U) <= 100000U) &&
+                (read_uint32(4) >= 12U) &&
+                ((quint64)read_uint32(4) <= (quint64)nSize) &&
+                ((quint64)read_uint32(8) <=
+                 ((quint64)nSize - (quint64)read_uint32(4))) &&
+                ((read_uint32(8) != 0U) ||
+                 ((read_uint32(4) == 12U) && (nSize == 12)))) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_QUAKE_PAK);
+        } else if ((nSize >= 12) &&
+                   (compareSignature(&memoryMap, "'IWAD'", 0) ||
+                    compareSignature(&memoryMap, "'PWAD'", 0)) &&
+                   (read_uint32(4) <= 100000U) &&
+                   (read_uint32(8) >= 12U) &&
+                   ((quint64)read_uint32(8) <= (quint64)nSize) &&
+                   (((quint64)read_uint32(4) * 16U) <=
+                    ((quint64)nSize - (quint64)read_uint32(8))) &&
+                   ((read_uint32(4) != 0U) ||
+                    ((read_uint32(8) == 12U) && (nSize == 12)))) {
+            stResult.insert(FT_ARCHIVE);
+            stResult.insert(FT_DOOM_WAD);
+        } else if ((nSize >= 16) &&
+                   compareSignature(&memoryMap, "'KenSilverman'", 0) &&
+                   (read_uint32(12) <= 100000U) &&
+                   (((quint64)read_uint32(12) * 16U) <=
+                    ((quint64)nSize - 16U))) {
+            const quint32 nRecordCount = read_uint32(12);
+            quint64 nExpectedSize = 16U + ((quint64)nRecordCount * 16U);
+            const QByteArray baGrpDirectory = read_array(
+                16, (qint64)nRecordCount * 16);
+            const char *pGrpDirectory = baGrpDirectory.constData();
+            bool bValidGrpSize =
+                (baGrpDirectory.size() == (qint64)nRecordCount * 16);
+            for (quint32 i = 0; i < nRecordCount; ++i) {
+                if (!bValidGrpSize) break;
+                const quint64 nMemberSize = _read_uint32(
+                    pGrpDirectory + ((qint64)i * 16) + 12);
+                if ((nExpectedSize > (quint64)nSize) ||
+                    (nMemberSize > ((quint64)nSize - nExpectedSize))) {
+                    bValidGrpSize = false;
+                    break;
+                }
+                nExpectedSize += nMemberSize;
+            }
+            if (bValidGrpSize && (nExpectedSize == (quint64)nSize)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_BUILD_GRP);
+            }
+        } else if (compareSignature(&memoryMap, "'PK'0304", 0) || compareSignature(&memoryMap, "'PK'0506", 0))  // TODO baHeader
             {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ZIP);
@@ -12552,8 +13355,18 @@ QSet<XBinary::FT> XBinary::getFileTypes(quint32 nFTFlags)
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_ZLIB);
         } else if (compareSignature(&memoryMap, "....'-lh'..2d") || compareSignature(&memoryMap, "....'-lz'..2d") || compareSignature(&memoryMap, "....'-pm'..2d")) {
-            stResult.insert(FT_ARCHIVE);
-            stResult.insert(FT_LHA);
+            // Same first-record guard as XLHA::isValid. This byte-array path
+            // never calls that function, so without the check here ARX - which
+            // shares the tag but shifts every field from offset 7 onward by one
+            // byte - keeps being reported as LHA.
+            const quint8 nLhaLevel = read_uint8(20);
+            const qint64 nLhaHeaderSize = (nLhaLevel == 2) ? (qint64)read_uint16(0) : (qint64)(read_uint8(0) + 2);
+            const qint64 nLhaRecordSize = nLhaHeaderSize + (qint64)(quint32)read_uint32(7);
+
+            if ((nLhaLevel <= 2) && (nLhaHeaderSize >= 21) && (nLhaRecordSize > 0) && (nLhaRecordSize <= getSize())) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_LHA);
+            }
         } else if (compareSignature(&memoryMap, "'!<arch>'0a")) {
             stResult.insert(FT_ARCHIVE);
             stResult.insert(FT_AR);
@@ -12838,23 +13651,40 @@ QSet<XBinary::FT> XBinary::getFileTypes(quint32 nFTFlags)
         }
 
         if (!bAllFound && (nFTFlags & (FT_FLAG_EXECUTABLES | FT_FLAG_ARCHIVES))) {
-            if (nSize >= (qint64)sizeof(XMACH_DEF::fat_header) + (qint64)sizeof(XMACH_DEF::fat_arch)) {
-                if (read_uint32(0, true) == XMACH_DEF::S_FAT_MAGIC) {
-                    if (read_uint32(4, true) < 10) {
-                        if (nFTFlags & FT_FLAG_ARCHIVES) {
-                            stResult.insert(FT_ARCHIVE);
-                        }
-                        stResult.insert(FT_MACHOFAT);
-                        bAllFound = true;
-                    }
-                } else if (read_uint32(0, false) == XMACH_DEF::S_FAT_MAGIC) {
-                    if (read_uint32(4, false) < 10) {
-                        if (nFTFlags & FT_FLAG_ARCHIVES) {
-                            stResult.insert(FT_ARCHIVE);
-                        }
-                        stResult.insert(FT_MACHOFAT);
-                        bAllFound = true;
-                    }
+            const quint32 nFatMagic = (nSize >= (qint64)sizeof(XMACH_DEF::fat_header)) ? read_uint32(0, true) : 0;
+            const bool bFat64 = (nFatMagic == XMACH_DEF::S_FAT_MAGIC_64) || (nFatMagic == XMACH_DEF::S_FAT_CIGAM_64);
+            const bool bFat32 = (nFatMagic == XMACH_DEF::S_FAT_MAGIC) || (nFatMagic == XMACH_DEF::S_FAT_CIGAM);
+
+            if (bFat32 || bFat64) {
+                const bool bFatBigEndian = (nFatMagic == XMACH_DEF::S_FAT_MAGIC) || (nFatMagic == XMACH_DEF::S_FAT_MAGIC_64);
+                const qint64 nFatRecordSize = bFat64 ? (qint64)sizeof(XMACH_DEF::fat_arch_64) : (qint64)sizeof(XMACH_DEF::fat_arch);
+                const quint32 nFatRecords = read_uint32(offsetof(XMACH_DEF::fat_header, nfat_arch), bFatBigEndian);
+                const quint32 nMaxFatRecords = 1000000;
+                bool bFatValid = (nFatRecords > 0) && (nFatRecords <= nMaxFatRecords) &&
+                                 ((quint64)nFatRecords <= (quint64)((nSize - (qint64)sizeof(XMACH_DEF::fat_header)) / nFatRecordSize));
+                const quint64 nFatTableEnd = sizeof(XMACH_DEF::fat_header) + (quint64)nFatRecords * (quint64)nFatRecordSize;
+
+                for (quint32 i = 0; bFatValid && (i < nFatRecords); i++) {
+                    const qint64 nFatRecordOffset = sizeof(XMACH_DEF::fat_header) + (qint64)i * nFatRecordSize;
+                    const quint32 nCpuType = read_uint32(nFatRecordOffset, bFatBigEndian);
+                    const quint64 nArchOffset = bFat64 ? read_uint64(nFatRecordOffset + 8, bFatBigEndian)
+                                                      : read_uint32(nFatRecordOffset + 8, bFatBigEndian);
+                    const quint64 nArchSize = bFat64 ? read_uint64(nFatRecordOffset + 16, bFatBigEndian)
+                                                    : read_uint32(nFatRecordOffset + 12, bFatBigEndian);
+                    const quint32 nAlign = read_uint32(nFatRecordOffset + (bFat64 ? 24 : 16), bFatBigEndian);
+                    const quint32 nReserved = bFat64 ? read_uint32(nFatRecordOffset + 28, bFatBigEndian) : 0;
+                    const quint64 nAlignmentMask = (nAlign > 63) ? 0 : (nAlign ? (((quint64)1 << nAlign) - 1) : 0);
+                    const quint64 nUnsignedFileSize = (quint64)nSize;
+                    bFatValid = (nCpuType != 0) && (nArchSize != 0) && (nAlign <= 63) && (!bFat64 || (nReserved == 0)) &&
+                                (nArchOffset >= nFatTableEnd) && ((nArchOffset & nAlignmentMask) == 0) &&
+                                (nArchOffset <= nUnsignedFileSize) &&
+                                (nArchSize <= (nUnsignedFileSize - nArchOffset));
+                }
+
+                if (bFatValid) {
+                    if (nFTFlags & FT_FLAG_ARCHIVES) stResult.insert(FT_ARCHIVE);
+                    stResult.insert(FT_MACHOFAT);
+                    bAllFound = true;
                 }
             }
         }
@@ -13044,6 +13874,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_PE64_TARMA,
         FT_PE64_UPX,
         FT_PE64_WINRARSFX,
+        FT_PE32_WIXBURN,
         FT_PE32_7ZSFX,
         FT_PE32_ACTUALINSTALLER,
         FT_PE32_ADVANCEDINSTALLER,
@@ -13065,12 +13896,12 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_PE32_SFX,
         FT_PE32_SMARTINSTALL,
         FT_PE32_TARMA,
+        FT_PE32_YODA,
         FT_PE32_UPX,
         FT_PE32_WINRARSFX,
-        FT_PE32_YODA,
-        FT_PE32_WIXBURN,
         FT_CFBF_WIX,  // More specific than MSI (WiX-generated) -> must win over FT_CFBF_MSI.
         FT_CFBF_MSI,
+        FT_UPX,
 
         // Executables
         FT_PE64,
@@ -13091,6 +13922,13 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_MSDOS,
 
         // Android/Java ecosystems and archives
+        FT_QUAKE_PAK,
+        FT_DOOM_WAD,
+        FT_BUILD_GRP,
+        // SAR and ARX precede LHA: all three share the method tag, so the more
+        // specific types must win.
+        FT_SAR,
+        FT_ARX,
         FT_APKS,
         FT_APK,
         FT_IPA,
@@ -13325,6 +14163,11 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_WARC, FT_FLAG_ARCHIVES},
         {FT_MTREE, FT_FLAG_ARCHIVES},
         {FT_UU, FT_FLAG_ARCHIVES},
+        {FT_QUAKE_PAK, FT_FLAG_ARCHIVES},
+        {FT_DOOM_WAD, FT_FLAG_ARCHIVES},
+        {FT_BUILD_GRP, FT_FLAG_ARCHIVES},
+        {FT_SAR, FT_FLAG_ARCHIVES},
+        {FT_ARX, FT_FLAG_ARCHIVES},
         {FT_STK, FT_FLAG_ARCHIVES},
         // Documents
         {FT_PDF, FT_FLAG_DOCUMENTS},
@@ -13357,6 +14200,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_UNICODE, FT_FLAG_TEXT},
         // Packer / protector / installer (XStaticUnpacker) handle-method types.
         // Off by default; only listed when FT_FLAG_STATICUNPACKERS is requested.
+        {FT_UPX, FT_FLAG_STATICUNPACKERS},
         {FT_PE32_7ZSFX, FT_FLAG_STATICUNPACKERS},
         {FT_PE64_7ZSFX, FT_FLAG_STATICUNPACKERS},
         {FT_PE32_ACTUALINSTALLER, FT_FLAG_STATICUNPACKERS},
@@ -21114,8 +21958,22 @@ void XBinary::setPdStructStatus(PDSTRUCT *pPdStruct, qint32 nIndex, const QStrin
 
 void XBinary::setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex)
 {
-    if (pPdStruct && (nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
-        QMutexLocker locker(&pPdStruct->_pdMutex);
+    const PDSTRUCTLIFETIME lifetime = retainPdStructLifetime(pPdStruct);
+    setPdStructFinishedChecked(pPdStruct, nIndex, lifetime);
+}
+
+bool XBinary::setPdStructFinishedChecked(
+    PDSTRUCT *pPdStruct, qint32 nIndex,
+    const PDSTRUCTLIFETIME &lifetime)
+{
+    if (!pPdStruct || !lifetime.isValid()) return false;
+
+    QMutexLocker stateLocker(&lifetime._state->mutex);
+    if (lifetime._state->bDestroying ||
+        (pPdStruct->_pdCallbackState != lifetime._state)) return false;
+
+    if ((nIndex >= 0) && (nIndex < N_NUMBER_PDRECORDS)) {
+        QMutexLocker pdLocker(&pPdStruct->_pdMutex);
 
         if (pPdStruct->_pdRecord[nIndex].bIsValid.loadAcquire()) {
             pPdStruct->_pdRecord[nIndex].bIsValid = false;
@@ -21130,7 +21988,7 @@ void XBinary::setPdStructFinished(PDSTRUCT *pPdStruct, qint32 nIndex)
         }
     }
 
-    // qDebug("setPdStructFinished: %d", nIndex);
+    return true;
 }
 
 void XBinary::setPdStructInfoString(PDSTRUCT *pPdStruct, const QString &sInfoString)
@@ -22649,6 +23507,11 @@ bool XBinary::writeUnpackData(UNPACK_STATE *pState, QIODevice *pDevice, const ch
         return false;
     }
 
+    if (!isUnpackOutputSizeAllowed(pState->mapUnpackProperties, nSize)) {
+        setPdStructErrorString(pPdStruct, tr("Unpacked output exceeds the configured limit"));
+        return false;
+    }
+
     QPointer<QIODevice> guardedOutput(pDevice);
     const bool bWritable = guardedOutput->isWritable();
     if (!guardedOutput || !isProgressAlive() || !bWritable) return false;
@@ -22892,6 +23755,12 @@ bool XBinary::_unpackRecordByIndex(
     if (!isProgressAlive() || !isPdStructNotCanceled(pPdStruct))
         return false;
 
+    qint64 nOutputLimit = -1;
+    if (!getUnpackOutputLimit(mapProperties, &nOutputLimit)) {
+        setPdStructErrorString(pPdStruct, tr("Invalid unpacked-output limit"));
+        return false;
+    }
+
     QPointer<XBinary> guardedThis(this);
     QPointer<QIODevice> guardedOutput(pOutDevice);
     QPointer<QIODevice> guardedSource(getDevice());
@@ -22992,6 +23861,11 @@ bool XBinary::_unpackRecordByIndex(
         ? record.mapProperties.value(FPART_PROP_UNCOMPRESSEDSIZE).toLongLong()
         : -1;
     if (bResult && bHasExpectedSize && (nExpectedSize < 0)) bResult = false;
+    if (bResult && (nOutputLimit >= 0) && bHasExpectedSize &&
+        (nExpectedSize > nOutputLimit)) {
+        setPdStructErrorString(pPdStruct, tr("Unpacked output exceeds the configured limit"));
+        bResult = false;
+    }
     QIODevice *pWorkDevice = nullptr;
     if (bResult && (nExpectedSize >= 0)) {
         pWorkDevice = createFileBuffer(nExpectedSize, pPdStruct);
@@ -23022,6 +23896,17 @@ bool XBinary::_unpackRecordByIndex(
         if (!guardedThis || !guardedWorkDevice || !isProgressAlive() ||
             (state.nCurrentIndex != nRecordIndex) ||
             (state.nNumberOfRecords != nNumberOfRecords)) {
+            bResult = false;
+        }
+    }
+    if (bResult) {
+        const qint64 nDecodedSize = guardedWorkDevice->size();
+        if (!guardedThis || !guardedWorkDevice || !isProgressAlive() ||
+            (nDecodedSize < 0) ||
+            ((nOutputLimit >= 0) && (nDecodedSize > nOutputLimit)) ||
+            (bHasExpectedSize && (nDecodedSize != nExpectedSize))) {
+            setPdStructErrorString(pPdStruct,
+                                   tr("Invalid unpacked output size"));
             bResult = false;
         }
     }
@@ -23286,6 +24171,94 @@ bool XBinary::_unpackRecordByIndex(
     return bResult;
 }
 
+namespace {
+
+class UnpackBoundedTemporaryFile final : public QTemporaryFile {
+public:
+    UnpackBoundedTemporaryFile(const QString &sTemplateName, qint64 nLimit)
+        : QTemporaryFile(sTemplateName),
+          m_nLimit(nLimit),
+          m_bLimitExceeded(false)
+    {
+    }
+
+    bool limitExceeded() const
+    {
+        return m_bLimitExceeded;
+    }
+
+    bool seek(qint64 nPosition) override
+    {
+        if (m_bLimitExceeded) return false;
+        if ((m_nLimit >= 0) && (nPosition > m_nLimit)) {
+            m_bLimitExceeded = true;
+            return false;
+        }
+        return QTemporaryFile::seek(nPosition);
+    }
+
+    bool resize(qint64 nSize) override
+    {
+        if (m_bLimitExceeded) return false;
+        if ((m_nLimit >= 0) && (nSize > m_nLimit)) {
+            m_bLimitExceeded = true;
+            return false;
+        }
+        return QTemporaryFile::resize(nSize);
+    }
+
+protected:
+    qint64 writeData(const char *pData, qint64 nSize) override
+    {
+        if (m_bLimitExceeded) return -1;
+        if ((m_nLimit >= 0) && (nSize > 0)) {
+            const qint64 nPosition = pos();
+            if ((nPosition < 0) || (nPosition > m_nLimit) ||
+                (nSize > (m_nLimit - nPosition))) {
+                m_bLimitExceeded = true;
+                return -1;
+            }
+        }
+        return QTemporaryFile::writeData(pData, nSize);
+    }
+
+private:
+    qint64 m_nLimit;
+    bool m_bLimitExceeded;
+};
+
+bool unpackReadNonNegativeSize(const QVariant &value, qint64 *pnSize)
+{
+    if (!pnSize) return false;
+    *pnSize = -1;
+
+    const int nType = value.userType();
+    qint64 nSize = -1;
+
+    if (nType == QMetaType::ULongLong) {
+        const quint64 nUnsigned = value.toULongLong();
+        if (nUnsigned >
+            (quint64)(std::numeric_limits<qint64>::max)()) {
+            return false;
+        }
+        nSize = (qint64)nUnsigned;
+    } else if (nType == QMetaType::UInt) {
+        nSize = (qint64)value.toUInt();
+    } else if ((nType == QMetaType::LongLong) ||
+               (nType == QMetaType::Int)) {
+        bool bOK = false;
+        nSize = value.toLongLong(&bOK);
+        if (!bOK || (nSize < 0)) return false;
+    } else {
+        return false;
+    }
+
+    *pnSize = nSize;
+    return true;
+}
+
+}  // namespace
+
 static QString _unpNormalizePath(const QString &sPath)
 {
     return QDir::fromNativeSeparators(QDir::cleanPath(QFileInfo(sPath).absoluteFilePath()));
@@ -23496,6 +24469,13 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
         return false;
     }
 
+    qint64 nOutputLimit = -1;
+    if (!getUnpackOutputLimit(mapProperties, &nOutputLimit)) {
+        setPdStructErrorString(pPdStruct,
+                               tr("Invalid unpacked-output limit"));
+        return false;
+    }
+
     if (!sFolderName.isEmpty()) {
         QDir dir;
 
@@ -23526,14 +24506,37 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
         QString sCanonicalRoot = QDir::fromNativeSeparators(QFileInfo(sRootPath).canonicalFilePath());
 
         if (sCanonicalRoot.isEmpty()) {
-            sCanonicalRoot = sRootPath;
+            return false;
         }
+        // All transactional paths use the verified identity rather than a
+        // caller-supplied alias.  The transaction additionally rejects a
+        // symlink/reparse-point root before creating its private journal.
+        sRootPath = sCanonicalRoot;
 
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-        const Qt::CaseSensitivity pathCaseSensitivity = Qt::CaseInsensitive;
-#else
-        const Qt::CaseSensitivity pathCaseSensitivity = Qt::CaseSensitive;
-#endif
+        UNPACK_FOLDER_TRANSACTION folderTransaction(sRootPath);
+        const auto reportTransactionError = [&]() {
+            if (!isProgressAlive()) return;
+            const QString sTransactionError =
+                folderTransaction.errorString();
+            if (sTransactionError.isEmpty()) return;
+            const QString sExistingError = getPdStructErrorString(pPdStruct);
+            if (sExistingError.isEmpty()) {
+                setPdStructErrorString(pPdStruct, sTransactionError);
+            } else if (!sExistingError.contains(sTransactionError)) {
+                setPdStructErrorString(
+                    pPdStruct,
+                    sExistingError + QStringLiteral("; ") +
+                        sTransactionError);
+            }
+        };
+        if (!folderTransaction.isValid()) {
+            reportTransactionError();
+            return false;
+        }
+        QList<QPair<QString, QDateTime>> listDeferredDateTimes;
+
+        const Qt::CaseSensitivity pathCaseSensitivity =
+            fileSystemPathCaseSensitivity();
 
         QSet<QString> setUsedPaths;
         QSet<QString> setUsedDirectories;
@@ -23571,9 +24574,19 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
             if (state.nCurrentIndex == nNumberOfRecords) {
                 const bool bFinished = guardedThis->finishUnpack(
                     &state, nullptr);
-                return guardedThis && bFinished &&
-                       isProgressAlive() &&
-                       isPdStructNotCanceled(pPdStruct);
+                const bool bEmptyResult = guardedThis && bFinished &&
+                    isProgressAlive() &&
+                    isPdStructNotCanceled(pPdStruct);
+                if (bEmptyResult && folderTransaction.commit()) {
+                    // A committed destination remains successful even if
+                    // obsolete-backup cleanup could not finish, but surface
+                    // the retained recovery directory to the caller.
+                    reportTransactionError();
+                    return true;
+                }
+                folderTransaction.rollback();
+                reportTransactionError();
+                return false;
             }
 
             bResult = true;
@@ -23614,6 +24627,22 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                         if (sFileName.isEmpty() && !bIsDirectory) {
                             sFileName = QLatin1String("file");
                         }
+                    }
+
+                    bool bDeclaredOutputSizeValid = true;
+                    bool bDeclaredOutputSizeOverLimit = false;
+                    if (!bIsDirectory && (nOutputLimit >= 0) &&
+                        record.mapProperties.contains(
+                            FPART_PROP_UNCOMPRESSEDSIZE)) {
+                        qint64 nDeclaredOutputSize = -1;
+                        bDeclaredOutputSizeValid =
+                            unpackReadNonNegativeSize(
+                                record.mapProperties.value(
+                                    FPART_PROP_UNCOMPRESSEDSIZE),
+                                &nDeclaredOutputSize);
+                        bDeclaredOutputSizeOverLimit =
+                            bDeclaredOutputSizeValid &&
+                            (nDeclaredOutputSize > nOutputLimit);
                     }
 
                     bool bPathResolved = true;
@@ -23725,27 +24754,61 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                             bResult = false;
                         } else if (bSkipFile) {
                             bResult = true;
-                        } else if (bIsDirectory) {
-                            if (!dir.exists(sFilePath)) {
-                                bResult = dir.mkpath(sFilePath);
-                            } else {
-                                bResult = XBinary::isDirectoryExists(sFilePath);
+                        } else if (!bDeclaredOutputSizeValid) {
+                            if (isProgressAlive()) {
+                                setPdStructErrorString(
+                                    pPdStruct,
+                                    tr("Invalid unpacked output size"));
                             }
+                            bResult = false;
+                        } else if (bDeclaredOutputSizeOverLimit) {
+                            if (isProgressAlive()) {
+                                setPdStructErrorString(
+                                    pPdStruct,
+                                    tr("Unpacked output exceeds the configured limit"));
+                            }
+                            bResult = false;
+                        } else if (bIsDirectory) {
+                            bResult = folderTransaction.ensureDirectory(
+                                sFilePath);
+                            if (!bResult) reportTransactionError();
                         } else {
                             QFileInfo fileInfo(sFilePath);
                             QString sDirectoryPath = fileInfo.absolutePath();
 
-                            if (!dir.exists(sDirectoryPath) && !dir.mkpath(sDirectoryPath)) {
+                            if (!folderTransaction.ensureDirectory(
+                                    sDirectoryPath)) {
+                                reportTransactionError();
                                 bResult = false;
                             } else {
-                                QTemporaryFile temporaryFile(QDir(sDirectoryPath).filePath(QLatin1String(".xunpack-XXXXXX")));
+                                UnpackBoundedTemporaryFile temporaryFile(
+                                    QDir(sDirectoryPath).filePath(
+                                        QLatin1String(".xunpack-XXXXXX")),
+                                    nOutputLimit);
 
                                 if (temporaryFile.open()) {
                                     const bool bUnpacked = guardedThis &&
                                         guardedThis->unpackCurrent(
                                             &state, &temporaryFile,
                                             pPdStruct);
-                                    if (!guardedThis || !isProgressAlive() ||
+                                    const bool bFlushed =
+                                        temporaryFile.flush();
+                                    const qint64 nStagedSize =
+                                        temporaryFile.size();
+                                    const bool bLimitExceeded =
+                                        temporaryFile.limitExceeded() ||
+                                        ((nOutputLimit >= 0) &&
+                                         (nStagedSize > nOutputLimit));
+                                    if (bLimitExceeded) {
+                                        if (isProgressAlive()) {
+                                            setPdStructErrorString(
+                                                pPdStruct,
+                                                tr("Unpacked output exceeds the configured limit"));
+                                        }
+                                        bResult = false;
+                                    } else if (!guardedThis ||
+                                        !isProgressAlive() || !bFlushed ||
+                                        (nStagedSize < 0) ||
                                         !bUnpacked ||
                                         (state.nCurrentIndex !=
                                          nExpectedIndex) ||
@@ -23802,10 +24865,27 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                     temporaryFile.close();
 
                                     if (bResult) {
-                                        bResult = QFile::rename(sTemporaryFilePath, sFilePath);
+                                        const QFileInfo targetInfo(sFilePath);
+                                        // Preserve the no-overwrite race
+                                        // contract: a target created after
+                                        // selection wins and is never moved
+                                        // into our rollback journal.
+                                        bResult = !targetInfo.exists() &&
+                                            !targetInfo.isSymLink() &&
+                                            folderTransaction.prepareFile(
+                                                sFilePath);
+                                    }
+                                    if (bResult) {
+                                        bResult = QFile::rename(
+                                            sTemporaryFilePath, sFilePath);
+                                    }
+                                    if (bResult) {
+                                        bResult = folderTransaction
+                                            .markFilePublished(sFilePath);
                                     }
 
                                     if (!bResult) {
+                                        reportTransactionError();
                                         if (isProgressAlive())
                                             setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot write file")).arg(sFilePath));
                                     }
@@ -23814,6 +24894,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
                                     if (bResult) {
                                         QSaveFile outputFile(sFilePath);
+                                        outputFile.setDirectWriteFallback(false);
 
                                         if (outputFile.open(QIODevice::WriteOnly)) {
                                             const qint32 nRequestedBufferSize = isProgressAlive() ? getBufferSize(pPdStruct) : 0;
@@ -23863,7 +24944,18 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
                                             if (bResult && (nRemaining == 0) && (temporaryFile.size() == nVerifiedSize) &&
                                                 isProgressAlive() && isPdStructNotCanceled(pPdStruct)) {
-                                                bResult = outputFile.commit();
+                                                bResult = folderTransaction
+                                                    .prepareFile(sFilePath);
+                                                if (bResult) {
+                                                    bResult = outputFile.commit();
+                                                } else {
+                                                    outputFile.cancelWriting();
+                                                }
+                                                if (bResult) {
+                                                    bResult = folderTransaction
+                                                        .markFilePublished(
+                                                            sFilePath);
+                                                }
                                             } else {
                                                 outputFile.cancelWriting();
                                                 bResult = false;
@@ -23874,6 +24966,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                     }
 
                                     if (!bResult) {
+                                        reportTransactionError();
                                         if (isProgressAlive())
                                             setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot write file")).arg(sFilePath));
                                     }
@@ -23881,7 +24974,10 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                             }
                         }
 
-                        // Set file datetime if provided by the archive record
+                        // Defer filesystem metadata until the complete folder
+                        // transaction has committed. Applying a directory time
+                        // here would mutate a pre-existing directory even when
+                        // a later record forces the archive to roll back.
                         if (bResult && !bSkipFile) {
                             QVariant vDateTime = record.mapProperties.value(XBinary::FPART_PROP_DATETIME);
                             if (vDateTime.isValid() && !vDateTime.isNull()) {
@@ -23905,7 +25001,8 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                 }
 
                                 if (dt.isValid()) {
-                                    XBinary::setFileDateTime(sFilePath, dt);
+                                    listDeferredDateTimes.append(
+                                        qMakePair(sFilePath, dt));
                                 }
                             }
                         }
@@ -23950,10 +25047,31 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
             bResult = bResult && guardedThis && bFinished &&
                       isProgressAlive() &&
                       isPdStructNotCanceled(pPdStruct);
+
+            if (bResult) {
+                bResult = folderTransaction.commit();
+                reportTransactionError();
+                if (bResult) {
+                    // Metadata remains best-effort, matching the prior API.
+                    // Preserve record order so duplicate output paths retain
+                    // the last archive-provided timestamp.
+                    for (const auto &dateTimeEntry :
+                         listDeferredDateTimes) {
+                        XBinary::setFileDateTime(dateTimeEntry.first,
+                                                 dateTimeEntry.second);
+                    }
+                }
+            } else {
+                folderTransaction.rollback();
+                reportTransactionError();
+            }
         }
     }
 
-    return guardedThis && isProgressAlive() && bResult;
+    // commit() is the final success boundary. A cancellation or owner-lifetime
+    // change racing strictly after that boundary must not turn a committed
+    // destination into a reported failure that can no longer be rolled back.
+    return bResult;
 }
 
 bool XBinary::initFFSearch(FFSEARCH_STATE *pState, PDSTRUCT *pPdStruct)
@@ -24201,6 +25319,8 @@ QList<QString> XBinary::getSearchSignatures()
     } else if (XBinary::checkFileType(FT_MACHOFAT, fileType)) {
         listResult.append("CAFEBABE");
         listResult.append("BEBAFECA");
+        listResult.append("CAFEBABF");
+        listResult.append("BFBAFECA");
     } else if (XBinary::checkFileType(FT_MACHO, fileType)) {
         listResult.append("FEEDFACE");
         listResult.append("CEFAEDFE");
@@ -24227,6 +25347,13 @@ QList<QString> XBinary::getSearchSignatures()
         listResult.append("00000100");
     } else if (XBinary::checkFileType(FT_DEX, fileType)) {
         listResult.append("'dex\n'");
+    } else if (XBinary::checkFileType(FT_QUAKE_PAK, fileType)) {
+        listResult.append("'PACK'");
+    } else if (XBinary::checkFileType(FT_DOOM_WAD, fileType)) {
+        listResult.append("'IWAD'");
+        listResult.append("'PWAD'");
+    } else if (XBinary::checkFileType(FT_BUILD_GRP, fileType)) {
+        listResult.append("'KenSilverman'");
     } else if (XBinary::checkFileType(FT_ZIP, fileType)) {
         listResult.append("'PK'0304");
     } else if (XBinary::checkFileType(FT_RAR, fileType)) {
@@ -24385,6 +25512,70 @@ QIODevice *XBinary::createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct)
     }
 
     return pResult;
+}
+
+namespace {
+class XUNPACK_FILE_BUFFER : public QBuffer {
+public:
+    XUNPACK_FILE_BUFFER() : m_nMaximumSize(0) {}
+
+    bool initialize(
+        qint64 nSize,
+        const QMap<XBinary::UNPACK_PROP, QVariant> &mapProperties)
+    {
+        if ((nSize < 0) ||
+            (nSize > (std::numeric_limits<qint32>::max)()) ||
+            !m_reservation.acquire(mapProperties, nSize)) {
+            return false;
+        }
+
+        m_nMaximumSize = nSize;
+        setData(QByteArray((qint32)nSize, '\0'));
+        return (size() == nSize) && open(QIODevice::ReadWrite) && seek(0);
+    }
+
+protected:
+    qint64 writeData(const char *pData, qint64 nSize) override
+    {
+        const qint64 nPosition = pos();
+        if ((nSize < 0) || (nPosition < 0) ||
+            (nPosition > m_nMaximumSize) ||
+            (nSize > (m_nMaximumSize - nPosition))) {
+            return -1;
+        }
+        return QBuffer::writeData(pData, nSize);
+    }
+
+private:
+    XBinary::UNPACK_MEMORY_RESERVATION m_reservation;
+    qint64 m_nMaximumSize;
+};
+}  // namespace
+
+QIODevice *XBinary::createUnpackFileBuffer(
+    qint64 nSize, const QMap<UNPACK_PROP, QVariant> &mapProperties,
+    PDSTRUCT *pPdStruct)
+{
+    if ((nSize < 0) || !isPdStructNotCanceled(pPdStruct)) return nullptr;
+
+    qint32 nFileBufferSize =
+        pPdStruct ? pPdStruct->nFileBufferSize.loadAcquire() : 0;
+    if (nFileBufferSize <= 0) nFileBufferSize = 0x1000000;
+
+    if (nSize >= nFileBufferSize) {
+        return createFileBuffer(nSize, pPdStruct);
+    }
+
+    XUNPACK_FILE_BUFFER *pBuffer =
+        new (std::nothrow) XUNPACK_FILE_BUFFER();
+    if (!pBuffer) return nullptr;
+    if (!pBuffer->initialize(nSize, mapProperties) ||
+        !isPdStructNotCanceled(pPdStruct)) {
+        delete pBuffer;
+        return nullptr;
+    }
+    pBuffer->setProperty("Memory", (quint64)pBuffer->buffer().constData());
+    return pBuffer;
 }
 
 void XBinary::freeFileBuffer(QIODevice **ppBuffer)
