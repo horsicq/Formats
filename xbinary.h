@@ -2059,6 +2059,14 @@ public:
     static bool isSignatureValid(const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
 
     static bool createFile(const QString &sFileName, qint64 nFileSize = 0);
+    // Wraps an ABSOLUTE path in the Win32 extended-length form so the raw
+    // Win32 calls in this project are not capped at MAX_PATH. Qt's own file
+    // classes already handle long paths; only our direct GetFileAttributesW /
+    // SetFileAttributesW calls were failing, and they fail CLOSED - a valid
+    // just-published file past the cap was reported as an unsafe reparse
+    // point, which aborted extraction and left a rollback journal behind.
+    // Returns the input unchanged on non-Windows platforms.
+    static QString winExtendedNativePath(const QString &sAbsolutePath);
     static bool isFileExists(const QString &sFileName, bool bTryToOpen = false);
     static bool removeFile(const QString &sFileName);
     static bool copyFile(const QString &sSrcFileName, const QString &sDestFileName);

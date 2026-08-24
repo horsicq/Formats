@@ -1659,7 +1659,11 @@ public:
     {
         if (info.isSymLink()) return true;
 #ifdef Q_OS_WIN
-        const QString sNativePath = QDir::toNativeSeparators(
+        // Extended-length form: without it a path past MAX_PATH returns
+        // INVALID_FILE_ATTRIBUTES/ERROR_PATH_NOT_FOUND and the fail-closed
+        // fallback below then declares an ordinary published file an unsafe
+        // reparse point, aborting an otherwise valid extraction.
+        const QString sNativePath = XBinary::winExtendedNativePath(
             info.absoluteFilePath());
         const DWORD nAttributes = GetFileAttributesW(
             reinterpret_cast<LPCWSTR>(sNativePath.utf16()));
@@ -4264,7 +4268,12 @@ bool XBinary::setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties,
                       mapProperties.contains(FPART_PROP_ISARCHIVE);
 
     if (bHasAttrib) {
-        DWORD nAttribs = GetFileAttributesW((LPCWSTR)sFileName.utf16());
+        // Absolute first: the name is caller-supplied and may be relative,
+        // and the extended-length form has no relative spelling. Both the get
+        // and the set below use it, or the block becomes read-modify-no-write
+        // past MAX_PATH.
+        const QString sAttribPath = XBinary::winExtendedNativePath(QFileInfo(sFileName).absoluteFilePath());
+        DWORD nAttribs = GetFileAttributesW((LPCWSTR)sAttribPath.utf16());
 
         if (nAttribs != INVALID_FILE_ATTRIBUTES) {
             if (mapProperties.contains(FPART_PROP_ISREADONLY)) {
@@ -4299,7 +4308,7 @@ bool XBinary::setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties,
                 }
             }
 
-            if (SetFileAttributesW((LPCWSTR)sFileName.utf16(), nAttribs)) {
+            if (SetFileAttributesW((LPCWSTR)sAttribPath.utf16(), nAttribs)) {
                 bResult = true;
             }
         }
@@ -9801,6 +9810,40 @@ bool XBinary::isSignatureValid(const QString &sSignature, PDSTRUCT *pPdStruct)
     }
 
     return bResult;
+}
+
+QString XBinary::winExtendedNativePath(const QString &sAbsolutePath)
+{
+#ifdef Q_OS_WIN
+    if (sAbsolutePath.isEmpty()) return sAbsolutePath;
+
+    // The extended-length form rejects forward slashes outright, so the path
+    // has to be in native spelling before the prefix goes on.
+    const QString sNative = QDir::toNativeSeparators(sAbsolutePath);
+
+    // Already extended ("\\?\") or a device path ("\\.\"): leave it alone.
+    if (sNative.startsWith(QLatin1String("\\\\?\\")) ||
+        sNative.startsWith(QLatin1String("\\\\.\\"))) {
+        return sNative;
+    }
+
+    // A UNC share \\server\share becomes \\?\UNC\server\share - the prefix
+    // replaces the leading pair of separators rather than stacking on them.
+    if (sNative.startsWith(QLatin1String("\\\\"))) {
+        return QLatin1String("\\\\?\\UNC\\") + sNative.mid(2);
+    }
+
+    // Relative paths have no extended form; the prefix disables all
+    // normalisation, so applying it to one would produce an invalid path.
+    if ((sNative.size() < 3) || (sNative.at(1) != QLatin1Char(':')) ||
+        (sNative.at(2) != QLatin1Char('\\'))) {
+        return sNative;
+    }
+
+    return QLatin1String("\\\\?\\") + sNative;
+#else
+    return sAbsolutePath;
+#endif
 }
 
 bool XBinary::createFile(const QString &sFileName, qint64 nFileSize)
@@ -24886,7 +24929,12 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
                                     if (!bResult) {
                                         reportTransactionError();
-                                        if (isProgressAlive())
+                                        // Only fall back to the generic text when the
+                                        // transaction did not already explain itself:
+                                        // setPdStructErrorString assigns, so doing this
+                                        // unconditionally discarded the precise cause
+                                        // reportTransactionError had just recorded.
+                                        if (isProgressAlive() && getPdStructErrorString(pPdStruct).isEmpty())
                                             setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot write file")).arg(sFilePath));
                                     }
                                 } else if (bResult) {
@@ -24967,7 +25015,12 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
                                     if (!bResult) {
                                         reportTransactionError();
-                                        if (isProgressAlive())
+                                        // Only fall back to the generic text when the
+                                        // transaction did not already explain itself:
+                                        // setPdStructErrorString assigns, so doing this
+                                        // unconditionally discarded the precise cause
+                                        // reportTransactionError had just recorded.
+                                        if (isProgressAlive() && getPdStructErrorString(pPdStruct).isEmpty())
                                             setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot write file")).arg(sFilePath));
                                     }
                                 }
