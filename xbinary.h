@@ -303,7 +303,8 @@ public:
         HANDLE_METHOD_ARC_CRUNCH_OLD,
         HANDLE_METHOD_ARC_CRUNCH,
         HANDLE_METHOD_ARC_CRUNCH_DYN,  // ARC method 8: dynamic-width LZW + run-length
-        HANDLE_METHOD_ARC_SQUASH       // ARC method 9: dynamic-width LZW, no run-length
+        HANDLE_METHOD_ARC_SQUASH,      // ARC method 9: dynamic-width LZW, no run-length
+        HANDLE_METHOD_QUANTUM_CAB      // CAB compression type 2 (Quantum). Kept at the tail so persisted ids do not move.
         // TODO check more methods
     };
 
