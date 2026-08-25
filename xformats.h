@@ -257,7 +257,8 @@ public:
     static QString toFormattedString(const QVector<XBinary::KeyValueItem> &listItems);
 
     static QVector<XBinary::KeyValueItem> getEntropy(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static QVector<XBinary::KeyValueItem> getFileInfo(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QVector<XBinary::KeyValueItem> getFileInfo(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1, XBinary::PDSTRUCT *pPdStruct = nullptr,
+                                                      XBinary::FT nForcedFileType = XBinary::FT_UNKNOWN);
     static XBinary::XFHEADER getXFHeaderFromStructName(QIODevice *pDevice, const QString &sStruct, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                        XBinary::PDSTRUCT *pPdStruct = nullptr);
 

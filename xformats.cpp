@@ -3387,7 +3387,7 @@ QVector<XBinary::KeyValueItem> XFormats::getEntropy(QIODevice *pDevice, bool bIs
     return result;
 }
 
-QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct)
+QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress, XBinary::PDSTRUCT *pPdStruct, XBinary::FT nForcedFileType)
 {
     QVector<XBinary::KeyValueItem> result;
 
@@ -3400,7 +3400,12 @@ QVector<XBinary::KeyValueItem> XFormats::getFileInfo(QIODevice *pDevice, bool bI
     if (!bProgressOwnerAlive || !isReadableSeekableDevice(pDevice) || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
     DevicePositionGuard positionGuard(pDevice);
 
-    XBinary::FT fileType = getPrefFileType(pDevice, XBinary::FT_FLAG_FORMATS, pPdStruct);
+    // Honor an explicitly forced file type (-F/--filetype) rather than
+    // auto-detecting, so `-i -F UDF` on a bridge disc reports UDF instead of the
+    // ISO 9660 bridge that always wins detection (XFU-042).
+    XBinary::FT fileType = (nForcedFileType != XBinary::FT_UNKNOWN)
+                               ? nForcedFileType
+                               : getPrefFileType(pDevice, XBinary::FT_FLAG_FORMATS, pPdStruct);
     bProgressOwnerAlive = XBinary::isPdStructLifetimeAlive(progressLifetime);
     if (!bProgressOwnerAlive || !XBinary::isPdStructNotCanceled(pPdStruct)) return result;
     XBinary *pBinary = createClass(fileType, pDevice, bIsImage, nModuleAddress);

@@ -1513,6 +1513,80 @@ bool XBinary::getUnpackOutputLimit(const QMap<UNPACK_PROP, QVariant> &mapPropert
     return true;
 }
 
+bool XBinary::resolveUnpackOutputPolicy(const QMap<UNPACK_PROP, QVariant> &mapProperties, OUTPUT_POLICY *pPolicy)
+{
+    if (!pPolicy) return false;
+
+    // Absolute-byte defaults from the design note (measured corpus maxima with
+    // generous headroom). getUnpackOutputLimit/isUnpackOutputSizeAllowed are
+    // deliberately left untouched, so the per-member key stays absent-by-default
+    // from UNPACK_MEMORY_RESERVATION's perspective and the process-wide clamp is
+    // never armed. Nothing calls this yet (XFU-015 foundation, steps 1-3).
+    const qint64 nDefaultMaxEntry = 8589934592LL;    // 8 GiB per member
+    const qint64 nDefaultMaxTotal = 68719476736LL;   // 64 GiB per operation
+    const qint64 nDefaultMaxEntries = 262144LL;      // members per operation
+    const qint64 nDefaultMaxMemory = 536870912LL;    // 512 MiB in-memory routes
+
+    // Parse one numeric key with the same QMetaType ladder getUnpackOutputLimit
+    // uses. Absent -> nDefault. Present & negative -> -1 (caller-declared
+    // unlimited). Present & non-negative -> the value (an explicit value always
+    // wins, including above the default). Malformed -> the whole resolve fails.
+    const auto resolveLimit = [&mapProperties](UNPACK_PROP nKey, qint64 nDefault, qint64 *pnOut) -> bool {
+        if (!mapProperties.contains(nKey)) {
+            *pnOut = nDefault;
+            return true;
+        }
+        const QVariant value = mapProperties.value(nKey);
+        const int nType = value.userType();
+        if (nType == QMetaType::ULongLong) {
+            const quint64 nUnsigned = value.toULongLong();
+            if (nUnsigned > (quint64)(std::numeric_limits<qint64>::max)()) return false;
+            *pnOut = (qint64)nUnsigned;
+            return true;
+        } else if (nType == QMetaType::UInt) {
+            *pnOut = (qint64)value.toUInt();
+            return true;
+        } else if ((nType == QMetaType::LongLong) || (nType == QMetaType::Int)) {
+            bool bOK = false;
+            const qint64 nValue = value.toLongLong(&bOK);
+            if (!bOK) return false;
+            *pnOut = (nValue < 0) ? (qint64)-1 : nValue;
+            return true;
+        }
+        return false;
+    };
+
+    OUTPUT_POLICY policy;
+    if (!resolveLimit(UNPACK_PROP_MAX_OUTPUT_SIZE, nDefaultMaxEntry, &policy.nMaxEntryOutputSize)) return false;
+    if (!resolveLimit(UNPACK_PROP_MAX_TOTAL_OUTPUT_SIZE, nDefaultMaxTotal, &policy.nMaxTotalOutputSize)) return false;
+    if (!resolveLimit(UNPACK_PROP_MAX_ENTRY_COUNT, nDefaultMaxEntries, &policy.nMaxEntryCount)) return false;
+    if (!resolveLimit(UNPACK_PROP_MAX_MEMORY_OUTPUT_SIZE, nDefaultMaxMemory, &policy.nMaxMemoryOutputSize)) return false;
+    // Reserved: absent by default (-1) = no ratio ceiling.
+    if (!resolveLimit(UNPACK_PROP_MAX_EXPANSION_RATIO, -1, &policy.nMaxExpansionRatio)) return false;
+
+    policy.bRequireFreeSpace = mapProperties.value(UNPACK_PROP_REQUIRE_FREE_SPACE, false).toBool();
+
+    *pPolicy = policy;
+    return true;
+}
+
+QAtomicInteger<qint64> XBinary::OUTPUT_BUDGET::s_nShadowRefusals(0);
+
+void XBinary::OUTPUT_BUDGET::noteShadowRefusal(const OUTPUT_BUDGET *pBudget)
+{
+    // XFU-015 shadow mode: a would-be refusal was detected but NOT enforced.
+    // Count it (the differential validation hook) and log it once. A shadow run
+    // over the corpora must leave the count at zero before enforcement is flipped.
+    s_nShadowRefusals.fetchAndAddRelaxed(1);
+    if (pBudget) {
+        qWarning("XFU-LIMIT-SHADOW/%d name=%s entry=%lld/%lld total=%lld/%lld",
+                 (int)pBudget->m_refusal,
+                 pBudget->m_sRefusedName.toUtf8().constData(),
+                 (long long)pBudget->m_nEntryWritten.loadRelaxed(), (long long)pBudget->m_nEntryLimit,
+                 (long long)pBudget->m_nTotalWritten.loadRelaxed(), (long long)pBudget->m_nTotalLimit);
+    }
+}
+
 bool XBinary::isUnpackOutputSizeAllowed(const QMap<UNPACK_PROP, QVariant> &mapProperties, qint64 nSize)
 {
     qint64 nLimit = -1;
@@ -2603,6 +2677,20 @@ qint32 XBinary::_writeDevice(const char *pBuffer, qint32 nBufferSize, DATAPROCES
           ((qint64)nBufferSize > (nOutputLimit - nChunkStart))))) {
         pState->bWriteError = true;
         return 0;
+    }
+
+    // XFU-015 shadow meter: charge PRODUCED bytes (pre-window-clip, the same
+    // quantity the gate above validated) against the operation budget. The debit
+    // result is deliberately IGNORED so shadow mode enforces nothing; the first
+    // would-be refusal on this budget is counted + logged. Placed AFTER the real
+    // gate so it never runs for a chunk the gate already rejected.
+    if (pState->spOutputBudget) {
+        const OUTPUT_BUDGET::REFUSAL nRefusalBefore = pState->spOutputBudget->refusal();
+        (void)pState->spOutputBudget->debit((qint64)nBufferSize);
+        if ((nRefusalBefore == OUTPUT_BUDGET::REFUSAL_NONE) &&
+            (pState->spOutputBudget->refusal() != OUTPUT_BUDGET::REFUSAL_NONE)) {
+            OUTPUT_BUDGET::noteShadowRefusal(pState->spOutputBudget.data());
+        }
     }
 
     const qint64 nChunkEnd = nChunkStart + nBufferSize;
@@ -23844,6 +23932,16 @@ bool XBinary::_unpackRecordByIndex(
 
     bool bResult = true;
     state.mapUnpackProperties = mapProperties;
+    // XFU-015 shadow: single-record extraction is its own operation root; mint a
+    // budget on this UNPACK_STATE so its member decode is metered too (shadow only).
+    {
+        OUTPUT_POLICY outputPolicy = {};
+        if (resolveUnpackOutputPolicy(mapProperties, &outputPolicy)) {
+            state.spOutputBudget = QSharedPointer<OUTPUT_BUDGET>::create();
+            state.spOutputBudget->setLimits(outputPolicy.nMaxEntryOutputSize, outputPolicy.nMaxTotalOutputSize,
+                                            outputPolicy.nMaxEntryCount, outputPolicy.nMaxMemoryOutputSize);
+        }
+    }
     const qint32 nInitialIndex = state.nCurrentIndex;
     const qint32 nNumberOfRecords = state.nNumberOfRecords;
     if ((nInitialIndex != 0) || (nNumberOfRecords <= 0) ||
@@ -24607,6 +24705,20 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
         if (guardedThis && bInitialized && isProgressAlive()) {
             const qint32 nNumberOfRecords = state.nNumberOfRecords;
             state.mapUnpackProperties = mapEffectiveProperties;
+
+            // XFU-015 shadow: mint the operation output budget once per folder
+            // extraction, at the override-proof re-assertion. It is threaded
+            // (null-guarded) into each member's decode so _writeDevice can meter
+            // produced bytes; shadow mode records + logs would-be refusals but
+            // enforces nothing.
+            {
+                OUTPUT_POLICY outputPolicy = {};
+                if (resolveUnpackOutputPolicy(mapEffectiveProperties, &outputPolicy)) {
+                    state.spOutputBudget = QSharedPointer<OUTPUT_BUDGET>::create();
+                    state.spOutputBudget->setLimits(outputPolicy.nMaxEntryOutputSize, outputPolicy.nMaxTotalOutputSize,
+                                                    outputPolicy.nMaxEntryCount, outputPolicy.nMaxMemoryOutputSize);
+                }
+            }
 
             if ((state.nCurrentIndex != 0) || (nNumberOfRecords < 0) ||
                 (state.nCurrentIndex > nNumberOfRecords)) {

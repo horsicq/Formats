@@ -464,7 +464,16 @@ public:
         UNPACK_PROP_CODEPAGE,
         // Exact raw password bytes for formats whose legacy password encoding
         // is not self-describing. This takes precedence over PASSWORD there.
-        UNPACK_PROP_PASSWORD_BYTES
+        UNPACK_PROP_PASSWORD_BYTES,
+        // XFU-015 output-ceiling policy vocabulary. Appended at the tail so every
+        // existing enumerator keeps its numeric value. Nothing reads these yet;
+        // resolveUnpackOutputPolicy() supplies defaults when a key is absent. See
+        // !TODO/xfu015_output_ceiling_design.md.
+        UNPACK_PROP_MAX_TOTAL_OUTPUT_SIZE,   // qint64: aggregate produced bytes per operation
+        UNPACK_PROP_MAX_ENTRY_COUNT,         // qint64: member count per operation
+        UNPACK_PROP_MAX_MEMORY_OUTPUT_SIZE,  // qint64: cap for in-memory (QByteArray) routes
+        UNPACK_PROP_REQUIRE_FREE_SPACE,      // bool: opt-in destination free-space preflight
+        UNPACK_PROP_MAX_EXPANSION_RATIO      // reserved; deliberately never read in this plan
     };
 
     // Accounts temporary decoder memory against the process-wide unpack
@@ -524,6 +533,112 @@ public:
     virtual QMap<UNPACK_PROP, QVariant> getDefaultUnpackProperties();
     bool hasUnpackCRC(PDSTRUCT *pPdStruct = nullptr);
 
+    // XFU-015 output-ceiling foundation (steps 1-3). Additive and behaviour-neutral:
+    // no code constructs an OUTPUT_BUDGET or reads OUTPUT_POLICY yet, so every state
+    // carries a null spOutputBudget and every debit() would be a no-op. See
+    // !TODO/xfu015_output_ceiling_design.md.
+
+    // The resolved numeric policy. -1 means "no ceiling on this axis". Produced by
+    // resolveUnpackOutputPolicy(), which substitutes the design defaults for any
+    // absent key and treats an explicit negative value as caller-declared unlimited.
+    struct OUTPUT_POLICY {
+        qint64 nMaxEntryOutputSize;   // per member
+        qint64 nMaxTotalOutputSize;   // aggregate per operation
+        qint64 nMaxEntryCount;        // member count per operation
+        qint64 nMaxMemoryOutputSize;  // in-memory (QByteArray) routes
+        qint64 nMaxExpansionRatio;    // reserved; -1 = absent (no ratio ceiling)
+        bool bRequireFreeSpace;       // opt-in free-space preflight
+    };
+
+    // One operation-scoped budget, always held by QSharedPointer and never copied
+    // by value, so a DATAPROCESS_STATE copy (e.g. xacedecoder's writeState =
+    // *pDecompressState) shares the same counters instead of resetting them. The
+    // debit inequality is the overflow-safe, subtraction-only form already proven
+    // in LimitedWriteDevice::writeData (xarchives_ip7z.cpp:407).
+    class OUTPUT_BUDGET {
+    public:
+        enum REFUSAL {
+            REFUSAL_NONE = 0,
+            REFUSAL_ENTRY,    // a single member exceeded the per-entry limit
+            REFUSAL_TOTAL,    // aggregate production exceeded the per-operation limit
+            REFUSAL_ENTRIES,  // member count exceeded the per-operation limit
+            REFUSAL_MEMORY    // an in-memory route exceeded the memory limit
+        };
+
+        OUTPUT_BUDGET()
+            : m_nEntryLimit(-1), m_nTotalLimit(-1), m_nMaxEntries(-1), m_nMemoryLimit(-1),
+              m_nEntryWritten(0), m_nTotalWritten(0), m_nEntryCount(0),
+              m_refusal(REFUSAL_NONE), m_nRefusedIndex(-1) {}
+
+        void setLimits(qint64 nEntryLimit, qint64 nTotalLimit, qint64 nMaxEntries, qint64 nMemoryLimit) {
+            m_nEntryLimit = nEntryLimit; m_nTotalLimit = nTotalLimit;
+            m_nMaxEntries = nMaxEntries; m_nMemoryLimit = nMemoryLimit;
+        }
+
+        // Exact-limit accepts, limit+1 refuses, size 0 accepts, never multiplies.
+        static bool withinLimit(qint64 nWritten, qint64 nLimit, qint64 nSize) {
+            if (nLimit < 0) return true;
+            return !((nWritten > nLimit) || (nSize > (nLimit - nWritten)));
+        }
+
+        // Charge produced bytes against the current entry and the operation total.
+        bool debit(qint64 nSize) {
+            if (nSize < 0) { m_refusal = REFUSAL_ENTRY; return false; }
+            if (!withinLimit(m_nEntryWritten.loadRelaxed(), m_nEntryLimit, nSize)) { m_refusal = REFUSAL_ENTRY; return false; }
+            if (!withinLimit(m_nTotalWritten.loadRelaxed(), m_nTotalLimit, nSize)) { m_refusal = REFUSAL_TOTAL; return false; }
+            m_nEntryWritten.fetchAndAddRelaxed(nSize);
+            m_nTotalWritten.fetchAndAddRelaxed(nSize);
+            return true;
+        }
+
+        // Reset the per-entry meter at each new member and enforce the member count.
+        bool beginEntry(qint32 nIndex, const QString &sName) {
+            m_nEntryWritten.storeRelaxed(0);
+            const qint64 nCount = m_nEntryCount.fetchAndAddRelaxed(1) + 1;
+            if ((m_nMaxEntries >= 0) && (nCount > m_nMaxEntries)) {
+                m_refusal = REFUSAL_ENTRIES; m_nRefusedIndex = nIndex; m_sRefusedName = sName;
+                return false;
+            }
+            return true;
+        }
+
+        REFUSAL refusal() const { return m_refusal; }
+        qint32 refusedIndex() const { return m_nRefusedIndex; }
+        QString refusedName() const { return m_sRefusedName; }
+        qint64 memoryLimit() const { return m_nMemoryLimit; }
+        // Read-only meters for the shadow log; debit() above is unchanged.
+        qint64 entryWritten() const { return m_nEntryWritten.loadRelaxed(); }
+        qint64 totalWritten() const { return m_nTotalWritten.loadRelaxed(); }
+        qint64 entryLimit() const { return m_nEntryLimit; }
+        qint64 totalLimit() const { return m_nTotalLimit; }
+
+        // XFU-015 SHADOW MODE. debit()/beginEntry() stay unchanged (they return
+        // false on a breach); shadow behaviour lives at the CALL SITES, which
+        // ignore that false and call noteShadowRefusal() to count + log the
+        // would-be refusal without enforcing. shadowRefusalCount() is the
+        // differential validation hook: a shadow run over the corpora must leave
+        // it at zero.
+        static void noteShadowRefusal(const OUTPUT_BUDGET *pBudget);
+        static qint64 shadowRefusalCount() { return s_nShadowRefusals.loadRelaxed(); }
+        static void resetShadowRefusals() { s_nShadowRefusals.storeRelaxed(0); }
+
+    private:
+        Q_DISABLE_COPY(OUTPUT_BUDGET)
+        qint64 m_nEntryLimit;
+        qint64 m_nTotalLimit;
+        qint64 m_nMaxEntries;
+        qint64 m_nMemoryLimit;
+        QAtomicInteger<qint64> m_nEntryWritten;
+        QAtomicInteger<qint64> m_nTotalWritten;
+        QAtomicInteger<qint64> m_nEntryCount;
+        REFUSAL m_refusal;
+        qint32 m_nRefusedIndex;
+        QString m_sRefusedName;
+        static QAtomicInteger<qint64> s_nShadowRefusals;  // XFU-015 shadow validation counter
+    };
+
+    static bool resolveUnpackOutputPolicy(const QMap<UNPACK_PROP, QVariant> &mapProperties, OUTPUT_POLICY *pPolicy);
+
     struct DATAPROCESS_STATE {
         QIODevice *pDeviceInput;
         QIODevice *pDeviceOutput;
@@ -533,6 +648,7 @@ public:
         qint64 nProcessedLimit;   // Bytes to write after nProcessedOffset; -1 means to end.
         QMap<FPART_PROP, QVariant> mapProperties;
         QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
+        QSharedPointer<OUTPUT_BUDGET> spOutputBudget;  // XFU-015: operation output budget (null until wired)
         bool bReadError;
         bool bWriteError;
         qint64 nCountInput;
@@ -555,6 +671,7 @@ public:
         qint32 nCurrentIndex;
         qint32 nNumberOfRecords;
         QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
+        QSharedPointer<OUTPUT_BUDGET> spOutputBudget;  // XFU-015: operation output budget (null until wired)
         QMap<FPART_PROP, QVariant> mapArchiveProperties;  // Archive-level properties (e.g., FPART_PROP_FILEMD5)
         void *pContext;                                   // Format-specific context
         // Opaque XArchive streaming-session identity.  It is deliberately
