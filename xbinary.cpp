@@ -852,6 +852,7 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_ARC_CRUNCH, "ARC_CRUNCH", QString("ARC crunched")},
     {XBinary::HANDLE_METHOD_ARC_CRUNCH_DYN, "ARC_CRUNCH_DYN", QString("ARC crunched (dynamic)")},
     {XBinary::HANDLE_METHOD_ARC_SQUASH, "ARC_SQUASH", QString("ARC squashed")},
+    {XBinary::HANDLE_METHOD_COKTEL_LZ, "COKTEL_LZ", QString("Coktel LZ")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -985,6 +986,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_ASAR, "ASAR", QString("Electron ASAR")},
     {XBinary::FT_XAR, "XAR", QString("XAR")},
     {XBinary::FT_ZOO, "ZOO", QString("ZOO")},
+    {XBinary::FT_STK, "STK", QString("Coktel Vision")},
     {XBinary::FT_PDB, "PDB", QString("Program Database")},
     {XBinary::FT_WARC, "WARC", QString("Web ARChive")},
     {XBinary::FT_MTREE, "mtree", QString("mtree manifest")},
@@ -14103,6 +14105,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_RPM,
         FT_XAR,
         FT_ZOO,
+        FT_STK,
         FT_KWAJ,
         FT_ASAR,
         FT_WARC,

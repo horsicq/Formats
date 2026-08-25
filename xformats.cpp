@@ -581,6 +581,7 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
     else if (XBinary::checkFileType(XBinary::FT_ASAR, fileType)) return new XASAR(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_XAR, fileType)) return new XXAR(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ZOO, fileType)) return new XZOO(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_STK, fileType)) return new XStk(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_ARC, fileType)) return new XSEAARC(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_FREEARC, fileType)) return new XFREEARC(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_QUAKE_PAK, fileType) || XBinary::checkFileType(XBinary::FT_DOOM_WAD, fileType) ||
@@ -797,6 +798,7 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_ASAR);
     listResult.append(XBinary::FT_XAR);
     listResult.append(XBinary::FT_ZOO);
+    listResult.append(XBinary::FT_STK);
     listResult.append(XBinary::FT_QUAKE_PAK);
     listResult.append(XBinary::FT_DOOM_WAD);
     listResult.append(XBinary::FT_BUILD_GRP);
@@ -2337,6 +2339,15 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
             if (XFREEARC::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_FREEARC);
+            }
+        }
+
+        // Classic STK has no magic. Probe it only as a last resort after
+        // signature-based archive detectors have found nothing specific.
+        if ((nFTFlags & XBinary::FT_FLAG_ARCHIVES) && (stResult.size() <= 1)) {
+            if (XStk::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_STK);
             }
         }
 

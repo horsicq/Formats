@@ -121,6 +121,7 @@
 #include "xasar.h"
 #include "xxar.h"
 #include "xzoo.h"
+#include "xstk.h"
 #include "xxz.h"
 #include "xzip.h"
 #include "xzlib.h"
