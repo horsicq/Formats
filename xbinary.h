@@ -305,7 +305,9 @@ public:
         HANDLE_METHOD_ARC_CRUNCH_DYN,  // ARC method 8: dynamic-width LZW + run-length
         HANDLE_METHOD_ARC_SQUASH,      // ARC method 9: dynamic-width LZW, no run-length
         HANDLE_METHOD_QUANTUM_CAB,     // CAB compression type 2 (Quantum). Kept at the tail so persisted ids do not move.
-        HANDLE_METHOD_COKTEL_LZ        // Coktel Vision STK/ITK LZSS
+        HANDLE_METHOD_COKTEL_LZ,       // Coktel Vision STK/ITK LZSS
+        HANDLE_METHOD_WINZIP_JPEG,     // ZIP method 96: WinZip JPEG recompression
+        HANDLE_METHOD_WAVPACK          // ZIP method 97: WavPack audio
         // TODO check more methods
     };
 
@@ -534,10 +536,10 @@ public:
     virtual QMap<UNPACK_PROP, QVariant> getDefaultUnpackProperties();
     bool hasUnpackCRC(PDSTRUCT *pPdStruct = nullptr);
 
-    // XFU-015 output-ceiling foundation (steps 1-3). Additive and behaviour-neutral:
-    // no code constructs an OUTPUT_BUDGET or reads OUTPUT_POLICY yet, so every state
-    // carries a null spOutputBudget and every debit() would be a no-op. See
-    // !TODO/xfu015_output_ceiling_design.md.
+    // XFU-015 output-ceiling policy. Operation budgets are live on the native
+    // streaming, legacy RECORD, and selected custom-reader routes. Explicit
+    // aggregate/count controls enforce; absent defaults remain shadow-metered
+    // until all custom writers are covered. See !TODO/xfu015_output_ceiling_design.md.
 
     // The resolved numeric policy. -1 means "no ceiling on this axis". Produced by
     // resolveUnpackOutputPolicy(), which substitutes the design defaults for any
@@ -554,8 +556,7 @@ public:
     // One operation-scoped budget, always held by QSharedPointer and never copied
     // by value, so a DATAPROCESS_STATE copy (e.g. xacedecoder's writeState =
     // *pDecompressState) shares the same counters instead of resetting them. The
-    // debit inequality is the overflow-safe, subtraction-only form already proven
-    // in LimitedWriteDevice::writeData (xarchives_ip7z.cpp:407).
+    // debit inequality uses overflow-safe subtraction rather than addition.
     class OUTPUT_BUDGET {
     public:
         enum REFUSAL {
@@ -569,12 +570,42 @@ public:
         OUTPUT_BUDGET()
             : m_nEntryLimit(-1), m_nTotalLimit(-1), m_nMaxEntries(-1), m_nMemoryLimit(-1),
               m_nEntryWritten(0), m_nTotalWritten(0), m_nEntryCount(0),
-              m_refusal(REFUSAL_NONE), m_nRefusedIndex(-1) {}
+              m_refusal(REFUSAL_NONE), m_nRefusedIndex(-1), m_bEnforcing(false) {}
 
         void setLimits(qint64 nEntryLimit, qint64 nTotalLimit, qint64 nMaxEntries, qint64 nMemoryLimit) {
             m_nEntryLimit = nEntryLimit; m_nTotalLimit = nTotalLimit;
             m_nMaxEntries = nMaxEntries; m_nMemoryLimit = nMemoryLimit;
         }
+
+        // Explicit aggregate/member-count limits are enforcement requests. In
+        // that mode only explicitly supplied axes are armed; an explicit -1
+        // therefore disables that axis without accidentally enabling defaults
+        // on the others. With neither key present, all generous defaults remain
+        // shadow-metered until every custom output route is covered.
+        void configureForProperties(
+            const OUTPUT_POLICY &policy,
+            const QMap<UNPACK_PROP, QVariant> &mapProperties) {
+            m_bEnforcing =
+                mapProperties.contains(UNPACK_PROP_MAX_TOTAL_OUTPUT_SIZE) ||
+                mapProperties.contains(UNPACK_PROP_MAX_ENTRY_COUNT);
+            if (m_bEnforcing) {
+                setLimits(
+                    mapProperties.contains(UNPACK_PROP_MAX_OUTPUT_SIZE)
+                        ? policy.nMaxEntryOutputSize : -1,
+                    mapProperties.contains(UNPACK_PROP_MAX_TOTAL_OUTPUT_SIZE)
+                        ? policy.nMaxTotalOutputSize : -1,
+                    mapProperties.contains(UNPACK_PROP_MAX_ENTRY_COUNT)
+                        ? policy.nMaxEntryCount : -1,
+                    mapProperties.contains(UNPACK_PROP_MAX_MEMORY_OUTPUT_SIZE)
+                        ? policy.nMaxMemoryOutputSize : -1);
+            } else {
+                setLimits(policy.nMaxEntryOutputSize,
+                          policy.nMaxTotalOutputSize,
+                          policy.nMaxEntryCount,
+                          policy.nMaxMemoryOutputSize);
+            }
+        }
+        bool isEnforcing() const { return m_bEnforcing; }
 
         // Exact-limit accepts, limit+1 refuses, size 0 accepts, never multiplies.
         static bool withinLimit(qint64 nWritten, qint64 nLimit, qint64 nSize) {
@@ -613,12 +644,9 @@ public:
         qint64 entryLimit() const { return m_nEntryLimit; }
         qint64 totalLimit() const { return m_nTotalLimit; }
 
-        // XFU-015 SHADOW MODE. debit()/beginEntry() stay unchanged (they return
-        // false on a breach); shadow behaviour lives at the CALL SITES, which
-        // ignore that false and call noteShadowRefusal() to count + log the
-        // would-be refusal without enforcing. shadowRefusalCount() is the
-        // differential validation hook: a shadow run over the corpora must leave
-        // it at zero.
+        // Non-enforcing budgets still use the shadow hook at call sites. Enforced
+        // failures return before this hook, so one breach is never reported as
+        // both a refusal and a shadow observation.
         static void noteShadowRefusal(const OUTPUT_BUDGET *pBudget);
         static qint64 shadowRefusalCount() { return s_nShadowRefusals.loadRelaxed(); }
         static void resetShadowRefusals() { s_nShadowRefusals.storeRelaxed(0); }
@@ -635,6 +663,7 @@ public:
         REFUSAL m_refusal;
         qint32 m_nRefusedIndex;
         QString m_sRefusedName;
+        bool m_bEnforcing;
         static QAtomicInteger<qint64> s_nShadowRefusals;  // XFU-015 shadow validation counter
     };
 
@@ -964,6 +993,48 @@ public:
         FT_BUILD_GRP,
         FT_SAR,
         FT_ARX,
+        FT_ZPAQ,
+        FT_BCM,
+        FT_LPAQ8,
+        FT_PEA,
+        // Non-PE SFX identities are appended to preserve every existing FT ID.
+        FT_ELF32_SFX,
+        FT_ELF64_SFX,
+
+        // Family-specific SFX identities. Keep these appended: FT numeric IDs
+        // are persisted by callers and must not be renumbered.
+        FT_PE32_ZIPSFX, FT_PE64_ZIPSFX, FT_ELF32_ZIPSFX, FT_ELF64_ZIPSFX,
+        FT_PE32_RARSFX, FT_PE64_RARSFX, FT_ELF32_RARSFX, FT_ELF64_RARSFX,
+        FT_PE32_CABSFX, FT_PE64_CABSFX, FT_ELF32_CABSFX, FT_ELF64_CABSFX,
+        FT_PE32_FREEARCSFX, FT_PE64_FREEARCSFX, FT_ELF32_FREEARCSFX, FT_ELF64_FREEARCSFX,
+        FT_PE32_ZPAQSFX, FT_PE64_ZPAQSFX, FT_ELF32_ZPAQSFX, FT_ELF64_ZPAQSFX,
+
+        // Game/install media readers. Keep appended so every existing
+        // persisted FT numeric ID remains stable.
+        FT_CKP,
+        FT_MPQ,
+        FT_EDP,
+        FT_BIGF,
+        FT_ISCAB,
+
+        // Parsec/PSM resource formats. Keep appended to preserve every
+        // previously persisted FT numeric ID.
+        FT_RIB,
+        FT_PARSEC_ARCHIVE,
+        FT_PMM,
+        FT_SM8,
+
+        // WebAssembly reader. Keep appended to preserve existing FT IDs.
+        FT_WASM,
+
+        // Parsec driver and music data formats. Keep appended so every
+        // previously persisted FT numeric ID remains stable.
+        FT_DTC,
+        FT_DMA,
+        FT_MUS,
+        FT_SND,
+        FT_PMA,
+        FT_MDH,
 
         // TODO more
     };

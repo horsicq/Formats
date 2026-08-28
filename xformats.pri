@@ -107,6 +107,15 @@ contains(XCONFIG, use_archive) {
     }
 }
 
+# XZip and the Deflate/store/... decoders are always available, with or
+# without use_archive/USE_ARCHIVE (the flag keeps gating the other archive
+# formats). When use_archive is set the include above already pulled the same
+# unit through xarchive.pri, so the xzip flag makes this a no-op.
+!contains(XCONFIG, xzip) {
+    XCONFIG += xzip
+    include($$PWD/../XArchive/xzip.pri)
+}
+
 !contains(XCONFIG, xicon) {
     XCONFIG += xicon
     include($$PWD/images/xicon.pri)
@@ -162,9 +171,44 @@ contains(XCONFIG, use_archive) {
     include($$PWD/formats/xder.pri)
 }
 
+!contains(XCONFIG, xdtc) {
+    XCONFIG += xdtc
+    include($$PWD/formats/xdtc.pri)
+}
+
+!contains(XCONFIG, xdma) {
+    XCONFIG += xdma
+    include($$PWD/formats/xdma.pri)
+}
+
 !contains(XCONFIG, xmp3) {
     XCONFIG += xmp3
     include($$PWD/audio/xmp3.pri)
+}
+
+!contains(XCONFIG, xmdh) {
+    XCONFIG += xmdh
+    include($$PWD/audio/xmdh.pri)
+}
+
+!contains(XCONFIG, xmus) {
+    XCONFIG += xmus
+    include($$PWD/audio/xmus.pri)
+}
+
+!contains(XCONFIG, xpma) {
+    XCONFIG += xpma
+    include($$PWD/audio/xpma.pri)
+}
+
+!contains(XCONFIG, xsnd) {
+    XCONFIG += xsnd
+    include($$PWD/audio/xsnd.pri)
+}
+
+!contains(XCONFIG, xsm8) {
+    XCONFIG += xsm8
+    include($$PWD/audio/xsm8.pri)
 }
 
 !contains(XCONFIG, xwav) {
@@ -185,6 +229,11 @@ contains(XCONFIG, use_archive) {
 !contains(XCONFIG, xpyc) {
     XCONFIG += xpyc
     include($$PWD/formats/xpyc.pri)
+}
+
+!contains(XCONFIG, xwasm) {
+    XCONFIG += xwasm
+    include($$PWD/formats/xwasm.pri)
 }
 
 !contains(XCONFIG, xttf) {

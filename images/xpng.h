@@ -23,9 +23,7 @@
 
 #include "xbinary.h"
 
-#ifdef USE_ARCHIVE
 #include "xdeflatedecoder.h"
-#endif
 
 class XPNG : public XBinary {
     Q_OBJECT

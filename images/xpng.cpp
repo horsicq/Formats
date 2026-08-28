@@ -622,7 +622,6 @@ bool XPNG::_writeChunk(QIODevice *pDevice, const QString &sChunkType, const QByt
 QByteArray XPNG::_compressData(const QByteArray &data)
 {
     QByteArray result;
-#ifdef USE_ARCHIVE
     // Use XDeflateDecoder for compression
 
     if (data.isEmpty()) {
@@ -663,7 +662,7 @@ QByteArray XPNG::_compressData(const QByteArray &data)
     if (success && !compressState.bReadError && !compressState.bWriteError) {
         result = outputBuffer.data();
     }
-#endif
+
     return result;
 }
 

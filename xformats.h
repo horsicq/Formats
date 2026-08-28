@@ -42,6 +42,11 @@
 #include "xtiff.h"
 #include "xmp3.h"
 #include "xmp4.h"
+#include "xmdh.h"
+#include "xmus.h"
+#include "xpma.h"
+#include "xsnd.h"
+#include "xsm8.h"
 #include "xxm.h"
 #include "xriff.h"
 #include "xwebp.h"
@@ -49,10 +54,13 @@
 #include "xwav.h"
 #include "xjavaclass.h"
 #include "xpyc.h"
+#include "xwasm.h"
 #include "xttf.h"
 #include "xtext.h"
 #include "xdjvu.h"
 #include "xder.h"
+#include "xdtc.h"
+#include "xdma.h"
 #include "../../XOptions/xthreadobject.h"
 #ifdef USE_DEX
 #include "xandroidbinary.h"
@@ -64,12 +72,18 @@
 #ifdef USE_PDB
 #include "xpdb.h"
 #endif
+// XZip and its family work without USE_ARCHIVE (see XArchive/xzip.cmake/.pri);
+// the define keeps gating the other archive formats.
+#include "xapk.h"
+#include "xapks.h"
+#include "xipa.h"
+#include "xjar.h"
+#include "xzip.h"
 #ifdef USE_ARCHIVE
 #include "x_ar.h"
 #include "xace.h"
-#include "xapk.h"
-#include "xapks.h"
 #include "xarj.h"
+#include "xbcm.h"
 #include "xbrotli.h"
 #include "xbzip2.h"
 #include "xcab.h"
@@ -82,11 +96,18 @@
 #include "xdos16.h"
 #include "xfreearc.h"
 #include "xgzip.h"
-#include "xgamearchive.h"
-#include "xipa.h"
+#include "games/xpak.h"
+#include "games/xwad.h"
+#include "games/xgrp.h"
+#include "games/xckp.h"
+#include "games/xedp.h"
+#include "games/xmpq.h"
+#include "games/xbigf.h"
+#include "games/xparsecarchive.h"
+#include "games/xpmm.h"
 #include "xiso9660.h"
-#include "xjar.h"
 #include "xlha.h"
+#include "xlpaq8.h"
 #include "xsar.h"
 #include "xarx.h"
 #include "xlzip.h"
@@ -98,6 +119,7 @@
 #include "xmachofat.h"
 #include "xminidump.h"
 #include "xnpm.h"
+#include "xpea.h"
 #include "xrar.h"
 #include "xseaarc.h"
 #include "xsevenzip.h"
@@ -123,16 +145,18 @@
 #include "xzoo.h"
 #include "xstk.h"
 #include "xxz.h"
-#include "xzip.h"
 #include "xzlib.h"
+#include "xzpaq.h"
 #include "xzstd.h"
 #include "xwarc.h"
 #include "xmtree.h"
 #include "xuu.h"
 #endif
 #ifdef USE_STATICUNPACKER
-#include "../XStaticUnpacker/x7zsfx.h"
+#include "../XStaticUnpacker/xrib.h"
+#include "../XStaticUnpacker/xsevenzipsfx.h"
 #include "../XStaticUnpacker/xburn.h"
+#include "../XStaticUnpacker/xcabsfx.h"
 #include "../XStaticUnpacker/xactualinstaller.h"
 #include "../XStaticUnpacker/xadvancedinstaller.h"
 #include "../XStaticUnpacker/xaspack.h"
@@ -142,9 +166,11 @@
 #include "../XStaticUnpacker/xcreateinstall.h"
 #include "../XStaticUnpacker/xenigmavb.h"
 #include "../XStaticUnpacker/xfsg.h"
+#include "../XStaticUnpacker/xfreearcsfx.h"
 #include "../XStaticUnpacker/xiexpress.h"
 #include "../XStaticUnpacker/xinnosetup.h"
 #include "../XStaticUnpacker/xinstallforge.h"
+#include "../XStaticUnpacker/xiscab.h"
 #ifdef USE_XEMULATOR
 #include "../XStaticUnpacker/xinstallsimple.h"
 #endif
@@ -153,13 +179,15 @@
 #include "../XStaticUnpacker/xnsis.h"
 #include "../XStaticUnpacker/xnspack.h"
 #include "../XStaticUnpacker/xpetite.h"
+#include "../XStaticUnpacker/xrarsfx.h"
 #include "../XStaticUnpacker/xsfx.h"
 #include "../XStaticUnpacker/xsmartinstall.h"
 #include "../XStaticUnpacker/xtarma.h"
 #include "../XStaticUnpacker/xupx.h"
-#include "../XStaticUnpacker/xwinrarsfx.h"
 #include "../XStaticUnpacker/xwix.h"
 #include "../XStaticUnpacker/xyoda.h"
+#include "../XStaticUnpacker/xzipsfx.h"
+#include "../XStaticUnpacker/xzpaqsfx.h"
 #endif
 #ifdef QT_GUI_LIB
 #include <QComboBox>  // TODO Check TESTLIB !!!
@@ -263,10 +291,10 @@ public:
     static XBinary::XFHEADER getXFHeaderFromStructName(QIODevice *pDevice, const QString &sStruct, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                        XBinary::PDSTRUCT *pPdStruct = nullptr);
 
-#ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, quint32 nFTFlags);
     static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct);
+#ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesTBZIP2(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesTXZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);

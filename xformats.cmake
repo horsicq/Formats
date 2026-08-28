@@ -49,10 +49,24 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xsearchprocess.h
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.cpp
     ${CMAKE_CURRENT_LIST_DIR}/audio/xmp3.h
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xmdh.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xmdh.h
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xmus.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xmus.h
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xpma.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xpma.h
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xsnd.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xsnd.h
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xsm8.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/audio/xsm8.h
     ${CMAKE_CURRENT_LIST_DIR}/audio/xwav.cpp
     ${CMAKE_CURRENT_LIST_DIR}/audio/xwav.h
     ${CMAKE_CURRENT_LIST_DIR}/audio/xxm.cpp
     ${CMAKE_CURRENT_LIST_DIR}/audio/xxm.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xdtc.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xdtc.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xdma.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xdma.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xbmp.cpp
     ${CMAKE_CURRENT_LIST_DIR}/images/xbmp.h
     ${CMAKE_CURRENT_LIST_DIR}/images/xgif.cpp
@@ -81,6 +95,8 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/formats/xder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/formats/xpyc.h
     ${CMAKE_CURRENT_LIST_DIR}/formats/xpyc.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xwasm.h
+    ${CMAKE_CURRENT_LIST_DIR}/formats/xwasm.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk.cpp
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk.h
     ${CMAKE_CURRENT_LIST_DIR}/exec/xamigahunk_def.h
