@@ -40,15 +40,15 @@ int _xsimd_cuda_detect(void);
 /* CUDA internal functions — same signatures as the SSE2/AVX2 equivalents */
 xsimd_int64 _xsimd_find_byte_CUDA(const unsigned char* pData, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64 nOffset);
 
-xsimd_int64 _xsimd_find_pattern_bmh_CUDA(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nPatternSize,
-                                         xsimd_int64 nOffset, xsimd_int64 nLimit, char nLastChar, xsimd_int64* pPosition);
+xsimd_int64 _xsimd_find_pattern_bmh_CUDA(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nPatternSize, xsimd_int64 nOffset,
+                                         xsimd_int64 nLimit, char nLastChar, xsimd_int64* pPosition);
 xsimd_int64 _xsimd_find_pattern_bmh_3byte_CUDA(const char* pHay, xsimd_int64 nBufferSize, const char* pNeedle, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_pattern_bmh_2byte_CUDA(const char* pHay, xsimd_int64 nBufferSize, xsimd_uint16 pattern16, xsimd_int64 nOffset);
 xsimd_int64 _xsimd_find_pattern_bmh_1byte_CUDA(const char* pHay, xsimd_int64 nBufferSize, char nByte, xsimd_int64 nOffset);
 
 xsimd_int64 _xsimd_find_ansi_CUDA(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
-xsimd_int64 _xsimd_find_notnull_CUDA(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset,
-                                     xsimd_int64 j, xsimd_int64 runStart);
+xsimd_int64 _xsimd_find_notnull_CUDA(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset, xsimd_int64 j,
+                                     xsimd_int64 runStart);
 xsimd_int64 _xsimd_find_not_ansi_CUDA(const unsigned char* pData, xsimd_int64 nBufferSize, xsimd_int64 nMinLength, xsimd_int64 nOffset);
 
 int _xsimd_is_not_null_CUDA(const char* ptr, xsimd_int64 nSize);
@@ -57,28 +57,23 @@ int _xsimd_is_not_ansi_CUDA(const char* ptr, xsimd_int64 nSize);
 
 int _xsimd_compare_memory_CUDA(const char* ptr1, const char* ptr2, xsimd_int64 nSize);
 
-xsimd_int64 _xsimd_find_not_ansi_and_null_CUDA(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset,
-                                               xsimd_int64 m, xsimd_int64 limit, const int* ansiTable, xsimd_int64* pj);
+xsimd_int64 _xsimd_find_not_ansi_and_null_CUDA(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset, xsimd_int64 m, xsimd_int64 limit, const int* ansiTable,
+                                               xsimd_int64* pj);
 int _xsimd_is_not_ansi_and_null_CUDA(const char* ptr, xsimd_int64 nSize);
 
-xsimd_int64 _xsimd_find_ansi_number_CUDA(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset,
-                                         xsimd_int64 m, xsimd_int64 limit, xsimd_int64* pj);
+xsimd_int64 _xsimd_find_ansi_number_CUDA(const unsigned char* hay, xsimd_int64 hayLen, xsimd_int64 nOffset, xsimd_int64 m, xsimd_int64 limit, xsimd_int64* pj);
 int _xsimd_is_ansi_number_CUDA(const char* ptr, xsimd_int64 nSize);
 
 xsimd_int64 _xsimd_find_first_non_ansi_CUDA(const xsimd_uint8* pData, xsimd_int64 i, xsimd_int64 nSize);
 xsimd_int64 _xsimd_find_null_byte_CUDA(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_int64* pi);
 xsimd_int64 _xsimd_count_unicode_prefix_CUDA(const xsimd_uint16* pData, xsimd_int64 nChars, xsimd_int64* pi);
 
-void _xsimd_count_char_CUDA(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_uint8 nByte,
-                            xsimd_int64* pi, xsimd_int64* pnCount);
-void _xsimd_create_ansi_mask_CUDA(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_uint8* pMaskData,
-                                  xsimd_int64* pi, xsimd_int64* pnAnsiCount);
+void _xsimd_count_char_CUDA(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_uint8 nByte, xsimd_int64* pi, xsimd_int64* pnCount);
+void _xsimd_create_ansi_mask_CUDA(const xsimd_uint8* pData, xsimd_int64 nSize, xsimd_uint8* pMaskData, xsimd_int64* pi, xsimd_int64* pnAnsiCount);
 
-int _xsimd_compare_sigbytes_CUDA(const xsimd_uint8* pSigBytes, xsimd_int64 nSigBytesSize,
-                                 const xsimd_uint8* pData, xsimd_int64 nDataSize,
+int _xsimd_compare_sigbytes_CUDA(const xsimd_uint8* pSigBytes, xsimd_int64 nSigBytesSize, const xsimd_uint8* pData, xsimd_int64 nDataSize,
                                  const xsimd_uint8* pAlphaNumTable);
-xsimd_int64 _xsimd_find_sigbytes_CUDA(const xsimd_uint8* pData, xsimd_int64 nDataSize,
-                                      const xsimd_uint8* pSigBytes, xsimd_int64 nSigBytesSize,
+xsimd_int64 _xsimd_find_sigbytes_CUDA(const xsimd_uint8* pData, xsimd_int64 nDataSize, const xsimd_uint8* pSigBytes, xsimd_int64 nSigBytesSize,
                                       const xsimd_uint8* pAlphaNumTable);
 
 #ifdef __cplusplus

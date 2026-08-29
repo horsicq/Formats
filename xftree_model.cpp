@@ -31,7 +31,6 @@
 #include "xoptions.h"
 #endif
 
-
 namespace {
 qint64 getHeaderEndOffset(const XBinary::XFHEADER &xfHeader)
 {
@@ -66,8 +65,7 @@ qint64 getHeaderEndOffset(const XBinary::XFHEADER &xfHeader)
         qint64 nEndOffset = -1;
 
         for (XADDR nRowLocation : xfHeader.listRowLocations) {
-            if ((nRowLocation > (XADDR)std::numeric_limits<qint64>::max()) ||
-                ((qint64)nRowLocation > std::numeric_limits<qint64>::max() - nRowSize)) {
+            if ((nRowLocation > (XADDR)std::numeric_limits<qint64>::max()) || ((qint64)nRowLocation > std::numeric_limits<qint64>::max() - nRowSize)) {
                 return -1;
             }
 
@@ -83,7 +81,6 @@ qint64 getHeaderEndOffset(const XBinary::XFHEADER &xfHeader)
             const XBinary::XFRECORD &record = xfHeader.listFields.at(i);
             nSize = qMax(nSize, (qint64)record.nOffset + record.nSize);
         }
-
     }
 
     if (nSize <= 0) {
@@ -114,8 +111,7 @@ bool isValidOffsetLocation(const XBinary::XLOC &xLoc)
     return true;
 }
 
-qint32 findRightmostContainingPosition(const QVector<quint64> &listMaxEnds, qint32 nNode, qint32 nLeft, qint32 nRight,
-                                       qint32 nMaximumPosition, quint64 nRequiredEnd)
+qint32 findRightmostContainingPosition(const QVector<quint64> &listMaxEnds, qint32 nNode, qint32 nLeft, qint32 nRight, qint32 nMaximumPosition, quint64 nRequiredEnd)
 {
     if ((nLeft > nMaximumPosition) || (listMaxEnds.at(nNode) < nRequiredEnd)) {
         return -1;
@@ -447,8 +443,7 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bE
             pItem->sStructName = pItem->xfHeader.sTag;
             pItem->sStructString = pItem->xfHeader.sTag;
         } else {
-            quint64 nStructKey = (static_cast<quint64>(static_cast<quint32>(pItem->xfHeader.fileType)) << 32) |
-                                 static_cast<quint32>(pItem->xfHeader.structID);
+            quint64 nStructKey = (static_cast<quint64>(static_cast<quint32>(pItem->xfHeader.fileType)) << 32) | static_cast<quint32>(pItem->xfHeader.structID);
             QHash<quint64, QString>::const_iterator it = mapStructNames.constFind(nStructKey);
 
             if (it == mapStructNames.constEnd()) {
@@ -559,8 +554,7 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bE
                 qint32 nMaximumPosition = mapLastParentPositions.value(nItemOffset, -1);
 
                 if (nMaximumPosition >= 0) {
-                    qint32 nParentPosition = findRightmostContainingPosition(listParentMaxEnds, 1, 0, nParentTreeBase - 1,
-                                                                             nMaximumPosition, nRequiredEnd);
+                    qint32 nParentPosition = findRightmostContainingPosition(listParentMaxEnds, 1, 0, nParentTreeBase - 1, nMaximumPosition, nRequiredEnd);
 
                     if ((nParentPosition >= 0) && (nParentPosition < listParentOrder.count())) {
                         pBestParent = listItems.at(listParentOrder.at(nParentPosition));
@@ -594,7 +588,6 @@ void XFTreeModel::buildTree(const QList<XBinary::XFHEADER> &listHeaders, bool bE
             }
         }
     }
-
 }
 
 QString XFTreeModel::getItemSize(TREEITEM *pItem)
@@ -706,7 +699,6 @@ QString XFTreeModel::getItemOffset(TREEITEM *pItem)
 {
     return XBinary::valueToHexEx(pItem->xfHeader.xLoc.nLocation);
 }
-
 
 QString XFTreeModel::getItemRows(TREEITEM *pItem)
 {
@@ -964,9 +956,3 @@ QIcon XFTreeModel::getItemIcon(const TREEITEM *pItem) const
     return icon;
 }
 #endif
-
-
-
-
-
-

@@ -650,13 +650,10 @@ bool XDJVU::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

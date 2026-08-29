@@ -874,8 +874,7 @@ QList<XBinary::XFHEADER> XMSDOS::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT
             nOffset = 0;
         }
 
-        qint64 nDefaultSize = (nStructID == STRUCTID_IMAGE_DOS_HEADEREX) ? (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)
-                                                                        : (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
+        qint64 nDefaultSize = (nStructID == STRUCTID_IMAGE_DOS_HEADEREX) ? (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX) : (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADER);
         qint64 nHeaderSize = xfStruct.nSize > 0 ? qMin(xfStruct.nSize, nDefaultSize) : nDefaultSize;
 
         if ((nOffset < 0) || (nOffset >= getSize())) {
@@ -1053,13 +1052,10 @@ bool XMSDOS::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

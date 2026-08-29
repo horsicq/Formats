@@ -124,9 +124,9 @@ private:
     bool _isChunkValid(const QString &sChunkName);
 
     HEADER m_header;
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XDJVU_H

@@ -55,7 +55,6 @@ public:
 
 signals:
     void errorMessage(const QString &sText);
-
 };
 
 #endif  // XHANDLER_H

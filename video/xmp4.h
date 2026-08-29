@@ -65,9 +65,9 @@ public:
 
 private:
     bool isTagValid(const QString &sTagName);
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XMP4_H

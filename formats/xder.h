@@ -59,9 +59,9 @@ public:
 
 private:
     HEADER _getHeader(PDSTRUCT *pPdStruct);
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XDER_H

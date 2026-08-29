@@ -27,7 +27,9 @@ class XMDH : public XBinary {
     Q_OBJECT
 
 public:
-    enum { RECORD_COUNT = 8 };
+    enum {
+        RECORD_COUNT = 8
+    };
 
     struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
 

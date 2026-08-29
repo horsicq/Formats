@@ -29,22 +29,17 @@ bool isValidIconDib(XIcon *pIcon, const XIcon::ICONDIRENTRY &entry, quint32 nHea
     }
 
     const bool bCoreHeader = nHeaderSize == 12;
-    const qint64 nSignedWidth = bCoreHeader ? pIcon->read_uint16(entry.dwImageOffset + 4)
-                                            : pIcon->read_int32(entry.dwImageOffset + 4);
-    const qint64 nSignedCombinedHeight = bCoreHeader ? pIcon->read_uint16(entry.dwImageOffset + 6)
-                                                     : pIcon->read_int32(entry.dwImageOffset + 8);
+    const qint64 nSignedWidth = bCoreHeader ? pIcon->read_uint16(entry.dwImageOffset + 4) : pIcon->read_int32(entry.dwImageOffset + 4);
+    const qint64 nSignedCombinedHeight = bCoreHeader ? pIcon->read_uint16(entry.dwImageOffset + 6) : pIcon->read_int32(entry.dwImageOffset + 8);
     const quint16 nPlanes = pIcon->read_uint16(entry.dwImageOffset + (bCoreHeader ? 8 : 12));
     const quint16 nBitCount = pIcon->read_uint16(entry.dwImageOffset + (bCoreHeader ? 10 : 14));
 
     if ((nSignedWidth <= 0) || (nSignedCombinedHeight == 0) || (nPlanes != 1) ||
-        ((nBitCount != 1) && (nBitCount != 4) && (nBitCount != 8) && (nBitCount != 16) &&
-         (nBitCount != 24) && (nBitCount != 32))) {
+        ((nBitCount != 1) && (nBitCount != 4) && (nBitCount != 8) && (nBitCount != 16) && (nBitCount != 24) && (nBitCount != 32))) {
         return false;
     }
 
-    const quint64 nCombinedHeight = (nSignedCombinedHeight < 0)
-                                        ? (quint64)(-nSignedCombinedHeight)
-                                        : (quint64)nSignedCombinedHeight;
+    const quint64 nCombinedHeight = (nSignedCombinedHeight < 0) ? (quint64)(-nSignedCombinedHeight) : (quint64)nSignedCombinedHeight;
     if ((nCombinedHeight < 2) || ((nCombinedHeight & 1) != 0)) {
         return false;
     }
@@ -63,10 +58,8 @@ bool isValidIconDib(XIcon *pIcon, const XIcon::ICONDIRENTRY &entry, quint32 nHea
         nColorCount = pIcon->read_uint32(entry.dwImageOffset + 32);
 
         const bool bRgb = nCompression == 0;
-        const bool bRle = ((nCompression == 1) && (nBitCount == 8)) ||
-                          ((nCompression == 2) && (nBitCount == 4));
-        const bool bBitFields = ((nCompression == 3) || (nCompression == 6)) &&
-                                ((nBitCount == 16) || (nBitCount == 32));
+        const bool bRle = ((nCompression == 1) && (nBitCount == 8)) || ((nCompression == 2) && (nBitCount == 4));
+        const bool bBitFields = ((nCompression == 3) || (nCompression == 6)) && ((nBitCount == 16) || (nBitCount == 32));
         if (!bRgb && !bRle && !bBitFields) {
             return false;
         }
@@ -161,8 +154,8 @@ bool XIcon::isValid(PDSTRUCT *pPdStruct)
     for (quint32 i = 0; (i < iconDir.idCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++, nOffset += sizeof(ICONDIRENTRY)) {
         const ICONDIRENTRY entry = readICONDIRENTRY(nOffset);
 
-        if ((entry.bReserved != 0) || (entry.dwBytesInRes < 4) || (entry.dwImageOffset < (quint64)nDataOffset) ||
-            (entry.dwImageOffset > (quint64)nTotalSize) || (entry.dwBytesInRes > (quint64)nTotalSize - entry.dwImageOffset)) {
+        if ((entry.bReserved != 0) || (entry.dwBytesInRes < 4) || (entry.dwImageOffset < (quint64)nDataOffset) || (entry.dwImageOffset > (quint64)nTotalSize) ||
+            (entry.dwBytesInRes > (quint64)nTotalSize - entry.dwImageOffset)) {
             return false;
         }
 
@@ -172,8 +165,7 @@ bool XIcon::isValid(PDSTRUCT *pPdStruct)
 
         const quint32 nHeader = read_uint32(entry.dwImageOffset);
         const bool bDibHeader = (nHeader == 12) || (nHeader == 40) || (nHeader == 108) || (nHeader == 124);
-        const bool bPngHeader = (entry.dwBytesInRes >= 8) &&
-                                (read_array(entry.dwImageOffset, 8) == QByteArray::fromHex("89504e470d0a1a0a"));
+        const bool bPngHeader = (entry.dwBytesInRes >= 8) && (read_array(entry.dwImageOffset, 8) == QByteArray::fromHex("89504e470d0a1a0a"));
 
         if (bPngHeader) {
             SubDevice subDevice(getDevice(), entry.dwImageOffset, entry.dwBytesInRes);
@@ -284,8 +276,7 @@ XBinary::_MEMORY_MAP XIcon::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         ICONDIRENTRY iconDirectory = readICONDIRENTRY(nOffset);
 
-        if ((iconDirectory.dwBytesInRes < 4) || (iconDirectory.dwImageOffset < (quint64)nDataOffset) ||
-            (iconDirectory.dwImageOffset > (quint64)result.nBinarySize) ||
+        if ((iconDirectory.dwBytesInRes < 4) || (iconDirectory.dwImageOffset < (quint64)nDataOffset) || (iconDirectory.dwImageOffset > (quint64)result.nBinarySize) ||
             (iconDirectory.dwBytesInRes > (quint64)result.nBinarySize - iconDirectory.dwImageOffset) || (iconDirectory.bReserved != 0)) {
             bError = true;
             break;
@@ -398,8 +389,8 @@ QList<XIcon::ICONDIRENTRY> XIcon::getIconDirectories(PDSTRUCT *pPdStruct)
     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         ICONDIRENTRY record = readICONDIRENTRY(nOffset);
 
-        if ((record.bReserved != 0) || (record.dwBytesInRes == 0) || (record.dwImageOffset < (quint64)nTableEnd) ||
-            (record.dwImageOffset > (quint64)nTotalSize) || (record.dwBytesInRes > (quint64)nTotalSize - record.dwImageOffset)) {
+        if ((record.bReserved != 0) || (record.dwBytesInRes == 0) || (record.dwImageOffset < (quint64)nTableEnd) || (record.dwImageOffset > (quint64)nTotalSize) ||
+            (record.dwBytesInRes > (quint64)nTotalSize - record.dwImageOffset)) {
             listResult.clear();
             break;
         }
@@ -425,8 +416,8 @@ QList<XIcon::GRPICONDIRENTRY> XIcon::getIconGPRDirectories(PDSTRUCT *pPdStruct)
     qint32 nNumberOfRecords = iconDir.idCount;
     const qint64 nTableEnd = (qint64)sizeof(ICONDIR) + (qint64)nNumberOfRecords * (qint64)sizeof(GRPICONDIRENTRY);
 
-    if ((getSize() < (qint64)sizeof(ICONDIR)) || (iconDir.idReserved != 0) || (iconDir.idType != 1) ||
-        (iconDir.idCount == 0) || (nTableEnd > getSize()) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+    if ((getSize() < (qint64)sizeof(ICONDIR)) || (iconDir.idReserved != 0) || (iconDir.idType != 1) || (iconDir.idCount == 0) || (nTableEnd > getSize()) ||
+        !XBinary::isPdStructNotCanceled(pPdStruct)) {
         return listResult;
     }
 
@@ -435,8 +426,7 @@ QList<XIcon::GRPICONDIRENTRY> XIcon::getIconGPRDirectories(PDSTRUCT *pPdStruct)
     for (qint32 i = 0; (i < nNumberOfRecords) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         GRPICONDIRENTRY record = readGPRICONDIRENTRY(nOffset);
 
-        if ((record.bReserved != 0) || ((record.wPlanes != 0) && (record.wPlanes != 1)) ||
-            (record.dwBytesInRes == 0) || (record.nID == 0)) {
+        if ((record.bReserved != 0) || ((record.wPlanes != 0) && (record.wPlanes != 1)) || (record.dwBytesInRes == 0) || (record.nID == 0)) {
             listResult.clear();
             break;
         }
@@ -463,7 +453,7 @@ QVector<XBinary::XMETADATA_STRUCT> XIcon::getMetadataStructs()
         const qint64 nEntryOffset = (qint64)sizeof(ICONDIR) + (qint64)i * sizeof(ICONDIRENTRY);
 
         auto appendMetadata = [this, &listResult, i, nEntryOffset](qint64 nRelativeOffset, qint64 nSize, XMETADATA_ID id, const QString &sName,
-                                                                  const QVariant &varValue) {
+                                                                   const QVariant &varValue) {
             XMETADATA_STRUCT record = {};
             record.nOffset = nEntryOffset + nRelativeOffset;
             record.nSize = nSize;
@@ -759,13 +749,10 @@ bool XIcon::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

@@ -416,8 +416,7 @@ QVariant XFModel_table::data(const QModelIndex &index, int role) const
                             xfDataSt = m_xfHeader.listDataSt.at(nDataStIndex);
                         }
 
-                        if (presCol.presentationType == PT_REL_ADDRESS_STRING ||
-                            presCol.presentationType == PT_OFFSET_MUTF8STRING ||
+                        if (presCol.presentationType == PT_REL_ADDRESS_STRING || presCol.presentationType == PT_OFFSET_MUTF8STRING ||
                             presCol.presentationType == PT_STRING_POOL_IDX) {
                             if ((nRow < m_listRowPresStrings.count()) && (nFieldIndex < m_listRowPresStrings.at(nRow).count())) {
                                 const QString &s = m_listRowPresStrings.at(nRow).at(nFieldIndex);

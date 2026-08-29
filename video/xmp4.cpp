@@ -120,8 +120,7 @@ QVector<XBinary::XMETADATA_STRUCT> XMP4::getMetadataStructs()
         listResult.append(record);
     };
 
-    auto appendDateTime = [this, &listResult, nMacToUnixEpoch](qint64 nOffset, qint64 nSize, quint64 nMacSeconds, XMETADATA_ID id,
-                                                              const QString &sName) {
+    auto appendDateTime = [this, &listResult, nMacToUnixEpoch](qint64 nOffset, qint64 nSize, quint64 nMacSeconds, XMETADATA_ID id, const QString &sName) {
         if ((nMacSeconds == 0) || (nMacSeconds > 0x7FFFFFFFFFFFFFFFULL)) {
             return;
         }
@@ -180,20 +179,16 @@ QVector<XBinary::XMETADATA_STRUCT> XMP4::getMetadataStructs()
             } else if ((sType == QString("mvhd")) && (nDataOffset + 24 <= nBoxEnd)) {
                 const quint8 nVersion = read_uint8(nDataOffset);
                 if ((nVersion == 0) && (nDataOffset + 24 <= nBoxEnd)) {
-                    appendDateTime(nDataOffset + 4, 4, read_uint32(nDataOffset + 4, true), XMETADATA_ID_DATETIME_CREATED,
-                                   QString("Movie creation time"));
-                    appendDateTime(nDataOffset + 8, 4, read_uint32(nDataOffset + 8, true), XMETADATA_ID_MODIFICATED,
-                                   QString("Movie modification time"));
+                    appendDateTime(nDataOffset + 4, 4, read_uint32(nDataOffset + 4, true), XMETADATA_ID_DATETIME_CREATED, QString("Movie creation time"));
+                    appendDateTime(nDataOffset + 8, 4, read_uint32(nDataOffset + 8, true), XMETADATA_ID_MODIFICATED, QString("Movie modification time"));
                     nMovieTimescale = read_uint32(nDataOffset + 12, true);
                     const quint32 nDuration = read_uint32(nDataOffset + 16, true);
                     if (nMovieTimescale) {
                         appendValue(nDataOffset + 16, 4, XMETADATA_ID_DURATION, QString("Movie duration"), (double)nDuration / nMovieTimescale);
                     }
                 } else if ((nVersion == 1) && (nDataOffset + 32 <= nBoxEnd)) {
-                    appendDateTime(nDataOffset + 4, 8, read_uint64(nDataOffset + 4, true), XMETADATA_ID_DATETIME_CREATED,
-                                   QString("Movie creation time"));
-                    appendDateTime(nDataOffset + 12, 8, read_uint64(nDataOffset + 12, true), XMETADATA_ID_MODIFICATED,
-                                   QString("Movie modification time"));
+                    appendDateTime(nDataOffset + 4, 8, read_uint64(nDataOffset + 4, true), XMETADATA_ID_DATETIME_CREATED, QString("Movie creation time"));
+                    appendDateTime(nDataOffset + 12, 8, read_uint64(nDataOffset + 12, true), XMETADATA_ID_MODIFICATED, QString("Movie modification time"));
                     nMovieTimescale = read_uint32(nDataOffset + 20, true);
                     const quint64 nDuration = read_uint64(nDataOffset + 24, true);
                     if (nMovieTimescale) {
@@ -222,8 +217,7 @@ QVector<XBinary::XMETADATA_STRUCT> XMP4::getMetadataStructs()
 
                     const quint64 nDuration = (nVersion == 1) ? read_uint64(nDurationOffset, true) : read_uint32(nDurationOffset, true);
                     if (nMovieTimescale && (nDuration != 0xFFFFFFFFFFFFFFFFULL) && (nDuration != 0xFFFFFFFFULL)) {
-                        appendValue(nDurationOffset, (nVersion == 1) ? 8 : 4, XMETADATA_ID_DURATION, QString("Track duration"),
-                                    (double)nDuration / nMovieTimescale);
+                        appendValue(nDurationOffset, (nVersion == 1) ? 8 : 4, XMETADATA_ID_DURATION, QString("Track duration"), (double)nDuration / nMovieTimescale);
                     }
                 }
             } else if ((sType == QString("stsd")) && (nDataOffset + 16 <= nBoxEnd)) {
@@ -235,12 +229,11 @@ QVector<XBinary::XMETADATA_STRUCT> XMP4::getMetadataStructs()
                 appendValue(nDataOffset + 8, 4, XMETADATA_ID_FRAME_COUNT, QString("Sample count"), read_uint32(nDataOffset + 8, true));
             }
 
-            const bool bContainer = (sType == QString("moov")) || (sType == QString("trak")) || (sType == QString("mdia")) ||
-                                    (sType == QString("minf")) || (sType == QString("stbl")) || (sType == QString("edts")) ||
-                                    (sType == QString("dinf")) || (sType == QString("udta")) || (sType == QString("meta")) ||
-                                    (sType == QString("mvex")) || (sType == QString("moof")) || (sType == QString("traf")) ||
-                                    (sType == QString("mfra")) || (sType == QString("ipro")) || (sType == QString("sinf")) ||
-                                    (sType == QString("schi")) || (sType == QString("iprp")) || (sType == QString("ipco"));
+            const bool bContainer = (sType == QString("moov")) || (sType == QString("trak")) || (sType == QString("mdia")) || (sType == QString("minf")) ||
+                                    (sType == QString("stbl")) || (sType == QString("edts")) || (sType == QString("dinf")) || (sType == QString("udta")) ||
+                                    (sType == QString("meta")) || (sType == QString("mvex")) || (sType == QString("moof")) || (sType == QString("traf")) ||
+                                    (sType == QString("mfra")) || (sType == QString("ipro")) || (sType == QString("sinf")) || (sType == QString("schi")) ||
+                                    (sType == QString("iprp")) || (sType == QString("ipco"));
 
             if (bContainer && (range.nDepth < 16)) {
                 qint64 nChildrenOffset = nDataOffset;
@@ -557,13 +550,10 @@ bool XMP4::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

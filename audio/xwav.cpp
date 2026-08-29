@@ -154,13 +154,10 @@ bool XWAV::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XRiff::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XRiff::INTERNAL_INFO *pInfo =
-            static_cast<XRiff::INTERNAL_INFO *>(
-                guardedThis->XRiff::getInternalInfo(pPdStruct));
+        XRiff::INTERNAL_INFO *pInfo = static_cast<XRiff::INTERNAL_INFO *>(guardedThis->XRiff::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XRiff::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XRiff::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

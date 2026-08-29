@@ -97,14 +97,13 @@ private:
 
     bool getIFDInfo(qint64 nOffset, bool bIsBigEndian, qint64 nTotalSize, IFD_INFO *pInfo, PDSTRUCT *pPdStruct);
     bool getIFDChain(QList<IFD_INFO> *pListInfo, PDSTRUCT *pPdStruct);
-    bool getIFDChunk(qint64 nEntryOffset, bool bIsBigEndian, qint64 nTotalSize, CHUNK *pChunk, quint16 *pType,
-                     PDSTRUCT *pPdStruct);
+    bool getIFDChunk(qint64 nEntryOffset, bool bIsBigEndian, qint64 nTotalSize, CHUNK *pChunk, quint16 *pType, PDSTRUCT *pPdStruct);
     bool readUInt16Exact(qint64 nOffset, bool bIsBigEndian, quint16 *pValue, PDSTRUCT *pPdStruct);
     bool readUInt32Exact(qint64 nOffset, bool bIsBigEndian, quint32 *pValue, PDSTRUCT *pPdStruct);
     qint32 getBaseTypeSize(quint16 nType);
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XTIFF_H

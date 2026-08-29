@@ -163,7 +163,6 @@ public:
     // Add more as needed
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XXM_H

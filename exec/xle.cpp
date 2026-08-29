@@ -1762,9 +1762,7 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         if ((nPages > 0) && (nPageSize > 0) && (nDataPageOff >= 0) && (nDataPageOff < nTotal)) {
             qint64 nPageSpan = (qint64)(nPages - 1);
             if (nPageSpan > 0) {
-                qint64 nMaxSpan = (nDataPageOff <= (nTotal - (qint64)nLastPageSize))
-                                       ? ((nTotal - (qint64)nDataPageOff - (qint64)nLastPageSize) / (qint64)nPageSize)
-                                       : -1;
+                qint64 nMaxSpan = (nDataPageOff <= (nTotal - (qint64)nLastPageSize)) ? ((nTotal - (qint64)nDataPageOff - (qint64)nLastPageSize) / (qint64)nPageSize) : -1;
 
                 if ((nMaxSpan >= 0) && (nPageSpan <= nMaxSpan)) {
                     nLoaderSize = nDataPageOff + (qint64)(nPages - 1) * (qint64)nPageSize + (qint64)nLastPageSize;
@@ -1922,13 +1920,10 @@ bool XLE::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XMSDOS::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XMSDOS::INTERNAL_INFO *pInfo =
-            static_cast<XMSDOS::INTERNAL_INFO *>(
-                guardedThis->XMSDOS::getInternalInfo(pPdStruct));
+        XMSDOS::INTERNAL_INFO *pInfo = static_cast<XMSDOS::INTERNAL_INFO *>(guardedThis->XMSDOS::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XMSDOS::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XMSDOS::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

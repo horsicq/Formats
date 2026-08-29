@@ -106,9 +106,9 @@ private:
     LINE_ENDING _detectLineEndingInData(const QByteArray &data);
     qint64 _countLines(const QByteArray &data);
     qint64 _countWords(const QString &text);
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XTEXT_H

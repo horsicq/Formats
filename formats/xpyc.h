@@ -150,7 +150,6 @@ private:
     qint32 _readMarshalInt(qint64 *pnOffset);
     QList<MARSHAL_OBJECT> _readMarshalTuple(qint64 *pnOffset, PDSTRUCT *pPdStruct);
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XPYC_H

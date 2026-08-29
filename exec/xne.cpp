@@ -1902,13 +1902,10 @@ bool XNE::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XMSDOS::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XMSDOS::INTERNAL_INFO *pInfo =
-            static_cast<XMSDOS::INTERNAL_INFO *>(
-                guardedThis->XMSDOS::getInternalInfo(pPdStruct));
+        XMSDOS::INTERNAL_INFO *pInfo = static_cast<XMSDOS::INTERNAL_INFO *>(guardedThis->XMSDOS::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XMSDOS::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XMSDOS::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

@@ -162,8 +162,7 @@ QVector<XBinary::XMETADATA_STRUCT> XAVI::getMetadataStructs()
         appendMetadata(nDataOffset + 4, 4, XMETADATA_ID_BITRATE, QString("Maximum bitrate"), (quint64)nMaxBytesPerSecond * 8);
         if (nMicrosecondsPerFrame) {
             appendMetadata(nDataOffset, 4, XMETADATA_ID_FRAME_RATE, QString("Frame rate"), 1000000.0 / nMicrosecondsPerFrame);
-            appendMetadata(nDataOffset + 16, 4, XMETADATA_ID_DURATION, QString("Duration"),
-                           (double)nTotalFrames * nMicrosecondsPerFrame / 1000000.0);
+            appendMetadata(nDataOffset + 16, 4, XMETADATA_ID_DURATION, QString("Duration"), (double)nTotalFrames * nMicrosecondsPerFrame / 1000000.0);
         }
     }
 
@@ -317,13 +316,10 @@ bool XAVI::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XRiff::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XRiff::INTERNAL_INFO *pInfo =
-            static_cast<XRiff::INTERNAL_INFO *>(
-                guardedThis->XRiff::getInternalInfo(pPdStruct));
+        XRiff::INTERNAL_INFO *pInfo = static_cast<XRiff::INTERNAL_INFO *>(guardedThis->XRiff::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XRiff::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XRiff::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

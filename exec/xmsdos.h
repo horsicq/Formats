@@ -165,9 +165,9 @@ public:
 
     // File parts enumeration
     virtual QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XMSDOS_H

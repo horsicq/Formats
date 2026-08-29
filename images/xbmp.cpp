@@ -49,9 +49,8 @@ bool XBMP::isValid(PDSTRUCT *pPdStruct)
     const bool bKnownInfoHeader = (infoHeader.biSize == 40) || (infoHeader.biSize == 108) || (infoHeader.biSize == 124);
     const qint64 nHeaderSize = 14 + (qint64)infoHeader.biSize;
 
-    if (!bKnownInfoHeader || (nHeaderSize > nTotalSize) || (fileHeader.bfSize < (quint64)nHeaderSize) ||
-        (fileHeader.bfSize > (quint64)nTotalSize) || (fileHeader.bfOffBits < (quint64)nHeaderSize) ||
-        (fileHeader.bfOffBits > fileHeader.bfSize) || (fileHeader.bfReserved1 != 0) || (fileHeader.bfReserved2 != 0) ||
+    if (!bKnownInfoHeader || (nHeaderSize > nTotalSize) || (fileHeader.bfSize < (quint64)nHeaderSize) || (fileHeader.bfSize > (quint64)nTotalSize) ||
+        (fileHeader.bfOffBits < (quint64)nHeaderSize) || (fileHeader.bfOffBits > fileHeader.bfSize) || (fileHeader.bfReserved1 != 0) || (fileHeader.bfReserved2 != 0) ||
         (infoHeader.biPlanes != 1) || (infoHeader.biWidth <= 0) || (infoHeader.biHeight == 0)) {
         return false;
     }
@@ -61,11 +60,10 @@ bool XBMP::isValid(PDSTRUCT *pPdStruct)
     const bool bRgb = infoHeader.biCompression == 0;
     const bool bRle8 = (infoHeader.biCompression == 1) && (infoHeader.biBitCount == 8);
     const bool bRle4 = (infoHeader.biCompression == 2) && (infoHeader.biBitCount == 4);
-    const bool bBitFields = ((infoHeader.biCompression == 3) || (infoHeader.biCompression == 6)) &&
-                            ((infoHeader.biBitCount == 16) || (infoHeader.biBitCount == 32));
+    const bool bBitFields = ((infoHeader.biCompression == 3) || (infoHeader.biCompression == 6)) && ((infoHeader.biBitCount == 16) || (infoHeader.biBitCount == 32));
     const bool bEmbedded = ((infoHeader.biCompression == 4) || (infoHeader.biCompression == 5)) && (infoHeader.biBitCount == 0);
-    const bool bKnownBitCount = (infoHeader.biBitCount == 1) || (infoHeader.biBitCount == 4) || (infoHeader.biBitCount == 8) ||
-                                (infoHeader.biBitCount == 16) || (infoHeader.biBitCount == 24) || (infoHeader.biBitCount == 32);
+    const bool bKnownBitCount = (infoHeader.biBitCount == 1) || (infoHeader.biBitCount == 4) || (infoHeader.biBitCount == 8) || (infoHeader.biBitCount == 16) ||
+                                (infoHeader.biBitCount == 24) || (infoHeader.biBitCount == 32);
 
     if ((!bRgb || !bKnownBitCount) && !bRle8 && !bRle4 && !bBitFields && !bEmbedded) {
         return false;
@@ -108,13 +106,11 @@ bool XBMP::isValid(PDSTRUCT *pPdStruct)
 
     if (bEmbedded) {
         const qint64 nEmbeddedOffset = fileHeader.bfOffBits;
-        if ((infoHeader.biCompression == 4) &&
-            ((nDataSize < 2) || (read_uint16(nEmbeddedOffset, false) != 0xD8FF))) {
+        if ((infoHeader.biCompression == 4) && ((nDataSize < 2) || (read_uint16(nEmbeddedOffset, false) != 0xD8FF))) {
             return false;
         }
         if ((infoHeader.biCompression == 5) &&
-            ((nDataSize < 8) || (read_uint32(nEmbeddedOffset, false) != 0x474E5089) ||
-             (read_uint32(nEmbeddedOffset + 4, false) != 0x0A1A0A0D))) {
+            ((nDataSize < 8) || (read_uint32(nEmbeddedOffset, false) != 0x474E5089) || (read_uint32(nEmbeddedOffset + 4, false) != 0x0A1A0A0D))) {
             return false;
         }
     }
@@ -334,8 +330,7 @@ QList<XBinary::XFHEADER> XBMP::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
         if ((nHeaderOffset >= 0) && (nHeaderOffset <= getSize() - 4)) {
             const quint32 nInfoHeaderSize = read_uint32(nHeaderOffset);
 
-            if (((nInfoHeaderSize != 40) && (nInfoHeaderSize != 108) && (nInfoHeaderSize != 124)) ||
-                (nInfoHeaderSize > (quint64)getSize() - nHeaderOffset)) {
+            if (((nInfoHeaderSize != 40) && (nInfoHeaderSize != 108) && (nInfoHeaderSize != 124)) || (nInfoHeaderSize > (quint64)getSize() - nHeaderOffset)) {
                 return listResult;
             }
 
@@ -561,13 +556,10 @@ bool XBMP::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

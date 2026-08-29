@@ -21,8 +21,7 @@
 #include "xmach.h"
 
 namespace {
-bool xmachAreOpcodeArgumentsValid(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes,
-                                  XBinary::OPCODE_STATUS *pOpcodeStatus)
+bool xmachAreOpcodeArgumentsValid(char *pData, XADDR nAddress, qint64 nSize, QList<XBinary::OPCODE> *pListOpcodes, XBinary::OPCODE_STATUS *pOpcodeStatus)
 {
     if (!pOpcodeStatus) {
         return false;
@@ -266,16 +265,8 @@ XBinary::XIDSTRING _TABLE_XMACH_SectionAttributesSys[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_SectionAttributes[] = {
-    {0x00000100, "LOC_RELOC"},
-    {0x00000200, "EXT_RELOC"},
-    {0x00000400, "SOME_INSTRUCTIONS"},
-    {0x02000000, "DEBUG"},
-    {0x04000000, "SELF_MODIFYING_CODE"},
-    {0x08000000, "LIVE_SUPPORT"},
-    {0x10000000, "NO_DEAD_STRIP"},
-    {0x20000000, "STRIP_STATIC_SYMS"},
-    {0x40000000, "NO_TOC"},
-    {0x80000000, "PURE_INSTRUCTIONS"},
+    {0x00000100, "LOC_RELOC"},    {0x00000200, "EXT_RELOC"},     {0x00000400, "SOME_INSTRUCTIONS"}, {0x02000000, "DEBUG"},  {0x04000000, "SELF_MODIFYING_CODE"},
+    {0x08000000, "LIVE_SUPPORT"}, {0x10000000, "NO_DEAD_STRIP"}, {0x20000000, "STRIP_STATIC_SYMS"}, {0x40000000, "NO_TOC"}, {0x80000000, "PURE_INSTRUCTIONS"},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_DICEKinds[] = {
@@ -314,19 +305,8 @@ XBinary::XIDSTRING _TABLE_XMACH_DyldChainedImports[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesVAX[] = {
-    {0, "VAX_ALL"},
-    {1, "VAX780"},
-    {2, "VAX785"},
-    {3, "VAX750"},
-    {4, "VAX730"},
-    {5, "UVAXI"},
-    {6, "UVAXII"},
-    {7, "VAX8200"},
-    {8, "VAX8500"},
-    {9, "VAX8600"},
-    {10, "VAX8650"},
-    {11, "VAX8800"},
-    {12, "UVAXIII"},
+    {0, "VAX_ALL"}, {1, "VAX780"},  {2, "VAX785"},  {3, "VAX750"},   {4, "VAX730"},   {5, "UVAXI"},    {6, "UVAXII"},
+    {7, "VAX8200"}, {8, "VAX8500"}, {9, "VAX8600"}, {10, "VAX8650"}, {11, "VAX8800"}, {12, "UVAXIII"},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesROMP[] = {
@@ -337,12 +317,7 @@ XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesROMP[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesNS32[] = {
-    {0, "MMAX_ALL"},
-    {1, "MMAX_DPC"},
-    {2, "SQT"},
-    {3, "MMAX_APC_FPU"},
-    {4, "MMAX_APC_FPA"},
-    {5, "MMAX_XPC"},
+    {0, "MMAX_ALL"}, {1, "MMAX_DPC"}, {2, "SQT"}, {3, "MMAX_APC_FPU"}, {4, "MMAX_APC_FPA"}, {5, "MMAX_XPC"},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesI386[] = {
@@ -351,11 +326,7 @@ XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesI386[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesMIPS[] = {
-    {0, "MIPS_ALL"},
-    {1, "MIPS_R2300"},
-    {2, "MIPS_R2600"},
-    {3, "MIPS_R2800"},
-    {4, "MIPS_R2000a"},
+    {0, "MIPS_ALL"}, {1, "MIPS_R2300"}, {2, "MIPS_R2600"}, {3, "MIPS_R2800"}, {4, "MIPS_R2000a"},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesMC680x0[] = {
@@ -370,23 +341,8 @@ XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesHPPA[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesARM[] = {
-    {0, "ARM_ALL"},
-    {1, "ARM_A500_ARCH"},
-    {2, "ARM_A500"},
-    {3, "ARM_A440"},
-    {4, "ARM_M4"},
-    {5, "ARM_V4T"},
-    {6, "ARM_V6"},
-    {7, "ARM_V5TEJ"},
-    {8, "ARM_XSCALE"},
-    {9, "ARM_V7"},
-    {10, "ARM_V7F"},
-    {11, "ARM_V7S"},
-    {12, "ARM_V7K"},
-    {14, "ARM_V6M"},
-    {15, "ARM_V7M"},
-    {16, "ARM_V7EM"},
-    {0x80000002, "ARM64E"},
+    {0, "ARM_ALL"}, {1, "ARM_A500_ARCH"}, {2, "ARM_A500"}, {3, "ARM_A440"}, {4, "ARM_M4"},   {5, "ARM_V4T"},  {6, "ARM_V6"},    {7, "ARM_V5TEJ"},       {8, "ARM_XSCALE"},
+    {9, "ARM_V7"},  {10, "ARM_V7F"},      {11, "ARM_V7S"}, {12, "ARM_V7K"}, {14, "ARM_V6M"}, {15, "ARM_V7M"}, {16, "ARM_V7EM"}, {0x80000002, "ARM64E"},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesMC88000[] = {
@@ -415,19 +371,8 @@ XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesSPARC[] = {
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesPOWERPC[] = {
-    {0, "POWERPC_ALL"},
-    {1, "POWERPC_601"},
-    {2, "POWERPC_602"},
-    {3, "POWERPC_603"},
-    {4, "POWERPC_603e"},
-    {5, "POWERPC_603ev"},
-    {6, "POWERPC_604"},
-    {7, "POWERPC_604e"},
-    {8, "POWERPC_620"},
-    {9, "POWERPC_750"},
-    {10, "POWERPC_7400"},
-    {11, "POWERPC_7450"},
-    {100, "POWERPC_970"},
+    {0, "POWERPC_ALL"},  {1, "POWERPC_601"}, {2, "POWERPC_602"}, {3, "POWERPC_603"},   {4, "POWERPC_603e"},  {5, "POWERPC_603ev"}, {6, "POWERPC_604"},
+    {7, "POWERPC_604e"}, {8, "POWERPC_620"}, {9, "POWERPC_750"}, {10, "POWERPC_7400"}, {11, "POWERPC_7450"}, {100, "POWERPC_970"},
 };
 
 XBinary::XIDSTRING _TABLE_XMACH_CpuSubTypesVEO[] = {
@@ -5701,12 +5646,12 @@ QList<XBinary::XFRECORD> XMACH::getXFRecords(FT fileType, quint32 nStructID, con
         if (nStructID == STRUCTID_dylib_command) {
             nStrOffsetField = (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, name));
             listResult.append({"dylib.name", nStrOffsetField, 4, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT32});
-            listResult.append({"dylib.timestamp", (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, timestamp)), 4,
-                               XFRECORD_FLAG_UNIXTIME, VT_UINT32});
+            listResult.append(
+                {"dylib.timestamp", (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, timestamp)), 4, XFRECORD_FLAG_UNIXTIME, VT_UINT32});
             listResult.append({"dylib.current_version", (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, current_version)), 4,
                                XFRECORD_FLAG_NONE, VT_UINT32});
-            listResult.append({"dylib.compatibility_version", (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, compatibility_version)),
-                               4, XFRECORD_FLAG_NONE, VT_UINT32});
+            listResult.append({"dylib.compatibility_version", (qint32)(offsetof(XMACH_DEF::dylib_command, _dylib) + offsetof(XMACH_DEF::dylib, compatibility_version)), 4,
+                               XFRECORD_FLAG_NONE, VT_UINT32});
         } else if (nStructID == STRUCTID_dylinker_command) {
             listResult.append({"name", (qint32)offsetof(XMACH_DEF::dylinker_command, name), 4, XFRECORD_FLAG_RELATIVE_OFFSET, VT_UINT32});
         } else {
@@ -6820,11 +6765,9 @@ XADDR XMACH::readOpcodesInterface_bind(char *pData, XADDR nAddress, qint64 nSize
             case XMACH_DEF::S_BIND_OPCODE_THREADED:
                 opcodeMain.sName = QString("BIND_OPCODE_THREADED");
                 bImm = true;
-                if ((nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) ==
-                    XMACH_DEF::S_BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB) {
+                if ((nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) == XMACH_DEF::S_BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB) {
                     bUleb1 = true;
-                } else if ((nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) !=
-                           XMACH_DEF::S_BIND_SUBOPCODE_THREADED_APPLY) {
+                } else if ((nByte & XMACH_DEF::S_BIND_IMMEDIATE_MASK) != XMACH_DEF::S_BIND_SUBOPCODE_THREADED_APPLY) {
                     bSuccess = false;
                     *pOpcodeStatus = OPCODE_STATUS_END;
                 }
@@ -7098,13 +7041,10 @@ bool XMACH::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

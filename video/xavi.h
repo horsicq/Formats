@@ -69,9 +69,9 @@ public:
     QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
     QList<QString> getSearchSignatures() override;
     XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XAVI_H

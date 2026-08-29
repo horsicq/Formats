@@ -26,7 +26,7 @@
 class XDMA : public XBinary {
     Q_OBJECT
 
-   public:
+public:
     struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
 
 #pragma pack(push, 1)
@@ -77,19 +77,16 @@ class XDMA : public XBinary {
     qint64 getFileFormatSize(PDSTRUCT *pPdStruct = nullptr) override;
     qint64 getImageSize() override;
     QList<MAPMODE> getMapModesList() override;
-    _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN,
-                             PDSTRUCT *pPdStruct = nullptr) override;
+    _MEMORY_MAP getMemoryMap(MAPMODE mapMode = MAPMODE_UNKNOWN, PDSTRUCT *pPdStruct = nullptr) override;
     QVector<XMETADATA_STRUCT> getMetadataStructs() override;
-    QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1,
-                              PDSTRUCT *pPdStruct = nullptr) override;
+    QList<FPART> getFileParts(quint32 nFileParts, qint32 nLimit = -1, PDSTRUCT *pPdStruct = nullptr) override;
     QList<QString> getSearchSignatures() override;
-    XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false,
-                            XADDR nModuleAddress = -1) override;
+    XBinary *createInstance(QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1) override;
 
     HEADER _read_HEADER(qint64 nOffset = 0);
     QList<quint16> getEntryPoints(PDSTRUCT *pPdStruct = nullptr);
 
-   private:
+private:
     bool _parseLayout(LAYOUT *pLayout, PDSTRUCT *pPdStruct);
 
     INTERNAL_INFO m_internalInfo;

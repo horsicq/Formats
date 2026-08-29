@@ -91,9 +91,9 @@ public:
 
 private:
     CHUNK _readChunk(qint64 nOffset);
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XJPEG_H

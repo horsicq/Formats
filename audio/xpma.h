@@ -27,7 +27,9 @@ class XPMA : public XBinary {
     Q_OBJECT
 
 public:
-    enum { CHANNEL_COUNT = 9 };
+    enum {
+        CHANNEL_COUNT = 9
+    };
 
     struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
 

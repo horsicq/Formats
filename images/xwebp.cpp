@@ -22,8 +22,7 @@ static bool _webpIsValidImageChunk(XWEBP *pWebp, const QByteArray &baType, qint6
     if (pHasAlpha) *pHasAlpha = false;
 
     if (baType == QByteArrayLiteral("VP8 ")) {
-        if ((nDataSize < 10) || ((pWebp->read_uint8(nDataOffset) & 1) != 0) ||
-            (pWebp->read_array(nDataOffset + 3, 3) != QByteArray::fromHex("9d012a"))) {
+        if ((nDataSize < 10) || ((pWebp->read_uint8(nDataOffset) & 1) != 0) || (pWebp->read_array(nDataOffset + 3, 3) != QByteArray::fromHex("9d012a"))) {
             return false;
         }
         const quint32 nWidth = pWebp->read_uint16(nDataOffset + 6, false) & 0x3FFF;
@@ -96,8 +95,7 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
         const qint64 nDataOffset = nOffset + 8;
 
         if (nChunkIndex == 0) {
-            if ((baChunkType != QByteArrayLiteral("VP8 ")) && (baChunkType != QByteArrayLiteral("VP8L")) &&
-                (baChunkType != QByteArrayLiteral("VP8X"))) {
+            if ((baChunkType != QByteArrayLiteral("VP8 ")) && (baChunkType != QByteArrayLiteral("VP8L")) && (baChunkType != QByteArrayLiteral("VP8X"))) {
                 return false;
             }
             bSimple = (baChunkType == QByteArrayLiteral("VP8 ")) || (baChunkType == QByteArrayLiteral("VP8L"));
@@ -112,23 +110,21 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
                 !_webpIsValidImageChunk(this, baChunkType, nDataOffset, nChunkSize, &nImageWidth, &nImageHeight, &bImageAlpha)) {
                 return false;
             }
-            if (bExtended && ((nImageWidth != nCanvasWidth) || (nImageHeight != nCanvasHeight) ||
-                              (bHasAlpha && (baChunkType != QByteArrayLiteral("VP8 "))))) {
+            if (bExtended && ((nImageWidth != nCanvasWidth) || (nImageHeight != nCanvasHeight) || (bHasAlpha && (baChunkType != QByteArrayLiteral("VP8 "))))) {
                 return false;
             }
             bHasTopImage = true;
             bHasAlpha |= bImageAlpha;
         } else if (baChunkType == QByteArrayLiteral("VP8X")) {
-            if ((nChunkIndex != 0) || (nChunkSize != 10) || ((read_uint8(nDataOffset) & 0xC1) != 0) ||
-                (read_uint8(nDataOffset + 1) != 0) || (read_uint8(nDataOffset + 2) != 0) || (read_uint8(nDataOffset + 3) != 0)) {
+            if ((nChunkIndex != 0) || (nChunkSize != 10) || ((read_uint8(nDataOffset) & 0xC1) != 0) || (read_uint8(nDataOffset + 1) != 0) ||
+                (read_uint8(nDataOffset + 2) != 0) || (read_uint8(nDataOffset + 3) != 0)) {
                 return false;
             }
             nFeatureFlags = read_uint8(nDataOffset);
             nCanvasWidth = read_uint24(nDataOffset + 4, false) + 1;
             nCanvasHeight = read_uint24(nDataOffset + 7, false) + 1;
         } else if (baChunkType == QByteArrayLiteral("ALPH")) {
-            if (!bExtended || bHasTopImage || bHasANIM || (nFrameCount != 0) || bHasAlpha || (nChunkSize < 1) ||
-                ((read_uint8(nDataOffset) & 0xE3) != 0)) {
+            if (!bExtended || bHasTopImage || bHasANIM || (nFrameCount != 0) || bHasAlpha || (nChunkSize < 1) || ((read_uint8(nDataOffset) & 0xE3) != 0)) {
                 return false;
             }
             bHasAlpha = true;
@@ -142,14 +138,12 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
             if (!bExtended || bHasXMP || (nChunkSize == 0)) return false;
             bHasXMP = true;
         } else if (baChunkType == QByteArrayLiteral("ANIM")) {
-            if (!bExtended || bHasANIM || bHasTopImage || bHasAlpha || (nFrameCount != 0) || (nChunkSize != 6) ||
-                ((nFeatureFlags & 0x02) == 0)) {
+            if (!bExtended || bHasANIM || bHasTopImage || bHasAlpha || (nFrameCount != 0) || (nChunkSize != 6) || ((nFeatureFlags & 0x02) == 0)) {
                 return false;
             }
             bHasANIM = true;
         } else if (baChunkType == QByteArrayLiteral("ANMF")) {
-            if (!bExtended || !bHasANIM || bHasTopImage || (nChunkSize < 16) ||
-                ((read_uint8(nDataOffset + 15) & 0xFC) != 0)) {
+            if (!bExtended || !bHasANIM || bHasTopImage || (nChunkSize < 16) || ((read_uint8(nDataOffset + 15) & 0xFC) != 0)) {
                 return false;
             }
 
@@ -157,8 +151,7 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
             const quint32 nFrameY = read_uint24(nDataOffset + 3, false) * 2;
             const quint32 nFrameWidth = read_uint24(nDataOffset + 6, false) + 1;
             const quint32 nFrameHeight = read_uint24(nDataOffset + 9, false) + 1;
-            if ((nFrameX > nCanvasWidth) || (nFrameY > nCanvasHeight) ||
-                (nFrameWidth > nCanvasWidth - nFrameX) || (nFrameHeight > nCanvasHeight - nFrameY)) {
+            if ((nFrameX > nCanvasWidth) || (nFrameY > nCanvasHeight) || (nFrameWidth > nCanvasWidth - nFrameX) || (nFrameHeight > nCanvasHeight - nFrameY)) {
                 return false;
             }
 
@@ -186,8 +179,7 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
                 }
 
                 if (baFrameType == QByteArrayLiteral("ALPH")) {
-                    if (bFrameAlpha || bFrameImage || (nFrameSize < 1) ||
-                        ((read_uint8(nFrameOffset + 8) & 0xE3) != 0)) {
+                    if (bFrameAlpha || bFrameImage || (nFrameSize < 1) || ((read_uint8(nFrameOffset + 8) & 0xE3) != 0)) {
                         return false;
                     }
                     bFrameAlpha = true;
@@ -195,17 +187,14 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
                     quint32 nImageWidth = 0;
                     quint32 nImageHeight = 0;
                     bool bImageAlpha = false;
-                    if (bFrameImage || !_webpIsValidImageChunk(this, baFrameType, nFrameOffset + 8, nFrameSize,
-                                                               &nImageWidth, &nImageHeight, &bImageAlpha) ||
-                        (nImageWidth != nFrameWidth) || (nImageHeight != nFrameHeight) ||
-                        (bFrameAlpha && (baFrameType != QByteArrayLiteral("VP8 ")))) {
+                    if (bFrameImage || !_webpIsValidImageChunk(this, baFrameType, nFrameOffset + 8, nFrameSize, &nImageWidth, &nImageHeight, &bImageAlpha) ||
+                        (nImageWidth != nFrameWidth) || (nImageHeight != nFrameHeight) || (bFrameAlpha && (baFrameType != QByteArrayLiteral("VP8 ")))) {
                         return false;
                     }
                     bFrameImage = true;
                     bFrameAlpha |= bImageAlpha;
-                } else if ((baFrameType == QByteArrayLiteral("VP8X")) || (baFrameType == QByteArrayLiteral("ANIM")) ||
-                           (baFrameType == QByteArrayLiteral("ANMF")) || (baFrameType == QByteArrayLiteral("ICCP")) ||
-                           (baFrameType == QByteArrayLiteral("EXIF")) || (baFrameType == QByteArrayLiteral("XMP "))) {
+                } else if ((baFrameType == QByteArrayLiteral("VP8X")) || (baFrameType == QByteArrayLiteral("ANIM")) || (baFrameType == QByteArrayLiteral("ANMF")) ||
+                           (baFrameType == QByteArrayLiteral("ICCP")) || (baFrameType == QByteArrayLiteral("EXIF")) || (baFrameType == QByteArrayLiteral("XMP "))) {
                     return false;
                 }
 
@@ -232,10 +221,8 @@ bool XWEBP::isValid(PDSTRUCT *pPdStruct)
     }
 
     const bool bAnimationFlag = (nFeatureFlags & 0x02) != 0;
-    const bool bFeatureStateValid = (((nFeatureFlags & 0x20) != 0) == bHasICCP) &&
-                                    (((nFeatureFlags & 0x10) != 0) == bHasAlpha) &&
-                                    (((nFeatureFlags & 0x08) != 0) == bHasEXIF) &&
-                                    (((nFeatureFlags & 0x04) != 0) == bHasXMP);
+    const bool bFeatureStateValid = (((nFeatureFlags & 0x20) != 0) == bHasICCP) && (((nFeatureFlags & 0x10) != 0) == bHasAlpha) &&
+                                    (((nFeatureFlags & 0x08) != 0) == bHasEXIF) && (((nFeatureFlags & 0x04) != 0) == bHasXMP);
     if (!bExtended || !bFeatureStateValid) return false;
 
     if (bAnimationFlag) {
@@ -350,13 +337,10 @@ bool XWEBP::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XRiff::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XRiff::INTERNAL_INFO *pInfo =
-            static_cast<XRiff::INTERNAL_INFO *>(
-                guardedThis->XRiff::getInternalInfo(pPdStruct));
+        XRiff::INTERNAL_INFO *pInfo = static_cast<XRiff::INTERNAL_INFO *>(guardedThis->XRiff::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XRiff::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XRiff::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

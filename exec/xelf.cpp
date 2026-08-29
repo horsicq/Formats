@@ -1646,13 +1646,10 @@ bool XELF::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 
@@ -4935,8 +4932,8 @@ XBinary::XCONVERT _TABLE_XELF_STRUCTID[] = {
     {XELF::STRUCTID_ELF_DYN64, "ELF_DYN64", QString("ELF_DYN64")},    {XELF::STRUCTID_ELF_SYM32, "ELF_SYM32", QString("ELF_SYM32")},
     {XELF::STRUCTID_ELF_SYM64, "ELF_SYM64", QString("ELF_SYM64")},    {XELF::STRUCTID_ELF_REL32, "ELF_REL32", QString("ELF_REL32")},
     {XELF::STRUCTID_ELF_REL64, "ELF_REL64", QString("ELF_REL64")},    {XELF::STRUCTID_ELF_RELA32, "ELF_RELA32", QString("ELF_RELA32")},
-    {XELF::STRUCTID_ELF_RELA64, "ELF_RELA64", QString("ELF_RELA64")},
-    {XELF::STRUCTID_ELF_NOTE, "ELF_NOTE", QString("ELF_NOTE")},       {XELF::STRUCTID_ELF_INTERP, "ELF_INTERP", QString("ELF_INTERP")},
+    {XELF::STRUCTID_ELF_RELA64, "ELF_RELA64", QString("ELF_RELA64")}, {XELF::STRUCTID_ELF_NOTE, "ELF_NOTE", QString("ELF_NOTE")},
+    {XELF::STRUCTID_ELF_INTERP, "ELF_INTERP", QString("ELF_INTERP")},
 };
 
 QString XELF::structIDToString(quint32 nID)
@@ -5133,34 +5130,26 @@ static void _appendELFXFDataSt(XBinary::XFHEADER *pHeader, quint32 nId, bool bIs
         pHeader->listDataSt.append({1, 0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_Types, sizeof(_TABLE_XELF_Types) / sizeof(XBinary::XIDSTRING)});
         pHeader->listDataSt.append({2, 0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_Machines, sizeof(_TABLE_XELF_Machines) / sizeof(XBinary::XIDSTRING)});
     } else if ((nId == XELF::STRUCTID_ELF_PHDR32) || (nId == XELF::STRUCTID_ELF_PHDR64)) {
+        pHeader->listDataSt.append({0, 0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_ProgramTypes_Base, sizeof(_TABLE_XELF_ProgramTypes_Base) / sizeof(XBinary::XIDSTRING)});
         pHeader->listDataSt.append(
-            {0, 0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_ProgramTypes_Base, sizeof(_TABLE_XELF_ProgramTypes_Base) / sizeof(XBinary::XIDSTRING)});
-        pHeader->listDataSt.append({bIs64 ? 1 : 6, 0xFFFFFFFF, XBinary::XFDATASTYPE_FLAGS, _TABLE_XELF_ProgramFlags,
-                                    sizeof(_TABLE_XELF_ProgramFlags) / sizeof(XBinary::XIDSTRING)});
+            {bIs64 ? 1 : 6, 0xFFFFFFFF, XBinary::XFDATASTYPE_FLAGS, _TABLE_XELF_ProgramFlags, sizeof(_TABLE_XELF_ProgramFlags) / sizeof(XBinary::XIDSTRING)});
     } else if ((nId == XELF::STRUCTID_ELF_SHDR32) || (nId == XELF::STRUCTID_ELF_SHDR64)) {
+        pHeader->listDataSt.append({1, 0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_SectionTypes, sizeof(_TABLE_XELF_SectionTypes) / sizeof(XBinary::XIDSTRING)});
         pHeader->listDataSt.append(
-            {1, 0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_SectionTypes, sizeof(_TABLE_XELF_SectionTypes) / sizeof(XBinary::XIDSTRING)});
-        pHeader->listDataSt.append({2, 0xFFFFFFFFFFFFFFFF, XBinary::XFDATASTYPE_FLAGS, _TABLE_XELF_SectionFlags,
-                                    sizeof(_TABLE_XELF_SectionFlags) / sizeof(XBinary::XIDSTRING)});
+            {2, 0xFFFFFFFFFFFFFFFF, XBinary::XFDATASTYPE_FLAGS, _TABLE_XELF_SectionFlags, sizeof(_TABLE_XELF_SectionFlags) / sizeof(XBinary::XIDSTRING)});
     } else if ((nId == XELF::STRUCTID_ELF_DYN32) || (nId == XELF::STRUCTID_ELF_DYN64)) {
-        pHeader->listDataSt.append(
-            {0, 0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_DynamicTags_Base, sizeof(_TABLE_XELF_DynamicTags_Base) / sizeof(XBinary::XIDSTRING)});
+        pHeader->listDataSt.append({0, 0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_DynamicTags_Base, sizeof(_TABLE_XELF_DynamicTags_Base) / sizeof(XBinary::XIDSTRING)});
     } else if (nId == XELF::STRUCTID_ELF_SYM32) {
-        pHeader->listDataSt.append({3, 0x0F, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StTypes, sizeof(_TABLE_XELF_StTypes) / sizeof(XBinary::XIDSTRING),
-                                    "st_type"});
-        pHeader->listDataSt.append({3, 0xF0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StBinds, sizeof(_TABLE_XELF_StBinds) / sizeof(XBinary::XIDSTRING),
-                                    "st_bind"});
-        pHeader->listDataSt.append({4, 0x03, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StVisibilities,
-                                    sizeof(_TABLE_XELF_StVisibilities) / sizeof(XBinary::XIDSTRING), "st_visibility"});
+        pHeader->listDataSt.append({3, 0x0F, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StTypes, sizeof(_TABLE_XELF_StTypes) / sizeof(XBinary::XIDSTRING), "st_type"});
+        pHeader->listDataSt.append({3, 0xF0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StBinds, sizeof(_TABLE_XELF_StBinds) / sizeof(XBinary::XIDSTRING), "st_bind"});
+        pHeader->listDataSt.append(
+            {4, 0x03, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StVisibilities, sizeof(_TABLE_XELF_StVisibilities) / sizeof(XBinary::XIDSTRING), "st_visibility"});
     } else if (nId == XELF::STRUCTID_ELF_SYM64) {
-        pHeader->listDataSt.append({1, 0x0F, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StTypes, sizeof(_TABLE_XELF_StTypes) / sizeof(XBinary::XIDSTRING),
-                                    "st_type"});
-        pHeader->listDataSt.append({1, 0xF0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StBinds, sizeof(_TABLE_XELF_StBinds) / sizeof(XBinary::XIDSTRING),
-                                    "st_bind"});
-        pHeader->listDataSt.append({2, 0x03, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StVisibilities,
-                                    sizeof(_TABLE_XELF_StVisibilities) / sizeof(XBinary::XIDSTRING), "st_visibility"});
-    } else if ((nId == XELF::STRUCTID_ELF_REL32) || (nId == XELF::STRUCTID_ELF_REL64) || (nId == XELF::STRUCTID_ELF_RELA32) ||
-               (nId == XELF::STRUCTID_ELF_RELA64)) {
+        pHeader->listDataSt.append({1, 0x0F, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StTypes, sizeof(_TABLE_XELF_StTypes) / sizeof(XBinary::XIDSTRING), "st_type"});
+        pHeader->listDataSt.append({1, 0xF0, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StBinds, sizeof(_TABLE_XELF_StBinds) / sizeof(XBinary::XIDSTRING), "st_bind"});
+        pHeader->listDataSt.append(
+            {2, 0x03, XBinary::XFDATASTYPE_LIST, _TABLE_XELF_StVisibilities, sizeof(_TABLE_XELF_StVisibilities) / sizeof(XBinary::XIDSTRING), "st_visibility"});
+    } else if ((nId == XELF::STRUCTID_ELF_REL32) || (nId == XELF::STRUCTID_ELF_REL64) || (nId == XELF::STRUCTID_ELF_RELA32) || (nId == XELF::STRUCTID_ELF_RELA64)) {
         qint32 nRelTypesCount = 0;
         XBinary::XIDSTRING *pRelTypes = _getELFRelTypesTable(sArch, &nRelTypesCount);
 
@@ -5307,8 +5296,8 @@ static QList<QString> _getELFSymbolSectionNames(XELF *pELF, const QList<QString>
     return listResult;
 }
 
-static QList<QString> _getELFRelocationSymbolNames(XELF *pELF, const QList<XELF_DEF::Elf_Shdr> &listShdrs, const QList<QString> &listSectionNames,
-                                                   qint64 nTableOffset, qint32 nRows, qint64 nSize, bool bIs64, bool bIsRela)
+static QList<QString> _getELFRelocationSymbolNames(XELF *pELF, const QList<XELF_DEF::Elf_Shdr> &listShdrs, const QList<QString> &listSectionNames, qint64 nTableOffset,
+                                                   qint32 nRows, qint64 nSize, bool bIs64, bool bIsRela)
 {
     QList<QString> listResult;
     qint32 nRelSection = _findELFSectionByOffsetAndType(listShdrs, nTableOffset, bIsRela ? XELF_DEF::S_SHT_RELA : XELF_DEF::S_SHT_REL, XELF_DEF::S_SHT_NULL);
@@ -5598,9 +5587,8 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
                 }
             }
         }
-    } else if ((nStructID == STRUCTID_ELF_DYN32) || (nStructID == STRUCTID_ELF_DYN64) || (nStructID == STRUCTID_ELF_SYM32) ||
-               (nStructID == STRUCTID_ELF_SYM64) || (nStructID == STRUCTID_ELF_REL32) || (nStructID == STRUCTID_ELF_REL64) ||
-               (nStructID == STRUCTID_ELF_RELA32) || (nStructID == STRUCTID_ELF_RELA64)) {
+    } else if ((nStructID == STRUCTID_ELF_DYN32) || (nStructID == STRUCTID_ELF_DYN64) || (nStructID == STRUCTID_ELF_SYM32) || (nStructID == STRUCTID_ELF_SYM64) ||
+               (nStructID == STRUCTID_ELF_REL32) || (nStructID == STRUCTID_ELF_REL64) || (nStructID == STRUCTID_ELF_RELA32) || (nStructID == STRUCTID_ELF_RELA64)) {
         qint64 nOffset = locToOffset(xfStruct.pMemoryMap, xfStruct.xLoc);
         qint32 nRows = xfStruct.nCount;
         qint64 nRowSize = xfStruct.nSize;
@@ -5617,8 +5605,8 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
                 xfTable.listRowLocations.append(nOffset + i * nRowSize);
             }
 
-            if ((nStructID == STRUCTID_ELF_SYM32) || (nStructID == STRUCTID_ELF_SYM64) || (nStructID == STRUCTID_ELF_REL32) ||
-                (nStructID == STRUCTID_ELF_REL64) || (nStructID == STRUCTID_ELF_RELA32) || (nStructID == STRUCTID_ELF_RELA64)) {
+            if ((nStructID == STRUCTID_ELF_SYM32) || (nStructID == STRUCTID_ELF_SYM64) || (nStructID == STRUCTID_ELF_REL32) || (nStructID == STRUCTID_ELF_REL64) ||
+                (nStructID == STRUCTID_ELF_RELA32) || (nStructID == STRUCTID_ELF_RELA64)) {
                 QList<XELF_DEF::Elf_Shdr> listShdrs = getElf_ShdrList(-1);
                 QList<QString> listSectionNames = _getELFSectionNames(this);
 
@@ -5648,8 +5636,8 @@ QList<XBinary::XFHEADER> XELF::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *
             QList<NOTE> listNotes = getNotes();
 
             if (!listNotes.isEmpty()) {
-                _appendNotesTable(listResult, xfStruct, listNotes.first().nOffset,
-                                  (listNotes.last().nOffset + listNotes.last().nSize) - listNotes.first().nOffset, xfStruct.sParent);
+                _appendNotesTable(listResult, xfStruct, listNotes.first().nOffset, (listNotes.last().nOffset + listNotes.last().nSize) - listNotes.first().nOffset,
+                                  xfStruct.sParent);
             }
         } else {
             _appendNotesTable(listResult, xfStruct, nOffset, nSize, xfStruct.sParent);

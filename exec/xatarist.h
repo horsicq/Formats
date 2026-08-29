@@ -75,9 +75,9 @@ public:
     virtual QList<XFRECORD> getXFRecords(FT fileType, quint32 nStructID, const XLOC &xLoc) override;
     virtual QString typeIdToString(qint32 nType) override;
     virtual QString getFileFormatExtsString() override;
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XATARIST_H

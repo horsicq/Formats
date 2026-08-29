@@ -32,11 +32,10 @@ const quint16 kVersion100 = 0x0100;
 const quint16 kEntryPointCount = 15;
 const quint16 kInterfaceCount = 7;
 
-const quint8 g_footer[kFooterSize] = {0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53,
-                                      0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53};
+const quint8 g_footer[kFooterSize] = {0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53, 0x4E, 0x53};
 
-void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize,
-                    const QString &sName, qint32 nLimit)
+void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize, const QString &sName,
+                    qint32 nLimit)
 {
     if (!(nRequestedFileParts & filePart) || (nSize <= 0) || ((nLimit != -1) && (pList->count() >= nLimit))) {
         return;

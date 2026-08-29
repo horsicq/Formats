@@ -25,8 +25,8 @@ namespace {
 const qint64 kSM8HeaderSize = 10;
 const double kPITClock = 1193182.0;
 
-void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize,
-                    const QString &sName, qint32 nLimit)
+void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize, const QString &sName,
+                    qint32 nLimit)
 {
     if (!(nRequestedFileParts & filePart) || (nSize <= 0) || ((nLimit != -1) && (pList->count() >= nLimit))) {
         return;

@@ -52,12 +52,10 @@ bool XICC::isValid(PDSTRUCT *pPdStruct)
     const quint32 nProfileSize = read_uint32(0, true);
     const quint32 nDeviceClass = read_uint32(12, true);
     const quint32 nMagic = read_uint32(36, true);
-    const bool bKnownDeviceClass = (nDeviceClass == 0x73636E72) || (nDeviceClass == 0x6D6E7472) || (nDeviceClass == 0x70727472) ||
-                                   (nDeviceClass == 0x6C696E6B) || (nDeviceClass == 0x73706163) || (nDeviceClass == 0x61627374) ||
-                                   (nDeviceClass == 0x6E6D636C);
+    const bool bKnownDeviceClass = (nDeviceClass == 0x73636E72) || (nDeviceClass == 0x6D6E7472) || (nDeviceClass == 0x70727472) || (nDeviceClass == 0x6C696E6B) ||
+                                   (nDeviceClass == 0x73706163) || (nDeviceClass == 0x61627374) || (nDeviceClass == 0x6E6D636C);
 
-    if ((nProfileSize < 132) || ((nProfileSize & 3) != 0) || (nProfileSize > (quint64)nTotalSize) ||
-        (nMagic != 0x61637370) || !bKnownDeviceClass) {
+    if ((nProfileSize < 132) || ((nProfileSize & 3) != 0) || (nProfileSize > (quint64)nTotalSize) || (nMagic != 0x61637370) || !bKnownDeviceClass) {
         return false;
     }
 
@@ -145,13 +143,10 @@ bool XICC::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 
@@ -255,8 +250,7 @@ QList<XICC::TAG> XICC::getTags(PDSTRUCT *pPdStruct)
         const quint32 nProfileSize = read_uint32(0, true);
         const quint32 nTagCount = read_uint32(128, true);
 
-        if ((nProfileSize < 132) || (nProfileSize > (quint64)getSize()) || (nTagCount > ICC_MAX_TAG_COUNT) ||
-            (nTagCount > ((qint64)nProfileSize - 132) / 12)) {
+        if ((nProfileSize < 132) || (nProfileSize > (quint64)getSize()) || (nTagCount > ICC_MAX_TAG_COUNT) || (nTagCount > ((qint64)nProfileSize - 132) / 12)) {
             return listResult;
         }
 
@@ -674,8 +668,7 @@ XICC::TAG XICC::_readTag(qint64 nOffset)
 
     result.sTagName = getTagName(result.nSignature);
     const qint64 nProfileSize = qMin<qint64>(read_uint32(0, true), getSize());
-    result.bValid = (result.nSignature != 0) && (result.nOffset > 0) && ((result.nOffset & 3) == 0) && (result.nSize > 0) &&
-                    (result.nOffset <= (quint64)nProfileSize) &&
+    result.bValid = (result.nSignature != 0) && (result.nOffset > 0) && ((result.nOffset & 3) == 0) && (result.nSize > 0) && (result.nOffset <= (quint64)nProfileSize) &&
                     (result.nSize <= (quint64)nProfileSize - result.nOffset);
 
     return result;
@@ -695,8 +688,7 @@ bool XICC::_isProfileTag(const TAG &tag, quint32 nExpectedSignature, PDSTRUCT *p
 
     for (quint32 i = 0; (i < nTagCount) && XBinary::isPdStructNotCanceled(pPdStruct); i++) {
         const TAG actualTag = _readTag(132 + (qint64)i * 12);
-        if (actualTag.bValid && (actualTag.nSignature == tag.nSignature) &&
-            (actualTag.nOffset == tag.nOffset) && (actualTag.nSize == tag.nSize)) {
+        if (actualTag.bValid && (actualTag.nSignature == tag.nSignature) && (actualTag.nOffset == tag.nOffset) && (actualTag.nSize == tag.nSize)) {
             return true;
         }
     }
@@ -761,8 +753,7 @@ QString XICC::_readMultiLocalizedUnicodeType(qint64 nOffset, qint64 nSize)
             quint32 nLength = read_uint32(nOffset + 16, true);
             quint32 nRecordOffset = read_uint32(nOffset + 20, true);
 
-            if ((nLength > 0) && ((nLength & 1) == 0) && (nRecordOffset >= 16) && (nRecordOffset <= (quint64)nSize) &&
-                (nLength <= (quint64)nSize - nRecordOffset)) {
+            if ((nLength > 0) && ((nLength & 1) == 0) && (nRecordOffset >= 16) && (nRecordOffset <= (quint64)nSize) && (nLength <= (quint64)nSize - nRecordOffset)) {
                 sResult = read_unicodeString(nOffset + nRecordOffset, qMin(nLength / 2, quint32(500)), true);
             }
         }

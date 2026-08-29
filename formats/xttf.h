@@ -108,9 +108,9 @@ public:
 
     static QMap<quint64, QString> getHeaderVersions();
     static QMap<quint64, QString> getHeaderVersionsS();
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XTTF_H

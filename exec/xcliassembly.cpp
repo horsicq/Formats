@@ -768,20 +768,15 @@ XCLIAssembly::CLI_INFO XCLIAssembly::getCliInfo(bool bFindHidden, PDSTRUCT *pPdS
                         // HasCustomDebugInformation: 27 tables (5 tag bits)
                         {
                             static const quint32 arrHasCustomDebugInformation[] = {
-                                XCLIASSEMBLY_DEF::metadata_MethodDef,       XCLIASSEMBLY_DEF::metadata_Field,
-                                XCLIASSEMBLY_DEF::metadata_TypeRef,         XCLIASSEMBLY_DEF::metadata_TypeDef,
-                                XCLIASSEMBLY_DEF::metadata_Param,           XCLIASSEMBLY_DEF::metadata_InterfaceImpl,
-                                XCLIASSEMBLY_DEF::metadata_MemberRef,       XCLIASSEMBLY_DEF::metadata_Module,
-                                XCLIASSEMBLY_DEF::metadata_DeclSecurity,    XCLIASSEMBLY_DEF::metadata_Property,
-                                XCLIASSEMBLY_DEF::metadata_Event,           XCLIASSEMBLY_DEF::metadata_StandAloneSig,
-                                XCLIASSEMBLY_DEF::metadata_ModuleRef,       XCLIASSEMBLY_DEF::metadata_TypeSpec,
-                                XCLIASSEMBLY_DEF::metadata_Assembly,        XCLIASSEMBLY_DEF::metadata_AssemblyRef,
-                                XCLIASSEMBLY_DEF::metadata_File,            XCLIASSEMBLY_DEF::metadata_ExportedType,
-                                XCLIASSEMBLY_DEF::metadata_ManifestResource, XCLIASSEMBLY_DEF::metadata_GenericParam,
-                                XCLIASSEMBLY_DEF::metadata_GenericParamConstraint, XCLIASSEMBLY_DEF::metadata_MethodSpec,
-                                XCLIASSEMBLY_DEF::metadata_Document,        XCLIASSEMBLY_DEF::metadata_LocalScope,
-                                XCLIASSEMBLY_DEF::metadata_LocalVariable,   XCLIASSEMBLY_DEF::metadata_LocalConstant,
-                                XCLIASSEMBLY_DEF::metadata_ImportScope,
+                                XCLIASSEMBLY_DEF::metadata_MethodDef,        XCLIASSEMBLY_DEF::metadata_Field,         XCLIASSEMBLY_DEF::metadata_TypeRef,
+                                XCLIASSEMBLY_DEF::metadata_TypeDef,          XCLIASSEMBLY_DEF::metadata_Param,         XCLIASSEMBLY_DEF::metadata_InterfaceImpl,
+                                XCLIASSEMBLY_DEF::metadata_MemberRef,        XCLIASSEMBLY_DEF::metadata_Module,        XCLIASSEMBLY_DEF::metadata_DeclSecurity,
+                                XCLIASSEMBLY_DEF::metadata_Property,         XCLIASSEMBLY_DEF::metadata_Event,         XCLIASSEMBLY_DEF::metadata_StandAloneSig,
+                                XCLIASSEMBLY_DEF::metadata_ModuleRef,        XCLIASSEMBLY_DEF::metadata_TypeSpec,      XCLIASSEMBLY_DEF::metadata_Assembly,
+                                XCLIASSEMBLY_DEF::metadata_AssemblyRef,      XCLIASSEMBLY_DEF::metadata_File,          XCLIASSEMBLY_DEF::metadata_ExportedType,
+                                XCLIASSEMBLY_DEF::metadata_ManifestResource, XCLIASSEMBLY_DEF::metadata_GenericParam,  XCLIASSEMBLY_DEF::metadata_GenericParamConstraint,
+                                XCLIASSEMBLY_DEF::metadata_MethodSpec,       XCLIASSEMBLY_DEF::metadata_Document,      XCLIASSEMBLY_DEF::metadata_LocalScope,
+                                XCLIASSEMBLY_DEF::metadata_LocalVariable,    XCLIASSEMBLY_DEF::metadata_LocalConstant, XCLIASSEMBLY_DEF::metadata_ImportScope,
                             };
 
                             const qint32 nNumberOfHcdi = sizeof(arrHasCustomDebugInformation) / sizeof(arrHasCustomDebugInformation[0]);
@@ -1351,8 +1346,7 @@ QList<QString> XCLIAssembly::getUnicodeStrings(CLI_INFO *pCliInfo, PDSTRUCT *pPd
             break;
         }
 
-        QString sTemp = QString::fromUtf16(
-            reinterpret_cast<const char16_t *>(pStringCurrentOffsetOffset), nStringSize / 2);
+        QString sTemp = QString::fromUtf16(reinterpret_cast<const char16_t *>(pStringCurrentOffsetOffset), nStringSize / 2);
 
         listResult.append(sTemp);
 
@@ -1582,8 +1576,8 @@ QVector<XBinary::XMETADATA_STRUCT> XCLIAssembly::getMetadataStructs()
         const XCLIASSEMBLY_DEF::S_METADATA_MODULE module = getMetadataModule(&cliInfo, 0);
         if (module.nMvid > 0) {
             const qint64 nGuidOffset = cliInfo.metaData.osGUID.nOffset + ((qint64)module.nMvid - 1) * 16;
-            if ((nGuidOffset >= cliInfo.metaData.osGUID.nOffset) &&
-                (nGuidOffset + 16 <= cliInfo.metaData.osGUID.nOffset + cliInfo.metaData.osGUID.nSize) && checkOffsetSize(nGuidOffset, 16)) {
+            if ((nGuidOffset >= cliInfo.metaData.osGUID.nOffset) && (nGuidOffset + 16 <= cliInfo.metaData.osGUID.nOffset + cliInfo.metaData.osGUID.nSize) &&
+                checkOffsetSize(nGuidOffset, 16)) {
                 appendMetadata(XMETADATA_ID_UUID, nGuidOffset, 16, QString("Module version ID"), read_UUID(nGuidOffset));
             }
         }
@@ -1849,10 +1843,10 @@ XCLIASSEMBLY_DEF::S_METADATA_TYPEDEF XCLIAssembly::getMetadataTypeDef(CLI_INFO *
                 pCliInfo->metaData.nTypeDefOrRefSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nTypeDefOrRefSize;
             result.nFieldList = pCliInfo->metaData.indexSize[XCLIASSEMBLY_DEF::metadata_Field] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                           : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+                                                                                                    : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.indexSize[XCLIASSEMBLY_DEF::metadata_Field];
             result.nMethodList = pCliInfo->metaData.indexSize[XCLIASSEMBLY_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                                : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+                                                                                                         : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -1931,7 +1925,7 @@ XCLIASSEMBLY_DEF::S_METADATA_METHODDEF XCLIAssembly::getMetadataMethodDef(CLI_IN
                 pCliInfo->metaData.nBLOBIndexSize == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset) : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
             nOffset += pCliInfo->metaData.nBLOBIndexSize;
             result.nParamList = pCliInfo->metaData.indexSize[XCLIASSEMBLY_DEF::metadata_Param] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                           : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+                                                                                                    : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -1951,7 +1945,7 @@ XCLIASSEMBLY_DEF::S_METADATA_METHODPTR XCLIAssembly::getMetadataMethodPtr(CLI_IN
             qint64 nOffset = pCliInfo->metaData.Tables_TablesOffsets[XCLIASSEMBLY_DEF::metadata_MethodPtr] +
                              pCliInfo->metaData.Tables_TableElementSizes[XCLIASSEMBLY_DEF::metadata_MethodPtr] * nNumber - pCliInfo->metaData.osMetadata.nOffset;
             result.nMethod = pCliInfo->metaData.indexSize[XCLIASSEMBLY_DEF::metadata_MethodDef] == 4 ? _read_uint32_safe(pBuffer, nBufferSize, nOffset)
-                                                                                            : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
+                                                                                                     : _read_uint16_safe(pBuffer, nBufferSize, nOffset);
         }
     }
 
@@ -2361,7 +2355,6 @@ XCLIAssembly::CLI_METADATA_HEADER XCLIAssembly::_read_MetadataHeader(qint64 nOff
     return result;
 }
 
-
 qint64 XCLIAssembly::findSignatureInBlob_NET(const QString &sSignature, PDSTRUCT *pPdStruct)
 {
     _MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
@@ -2384,13 +2377,10 @@ bool XCLIAssembly::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

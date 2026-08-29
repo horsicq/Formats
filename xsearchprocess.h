@@ -31,8 +31,8 @@ public:
     explicit XSearchProcess(QObject *pParent = nullptr);
     ~XSearchProcess() override;
 
-    void setData(const XBinary::INDATA &inData, XBinary::XLOC location, qint64 nSize, const XBinary::XFSS_OPTIONS &ssOptions,
-                 XBinary::_MEMORY_MAP *pMemoryMap, QVector<XBinary::MS_RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
+    void setData(const XBinary::INDATA &inData, XBinary::XLOC location, qint64 nSize, const XBinary::XFSS_OPTIONS &ssOptions, XBinary::_MEMORY_MAP *pMemoryMap,
+                 QVector<XBinary::MS_RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     void process() override;
     QString getTitle() override;
 

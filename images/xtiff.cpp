@@ -25,7 +25,7 @@
 namespace {
 const qint32 XTIFF_MAX_IFD_TABLES = 4096;
 const quint64 XTIFF_MAX_IFD_ENTRIES = 256 * 1024;
-}
+}  // namespace
 
 static XBinary::XCONVERT _TABLE_XTIFF_STRUCTID[] = {
     {XTiff::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -279,8 +279,7 @@ QVector<XBinary::XMETADATA_STRUCT> XTiff::getMetadataStructs()
         }
     }
 
-    auto appendUnsignedTag = [this, &listResult, &listChunks, bIsBigEndian](quint16 nTag, XMETADATA_ID id, const QString &sName,
-                                                                           bool bForceUInt16) {
+    auto appendUnsignedTag = [this, &listResult, &listChunks, bIsBigEndian](quint16 nTag, XMETADATA_ID id, const QString &sName, bool bForceUInt16) {
         const QList<CHUNK> listValues = _getChunksByTag(&listChunks, nTag);
         for (qint32 i = 0; i < listValues.count(); ++i) {
             const CHUNK &chunk = listValues.at(i);
@@ -288,8 +287,7 @@ QVector<XBinary::XMETADATA_STRUCT> XTiff::getMetadataStructs()
                 continue;
             }
 
-            const quint32 nValue = (!bForceUInt16 && (chunk.nSize == 4)) ? read_uint32(chunk.nOffset, bIsBigEndian)
-                                                                         : read_uint16(chunk.nOffset, bIsBigEndian);
+            const quint32 nValue = (!bForceUInt16 && (chunk.nSize == 4)) ? read_uint32(chunk.nOffset, bIsBigEndian) : read_uint16(chunk.nOffset, bIsBigEndian);
             XMETADATA_STRUCT record = {};
             record.nOffset = chunk.nOffset;
             record.nSize = bForceUInt16 || (chunk.nSize != 4) ? 2 : 4;
@@ -467,7 +465,6 @@ QList<XBinary::XFHEADER> XTiff::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
 
         IFD_INFO info = {};
         if (getIFDInfo(nIfdOffset, bIsBigEndian, getSize(), &info, pPdStruct)) {
-
             XFHEADER xfHeader = {};
             xfHeader.sParentTag = xfStruct.sParent;
             xfHeader.fileType = xfStruct.fileType;
@@ -701,8 +698,7 @@ bool XTiff::getIFDChain(QList<IFD_INFO> *pListInfo, PDSTRUCT *pPdStruct)
 
         bool bOverlapsTable = false;
         for (const IFD_INFO &previousInfo : *pListInfo) {
-            if ((info.nOffset < previousInfo.nOffset + previousInfo.nSize) &&
-                (previousInfo.nOffset < info.nOffset + info.nSize)) {
+            if ((info.nOffset < previousInfo.nOffset + previousInfo.nSize) && (previousInfo.nOffset < info.nOffset + info.nSize)) {
                 bOverlapsTable = true;
                 break;
             }
@@ -720,15 +716,13 @@ bool XTiff::getIFDChain(QList<IFD_INFO> *pListInfo, PDSTRUCT *pPdStruct)
     return isPdStructNotCanceled(pPdStruct);
 }
 
-bool XTiff::getIFDChunk(qint64 nEntryOffset, bool bIsBigEndian, qint64 nTotalSize, CHUNK *pChunk, quint16 *pType,
-                        PDSTRUCT *pPdStruct)
+bool XTiff::getIFDChunk(qint64 nEntryOffset, bool bIsBigEndian, qint64 nTotalSize, CHUNK *pChunk, quint16 *pType, PDSTRUCT *pPdStruct)
 {
     if (!pChunk) return false;
     *pChunk = CHUNK();
     if (pType) *pType = 0;
 
-    if (!isPdStructNotCanceled(pPdStruct) || (nEntryOffset < 0) || (nTotalSize < (qint64)sizeof(IFD_ENTRY)) ||
-        (nEntryOffset > nTotalSize - (qint64)sizeof(IFD_ENTRY))) {
+    if (!isPdStructNotCanceled(pPdStruct) || (nEntryOffset < 0) || (nTotalSize < (qint64)sizeof(IFD_ENTRY)) || (nEntryOffset > nTotalSize - (qint64)sizeof(IFD_ENTRY))) {
         return false;
     }
 
@@ -766,8 +760,7 @@ bool XTiff::readUInt16Exact(qint64 nOffset, bool bIsBigEndian, quint16 *pValue, 
     *pValue = 0;
 
     quint8 data[2] = {};
-    if ((read_array_process(nOffset, (char *)data, (qint64)sizeof(data), pPdStruct) != (qint64)sizeof(data)) ||
-        !isPdStructNotCanceled(pPdStruct)) {
+    if ((read_array_process(nOffset, (char *)data, (qint64)sizeof(data), pPdStruct) != (qint64)sizeof(data)) || !isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
 
@@ -785,8 +778,7 @@ bool XTiff::readUInt32Exact(qint64 nOffset, bool bIsBigEndian, quint32 *pValue, 
     *pValue = 0;
 
     quint8 data[4] = {};
-    if ((read_array_process(nOffset, (char *)data, (qint64)sizeof(data), pPdStruct) != (qint64)sizeof(data)) ||
-        !isPdStructNotCanceled(pPdStruct)) {
+    if ((read_array_process(nOffset, (char *)data, (qint64)sizeof(data), pPdStruct) != (qint64)sizeof(data)) || !isPdStructNotCanceled(pPdStruct)) {
         return false;
     }
 
@@ -861,13 +853,10 @@ bool XTiff::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

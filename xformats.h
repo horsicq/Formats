@@ -240,8 +240,7 @@ public:
     static QList<XBinary::SYMBOL_RECORD> getSymbolRecords(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage = false, XADDR nModuleAddress = -1,
                                                           XBinary::SYMBOL_TYPE symBolType = XBinary::SYMBOL_TYPE_ALL);  // TODO pdStruct
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct = nullptr);
-    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, quint32 nFTFlags,
-                                          XBinary::PDSTRUCT *pPdStruct = nullptr);
+    static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, qint64 nOffset, qint64 nSize, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(const QString &sFileName, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static QSet<XBinary::FT> getFileTypes(QByteArray *pbaData, quint32 nFTFlags);
     static XBinary::FT getPrefFileType(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct = nullptr);
@@ -307,8 +306,7 @@ public:
 #endif
 #ifdef QT_GUI_LIB
     static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, QIODevice *pDevice, QComboBox *pComboBox, quint32 nFileTypeFlags = XBinary::FT_FLAG_FORMATS);
-    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox,
-                                           quint32 nFileTypeFlags = XBinary::FT_FLAG_FORMATS);
+    static XBinary::FT setFileTypeComboBox(XBinary::FT fileType, const QString &sFileName, QComboBox *pComboBox, quint32 nFileTypeFlags = XBinary::FT_FLAG_FORMATS);
     static QVariant setComboBoxCurrent(QComboBox *pComboBox, QVariant varValue);
     static XBinary::ENDIAN setEndiannessComboBox(QComboBox *pComboBox, XBinary::ENDIAN endian);
     static XBinary::CODEPAGE setCodepageComboBox(QComboBox *pComboBox, XBinary::CODEPAGE codepage);

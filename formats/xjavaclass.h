@@ -147,9 +147,9 @@ public:
 private:
     qint32 _read_attribute_info(qint64 nOffset, attribute_info *pAttributeInfo);
     qint32 _read_record_info(qint64 nOffset, record_info *pRecordInfo);
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XJAVACLASS_H

@@ -1392,8 +1392,7 @@ QByteArray uuDecode(const QByteArray &baIn, bool *pOk, XBinary::PDSTRUCT *pPdStr
             nPos += 4;
 
             const qint32 nRemaining = nLine - nProduced;
-            if (((nRemaining == 1) && (((c1 & 0x0F) != 0) || (c2 != 0) || (c3 != 0))) ||
-                ((nRemaining == 2) && (((c2 & 0x03) != 0) || (c3 != 0)))) {
+            if (((nRemaining == 1) && (((c1 & 0x0F) != 0) || (c2 != 0) || (c3 != 0))) || ((nRemaining == 2) && (((c2 & 0x03) != 0) || (c3 != 0)))) {
                 return QByteArray();
             }
 

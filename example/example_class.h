@@ -90,9 +90,9 @@ public:
     ORIGINALHEADERNAME _read_ORIGINALHEADERNAME(qint64 nOffset);
     DATA_STRUCT1 _read_DATA_STRUCT1(qint64 nOffset);
     DATA_STRUCT2 _read_DATA_STRUCT2(qint64 nOffset);
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // EXAMPLE_CLASS_H

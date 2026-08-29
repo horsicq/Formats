@@ -27,8 +27,8 @@ const qint64 kMDHRecordTableOffset = kMDHControlSize;
 const qint64 kMDHRecordTableSize = XMDH::RECORD_COUNT * (qint64)sizeof(XMDH::RECORD);
 const quint16 kMDHRecordCodes[XMDH::RECORD_COUNT] = {0x00F0, 0x01D2, 0x02B4, 0x0396, 0x0478, 0x0564, 0x0614, 0x070A};
 
-void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize,
-                    const QString &sName, qint32 nLimit)
+void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize, const QString &sName,
+                    qint32 nLimit)
 {
     if (!(nRequestedFileParts & filePart) || (nSize <= 0) || ((nLimit != -1) && (pList->count() >= nLimit))) {
         return;
@@ -69,8 +69,8 @@ bool XMDH::isValid(PDSTRUCT *pPdStruct)
     }
 
     const HEADER header = _read_HEADER();
-    if ((header.nReserved != 0) || (header.nTrackOffset != sizeof(HEADER)) || (header.nActiveRecordCount < 1) ||
-        (header.nActiveRecordCount > RECORD_COUNT) || (header.nReserved2 != 0)) {
+    if ((header.nReserved != 0) || (header.nTrackOffset != sizeof(HEADER)) || (header.nActiveRecordCount < 1) || (header.nActiveRecordCount > RECORD_COUNT) ||
+        (header.nReserved2 != 0)) {
         return false;
     }
 

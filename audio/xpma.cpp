@@ -28,8 +28,8 @@ const qint64 kPMAChannelTableOffset = kPMAControlSize;
 const qint64 kPMAChannelTableSize = XPMA::CHANNEL_COUNT * (qint64)sizeof(quint16);
 const qint64 kPMAInstrumentSize = 12;
 
-void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize,
-                    const QString &sName, qint32 nLimit)
+void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize, const QString &sName,
+                    qint32 nLimit)
 {
     if (!(nRequestedFileParts & filePart) || (nSize <= 0) || ((nLimit != -1) && (pList->count() >= nLimit))) {
         return;
@@ -70,9 +70,7 @@ bool XPMA::isValid(PDSTRUCT *pPdStruct)
     }
 
     bool bHasActiveChannel = false;
-    auto hasBytes = [nSize](qint64 nOffset, qint64 nByteCount) {
-        return (nOffset >= 0) && (nByteCount >= 0) && (nOffset <= nSize) && (nByteCount <= (nSize - nOffset));
-    };
+    auto hasBytes = [nSize](qint64 nOffset, qint64 nByteCount) { return (nOffset >= 0) && (nByteCount >= 0) && (nOffset <= nSize) && (nByteCount <= (nSize - nOffset)); };
 
     for (qint32 i = 0; i < CHANNEL_COUNT; ++i) {
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) {

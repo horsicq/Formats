@@ -53,8 +53,8 @@ bool getMSRecordOffset(const XBinary::_MEMORY_MAP &memoryMap, const XBinary::MS_
     const qint64 nRegionOffset = memoryRecord.nOffset;
     const qint64 nRegionSize = memoryRecord.nSize;
 
-    if (memoryRecord.bIsVirtual || (nRegionOffset < 0) || (nRegionSize < 0) || (nRelOffset > nRegionSize) ||
-        (nRecordSize > (nRegionSize - nRelOffset)) || (nRelOffset > (std::numeric_limits<qint64>::max)() - nRegionOffset)) {
+    if (memoryRecord.bIsVirtual || (nRegionOffset < 0) || (nRegionSize < 0) || (nRelOffset > nRegionSize) || (nRecordSize > (nRegionSize - nRelOffset)) ||
+        (nRelOffset > (std::numeric_limits<qint64>::max)() - nRegionOffset)) {
         return false;
     }
 
@@ -69,8 +69,7 @@ bool isValidMemoryMap(const XBinary::_MEMORY_MAP &memoryMap, qint64 nDeviceSize)
     }
 
     for (const XBinary::_MEMORY_RECORD &record : memoryMap.listRecords) {
-        if (!record.bIsVirtual && ((record.nOffset < 0) || (record.nSize < 0) || (record.nOffset > nDeviceSize) ||
-                                   (record.nSize > (nDeviceSize - record.nOffset)))) {
+        if (!record.bIsVirtual && ((record.nOffset < 0) || (record.nSize < 0) || (record.nOffset > nDeviceSize) || (record.nSize > (nDeviceSize - record.nOffset)))) {
             return false;
         }
     }
@@ -136,9 +135,7 @@ void XSearchProcess::process()
     XBinary::PDSTRUCT pdStructEmpty = XBinary::createPdStruct();
     XBinary::PDSTRUCT *pPdStruct = pRequestedPdStruct ? pRequestedPdStruct : &pdStructEmpty;
     const XBinary::PDSTRUCTLIFETIME progressLifetime = XBinary::retainPdStructLifetime(pPdStruct);
-    if (!XBinary::isPdStructLifetimeAlive(progressLifetime) ||
-        !XBinary::isPdStructNotCanceled(pPdStruct) ||
-        (nRequestedSize < -1)) {
+    if (!XBinary::isPdStructLifetimeAlive(progressLifetime) || !XBinary::isPdStructNotCanceled(pPdStruct) || (nRequestedSize < -1)) {
         clearPdStructCallback();
         return;
     }
@@ -170,13 +167,9 @@ void XSearchProcess::process()
         if (guardedThis) guardedThis->clearPdStructCallback();
     };
 
-    const auto progressOwnerAlive = [&]() -> bool {
-        return guardedThis && guardedDevice &&
-               XBinary::isPdStructLifetimeAlive(progressLifetime);
-    };
+    const auto progressOwnerAlive = [&]() -> bool { return guardedThis && guardedDevice && XBinary::isPdStructLifetimeAlive(progressLifetime); };
 
-    if (!progressOwnerAlive() || !guardedDevice->isOpen() ||
-        !guardedDevice->isReadable()) {
+    if (!progressOwnerAlive() || !guardedDevice->isOpen() || !guardedDevice->isReadable()) {
         cleanup();
         return;
     }
@@ -197,20 +190,16 @@ void XSearchProcess::process()
         return;
     }
 
-    guardedBinary = XFormats::createClass(inData.fileType, guardedDevice.data(),
-                                          inData.bIsImage,
-                                          inData.nModuleAddress);
+    guardedBinary = XFormats::createClass(inData.fileType, guardedDevice.data(), inData.bIsImage, inData.nModuleAddress);
     if (!progressOwnerAlive() || !guardedBinary) {
         cleanup();
         return;
     }
 
-    connect(guardedBinary.data(), SIGNAL(errorMessage(QString)),
-            guardedThis.data(), SIGNAL(errorMessage(QString)));
+    connect(guardedBinary.data(), SIGNAL(errorMessage(QString)), guardedThis.data(), SIGNAL(errorMessage(QString)));
 
     if (memoryMap.listRecords.isEmpty()) {
-        memoryMap = guardedBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN,
-                                                pPdStruct);
+        memoryMap = guardedBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
         if (!progressOwnerAlive() || !guardedBinary) {
             cleanup();
             return;
@@ -218,17 +207,12 @@ void XSearchProcess::process()
     }
 
     const qint64 nOffset = XBinary::locToOffset(&memoryMap, location);
-    const bool bRangeValid =
-        XBinary::isPdStructNotCanceled(pPdStruct) &&
-        isValidMemoryMap(memoryMap, nDeviceSize) &&
-        (nOffset >= 0) && (nOffset <= nDeviceSize) &&
-        ((nRequestedSize == -1) ||
-         (nRequestedSize <= (nDeviceSize - nOffset)));
+    const bool bRangeValid = XBinary::isPdStructNotCanceled(pPdStruct) && isValidMemoryMap(memoryMap, nDeviceSize) && (nOffset >= 0) && (nOffset <= nDeviceSize) &&
+                             ((nRequestedSize == -1) || (nRequestedSize <= (nDeviceSize - nOffset)));
     QVector<XBinary::MS_RECORD> listRecords;
 
     if (bRangeValid) {
-        listRecords = guardedBinary->multiSearch_strings(
-            &memoryMap, nOffset, nRequestedSize, ssOptions, pPdStruct);
+        listRecords = guardedBinary->multiSearch_strings(&memoryMap, nOffset, nRequestedSize, ssOptions, pPdStruct);
         if (!progressOwnerAlive() || !guardedBinary) {
             cleanup();
             return;
@@ -237,8 +221,7 @@ void XSearchProcess::process()
 
     bool bRecordsValid = bRangeValid;
     for (qint32 i = 0; bRecordsValid && (i < listRecords.count()); i++) {
-        if (!progressOwnerAlive() || !guardedBinary ||
-            !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        if (!progressOwnerAlive() || !guardedBinary || !XBinary::isPdStructNotCanceled(pPdStruct)) {
             bRecordsValid = false;
             break;
         }
@@ -246,10 +229,8 @@ void XSearchProcess::process()
         XBinary::MS_RECORD *pRecord = &(listRecords[i]);
         if (pRecord->sValue.isEmpty()) {
             qint64 nRecordOffset = -1;
-            if (getMSRecordOffset(memoryMap, *pRecord, nDeviceSize,
-                                  &nRecordOffset)) {
-                const QString sValue = guardedBinary->read_msRecordString(
-                    *pRecord, nRecordOffset);
+            if (getMSRecordOffset(memoryMap, *pRecord, nDeviceSize, &nRecordOffset)) {
+                const QString sValue = guardedBinary->read_msRecordString(*pRecord, nRecordOffset);
                 if (!progressOwnerAlive() || !guardedBinary) {
                     bRecordsValid = false;
                     break;
@@ -261,8 +242,7 @@ void XSearchProcess::process()
         }
     }
 
-    if (bRecordsValid && progressOwnerAlive() && guardedBinary &&
-        XBinary::isPdStructNotCanceled(pPdStruct)) {
+    if (bRecordsValid && progressOwnerAlive() && guardedBinary && XBinary::isPdStructNotCanceled(pPdStruct)) {
         *pMemoryMap = memoryMap;
         *pListRecords = listRecords;
     }
@@ -306,8 +286,7 @@ void XSearchProcess::pdStructCallback(void *pUserData, XBinary::PDSTRUCT *pPdStr
     if (guardedSearchProcess) {
         // A direct receiver may delete the worker synchronously. Nothing in
         // this callback touches it after the signal returns.
-        emit guardedSearchProcess->progressChanged(nValue, nCurrent, nTotal,
-                                                   sStatus);
+        emit guardedSearchProcess->progressChanged(nValue, nCurrent, nTotal, sStatus);
     }
 }
 

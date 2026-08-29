@@ -123,9 +123,8 @@ qint64 XPNG::_getStructuredSize(PDSTRUCT *pPdStruct)
     const quint32 nHeight = read_uint32(chunk.nDataOffset + 4, true);
     const COLOR_TYPE colorType = (COLOR_TYPE)read_uint8(chunk.nDataOffset + 9);
 
-    if ((nWidth == 0) || (nHeight == 0) || !isValidPngColorDepth(colorType, read_uint8(chunk.nDataOffset + 8)) ||
-        (read_uint8(chunk.nDataOffset + 10) != 0) || (read_uint8(chunk.nDataOffset + 11) != 0) ||
-        (read_uint8(chunk.nDataOffset + 12) > 1)) {
+    if ((nWidth == 0) || (nHeight == 0) || !isValidPngColorDepth(colorType, read_uint8(chunk.nDataOffset + 8)) || (read_uint8(chunk.nDataOffset + 10) != 0) ||
+        (read_uint8(chunk.nDataOffset + 11) != 0) || (read_uint8(chunk.nDataOffset + 12) > 1)) {
         return 0;
     }
 
@@ -159,10 +158,9 @@ qint64 XPNG::_getStructuredSize(PDSTRUCT *pPdStruct)
             }
         } else if (currentChunk.sName == "PLTE") {
             const quint32 nPaletteEntries = currentChunk.nDataSize / 3;
-            if (bHasPalette || bHasImageData || (currentChunk.nDataSize == 0) || ((currentChunk.nDataSize % 3) != 0) ||
-                (nPaletteEntries > 256) || ((colorType == COLOR_TYPE_PALETTE) &&
-                                            (nPaletteEntries > (1U << read_uint8(chunk.nDataOffset + 8)))) ||
-                (colorType == COLOR_TYPE_GRAYSCALE) || (colorType == COLOR_TYPE_GRAYSCALE_ALPHA)) {
+            if (bHasPalette || bHasImageData || (currentChunk.nDataSize == 0) || ((currentChunk.nDataSize % 3) != 0) || (nPaletteEntries > 256) ||
+                ((colorType == COLOR_TYPE_PALETTE) && (nPaletteEntries > (1U << read_uint8(chunk.nDataOffset + 8)))) || (colorType == COLOR_TYPE_GRAYSCALE) ||
+                (colorType == COLOR_TYPE_GRAYSCALE_ALPHA)) {
                 return 0;
             }
             bHasPalette = true;
@@ -287,8 +285,7 @@ QVector<XBinary::XMETADATA_STRUCT> XPNG::getMetadataStructs()
 
     const CHUNK ihdr = _readChunk(nOffset);
     if (ihdr.bValid && (ihdr.sName == QString("IHDR")) && (ihdr.nDataSize == 13) && _isChunkCRCValid(ihdr, nullptr)) {
-        auto appendMetadata = [this, &listResult, &ihdr](qint64 nRelativeOffset, qint64 nSize, XMETADATA_ID id, const QString &sName,
-                                                         const QVariant &varValue) {
+        auto appendMetadata = [this, &listResult, &ihdr](qint64 nRelativeOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
             XMETADATA_STRUCT record = {};
             record.nOffset = ihdr.nDataOffset + nRelativeOffset;
             record.nSize = nSize;
@@ -432,8 +429,7 @@ bool XPNG::_isChunkCRCValid(const CHUNK &chunk, PDSTRUCT *pPdStruct)
 
     delete[] pBuffer;
 
-    return !bReadError && (nRemaining == 0) && XBinary::isPdStructNotCanceled(pPdStruct) &&
-           ((nCRC ^ 0xFFFFFFFF) == chunk.nCRC);
+    return !bReadError && (nRemaining == 0) && XBinary::isPdStructNotCanceled(pPdStruct) && ((nCRC ^ 0xFFFFFFFF) == chunk.nCRC);
 }
 
 bool XPNG::createPNG(QIODevice *pDevice, quint32 nWidth, quint32 nHeight, const QByteArray &baImageData, COLOR_TYPE colorType, quint8 nBitDepth)
@@ -512,8 +508,7 @@ bool XPNG::createPNGIndexed(QIODevice *pDevice, quint32 nWidth, quint32 nHeight,
     }
 
     const qint32 nPaletteEntries = baPalette.size() / 3;
-    if (baPalette.isEmpty() || ((baPalette.size() % 3) != 0) || (nPaletteEntries > 256) ||
-        (nPaletteEntries > (1 << nBitDepth))) {
+    if (baPalette.isEmpty() || ((baPalette.size() % 3) != 0) || (nPaletteEntries > 256) || (nPaletteEntries > (1 << nBitDepth))) {
         return false;
     }
 
@@ -689,8 +684,8 @@ QByteArray XPNG::_convertImageData(const char *pData, qint32 nDataSize, quint32 
         const qint64 nBytesPerRow = (nBitsPerRow + 7) / 8;
         const qint64 nFilteredRowSize = nBytesPerRow + 1;
 
-        if ((nBytesPerRow > (std::numeric_limits<qint32>::max)()) ||
-            (nFilteredRowSize > PNG_MAX_ENCODE_BUFFER_SIZE / nHeight) || (nBytesPerRow > nDataSize / (qint64)nHeight)) {
+        if ((nBytesPerRow > (std::numeric_limits<qint32>::max)()) || (nFilteredRowSize > PNG_MAX_ENCODE_BUFFER_SIZE / nHeight) ||
+            (nBytesPerRow > nDataSize / (qint64)nHeight)) {
             return baResult;
         }
 
@@ -1342,13 +1337,10 @@ bool XPNG::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

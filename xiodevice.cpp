@@ -88,8 +88,7 @@ bool XIODevice::reset()
 
 bool XIODevice::open(OpenMode mode)
 {
-    if (((mode & QIODevice::ReadWrite) == QIODevice::NotOpen) ||
-        (mode & (QIODevice::Append | QIODevice::Truncate))) {
+    if (((mode & QIODevice::ReadWrite) == QIODevice::NotOpen) || (mode & (QIODevice::Append | QIODevice::Truncate))) {
         return false;
     }
 

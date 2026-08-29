@@ -113,9 +113,9 @@ private:
     QString _readTextType(qint64 nOffset, qint64 nSize);
     QString _readMultiLocalizedUnicodeType(qint64 nOffset, qint64 nSize);
     QString _fourCCToString(quint32 nValue);
+
 private:
     INTERNAL_INFO m_internalInfo;
-
 };
 
 #endif  // XICC_H

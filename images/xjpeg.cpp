@@ -109,9 +109,8 @@ bool XJpeg::isValid(PDSTRUCT *pPdStruct)
 
         if (bIsValid && XBinary::isPdStructNotCanceled(pPdStruct)) {
             const QList<CHUNK> listChunks = getChunks(pPdStruct);
-            bIsValid = !listChunks.isEmpty() && !listChunks.first().bEntropyCodedData &&
-                       (listChunks.first().nId == JPEG_MARKER_SOI) && !listChunks.last().bEntropyCodedData &&
-                       (listChunks.last().nId == JPEG_MARKER_EOI);
+            bIsValid = !listChunks.isEmpty() && !listChunks.first().bEntropyCodedData && (listChunks.first().nId == JPEG_MARKER_SOI) &&
+                       !listChunks.last().bEntropyCodedData && (listChunks.last().nId == JPEG_MARKER_EOI);
         }
     }
 
@@ -325,13 +324,11 @@ QString XJpeg::getComment(QList<CHUNK> *pListChunks, PDSTRUCT *pPdStruct)
             break;
         }
 
-        if ((chunk.nDataSize < JPEG_SEGMENT_HEADER_SIZE) || (chunk.nDataOffset < 0) ||
-            (chunk.nDataOffset > getSize() - chunk.nDataSize)) {
+        if ((chunk.nDataSize < JPEG_SEGMENT_HEADER_SIZE) || (chunk.nDataOffset < 0) || (chunk.nDataOffset > getSize() - chunk.nDataSize)) {
             continue;
         }
 
-        sResult += read_ansiString(chunk.nDataOffset + JPEG_SEGMENT_HEADER_SIZE,
-                                   (qint32)qMin(nRemaining, chunk.nDataSize - JPEG_SEGMENT_HEADER_SIZE));
+        sResult += read_ansiString(chunk.nDataOffset + JPEG_SEGMENT_HEADER_SIZE, (qint32)qMin(nRemaining, chunk.nDataSize - JPEG_SEGMENT_HEADER_SIZE));
     }
 
     if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
@@ -367,8 +364,7 @@ QString XJpeg::getDqtMD5(QList<CHUNK> *pListChunks)
     for (qint32 i = 0; i < nNumberOfRecords; i++) {
         const CHUNK &chunk = listComments.at(i);
 
-        if ((chunk.nDataSize < JPEG_SEGMENT_HEADER_SIZE) || (chunk.nDataOffset < 0) ||
-            (chunk.nDataOffset > getSize() - chunk.nDataSize)) {
+        if ((chunk.nDataSize < JPEG_SEGMENT_HEADER_SIZE) || (chunk.nDataOffset < 0) || (chunk.nDataOffset > getSize() - chunk.nDataSize)) {
             continue;
         }
 
@@ -422,8 +418,7 @@ XBinary::OFFSETSIZE XJpeg::getJFIF(QList<CHUNK> *pListChunks)
     for (qint32 i = 0; i < listAPP0.count(); ++i) {
         const CHUNK &chunk = listAPP0.at(i);
 
-        if ((chunk.nDataSize >= JPEG_SEGMENT_HEADER_SIZE + 14) && (chunk.nDataOffset >= 0) &&
-            (chunk.nDataOffset <= getSize() - chunk.nDataSize) &&
+        if ((chunk.nDataSize >= JPEG_SEGMENT_HEADER_SIZE + 14) && (chunk.nDataOffset >= 0) && (chunk.nDataOffset <= getSize() - chunk.nDataSize) &&
             (read_array(chunk.nDataOffset + JPEG_SEGMENT_HEADER_SIZE, 5) == QByteArray("JFIF\0", 5))) {
             result.nOffset = chunk.nDataOffset + JPEG_SEGMENT_HEADER_SIZE;
             result.nSize = chunk.nDataSize - JPEG_SEGMENT_HEADER_SIZE;
@@ -452,8 +447,7 @@ XBinary::OFFSETSIZE XJpeg::getExif(QList<CHUNK> *pListChunks)
     if (listExif.count() > 0) {
         CHUNK chunkExif = listExif.at(0);
 
-        if ((chunkExif.nDataSize > JPEG_EXIF_DATA_OFFSET) && (chunkExif.nDataOffset >= 0) &&
-            (chunkExif.nDataOffset <= getSize() - chunkExif.nDataSize)) {
+        if ((chunkExif.nDataSize > JPEG_EXIF_DATA_OFFSET) && (chunkExif.nDataOffset >= 0) && (chunkExif.nDataOffset <= getSize() - chunkExif.nDataSize)) {
             if (read_array(chunkExif.nDataOffset + JPEG_SEGMENT_HEADER_SIZE, 6) == QByteArray("Exif\0\0", 6)) {
                 result.nOffset = chunkExif.nDataOffset + JPEG_EXIF_DATA_OFFSET;
                 result.nSize = chunkExif.nDataSize - JPEG_EXIF_DATA_OFFSET;
@@ -487,8 +481,7 @@ QVector<XBinary::XMETADATA_STRUCT> XJpeg::getMetadataStructs()
             continue;
         }
 
-        auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName,
-                                                  const QVariant &varValue) {
+        auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
             XMETADATA_STRUCT record = {};
             record.nOffset = nOffset;
             record.nSize = nSize;
@@ -842,13 +835,10 @@ bool XJpeg::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 

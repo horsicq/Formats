@@ -261,25 +261,25 @@ public:
         HANDLE_METHOD_ARJ,          // ARJ compression methods 1-3 (Huffman + LZSS)
         HANDLE_METHOD_ARJ_FASTEST,  // ARJ compression method 4 (simple LZSS)
         HANDLE_METHOD_BROTLI,       // Brotli compression (.br)
-        HANDLE_METHOD_ACE,           // ACE method 1: LZ77 + Huffman
-        HANDLE_METHOD_ACE_DELTA,     // Reserved legacy value; ACE TECH.TYPE 2 is unsupported BLOCKED_1
-        HANDLE_METHOD_DELTA,         // Delta filter (7z/XZ), property byte = distance - 1
-        HANDLE_METHOD_ARM_BCJ,       // ARM (LE) branch filter
-        HANDLE_METHOD_ARMT_BCJ,      // ARM Thumb (LE) branch filter
-        HANDLE_METHOD_PPC_BCJ,       // PowerPC (BE) branch filter
-        HANDLE_METHOD_SPARC_BCJ,     // SPARC branch filter
-        HANDLE_METHOD_IA64_BCJ,      // IA64 branch filter
-        HANDLE_METHOD_LZX,           // LZX (CAB/CHM/WIM)
-        HANDLE_METHOD_XPRESS,        // MS XPRESS plain LZ77 (MS-XCA)
-        HANDLE_METHOD_XPRESS_HUFF,   // MS XPRESS Huffman (MS-XCA)
-        HANDLE_METHOD_KWAJ_XOR,      // KWAJ method 1: XOR 0xFF
-        HANDLE_METHOD_KWAJ_LZSS,     // KWAJ method 2: SZDD LZSS
-        HANDLE_METHOD_KWAJ_LZH,      // KWAJ method 3: LZSS + Huffman
-        HANDLE_METHOD_ZOO_LZD,       // ZOO method 1: LZD (13-bit LZW)
-        HANDLE_METHOD_ZOO_LZH,       // ZOO method 2: LZH (lh5-compatible)
-        HANDLE_METHOD_ASCIIHEX,      // PDF /ASCIIHexDecode
-        HANDLE_METHOD_RUNLENGTH,     // PDF /RunLengthDecode (PackBits-style)
-        HANDLE_METHOD_LZ4,           // LZ4 frame/legacy stream
+        HANDLE_METHOD_ACE,          // ACE method 1: LZ77 + Huffman
+        HANDLE_METHOD_ACE_DELTA,    // Reserved legacy value; ACE TECH.TYPE 2 is unsupported BLOCKED_1
+        HANDLE_METHOD_DELTA,        // Delta filter (7z/XZ), property byte = distance - 1
+        HANDLE_METHOD_ARM_BCJ,      // ARM (LE) branch filter
+        HANDLE_METHOD_ARMT_BCJ,     // ARM Thumb (LE) branch filter
+        HANDLE_METHOD_PPC_BCJ,      // PowerPC (BE) branch filter
+        HANDLE_METHOD_SPARC_BCJ,    // SPARC branch filter
+        HANDLE_METHOD_IA64_BCJ,     // IA64 branch filter
+        HANDLE_METHOD_LZX,          // LZX (CAB/CHM/WIM)
+        HANDLE_METHOD_XPRESS,       // MS XPRESS plain LZ77 (MS-XCA)
+        HANDLE_METHOD_XPRESS_HUFF,  // MS XPRESS Huffman (MS-XCA)
+        HANDLE_METHOD_KWAJ_XOR,     // KWAJ method 1: XOR 0xFF
+        HANDLE_METHOD_KWAJ_LZSS,    // KWAJ method 2: SZDD LZSS
+        HANDLE_METHOD_KWAJ_LZH,     // KWAJ method 3: LZSS + Huffman
+        HANDLE_METHOD_ZOO_LZD,      // ZOO method 1: LZD (13-bit LZW)
+        HANDLE_METHOD_ZOO_LZH,      // ZOO method 2: LZH (lh5-compatible)
+        HANDLE_METHOD_ASCIIHEX,     // PDF /ASCIIHexDecode
+        HANDLE_METHOD_RUNLENGTH,    // PDF /RunLengthDecode (PackBits-style)
+        HANDLE_METHOD_LZ4,          // LZ4 frame/legacy stream
         // Logical record decoded by its owning archive object.  This is a
         // routing marker, not a raw compression codec.
         HANDLE_METHOD_ARCHIVE_STREAM,
@@ -289,12 +289,12 @@ public:
         HANDLE_METHOD_LZ5,
         HANDLE_METHOD_LIZARD,
         HANDLE_METHOD_LZH4,
-        HANDLE_METHOD_KWAJ_MSZIP,     // KWAJ method 4: length-prefixed MSZIP blocks
+        HANDLE_METHOD_KWAJ_MSZIP,  // KWAJ method 4: length-prefixed MSZIP blocks
         // SEA ARC. The run-length stage is part of the method, not a separate
         // layer: 3/4/6/7/8 apply it, 5/9 do not. Methods 6 and 7 differ only in
         // the encoder's hash function, so one decoder value covers both.
-        HANDLE_METHOD_ARC_PACK,        // ARC method 3: run-length only
-        HANDLE_METHOD_ARC_SQUEEZE,     // ARC method 4: Huffman + run-length
+        HANDLE_METHOD_ARC_PACK,     // ARC method 3: run-length only
+        HANDLE_METHOD_ARC_SQUEEZE,  // ARC method 4: Huffman + run-length
         // Reserved for ARC's original hash-table crunch, methods 5 (no
         // run-length) and 6/7 (with it). That is a different decompressor from
         // the dynamic LZW below, and no sample has been found to develop it
@@ -449,8 +449,8 @@ public:
     enum UNPACK_PROP {
         UNPACK_PROP_UNKNOWN = 0,
         UNPACK_PROP_PASSWORD,
-        UNPACK_PROP_FIXFILENAMES,  // Sanitize filenames for current OS; handle duplicates with _2, _3; treat symlinks as folders
-        UNPACK_PROP_NOCRC,         // Deprecated: use UNPACK_PROP_CHECKCRC
+        UNPACK_PROP_FIXFILENAMES,    // Sanitize filenames for current OS; handle duplicates with _2, _3; treat symlinks as folders
+        UNPACK_PROP_NOCRC,           // Deprecated: use UNPACK_PROP_CHECKCRC
         UNPACK_PROP_CHECKCRC,        // Compatibility master switch for every stored checksum
         UNPACK_PROP_OVERWRITEFILES,  // Replace files already present in the result directory
         UNPACK_PROP_CHECKCRC32,      // Check CRC-32 values
@@ -489,8 +489,7 @@ public:
         UNPACK_MEMORY_RESERVATION();
         ~UNPACK_MEMORY_RESERVATION();
 
-        bool acquire(const QMap<UNPACK_PROP, QVariant> &mapProperties,
-                     qint64 nSize);
+        bool acquire(const QMap<UNPACK_PROP, QVariant> &mapProperties, qint64 nSize);
         bool resize(qint64 nSize);
         void release();
         bool isActive() const;
@@ -568,13 +567,25 @@ public:
         };
 
         OUTPUT_BUDGET()
-            : m_nEntryLimit(-1), m_nTotalLimit(-1), m_nMaxEntries(-1), m_nMemoryLimit(-1),
-              m_nEntryWritten(0), m_nTotalWritten(0), m_nEntryCount(0),
-              m_refusal(REFUSAL_NONE), m_nRefusedIndex(-1), m_bEnforcing(false) {}
+            : m_nEntryLimit(-1),
+              m_nTotalLimit(-1),
+              m_nMaxEntries(-1),
+              m_nMemoryLimit(-1),
+              m_nEntryWritten(0),
+              m_nTotalWritten(0),
+              m_nEntryCount(0),
+              m_refusal(REFUSAL_NONE),
+              m_nRefusedIndex(-1),
+              m_bEnforcing(false)
+        {
+        }
 
-        void setLimits(qint64 nEntryLimit, qint64 nTotalLimit, qint64 nMaxEntries, qint64 nMemoryLimit) {
-            m_nEntryLimit = nEntryLimit; m_nTotalLimit = nTotalLimit;
-            m_nMaxEntries = nMaxEntries; m_nMemoryLimit = nMemoryLimit;
+        void setLimits(qint64 nEntryLimit, qint64 nTotalLimit, qint64 nMaxEntries, qint64 nMemoryLimit)
+        {
+            m_nEntryLimit = nEntryLimit;
+            m_nTotalLimit = nTotalLimit;
+            m_nMaxEntries = nMaxEntries;
+            m_nMemoryLimit = nMemoryLimit;
         }
 
         // Explicit aggregate/member-count limits are enforcement requests. In
@@ -582,74 +593,110 @@ public:
         // therefore disables that axis without accidentally enabling defaults
         // on the others. With neither key present, all generous defaults remain
         // shadow-metered until every custom output route is covered.
-        void configureForProperties(
-            const OUTPUT_POLICY &policy,
-            const QMap<UNPACK_PROP, QVariant> &mapProperties) {
-            m_bEnforcing =
-                mapProperties.contains(UNPACK_PROP_MAX_TOTAL_OUTPUT_SIZE) ||
-                mapProperties.contains(UNPACK_PROP_MAX_ENTRY_COUNT);
+        void configureForProperties(const OUTPUT_POLICY &policy, const QMap<UNPACK_PROP, QVariant> &mapProperties)
+        {
+            m_bEnforcing = mapProperties.contains(UNPACK_PROP_MAX_TOTAL_OUTPUT_SIZE) || mapProperties.contains(UNPACK_PROP_MAX_ENTRY_COUNT);
             if (m_bEnforcing) {
-                setLimits(
-                    mapProperties.contains(UNPACK_PROP_MAX_OUTPUT_SIZE)
-                        ? policy.nMaxEntryOutputSize : -1,
-                    mapProperties.contains(UNPACK_PROP_MAX_TOTAL_OUTPUT_SIZE)
-                        ? policy.nMaxTotalOutputSize : -1,
-                    mapProperties.contains(UNPACK_PROP_MAX_ENTRY_COUNT)
-                        ? policy.nMaxEntryCount : -1,
-                    mapProperties.contains(UNPACK_PROP_MAX_MEMORY_OUTPUT_SIZE)
-                        ? policy.nMaxMemoryOutputSize : -1);
+                setLimits(mapProperties.contains(UNPACK_PROP_MAX_OUTPUT_SIZE) ? policy.nMaxEntryOutputSize : -1,
+                          mapProperties.contains(UNPACK_PROP_MAX_TOTAL_OUTPUT_SIZE) ? policy.nMaxTotalOutputSize : -1,
+                          mapProperties.contains(UNPACK_PROP_MAX_ENTRY_COUNT) ? policy.nMaxEntryCount : -1,
+                          mapProperties.contains(UNPACK_PROP_MAX_MEMORY_OUTPUT_SIZE) ? policy.nMaxMemoryOutputSize : -1);
             } else {
-                setLimits(policy.nMaxEntryOutputSize,
-                          policy.nMaxTotalOutputSize,
-                          policy.nMaxEntryCount,
-                          policy.nMaxMemoryOutputSize);
+                setLimits(policy.nMaxEntryOutputSize, policy.nMaxTotalOutputSize, policy.nMaxEntryCount, policy.nMaxMemoryOutputSize);
             }
         }
-        bool isEnforcing() const { return m_bEnforcing; }
+        bool isEnforcing() const
+        {
+            return m_bEnforcing;
+        }
 
         // Exact-limit accepts, limit+1 refuses, size 0 accepts, never multiplies.
-        static bool withinLimit(qint64 nWritten, qint64 nLimit, qint64 nSize) {
+        static bool withinLimit(qint64 nWritten, qint64 nLimit, qint64 nSize)
+        {
             if (nLimit < 0) return true;
             return !((nWritten > nLimit) || (nSize > (nLimit - nWritten)));
         }
 
         // Charge produced bytes against the current entry and the operation total.
-        bool debit(qint64 nSize) {
-            if (nSize < 0) { m_refusal = REFUSAL_ENTRY; return false; }
-            if (!withinLimit(m_nEntryWritten.loadRelaxed(), m_nEntryLimit, nSize)) { m_refusal = REFUSAL_ENTRY; return false; }
-            if (!withinLimit(m_nTotalWritten.loadRelaxed(), m_nTotalLimit, nSize)) { m_refusal = REFUSAL_TOTAL; return false; }
+        bool debit(qint64 nSize)
+        {
+            if (nSize < 0) {
+                m_refusal = REFUSAL_ENTRY;
+                return false;
+            }
+            if (!withinLimit(m_nEntryWritten.loadRelaxed(), m_nEntryLimit, nSize)) {
+                m_refusal = REFUSAL_ENTRY;
+                return false;
+            }
+            if (!withinLimit(m_nTotalWritten.loadRelaxed(), m_nTotalLimit, nSize)) {
+                m_refusal = REFUSAL_TOTAL;
+                return false;
+            }
             m_nEntryWritten.fetchAndAddRelaxed(nSize);
             m_nTotalWritten.fetchAndAddRelaxed(nSize);
             return true;
         }
 
         // Reset the per-entry meter at each new member and enforce the member count.
-        bool beginEntry(qint32 nIndex, const QString &sName) {
+        bool beginEntry(qint32 nIndex, const QString &sName)
+        {
             m_nEntryWritten.storeRelaxed(0);
             const qint64 nCount = m_nEntryCount.fetchAndAddRelaxed(1) + 1;
             if ((m_nMaxEntries >= 0) && (nCount > m_nMaxEntries)) {
-                m_refusal = REFUSAL_ENTRIES; m_nRefusedIndex = nIndex; m_sRefusedName = sName;
+                m_refusal = REFUSAL_ENTRIES;
+                m_nRefusedIndex = nIndex;
+                m_sRefusedName = sName;
                 return false;
             }
             return true;
         }
 
-        REFUSAL refusal() const { return m_refusal; }
-        qint32 refusedIndex() const { return m_nRefusedIndex; }
-        QString refusedName() const { return m_sRefusedName; }
-        qint64 memoryLimit() const { return m_nMemoryLimit; }
+        REFUSAL refusal() const
+        {
+            return m_refusal;
+        }
+        qint32 refusedIndex() const
+        {
+            return m_nRefusedIndex;
+        }
+        QString refusedName() const
+        {
+            return m_sRefusedName;
+        }
+        qint64 memoryLimit() const
+        {
+            return m_nMemoryLimit;
+        }
         // Read-only meters for the shadow log; debit() above is unchanged.
-        qint64 entryWritten() const { return m_nEntryWritten.loadRelaxed(); }
-        qint64 totalWritten() const { return m_nTotalWritten.loadRelaxed(); }
-        qint64 entryLimit() const { return m_nEntryLimit; }
-        qint64 totalLimit() const { return m_nTotalLimit; }
+        qint64 entryWritten() const
+        {
+            return m_nEntryWritten.loadRelaxed();
+        }
+        qint64 totalWritten() const
+        {
+            return m_nTotalWritten.loadRelaxed();
+        }
+        qint64 entryLimit() const
+        {
+            return m_nEntryLimit;
+        }
+        qint64 totalLimit() const
+        {
+            return m_nTotalLimit;
+        }
 
         // Non-enforcing budgets still use the shadow hook at call sites. Enforced
         // failures return before this hook, so one breach is never reported as
         // both a refusal and a shadow observation.
         static void noteShadowRefusal(const OUTPUT_BUDGET *pBudget);
-        static qint64 shadowRefusalCount() { return s_nShadowRefusals.loadRelaxed(); }
-        static void resetShadowRefusals() { s_nShadowRefusals.storeRelaxed(0); }
+        static qint64 shadowRefusalCount()
+        {
+            return s_nShadowRefusals.loadRelaxed();
+        }
+        static void resetShadowRefusals()
+        {
+            s_nShadowRefusals.storeRelaxed(0);
+        }
 
     private:
         Q_DISABLE_COPY(OUTPUT_BUDGET)
@@ -701,7 +748,7 @@ public:
         qint32 nCurrentIndex;
         qint32 nNumberOfRecords;
         QMap<UNPACK_PROP, QVariant> mapUnpackProperties;
-        QSharedPointer<OUTPUT_BUDGET> spOutputBudget;  // XFU-015: operation output budget (null until wired)
+        QSharedPointer<OUTPUT_BUDGET> spOutputBudget;     // XFU-015: operation output budget (null until wired)
         QMap<FPART_PROP, QVariant> mapArchiveProperties;  // Archive-level properties (e.g., FPART_PROP_FILEMD5)
         void *pContext;                                   // Format-specific context
         // Opaque XArchive streaming-session identity.  It is deliberately
@@ -958,32 +1005,52 @@ public:
         // XStaticUnpacker file types. Keep this block contiguous and do not
         // insert into it: numeric IDs and the inclusive static-type range are
         // both persistent contracts.
-        FT_PE32_7ZSFX, FT_PE64_7ZSFX,
-        FT_PE32_ACTUALINSTALLER, FT_PE64_ACTUALINSTALLER,
-        FT_PE32_ADVANCEDINSTALLER, FT_PE64_ADVANCEDINSTALLER,
+        FT_PE32_7ZSFX,
+        FT_PE64_7ZSFX,
+        FT_PE32_ACTUALINSTALLER,
+        FT_PE64_ACTUALINSTALLER,
+        FT_PE32_ADVANCEDINSTALLER,
+        FT_PE64_ADVANCEDINSTALLER,
         FT_PE32_ASPACK,
-        FT_PE32_AUTOIT, FT_PE64_AUTOIT,
-        FT_PE32_BOXEDAPP, FT_PE64_BOXEDAPP,
-        FT_PE32_CLICKTEAM, FT_PE64_CLICKTEAM,
-        FT_PE32_CREATEINSTALL, FT_PE64_CREATEINSTALL,
-        FT_PE32_ENIGMAVB, FT_PE64_ENIGMAVB,
+        FT_PE32_AUTOIT,
+        FT_PE64_AUTOIT,
+        FT_PE32_BOXEDAPP,
+        FT_PE64_BOXEDAPP,
+        FT_PE32_CLICKTEAM,
+        FT_PE64_CLICKTEAM,
+        FT_PE32_CREATEINSTALL,
+        FT_PE64_CREATEINSTALL,
+        FT_PE32_ENIGMAVB,
+        FT_PE64_ENIGMAVB,
         FT_PE32_FSG,
-        FT_PE32_IEXPRESS, FT_PE64_IEXPRESS,
-        FT_PE32_INNOSETUP, FT_PE64_INNOSETUP,
-        FT_PE32_INSTALLFORGE, FT_PE64_INSTALLFORGE,
-        FT_PE32_INSTALLSIMPLE, FT_PE64_INSTALLSIMPLE,
+        FT_PE32_IEXPRESS,
+        FT_PE64_IEXPRESS,
+        FT_PE32_INNOSETUP,
+        FT_PE64_INNOSETUP,
+        FT_PE32_INSTALLFORGE,
+        FT_PE64_INSTALLFORGE,
+        FT_PE32_INSTALLSIMPLE,
+        FT_PE64_INSTALLSIMPLE,
         FT_PE32_MEW,
         FT_CFBF_MSI,
-        FT_PE32_NSIS, FT_PE64_NSIS,
-        FT_PE32_NSPACK, FT_PE32_PETITE,
-        FT_PE32_SFX, FT_PE64_SFX,
-        FT_PE32_SMARTINSTALL, FT_PE64_SMARTINSTALL,
-        FT_PE32_TARMA, FT_PE64_TARMA,
-        FT_PE32_UPX, FT_PE64_UPX,
-        FT_PE32_WINRARSFX, FT_PE64_WINRARSFX,
+        FT_PE32_NSIS,
+        FT_PE64_NSIS,
+        FT_PE32_NSPACK,
+        FT_PE32_PETITE,
+        FT_PE32_SFX,
+        FT_PE64_SFX,
+        FT_PE32_SMARTINSTALL,
+        FT_PE64_SMARTINSTALL,
+        FT_PE32_TARMA,
+        FT_PE64_TARMA,
+        FT_PE32_UPX,
+        FT_PE64_UPX,
+        FT_PE32_WINRARSFX,
+        FT_PE64_WINRARSFX,
         FT_CFBF_WIX,
         FT_PE32_YODA,
-        FT_PE32_WIXBURN, FT_PE64_WIXBURN,
+        FT_PE32_WIXBURN,
+        FT_PE64_WIXBURN,
 
         // Native readers appended after the stable XStaticUnpacker range.
         // Do not insert these between FT_PE32_7ZSFX and FT_PE64_WIXBURN:
@@ -1003,11 +1070,26 @@ public:
 
         // Family-specific SFX identities. Keep these appended: FT numeric IDs
         // are persisted by callers and must not be renumbered.
-        FT_PE32_ZIPSFX, FT_PE64_ZIPSFX, FT_ELF32_ZIPSFX, FT_ELF64_ZIPSFX,
-        FT_PE32_RARSFX, FT_PE64_RARSFX, FT_ELF32_RARSFX, FT_ELF64_RARSFX,
-        FT_PE32_CABSFX, FT_PE64_CABSFX, FT_ELF32_CABSFX, FT_ELF64_CABSFX,
-        FT_PE32_FREEARCSFX, FT_PE64_FREEARCSFX, FT_ELF32_FREEARCSFX, FT_ELF64_FREEARCSFX,
-        FT_PE32_ZPAQSFX, FT_PE64_ZPAQSFX, FT_ELF32_ZPAQSFX, FT_ELF64_ZPAQSFX,
+        FT_PE32_ZIPSFX,
+        FT_PE64_ZIPSFX,
+        FT_ELF32_ZIPSFX,
+        FT_ELF64_ZIPSFX,
+        FT_PE32_RARSFX,
+        FT_PE64_RARSFX,
+        FT_ELF32_RARSFX,
+        FT_ELF64_RARSFX,
+        FT_PE32_CABSFX,
+        FT_PE64_CABSFX,
+        FT_ELF32_CABSFX,
+        FT_ELF64_CABSFX,
+        FT_PE32_FREEARCSFX,
+        FT_PE64_FREEARCSFX,
+        FT_ELF32_FREEARCSFX,
+        FT_ELF64_FREEARCSFX,
+        FT_PE32_ZPAQSFX,
+        FT_PE64_ZPAQSFX,
+        FT_ELF32_ZPAQSFX,
+        FT_ELF64_ZPAQSFX,
 
         // Game/install media readers. Keep appended so every existing
         // persisted FT numeric ID remains stable.
@@ -1647,7 +1729,10 @@ public:
         QSharedPointer<PDSTRUCT_CALLBACK_STATE> _state;
         quint64 _token = 0;
 
-        bool isValid() const { return !_state.isNull() && (_token != 0); }
+        bool isValid() const
+        {
+            return !_state.isNull() && (_token != 0);
+        }
     };
 
     // Retains only the callback/liveness control block, never the PDSTRUCT
@@ -1656,7 +1741,10 @@ public:
     struct PDSTRUCTLIFETIME {
         QSharedPointer<PDSTRUCT_CALLBACK_STATE> _state;
 
-        bool isValid() const { return !_state.isNull(); }
+        bool isValid() const
+        {
+            return !_state.isNull();
+        }
     };
 
     struct PDSTRUCT {
@@ -1674,7 +1762,7 @@ public:
         //        bool bSuccess; // TODO important
         QString sInfoString;
         QString sErrorString;
-        QAtomicInteger<bool> bForceStop;  // TODO !!!
+        QAtomicInteger<bool> bForceStop;         // TODO !!!
         QAtomicInteger<qint32> nBufferSize;      // 0 => 0x4000
         QAtomicInteger<qint32> nFileBufferSize;  // 0 => 0x10000
         PDSTRUCT_CALLBACK pCallback;
@@ -2347,9 +2435,7 @@ public:
     static QString getLoadSectionNameByOffset(_MEMORY_MAP *pMemoryMap, qint64 nOffset);
 
     static bool isSolidAddressRange(_MEMORY_MAP *pMemoryMap, XADDR nAddress, qint64 nSize);
-    static bool isPhysicalAddressRange(_MEMORY_MAP *pMemoryMap,
-                                       XADDR nAddress,
-                                       qint64 nSize);
+    static bool isPhysicalAddressRange(_MEMORY_MAP *pMemoryMap, XADDR nAddress, qint64 nSize);
 
     QString getMemoryRecordInfoByOffset(qint64 nOffset);
     QString getMemoryRecordInfoByAddress(XADDR nAddress);
@@ -2541,8 +2627,7 @@ public:
     };
 
     static QList<qint64> getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, PDSTRUCT *pPdStruct = nullptr);
-    static QList<qint64> getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, FIXUP_WIDTH fixupWidth,
-                                      PDSTRUCT *pPdStruct = nullptr);
+    static QList<qint64> getFixupList(QIODevice *pDevice1, QIODevice *pDevice2, qint64 nDelta, FIXUP_WIDTH fixupWidth, PDSTRUCT *pPdStruct = nullptr);
 
     static QString getHash(HASH hash, const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
     static QString getHash(HASH hash, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
@@ -2963,10 +3048,10 @@ public:
     static bool isPdStructStopped(PDSTRUCT *pPdStruct);
     static void setPdStructStopped(PDSTRUCT *pPdStruct);
     static qint32 getPdStructPercentage(PDSTRUCT *pPdStruct);  // 0-100
-    static void setPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData,
-                                    PDSTRUCT_CALLBACK *pPreviousCallback = nullptr, void **pPreviousCallbackUserData = nullptr);
-    static bool compareAndSetPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pExpectedCallback, void *pExpectedCallbackUserData,
-                                              PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData);
+    static void setPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData, PDSTRUCT_CALLBACK *pPreviousCallback = nullptr,
+                                    void **pPreviousCallbackUserData = nullptr);
+    static bool compareAndSetPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pExpectedCallback, void *pExpectedCallbackUserData, PDSTRUCT_CALLBACK pCallback,
+                                              void *pCallbackUserData);
     static PDCALLBACKSUBSCRIPTION subscribePdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData);
     static bool unsubscribePdStructCallback(PDCALLBACKSUBSCRIPTION *pSubscription);
     static PDSTRUCTLIFETIME retainPdStructLifetime(PDSTRUCT *pPdStruct);
@@ -2974,8 +3059,7 @@ public:
     static bool setPdStructCurrentChecked(PDSTRUCT *pPdStruct, qint32 nIndex, qint64 nValue, const PDSTRUCTLIFETIME &lifetime);
     static bool setPdStructCurrentIncrementChecked(PDSTRUCT *pPdStruct, qint32 nIndex, const PDSTRUCTLIFETIME &lifetime);
     static bool setPdStructFinishedChecked(PDSTRUCT *pPdStruct, qint32 nIndex, const PDSTRUCTLIFETIME &lifetime);
-    static bool invokePdStructCallbackChecked(PDSTRUCT *pPdStruct, const PDSTRUCTLIFETIME &lifetime,
-                                              qint32 nMinIntervalMs = 100);
+    static bool invokePdStructCallbackChecked(PDSTRUCT *pPdStruct, const PDSTRUCTLIFETIME &lifetime, qint32 nMinIntervalMs = 100);
     static void invokePdStructCallback(PDSTRUCT *pPdStruct, qint32 nMinIntervalMs = 100);
 
     struct REGION_FILL {
@@ -3066,10 +3150,10 @@ public:
         CRC_TYPE_ADLER32,
         CRC_TYPE_FFFFFFFF_EDB88320_00000000,
         CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF,
-        CRC_TYPE_CRC16ARC,  // ARC-designated reflected polynomial 0xA001, init/xorout 0
+        CRC_TYPE_CRC16ARC,                            // ARC-designated reflected polynomial 0xA001, init/xorout 0
         CRC_TYPE_0000_A001_0000 = CRC_TYPE_CRC16ARC,  // Source-compatible alias
-        CRC_TYPE_RAR14,  // RAR 1.4 16-bit additive/rotate checksum
-        CRC_TYPE_CRC16   // Format-designated CRC-16; reflected polynomial 0xA001, init/xorout 0
+        CRC_TYPE_RAR14,                               // RAR 1.4 16-bit additive/rotate checksum
+        CRC_TYPE_CRC16                                // Format-designated CRC-16; reflected polynomial 0xA001, init/xorout 0
     };
 
     static UNPACK_PROP getUnpackCRCProperty(CRC_TYPE crcType);
@@ -3128,21 +3212,16 @@ public:
     bool unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
     // Safely re-open the session, revalidate the expected record identity and
     // publish exactly one member transactionally to a seekable output device.
-    bool unpackRecordByIndex(qint32 nRecordIndex, const ARCHIVERECORD *pExpectedRecord,
-                             QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties,
+    bool unpackRecordByIndex(qint32 nRecordIndex, const ARCHIVERECORD *pExpectedRecord, QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties,
                              PDSTRUCT *pPdStruct = nullptr);
 
 protected:
     // Shared, transaction-safe implementation used by archive wrappers that
     // expose logical records from a private decoded transport stream.
-    bool _unpackRecordByIndex(qint32 nRecordIndex,
-                              const ARCHIVERECORD *pExpectedRecord,
-                              QIODevice *pOutDevice,
-                              const QMap<UNPACK_PROP, QVariant> &mapProperties,
+    bool _unpackRecordByIndex(qint32 nRecordIndex, const ARCHIVERECORD *pExpectedRecord, QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties,
                               PDSTRUCT *pPdStruct = nullptr);
 
 public:
-
     struct FFSEARCH_STATE {
         QIODevice *pDevice;     // Input device
         qint64 nStartOffset;    // Start offset for search
@@ -3170,9 +3249,7 @@ public:
     static qint32 getBufferSize(PDSTRUCT *pPdStruct);
     static qint32 getFileBufferSize(PDSTRUCT *pPdStruct);
     static QIODevice *createFileBuffer(qint64 nSize, PDSTRUCT *pPdStruct);
-    static QIODevice *createUnpackFileBuffer(qint64 nSize,
-                                             const QMap<UNPACK_PROP, QVariant> &mapProperties,
-                                             PDSTRUCT *pPdStruct);
+    static QIODevice *createUnpackFileBuffer(qint64 nSize, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct);
     static void freeFileBuffer(QIODevice **ppBuffer);
 
     static QString getArchiveRecordComment(const ARCHIVERECORD &record);
@@ -3190,8 +3267,7 @@ public:
     // removed rather than merely guarded.
     static const qint64 ARCHIVE_STREAM_NO_EXTENT;
     // True only for the exact no-extent coordinate pair above.
-    static bool isArchiveStreamNoExtent(qint64 nStreamOffset,
-                                        qint64 nStreamSize);
+    static bool isArchiveStreamNoExtent(qint64 nStreamOffset, qint64 nStreamSize);
     // Coordinate/identity consistency for a record just produced by a session:
     // an index-paired archive-stream record must carry no extent, and every
     // other record must carry a non-negative one measured on the session's own
@@ -3200,8 +3276,7 @@ public:
     static bool isArchiveRecordExtentValid(const ARCHIVERECORD &record);
     // Convert an inner archive record into a safe public record for transport
     // wrappers whose decoded stream is not the caller-visible source device.
-    static bool markArchiveStreamRecord(ARCHIVERECORD *pRecord,
-                                        qint32 nRecordIndex);
+    static bool markArchiveStreamRecord(ARCHIVERECORD *pRecord, qint32 nRecordIndex);
     // An opaque per-member digest, derived from the member's position inside
     // the PRIVATE decoded stream plus its own descriptive metadata.  It is a
     // hex string, never a number: no consumer can resolve it against a device,
@@ -3209,23 +3284,17 @@ public:
     // only purpose is to keep archive-stream records distinguishable from one
     // another once their coordinates - the field that used to tell two members
     // apart - are gone.
-    static QString archiveStreamRecordToken(
-        qint32 nRecordIndex, qint64 nStreamOffset, qint64 nStreamSize,
-        const QMap<FPART_PROP, QVariant> &mapProperties);
+    static QString archiveStreamRecordToken(qint32 nRecordIndex, qint64 nStreamOffset, qint64 nStreamSize, const QMap<FPART_PROP, QVariant> &mapProperties);
     // Does a caller-supplied record describe the same member as one this
     // session just produced?  For an archive-stream record the comparison must
     // not rest on the logical index alone: the index is exactly the field a
     // caller supplies, so two members with identical metadata would otherwise
     // validate against each other's record.  The identity token settles it.
-    static bool isSameArchiveRecordIdentity(const ARCHIVERECORD &record,
-                                            const ARCHIVERECORD &expectedRecord);
+    static bool isSameArchiveRecordIdentity(const ARCHIVERECORD &record, const ARCHIVERECORD &expectedRecord);
     // Returns true only for the exact pseudo-method/index contract.  Numeric
     // strings, floating-point values and out-of-range indices are rejected.
-    static bool getArchiveStreamRecordIndex(
-        const QMap<FPART_PROP, QVariant> &mapProperties,
-        qint32 *pnRecordIndex);
-    static bool getArchiveStreamRecordIndex(const ARCHIVERECORD &record,
-                                            qint32 *pnRecordIndex);
+    static bool getArchiveStreamRecordIndex(const QMap<FPART_PROP, QVariant> &mapProperties, qint32 *pnRecordIndex);
+    static bool getArchiveStreamRecordIndex(const ARCHIVERECORD &record, qint32 *pnRecordIndex);
     // Decode a coder's raw property bytes into 7-Zip-style parameters, e.g. LZMA2
     // dictionary byte 0x00 -> "12" (2^12 = 4 KiB), LZMA -> "<dictexp>[:lcN:lpN:pbN]".
     // Returns an empty string for methods without decodable parameters.
@@ -3260,8 +3329,7 @@ public:
     // as handled: a nested getter fails instead of observing unpublished data.
     quint64 beginInternalInfoTransaction();
     bool isInternalInfoTransactionCurrent(quint64 nTransaction) const;
-    bool commitInternalInfoTransaction(quint64 nTransaction,
-                                       const XBinary::INTERNAL_INFO *pInternalInfo);
+    bool commitInternalInfoTransaction(quint64 nTransaction, const XBinary::INTERNAL_INFO *pInternalInfo);
     void rollbackInternalInfoTransaction(quint64 nTransaction);
 
 private:

@@ -125,8 +125,8 @@ QVector<XBinary::XMETADATA_STRUCT> XMP3::getMetadataStructs()
     };
 
     auto readSynchsafe = [this](qint64 nOffset) -> quint32 {
-        return ((quint32)(read_uint8(nOffset) & 0x7F) << 21) | ((quint32)(read_uint8(nOffset + 1) & 0x7F) << 14) |
-               ((quint32)(read_uint8(nOffset + 2) & 0x7F) << 7) | (read_uint8(nOffset + 3) & 0x7F);
+        return ((quint32)(read_uint8(nOffset) & 0x7F) << 21) | ((quint32)(read_uint8(nOffset + 1) & 0x7F) << 14) | ((quint32)(read_uint8(nOffset + 2) & 0x7F) << 7) |
+               (read_uint8(nOffset + 3) & 0x7F);
     };
 
     auto decodeText = [](const QByteArray &baData) -> QString {
@@ -156,8 +156,8 @@ QVector<XBinary::XMETADATA_STRUCT> XMP3::getMetadataStructs()
                 }
             }
             for (qint32 i = nStart; i + 1 < baText.size(); i += 2) {
-                const quint16 nCharacter = bBigEndian ? (((quint8)baText.at(i) << 8) | (quint8)baText.at(i + 1))
-                                                       : (((quint8)baText.at(i + 1) << 8) | (quint8)baText.at(i));
+                const quint16 nCharacter =
+                    bBigEndian ? (((quint8)baText.at(i) << 8) | (quint8)baText.at(i + 1)) : (((quint8)baText.at(i + 1) << 8) | (quint8)baText.at(i));
                 if (!nCharacter) {
                     break;
                 }
@@ -640,13 +640,10 @@ bool XMP3::handleInternalInfo(PDSTRUCT *pPdStruct)
         bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
         if (!guardedThis || !bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo =
-            static_cast<XBinary::INTERNAL_INFO *>(
-                guardedThis->XBinary::getInternalInfo(pPdStruct));
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
         if (!guardedThis || !pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(
-            guardedThis->m_internalInfo) = *pInfo;
+        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
         guardedThis->setIsInternalInfoHandled(true);
     }
 
