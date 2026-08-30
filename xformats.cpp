@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xformats.h"
+#include <QElapsedTimer>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -459,6 +460,21 @@ XBinary::INDATA XFormats::createINDATA(XBinary::FT fileType, const QString &sFil
 XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
 #ifdef USE_STATICUNPACKER
+    if (fileType == XBinary::FT_GZIPSFX) return new XGzipSFX(pDevice, bIsImage, nModuleAddress);
+    if (fileType == XBinary::FT_KWAJSFX) return new XKwajSFX(pDevice, bIsImage, nModuleAddress);
+    if (fileType == XBinary::FT_SZDDSFX) return new XSzddSFX(pDevice, bIsImage, nModuleAddress);
+    if (fileType == XBinary::FT_PYINSTALLER_SFX) return new XSFX(pDevice, bIsImage, nModuleAddress);
+    if (fileType == XBinary::FT_WISE_SFX) return new XWiseSFXArchive(pDevice);
+    if ((fileType >= XBinary::FT_ARCSFX) && (fileType <= XBinary::FT_ZPAQSFX)) {
+        if (fileType == XBinary::FT_ARCSFX) return new XArcSFX(pDevice, bIsImage, nModuleAddress);
+        if (fileType == XBinary::FT_ARJSFX) return new XArjSFX(pDevice, bIsImage, nModuleAddress);
+        if (fileType == XBinary::FT_LHASFX) return new XLhaSFX(pDevice, bIsImage, nModuleAddress);
+        if (fileType == XBinary::FT_ZIPSFX) return new XZipSFX(pDevice, bIsImage, nModuleAddress);
+        if (fileType == XBinary::FT_RARSFX) return new XRarSFX(pDevice, bIsImage, nModuleAddress);
+        if (fileType == XBinary::FT_CABSFX) return new XCabSFX(pDevice, bIsImage, nModuleAddress);
+        if (fileType == XBinary::FT_FREEARCSFX) return new XFreeArcSFX(pDevice, bIsImage, nModuleAddress);
+        return new XZPAQSFX(pDevice, bIsImage, nModuleAddress);
+    }
     // Dispatch the appended family-specific SFX range before the legacy
     // factory chain. Keeping this independent avoids MSVC's block-nesting
     // ceiling in the already very long else-if sequence below.
@@ -613,6 +629,58 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
     else if (XBinary::checkFileType(XBinary::FT_QUAKE_PAK, fileType)) return new XPAK(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_DOOM_WAD, fileType)) return new XWAD(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_BUILD_GRP, fileType)) return new XGRP(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_DESCENT_HOG, fileType)) return new XHOG(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_WOLF_VSWAP, fileType)) return new XWolfVSwap(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_WINTERMUTE_DCP, fileType)) return new XWintermuteDCP(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_PYINSTALLER_PYZ, fileType)) return new XPYZ(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_AMIGA_LZX, fileType)) return new XLZXArchive(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_DEARK_LEGACY_ARCHIVE, fileType)) return new XDearkArchive(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_LIBDSK_IMAGE, fileType)) return new XLibDskArchive(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_COMPACT_PRO, fileType)) return new XCompactProArchive(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_DISK_DOUBLER, fileType)) return new XDiskDoublerArchive(pDevice, XBinary::FT_DISK_DOUBLER);
+    else if (XBinary::checkFileType(XBinary::FT_DISK_DOUBLER_DDA2, fileType)) return new XDiskDoublerArchive(pDevice, XBinary::FT_DISK_DOUBLER_DDA2);
+    else if ((fileType >= XBinary::FT_LEGACY_CAT) &&
+             (fileType <= XBinary::FT_LPAK))
+        return new XLegacyStoreArchive(pDevice, fileType);
+    else if (XBinary::checkFileType(XBinary::FT_DISKJUGGLER_CDI, fileType)) return new XDiskJugglerArchive(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_INSTALLSHIELD_BOOT, fileType) ||
+             XBinary::checkFileType(XBinary::FT_SABDU_IMAGE, fileType) ||
+             XBinary::checkFileType(XBinary::FT_COMPAQ_LZH, fileType) ||
+             XBinary::checkFileType(XBinary::FT_EPFS_ARCHIVE, fileType) ||
+             XBinary::checkFileType(XBinary::FT_STUNTS_DSI, fileType) ||
+             XBinary::checkFileType(XBinary::FT_FINSTALL_ARCHIVE, fileType) ||
+             XBinary::checkFileType(XBinary::FT_IS_STORED, fileType) ||
+             XBinary::checkFileType(XBinary::FT_INSTALLSHIELD3_ARCHIVE, fileType) ||
+             XBinary::checkFileType(XBinary::FT_EMT_IMAGE, fileType) ||
+             XBinary::checkFileType(XBinary::FT_GPFPACK, fileType) ||
+             XBinary::checkFileType(XBinary::FT_PAX, fileType) ||
+             XBinary::checkFileType(XBinary::FT_SCF, fileType) ||
+             XBinary::checkFileType(XBinary::FT_SOLITAIRE_DELUXE, fileType) ||
+             XBinary::checkFileType(XBinary::FT_INSTALIT_DATA, fileType) ||
+             XBinary::checkFileType(XBinary::FT_ARCV, fileType) ||
+             XBinary::checkFileType(XBinary::FT_PIMP_SFX, fileType) ||
+             XBinary::checkFileType(XBinary::FT_VISE_SFX, fileType) ||
+             XBinary::checkFileType(XBinary::FT_FTCOMP, fileType) ||
+             XBinary::checkFileType(XBinary::FT_DN_ARCHIVE, fileType) ||
+             XBinary::checkFileType(XBinary::FT_FPAK, fileType) ||
+             XBinary::checkFileType(XBinary::FT_SOFTPAQ1_SFX, fileType) ||
+             XBinary::checkFileType(XBinary::FT_INSTALIT_SFX, fileType) ||
+             XBinary::checkFileType(XBinary::FT_LIF_COMPRESSED, fileType) ||
+             XBinary::checkFileType(XBinary::FT_JASC_ARCHIVE, fileType) ||
+             XBinary::checkFileType(XBinary::FT_SSM_MODULE, fileType))
+        return new XLegacyStoreArchive(pDevice, fileType);
+    else if (XBinary::checkFileType(XBinary::FT_C64_T64, fileType)) return new XT64(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_APPLESINGLE, fileType)) return new XAppleSingle(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_APPLE_2IMG, fileType)) return new X2IMG(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_MACBINARY, fileType)) return new XMacBinary(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_RESOURCE_FORK, fileType)) return new XResourceFork(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_CPM_LBR, fileType)) return new XLBR(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_DMS, fileType) || XBinary::checkFileType(XBinary::FT_PP20, fileType) ||
+             XBinary::checkFileType(XBinary::FT_RNC, fileType) || XBinary::checkFileType(XBinary::FT_TPWM, fileType) ||
+             XBinary::checkFileType(XBinary::FT_FREEZE, fileType) || XBinary::checkFileType(XBinary::FT_UNIX_PACK, fileType))
+        return new XAncient(pDevice, fileType);
+    else if (XBinary::checkFileType(XBinary::FT_BINHEX, fileType) || XBinary::checkFileType(XBinary::FT_BTOA, fileType))
+        return new XLegacyEncoded(pDevice, fileType);
     else if (XBinary::checkFileType(XBinary::FT_SQUASHFS, fileType)) return new XSquashfs(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MINIDUMP, fileType)) return new XMiniDump(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_WARC, fileType)) return new XWARC(pDevice);
@@ -650,6 +718,8 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
         return new XInnoSetup(pDevice, bIsImage, nModuleAddress);
     else if (XBinary::checkFileType(XBinary::FT_PE32_INSTALLFORGE, fileType) || XBinary::checkFileType(XBinary::FT_PE64_INSTALLFORGE, fileType))
         return new XInstallForge(pDevice, bIsImage, nModuleAddress);
+    else if (XBinary::checkFileType(XBinary::FT_PE32_INSTALLSHIELD, fileType) || XBinary::checkFileType(XBinary::FT_PE64_INSTALLSHIELD, fileType))
+        return new XInstallShield(pDevice, bIsImage, nModuleAddress);
 #ifdef USE_XEMULATOR
     else if (XBinary::checkFileType(XBinary::FT_PE32_INSTALLSIMPLE, fileType) || XBinary::checkFileType(XBinary::FT_PE64_INSTALLSIMPLE, fileType))
         return new XInstallSimple(pDevice, bIsImage, nModuleAddress);
@@ -1669,7 +1739,12 @@ bool XFormats::isStaticUnpacker(XBinary::FT fileType)
     // SFX identities each occupy a contiguous range. Generic UPX predates those
     // ranges and is the non-PE counterpart used for ELF, Mach-O, and DOS streams.
     return (fileType == XBinary::FT_UPX) || (fileType == XBinary::FT_RIB) || (fileType == XBinary::FT_ISCAB) || (fileType == XBinary::FT_ELF32_SFX) ||
-           (fileType == XBinary::FT_ELF64_SFX) || ((fileType >= XBinary::FT_PE32_ZIPSFX) && (fileType <= XBinary::FT_ELF64_ZPAQSFX)) ||
+           (fileType == XBinary::FT_ELF64_SFX) || (fileType == XBinary::FT_PE32_INSTALLSHIELD) || (fileType == XBinary::FT_PE64_INSTALLSHIELD) ||
+           (fileType == XBinary::FT_GZIPSFX) || (fileType == XBinary::FT_KWAJSFX) || (fileType == XBinary::FT_SZDDSFX) ||
+           (fileType == XBinary::FT_PYINSTALLER_SFX) ||
+           (fileType == XBinary::FT_WISE_SFX) ||
+           ((fileType >= XBinary::FT_ARCSFX) && (fileType <= XBinary::FT_ZPAQSFX)) ||
+           ((fileType >= XBinary::FT_PE32_ZIPSFX) && (fileType <= XBinary::FT_ELF64_ZPAQSFX)) ||
            ((fileType >= XBinary::FT_PE32_7ZSFX) && (fileType <= XBinary::FT_PE64_WIXBURN));
 }
 
@@ -2263,7 +2338,99 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
         }
 
         if ((nFTFlags & XBinary::FT_FLAG_ARCHIVES) && (stResult.size() <= 1)) {
-            if (XZip::isValid(pDevice, pPdStruct)) {
+            // Exact, fully bounded store-only formats go before ZIP's cheap
+            // prefix probe so an incidental local-header pattern cannot stop
+            // the archive chain before their structural validators run.
+            if (XAppleSingle::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_APPLESINGLE);
+            } else if (X2IMG::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_APPLE_2IMG);
+            } else if (XPyInstallerCArchive::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_PYINSTALLER_SFX);
+            } else if (XWiseSFXArchive::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_WISE_SFX);
+#ifdef USE_STATICUNPACKER
+            } else if (XZipSFX zipSfx(pDevice); zipSfx.isValid(pPdStruct)) {
+                // ZIP self-extractors are archives even when the caller did
+                // not request the full (and substantially more expensive)
+                // packer/installer scan. This also covers installers whose
+                // first ZIP follows metadata inside the executable overlay.
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(zipSfx.getFileType());
+#endif
+            } else if (XMacBinary::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_MACBINARY);
+            } else if (XResourceFork::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_RESOURCE_FORK);
+            } else if (XLBR::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_CPM_LBR);
+            } else if (const XBinary::FT ancientType = XAncient::detectFileType(pDevice, pPdStruct); ancientType != XBinary::FT_UNKNOWN) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(ancientType);
+            } else if (const XBinary::FT encodedType = XLegacyEncoded::detectFileType(pDevice, pPdStruct); encodedType != XBinary::FT_UNKNOWN) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(encodedType);
+            } else if (XHOG::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_DESCENT_HOG);
+            } else if (XWolfVSwap::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_WOLF_VSWAP);
+            } else if (XWintermuteDCP::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_WINTERMUTE_DCP);
+            } else if (XPYZ::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_PYINSTALLER_PYZ);
+            } else if (XLZXArchive::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_AMIGA_LZX);
+            } else if (XCompactProArchive::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_COMPACT_PRO);
+            } else if (XDiskDoublerArchive::isValid(pDevice, XBinary::FT_DISK_DOUBLER, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_DISK_DOUBLER);
+            } else if (XDiskDoublerArchive::isValid(pDevice, XBinary::FT_DISK_DOUBLER_DDA2, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_DISK_DOUBLER_DDA2);
+            } else if (const XBinary::FT legacyStoreType =
+                           XLegacyStoreArchive::detectFileType(pDevice, pPdStruct);
+                       legacyStoreType != XBinary::FT_UNKNOWN) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(legacyStoreType);
+            } else if (XDiskJugglerArchive::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_DISKJUGGLER_CDI);
+            } else if ([&]() -> bool {
+                           if (!pDevice || pDevice->isSequential()) return false;
+                           const qint64 nSavedPosition = pDevice->pos();
+                           if (!pDevice->seek(0)) return false;
+                           const QByteArray baPrefix = pDevice->read(4);
+                           const bool bRestored = pDevice->seek(nSavedPosition);
+                           return bRestored &&
+                                  (baPrefix == QByteArrayLiteral("EXEC")) &&
+                                  XLhaSFX::isValid(pDevice, pPdStruct);
+                       }()) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LHASFX);
+            } else if (XDearkArchive::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_DEARK_LEGACY_ARCHIVE);
+            } else if (XLibDskArchive::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_LIBDSK_IMAGE);
+            } else if (XT64::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_C64_T64);
+            } else if (XZip::isValid(pDevice, pPdStruct)) {
                 XZip xzip(pDevice);
                 if (xzip.isValid(pPdStruct)) {
                     stResult.insert(XBinary::FT_ARCHIVE);
@@ -2651,71 +2818,143 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
         // Inno Setup loader is the one supported NE-container exception. MSI/WiX
         // are only probed when a CFBF (OLE compound) container was detected.
         if ((nFTFlags & XBinary::FT_FLAG_STATICUNPACKERS) && XBinary::isPdStructNotCanceled(pPdStruct)) {
-            {
-                XISCab x(pDevice);
-                if (x.isValid(pPdStruct)) stResult.insert(XBinary::FT_ISCAB);
+            // PyInstaller places an authenticated, footer-indexed CArchive at
+            // the end of the executable.  Test that constant-time structure
+            // before the large PE unpacker chain: a contemporary one-file
+            // bundle can be tens or hundreds of megabytes and otherwise makes
+            // signature scanners repeatedly traverse the whole image.
+            if (stResult.contains(XBinary::FT_PE) &&
+                [&](){ QElapsedTimer _q; _q.start(); const bool _r=XPyInstallerCArchive::isValid(pDevice, pPdStruct); qDebug() << "PROBE" << "XPyInstallerCArchive" << _q.elapsed() << _r; return _r; }()) {
+                stResult.insert(XBinary::FT_PYINSTALLER_SFX);
             }
-            if (stResult.contains(XBinary::FT_PE)) {
+            if ((stResult.contains(XBinary::FT_PE) ||
+                 stResult.contains(XBinary::FT_NE)) &&
+                [&](){ QElapsedTimer _q; _q.start(); const bool _r=XWiseSFXArchive::isValid(pDevice, pPdStruct); qDebug() << "PROBE" << "XWiseSFXArchive" << _q.elapsed() << _r; return _r; }()) {
+                stResult.insert(XBinary::FT_WISE_SFX);
+            }
+            {
+                QElapsedTimer _pt;
+                _pt.start();
+                XISCab x(pDevice);
+                const bool _pv = x.isValid(pPdStruct);
+                qDebug() << "PROBE" << "XISCab" << _pt.elapsed() << _pv;
+                if (_pv) stResult.insert(XBinary::FT_ISCAB);
+            }
+            if (stResult.contains(XBinary::FT_PE) &&
+                !stResult.contains(XBinary::FT_PYINSTALLER_SFX) &&
+                !stResult.contains(XBinary::FT_WISE_SFX)) {
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XBurn x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XBurn" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XSevenZipSFX x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XSevenZipSFX" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XActualInstaller x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XActualInstaller" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XAdvancedInstaller x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XAdvancedInstaller" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XASPACK x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XASPACK" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XAUTOIT x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XAUTOIT" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XBoxedApp x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XBoxedApp" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XClickteam x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XClickteam" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XCreateInstall x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XCreateInstall" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XEnigmaVB x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XEnigmaVB" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XFSG x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XFSG" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XIExpress x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XIExpress" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XInnoSetup x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XInnoSetup" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XInstallForge x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XInstallForge" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
+                }
+                {
+                    QElapsedTimer _pt; _pt.start();
+                    XInstallShield x(pDevice);
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XInstallShield" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
 #ifdef USE_XEMULATOR
                 {
+                    QElapsedTimer _pt; _pt.start();
                     XInstallSimple x(pDevice);
-                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                    const bool _pv = x.isValid(pPdStruct);
+                    qDebug() << "PROBE" << "XInstallSimple" << _pt.elapsed() << _pv;
+                    if (_pv) stResult.insert(x.getFileType());
                 }
 #endif
                 {
@@ -2736,6 +2975,18 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
                 }
                 {
                     XSFX x(pDevice);
+                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                }
+                {
+                    XGzipSFX x(pDevice);
+                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                }
+                {
+                    XKwajSFX x(pDevice);
+                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                }
+                {
+                    XSzddSFX x(pDevice);
                     if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
                 }
                 {
@@ -2761,12 +3012,16 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
             }
             const QString sExecutableSuffix = XBinary::getDeviceFileSuffix(pDevice).toUpper();
             if (!stResult.contains(XBinary::FT_PE) &&
+                !stResult.contains(XBinary::FT_WISE_SFX) &&
                 (stResult.contains(XBinary::FT_ELF) || stResult.contains(XBinary::FT_MACHO) || stResult.contains(XBinary::FT_MACHOFAT) ||
-                 stResult.contains(XBinary::FT_MSDOS) || stResult.contains(XBinary::FT_COM) || (sExecutableSuffix == QStringLiteral("SYS")))) {
-                // Generic SFX supports ELF wrappers whose archive lives in the
-                // exact unmapped suffix. Probe it before UPX so an UPX-packed
-                // extraction stub is classified by its archive payload.
-                if (stResult.contains(XBinary::FT_ELF)) {
+                 stResult.contains(XBinary::FT_MSDOS) || stResult.contains(XBinary::FT_NE) || stResult.contains(XBinary::FT_COM) ||
+                 stResult.contains(XBinary::FT_ATARIST) || (sExecutableSuffix == QStringLiteral("SYS")))) {
+                // Probe authenticated archive-backed SFX wrappers before UPX
+                // so a compressed extraction stub is classified by its
+                // payload. MZ/NE use the declared executable extent; COM is
+                // bounded to its complete 16-bit image.
+                if (stResult.contains(XBinary::FT_ELF) || stResult.contains(XBinary::FT_MSDOS) || stResult.contains(XBinary::FT_NE) ||
+                    stResult.contains(XBinary::FT_COM) || stResult.contains(XBinary::FT_ATARIST)) {
                     XSFX x(pDevice);
                     if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
                 }
@@ -2779,9 +3034,22 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
                 XUPX x(pDevice);
                 if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
             }
-            if (stResult.contains(XBinary::FT_NE)) {
+            if (stResult.contains(XBinary::FT_NE) &&
+                !stResult.contains(XBinary::FT_WISE_SFX)) {
                 {
                     XInnoSetup x(pDevice);
+                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                }
+                {
+                    XGzipSFX x(pDevice);
+                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                }
+                {
+                    XKwajSFX x(pDevice);
+                    if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+                }
+                {
+                    XSzddSFX x(pDevice);
                     if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
                 }
             }

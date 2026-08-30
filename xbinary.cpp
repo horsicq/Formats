@@ -825,6 +825,28 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_COKTEL_LZ, "COKTEL_LZ", QString("Coktel LZ")},
     {XBinary::HANDLE_METHOD_WINZIP_JPEG, "WINZIP_JPEG", QString("WinZip JPEG")},
     {XBinary::HANDLE_METHOD_WAVPACK, "WAVPACK", QString("WavPack")},
+    {XBinary::HANDLE_METHOD_AMIGA_LZX, "AMIGA_LZX", QString("Amiga LZX")},
+    {XBinary::HANDLE_METHOD_COMPACT_PRO_RLE, "COMPACT_PRO_RLE", QString("Compact Pro RLE")},
+    {XBinary::HANDLE_METHOD_COMPACT_PRO_LZH, "COMPACT_PRO_LZH", QString("Compact Pro LZH+RLE")},
+    {XBinary::HANDLE_METHOD_DISKDOUBLER_ADN, "DISKDOUBLER_ADN", QString("DiskDoubler ADn")},
+    {XBinary::HANDLE_METHOD_DISKDOUBLER_DDN, "DISKDOUBLER_DDN", QString("DiskDoubler DDn")},
+    {XBinary::HANDLE_METHOD_DISKDOUBLER_COMPACT_PRO, "DISKDOUBLER_COMPACT_PRO", QString("DiskDoubler Compact Pro")},
+    {XBinary::HANDLE_METHOD_LPAK_LZSS, "LPAK_LZSS", QString("LPAK LZSS")},
+    {XBinary::HANDLE_METHOD_WISE_DEFLATE, "WISE_DEFLATE", QString("Wise raw Deflate")},
+    {XBinary::HANDLE_METHOD_EPFS_LZW, "EPFS_LZW", QString("EPFS LZW")},
+    {XBinary::HANDLE_METHOD_STUNTS_DSI, "STUNTS_DSI", QString("Stunts DSI multi-pass")},
+    {XBinary::HANDLE_METHOD_XOR_A9, "XOR_A9", QString("XOR A9 stored data")},
+    {XBinary::HANDLE_METHOD_PKWARE_DCL_IMPLODE, "PKWARE_DCL_IMPLODE", QString("PKWARE DCL Implode/TTCOMP")},
+    {XBinary::HANDLE_METHOD_EMT_RLE, "EMT_RLE", QString("EMT track RLE")},
+    {XBinary::HANDLE_METHOD_GPFPACK_LZW, "GPFPACK_LZW", QString("GPFPACK block LZW")},
+    {XBinary::HANDLE_METHOD_PAX_LZF, "PAX_LZF", QString("PAX LZF0")},
+    {XBinary::HANDLE_METHOD_ARCV_LZHUF, "ARCV_LZHUF", QString("ARCV adaptive Huffman/LZSS")},
+    {XBinary::HANDLE_METHOD_VISE_DEFLATE, "VISE_DEFLATE", QString("VISE byte-swapped Deflate")},
+    {XBinary::HANDLE_METHOD_FTCOMP_FT19, "FTCOMP_FT19", QString("FTCOMP fT19 (unsupported)")},
+    {XBinary::HANDLE_METHOD_DN_COMPRESSED, "DN_COMPRESSED", QString("DOS Navigator installer compression (unsupported)")},
+    {XBinary::HANDLE_METHOD_FPAK_COMPRESSED, "FPAK_COMPRESSED", QString("FoxPro FPAK compression (unsupported)")},
+    {XBinary::HANDLE_METHOD_JASC_COMPRESSED, "JASC_COMPRESSED", QString("JASC installer compression (unsupported)")},
+    {XBinary::HANDLE_METHOD_SSM_PICTOOLS, "SSM_PICTOOLS", QString("PICTools SSM module compression (unsupported)")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -1060,6 +1082,78 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_SND, "SND", QString("Palladix sound driver module")},
     {XBinary::FT_PMA, "PMA", QString("Palladix AdLib music")},
     {XBinary::FT_MDH, "MDH", QString("Parsec digital music data")},
+    {XBinary::FT_PE32_INSTALLSHIELD, "PE32_INSTALLSHIELD", QString("PE32: InstallShield")},
+    {XBinary::FT_PE64_INSTALLSHIELD, "PE64_INSTALLSHIELD", QString("PE64: InstallShield")},
+    {XBinary::FT_ARCSFX, "ARCSFX", QString("ARC SFX")},
+    {XBinary::FT_ARJSFX, "ARJSFX", QString("ARJ SFX")},
+    {XBinary::FT_LHASFX, "LHASFX", QString("LHA SFX")},
+    {XBinary::FT_ZIPSFX, "ZIPSFX", QString("ZIP SFX")},
+    {XBinary::FT_RARSFX, "RARSFX", QString("RAR SFX")},
+    {XBinary::FT_CABSFX, "CABSFX", QString("CAB SFX")},
+    {XBinary::FT_FREEARCSFX, "FREEARCSFX", QString("FreeArc SFX")},
+    {XBinary::FT_ZPAQSFX, "ZPAQSFX", QString("ZPAQ SFX")},
+    {XBinary::FT_GZIPSFX, "GZIPSFX", QString("GZIP SFX")},
+    {XBinary::FT_KWAJSFX, "KWAJSFX", QString("KWAJ SFX")},
+    {XBinary::FT_SZDDSFX, "SZDDSFX", QString("SZDD SFX")},
+    {XBinary::FT_DESCENT_HOG, "DESCENT_HOG", QString("Descent HOG")},
+    {XBinary::FT_C64_T64, "C64_T64", QString("Commodore T64 tape image")},
+    {XBinary::FT_APPLESINGLE, "APPLESINGLE", QString("AppleSingle/AppleDouble")},
+    {XBinary::FT_MACBINARY, "MACBINARY", QString("MacBinary")},
+    {XBinary::FT_RESOURCE_FORK, "RESOURCE_FORK", QString("Macintosh resource fork")},
+    {XBinary::FT_CPM_LBR, "CPM_LBR", QString("CP/M LBR library")},
+    {XBinary::FT_DMS, "DMS", QString("Disk Masher System")},
+    {XBinary::FT_PP20, "PP20", QString("PowerPacker")},
+    {XBinary::FT_RNC, "RNC", QString("Rob Northen compression")},
+    {XBinary::FT_TPWM, "TPWM", QString("Turbo Packer")},
+    {XBinary::FT_FREEZE, "FREEZE", QString("Freeze/Melt compression")},
+    {XBinary::FT_UNIX_PACK, "UNIX_PACK", QString("Unix Pack compression")},
+    {XBinary::FT_BINHEX, "BINHEX", QString("BinHex 4.0")},
+    {XBinary::FT_BTOA, "BTOA", QString("xbtoa/Base85")},
+    {XBinary::FT_APPLE_2IMG, "APPLE_2IMG", QString("Apple II 2IMG disk image")},
+    {XBinary::FT_WINTERMUTE_DCP, "WINTERMUTE_DCP", QString("Wintermute Engine package")},
+    {XBinary::FT_PYINSTALLER_PYZ, "PYINSTALLER_PYZ", QString("PyInstaller PYZ archive")},
+    {XBinary::FT_AMIGA_LZX, "AMIGA_LZX", QString("Amiga LZX archive")},
+    {XBinary::FT_DEARK_LEGACY_ARCHIVE, "DEARK_LEGACY_ARCHIVE", QString("Legacy archive (Deark)")},
+    {XBinary::FT_LIBDSK_IMAGE, "LIBDSK_IMAGE", QString("Legacy sector disk image (LibDsk)")},
+    {XBinary::FT_WOLF_VSWAP, "WOLF_VSWAP", QString("Wolfenstein VSWAP resource archive")},
+    {XBinary::FT_COMPACT_PRO, "COMPACT_PRO", QString("Compact Pro archive")},
+    {XBinary::FT_DISK_DOUBLER, "DISK_DOUBLER", QString("DiskDoubler compressed file")},
+    {XBinary::FT_DISK_DOUBLER_DDA2, "DISK_DOUBLER_DDA2", QString("DiskDoubler DDA2 archive")},
+    {XBinary::FT_PYINSTALLER_SFX, "PYINSTALLER_SFX", QString("PyInstaller executable archive")},
+    {XBinary::FT_LEGACY_CAT, "LEGACY_CAT", QString("CAT resource archive")},
+    {XBinary::FT_KA_ARCHIVE, "KA_ARCHIVE", QString("KA archive")},
+    {XBinary::FT_MLB_ARCHIVE, "MLB_ARCHIVE", QString("MLB resource archive")},
+    {XBinary::FT_LEGACY_RES, "LEGACY_RES", QString("RES resource archive")},
+    {XBinary::FT_LEGACY_RSC, "LEGACY_RSC", QString("RSC resource archive")},
+    {XBinary::FT_SHRINKWRAP_IMAGE, "SHRINKWRAP_IMAGE", QString("ShrinkWrap disk image")},
+    {XBinary::FT_LPAK, "LPAK", QString("Atari LPAK compression")},
+    {XBinary::FT_DISKJUGGLER_CDI, "DISKJUGGLER_CDI", QString("DiscJuggler CDI disc image")},
+    {XBinary::FT_INSTALLSHIELD_BOOT, "INSTALLSHIELD_BOOT", QString("InstallShield 7 bootstrap archive")},
+    {XBinary::FT_SABDU_IMAGE, "SABDU_IMAGE", QString("SAB Diskette Utility image")},
+    {XBinary::FT_COMPAQ_LZH, "COMPAQ_LZH", QString("Compaq LZH compressed file")},
+    {XBinary::FT_WISE_SFX, "WISE_SFX", QString("Wise installer executable archive")},
+    {XBinary::FT_EPFS_ARCHIVE, "EPFS_ARCHIVE", QString("East Point Software EPFS archive")},
+    {XBinary::FT_STUNTS_DSI, "STUNTS_DSI", QString("Stunts/4D Sports Driving compressed resource")},
+    {XBinary::FT_FINSTALL_ARCHIVE, "FINSTALL_ARCHIVE", QString("F Install archive")},
+    {XBinary::FT_IS_STORED, "IS_STORED", QString("IS stored/XOR data")},
+    {XBinary::FT_INSTALLSHIELD3_ARCHIVE, "INSTALLSHIELD3_ARCHIVE", QString("InstallShield 3 archive")},
+    {XBinary::FT_EMT_IMAGE, "EMT_IMAGE", QString("EMT compressed disk image")},
+    {XBinary::FT_GPFPACK, "GPFPACK", QString("GPFPACK compressed file")},
+    {XBinary::FT_PAX, "PAX", QString("GEM-View PAX archive")},
+    {XBinary::FT_SCF, "SCF", QString("Microsoft SCF compressed archive")},
+    {XBinary::FT_SOLITAIRE_DELUXE, "SOLITAIRE_DELUXE", QString("Solitaire Deluxe installation archive")},
+    {XBinary::FT_INSTALIT_DATA, "INSTALIT_DATA", QString("Instalit concatenated DCL archive")},
+    {XBinary::FT_ARCV, "ARCV", QString("Eschalon Setup ARCV archive")},
+    {XBinary::FT_PIMP_SFX, "PIMP_SFX", QString("Nullsoft PiMP self-extracting archive")},
+    {XBinary::FT_VISE_SFX, "VISE_SFX", QString("Windows Installer VISE self-extracting archive")},
+    {XBinary::FT_FTCOMP, "FTCOMP", QString("IBM OS/2 PACK2 (FTCOMP) archive")},
+    {XBinary::FT_DN_ARCHIVE, "DN_ARCHIVE", QString("DOS Navigator installer archive")},
+    {XBinary::FT_FPAK, "FPAK", QString("FoxPro Distribution Kit FPAK archive")},
+    {XBinary::FT_SOFTPAQ1_SFX, "SOFTPAQ1_SFX", QString("Compaq SoftPaq version 1 self-extracting archive")},
+    {XBinary::FT_INSTALIT_SFX, "INSTALIT_SFX", QString("Instalit self-extracting archive")},
+    {XBinary::FT_LIF_COMPRESSED, "LIF_COMPRESSED", QString("LIF/DC LZW compressed file")},
+    {XBinary::FT_JASC_ARCHIVE, "JASC_ARCHIVE", QString("JASC installer archive")},
+    {XBinary::FT_SSM_MODULE, "SSM_MODULE", QString("PICTools SSM compressed module")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -13138,6 +13232,181 @@ QSet<XBinary::FT> XBinary::getFileTypes(quint32 nFTFlags)
                     stResult.insert(FT_ARCHIVE);
                     stResult.insert(FT_BUILD_GRP);
                 }
+            } else if ((nSize >= 38) &&
+                       (compareSignature(&memoryMap, "00051600", 0) ||
+                        compareSignature(&memoryMap, "00051607", 0))) {
+                const quint32 nVersion = read_uint32(4, true);
+                const quint16 nRecordCount = read_uint16(24, true);
+                const quint64 nDataFloor = 26U + ((quint64)nRecordCount * 12U);
+                bool bValidAppleSingle =
+                    ((nVersion == 0x00010000U) ||
+                     (nVersion == 0x00020000U)) &&
+                    (nRecordCount > 0) && (nDataFloor <= (quint64)nSize);
+                quint64 nArchiveEnd = nDataFloor;
+                for (quint16 i = 0;
+                     bValidAppleSingle && (i < nRecordCount); ++i) {
+                    const qint64 nRecordOffset = 26 + ((qint64)i * 12);
+                    const quint32 nEntryId =
+                        read_uint32(nRecordOffset, true);
+                    const quint64 nDataOffset =
+                        read_uint32(nRecordOffset + 4, true);
+                    const quint64 nDataSize =
+                        read_uint32(nRecordOffset + 8, true);
+                    if ((nEntryId == 0) || (nDataOffset < nDataFloor) ||
+                        (nDataOffset > (quint64)nSize) ||
+                        (nDataSize > ((quint64)nSize - nDataOffset))) {
+                        bValidAppleSingle = false;
+                        break;
+                    }
+                    nArchiveEnd = qMax(nArchiveEnd,
+                                       nDataOffset + nDataSize);
+                }
+                if (bValidAppleSingle &&
+                    (nArchiveEnd == (quint64)nSize)) {
+                    stResult.insert(FT_ARCHIVE);
+                    stResult.insert(FT_APPLESINGLE);
+                }
+            } else if ((nSize >= 4) && compareSignature(&memoryMap, "'DMS!'", 0)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_DMS);
+            } else if ((nSize >= 40) && compareSignature(&memoryMap, "'(This file must be converted with BinHex'", 0)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_BINHEX);
+            } else if ((nSize >= 11) && compareSignature(&memoryMap, "'xbtoa Begin'", 0)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_BTOA);
+            } else if ((nSize >= 64) && compareSignature(&memoryMap, "'2IMG'", 0) && (read_uint16(8) >= 64) &&
+                       (read_uint16(10) <= 1) && (read_uint32(12) <= 2U) && (read_uint32(20) > 0U) &&
+                       (read_uint32(24) >= read_uint16(8)) && ((quint64)read_uint32(24) <= (quint64)nSize) &&
+                       ((quint64)read_uint32(28) <= ((quint64)nSize - read_uint32(24)))) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_APPLE_2IMG);
+            } else if ((nSize >= 128) && compareSignature(&memoryMap, "DEADC0DE'JUNK'", 0) &&
+                       ((read_uint32(8) == 0x100U) || (read_uint32(8) == 0x200U)) &&
+                       (read_uint32(124) > 0U) && (read_uint32(124) <= 100000U)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_WINTERMUTE_DCP);
+            } else if ((nSize >= 16) && compareSignature(&memoryMap, "'PYZ'00", 0) &&
+                       (read_uint32(8, true) >= 12U) &&
+                       ((quint64)read_uint32(8, true) < (quint64)nSize)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_PYINSTALLER_PYZ);
+            } else if ((nSize >= 41) && compareSignature(&memoryMap, "'LZX'", 0)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_AMIGA_LZX);
+            } else if ((nSize >= 84) && compareSignature(&memoryMap, "ABCD0054", 0)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_DISK_DOUBLER);
+            } else if ((nSize >= 62) && compareSignature(&memoryMap, "'DDA2'", 0)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_DISK_DOUBLER_DDA2);
+            } else if (((nSize >= 9) && compareSignature(&memoryMap, "0D0A1A'CAZIP'", 0)) ||
+                       ((nSize >= 8) && compareSignature(&memoryMap, "'EDILZSS'", 0)) ||
+                       ((nSize >= 8) && compareSignature(&memoryMap, "'MRNZ'88F02733", 0))) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_DEARK_LEGACY_ARCHIVE);
+            } else if (((nSize >= 4) && compareSignature(&memoryMap, "'IMD '", 0)) ||
+                       ((nSize >= 4) && compareSignature(&memoryMap, "'QRST'", 0))) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_LIBDSK_IMAGE);
+            } else if ((nSize >= 4) &&
+                       (compareSignature(&memoryMap, "'PP11'", 0) ||
+                        compareSignature(&memoryMap, "'PP20'", 0) ||
+                        compareSignature(&memoryMap, "'PX20'", 0) ||
+                        compareSignature(&memoryMap, "'CHFC'", 0) ||
+                        compareSignature(&memoryMap, "'DEN!'", 0) ||
+                        compareSignature(&memoryMap, "'DXS9'", 0) ||
+                        compareSignature(&memoryMap, "'H.D.'", 0) ||
+                        compareSignature(&memoryMap, "'RVV!'", 0))) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_PP20);
+            } else if ((nSize >= 4) &&
+                       (compareSignature(&memoryMap, "'RNC'01", 0) ||
+                        compareSignature(&memoryMap, "'RNC'02", 0) ||
+                        compareSignature(&memoryMap, "'...'01", 0))) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_RNC);
+            } else if ((nSize >= 4) && compareSignature(&memoryMap, "'TPWM'", 0)) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_TPWM);
+            } else if ((nSize >= 2) &&
+                       (compareSignature(&memoryMap, "1F9E", 0) ||
+                        compareSignature(&memoryMap, "1F9F", 0))) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_FREEZE);
+            } else if ((nSize >= 2) &&
+                       (compareSignature(&memoryMap, "1F1E", 0) ||
+                        compareSignature(&memoryMap, "1F1F", 0))) {
+                stResult.insert(FT_ARCHIVE);
+                stResult.insert(FT_UNIX_PACK);
+            } else if ((nSize >= 20) && compareSignature(&memoryMap, "'DHF'", 0)) {
+                quint64 nOffset = 3;
+                quint32 nRecordCount = 0;
+                bool bValidHog = true;
+                while (nOffset < (quint64)nSize) {
+                    if (((quint64)nSize - nOffset < 17U) ||
+                        (nRecordCount >= 100000U)) {
+                        bValidHog = false;
+                        break;
+                    }
+                    const quint64 nDataSize = read_uint32((qint64)nOffset + 13);
+                    nOffset += 17U;
+                    if (nDataSize > ((quint64)nSize - nOffset)) {
+                        bValidHog = false;
+                        break;
+                    }
+                    nOffset += nDataSize;
+                    nRecordCount++;
+                }
+                if (bValidHog && (nRecordCount > 0) &&
+                    (nOffset == (quint64)nSize)) {
+                    stResult.insert(FT_ARCHIVE);
+                    stResult.insert(FT_DESCENT_HOG);
+                }
+            } else if ((nSize >= 96) &&
+                       (compareSignature(&memoryMap, "'C64 tape image file'", 0) ||
+                        compareSignature(&memoryMap, "'C64S tape image file'", 0))) {
+                const quint16 nVersion = read_uint16(32);
+                const quint16 nMaxRecords = read_uint16(34);
+                const quint16 nUsedRecords = read_uint16(36);
+                const quint64 nDataFloor = 64U + ((quint64)nMaxRecords * 32U);
+                bool bValidT64 = ((nVersion == 0x0100) ||
+                                  (nVersion == 0x0101)) &&
+                                 (nMaxRecords > 0) &&
+                                 (nUsedRecords > 0) &&
+                                 (nUsedRecords <= nMaxRecords) &&
+                                 (nDataFloor <= (quint64)nSize);
+                quint32 nActiveRecords = 0;
+                for (quint16 i = 0; bValidT64 && (i < nMaxRecords); ++i) {
+                    const qint64 nRecordOffset = 64 + ((qint64)i * 32);
+                    const quint8 nEntryType = read_uint8(nRecordOffset);
+                    if (nEntryType == 0) continue;
+                    if (nEntryType != 1) {
+                        bValidT64 = false;
+                        break;
+                    }
+                    const quint16 nStartAddress =
+                        read_uint16(nRecordOffset + 2);
+                    const quint16 nEndAddress =
+                        read_uint16(nRecordOffset + 4);
+                    const quint64 nDataOffset =
+                        read_uint32(nRecordOffset + 8);
+                    const quint64 nDataSize =
+                        (nEndAddress >= nStartAddress)
+                            ? (quint64)(nEndAddress - nStartAddress)
+                            : ((quint64)nSize + 1U);
+                    if ((nDataOffset < nDataFloor) ||
+                        (nDataOffset > (quint64)nSize) ||
+                        (nDataSize > ((quint64)nSize - nDataOffset))) {
+                        bValidT64 = false;
+                        break;
+                    }
+                    nActiveRecords++;
+                }
+                if (bValidT64 && (nActiveRecords == nUsedRecords)) {
+                    stResult.insert(FT_ARCHIVE);
+                    stResult.insert(FT_C64_T64);
+                }
             } else if (compareSignature(&memoryMap, "'PK'0304", 0) || compareSignature(&memoryMap, "'PK'0506", 0))  // TODO baHeader
             {
                 stResult.insert(FT_ARCHIVE);
@@ -13648,6 +13917,8 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         // whenever both a packer type and its base container are detected.
         FT_ISCAB,
         FT_RIB,
+        FT_PE64_INSTALLSHIELD,
+        FT_PE32_INSTALLSHIELD,
         FT_PE64_WIXBURN,
         FT_PE64_7ZSFX,
         FT_PE64_ACTUALINSTALLER,
@@ -13714,6 +13985,18 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_ELF32_CABSFX,
         FT_ELF32_FREEARCSFX,
         FT_ELF32_ZPAQSFX,
+        FT_ARCSFX,
+        FT_ARJSFX,
+        FT_LHASFX,
+        FT_ZIPSFX,
+        FT_RARSFX,
+        FT_CABSFX,
+        FT_FREEARCSFX,
+        FT_ZPAQSFX,
+        FT_GZIPSFX,
+        FT_KWAJSFX,
+        FT_SZDDSFX,
+        FT_PYINSTALLER_SFX,
 
         FT_PE64_SFX,
         FT_PE32_SFX,
@@ -13757,6 +14040,64 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_QUAKE_PAK,
         FT_DOOM_WAD,
         FT_BUILD_GRP,
+        FT_DESCENT_HOG,
+        FT_C64_T64,
+        FT_APPLESINGLE,
+        FT_MACBINARY,
+        FT_RESOURCE_FORK,
+        FT_CPM_LBR,
+        FT_DMS,
+        FT_PP20,
+        FT_RNC,
+        FT_TPWM,
+        FT_FREEZE,
+        FT_UNIX_PACK,
+        FT_BINHEX,
+        FT_BTOA,
+        FT_APPLE_2IMG,
+        FT_WINTERMUTE_DCP,
+        FT_PYINSTALLER_PYZ,
+        FT_AMIGA_LZX,
+        FT_DEARK_LEGACY_ARCHIVE,
+        FT_LIBDSK_IMAGE,
+        FT_WOLF_VSWAP,
+        FT_COMPACT_PRO,
+        FT_DISK_DOUBLER,
+        FT_DISK_DOUBLER_DDA2,
+        FT_LEGACY_CAT,
+        FT_KA_ARCHIVE,
+        FT_MLB_ARCHIVE,
+        FT_LEGACY_RES,
+        FT_LEGACY_RSC,
+        FT_SHRINKWRAP_IMAGE,
+        FT_LPAK,
+        FT_DISKJUGGLER_CDI,
+        FT_INSTALLSHIELD_BOOT,
+        FT_SABDU_IMAGE,
+        FT_COMPAQ_LZH,
+        FT_WISE_SFX,
+        FT_EPFS_ARCHIVE,
+        FT_STUNTS_DSI,
+        FT_FINSTALL_ARCHIVE,
+        FT_IS_STORED,
+        FT_INSTALLSHIELD3_ARCHIVE,
+        FT_EMT_IMAGE,
+        FT_GPFPACK,
+        FT_PAX,
+        FT_SCF,
+        FT_SOLITAIRE_DELUXE,
+        FT_INSTALIT_DATA,
+        FT_ARCV,
+        FT_PIMP_SFX,
+        FT_VISE_SFX,
+        FT_FTCOMP,
+        FT_DN_ARCHIVE,
+        FT_FPAK,
+        FT_SOFTPAQ1_SFX,
+        FT_INSTALIT_SFX,
+        FT_LIF_COMPRESSED,
+        FT_JASC_ARCHIVE,
+        FT_SSM_MODULE,
         // SAR and ARX precede LHA: all three share the method tag, so the more
         // specific types must win.
         FT_SAR,
@@ -14016,6 +14357,64 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_QUAKE_PAK, FT_FLAG_ARCHIVES},
         {FT_DOOM_WAD, FT_FLAG_ARCHIVES},
         {FT_BUILD_GRP, FT_FLAG_ARCHIVES},
+        {FT_DESCENT_HOG, FT_FLAG_ARCHIVES},
+        {FT_C64_T64, FT_FLAG_ARCHIVES},
+        {FT_APPLESINGLE, FT_FLAG_ARCHIVES},
+        {FT_MACBINARY, FT_FLAG_ARCHIVES},
+        {FT_RESOURCE_FORK, FT_FLAG_ARCHIVES},
+        {FT_CPM_LBR, FT_FLAG_ARCHIVES},
+        {FT_DMS, FT_FLAG_ARCHIVES},
+        {FT_PP20, FT_FLAG_ARCHIVES},
+        {FT_RNC, FT_FLAG_ARCHIVES},
+        {FT_TPWM, FT_FLAG_ARCHIVES},
+        {FT_FREEZE, FT_FLAG_ARCHIVES},
+        {FT_UNIX_PACK, FT_FLAG_ARCHIVES},
+        {FT_BINHEX, FT_FLAG_ARCHIVES},
+        {FT_BTOA, FT_FLAG_ARCHIVES},
+        {FT_APPLE_2IMG, FT_FLAG_ARCHIVES},
+        {FT_WINTERMUTE_DCP, FT_FLAG_ARCHIVES},
+        {FT_PYINSTALLER_PYZ, FT_FLAG_ARCHIVES},
+        {FT_AMIGA_LZX, FT_FLAG_ARCHIVES},
+        {FT_DEARK_LEGACY_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_LIBDSK_IMAGE, FT_FLAG_ARCHIVES},
+        {FT_WOLF_VSWAP, FT_FLAG_ARCHIVES},
+        {FT_COMPACT_PRO, FT_FLAG_ARCHIVES},
+        {FT_DISK_DOUBLER, FT_FLAG_ARCHIVES},
+        {FT_DISK_DOUBLER_DDA2, FT_FLAG_ARCHIVES},
+        {FT_LEGACY_CAT, FT_FLAG_ARCHIVES},
+        {FT_KA_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_MLB_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_LEGACY_RES, FT_FLAG_ARCHIVES},
+        {FT_LEGACY_RSC, FT_FLAG_ARCHIVES},
+        {FT_SHRINKWRAP_IMAGE, FT_FLAG_ARCHIVES},
+        {FT_LPAK, FT_FLAG_ARCHIVES},
+        {FT_DISKJUGGLER_CDI, FT_FLAG_ARCHIVES},
+        {FT_INSTALLSHIELD_BOOT, FT_FLAG_ARCHIVES},
+        {FT_SABDU_IMAGE, FT_FLAG_ARCHIVES},
+        {FT_COMPAQ_LZH, FT_FLAG_ARCHIVES},
+        {FT_WISE_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_EPFS_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_STUNTS_DSI, FT_FLAG_ARCHIVES},
+        {FT_FINSTALL_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_IS_STORED, FT_FLAG_ARCHIVES},
+        {FT_INSTALLSHIELD3_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_EMT_IMAGE, FT_FLAG_ARCHIVES},
+        {FT_GPFPACK, FT_FLAG_ARCHIVES},
+        {FT_PAX, FT_FLAG_ARCHIVES},
+        {FT_SCF, FT_FLAG_ARCHIVES},
+        {FT_SOLITAIRE_DELUXE, FT_FLAG_ARCHIVES},
+        {FT_INSTALIT_DATA, FT_FLAG_ARCHIVES},
+        {FT_ARCV, FT_FLAG_ARCHIVES},
+        {FT_PIMP_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_VISE_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_FTCOMP, FT_FLAG_ARCHIVES},
+        {FT_DN_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_FPAK, FT_FLAG_ARCHIVES},
+        {FT_SOFTPAQ1_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_INSTALIT_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_LIF_COMPRESSED, FT_FLAG_ARCHIVES},
+        {FT_JASC_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_SSM_MODULE, FT_FLAG_ARCHIVES},
         {FT_RIB, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_PMM, FT_FLAG_ARCHIVES},
         {FT_PARSEC_ARCHIVE, FT_FLAG_ARCHIVES},
@@ -14062,6 +14461,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         // Off by default; only listed when FT_FLAG_STATICUNPACKERS is requested.
         {FT_ISCAB, FT_FLAG_STATICUNPACKERS},
         {FT_UPX, FT_FLAG_STATICUNPACKERS},
+        {FT_PE32_INSTALLSHIELD, FT_FLAG_STATICUNPACKERS},
+        {FT_PE64_INSTALLSHIELD, FT_FLAG_STATICUNPACKERS},
         {FT_PE32_7ZSFX, FT_FLAG_STATICUNPACKERS},
         {FT_PE64_7ZSFX, FT_FLAG_STATICUNPACKERS},
         {FT_PE32_ACTUALINSTALLER, FT_FLAG_STATICUNPACKERS},
@@ -14130,6 +14531,18 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_PE64_ZPAQSFX, FT_FLAG_STATICUNPACKERS},
         {FT_ELF32_ZPAQSFX, FT_FLAG_STATICUNPACKERS},
         {FT_ELF64_ZPAQSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_ARCSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_ARJSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_LHASFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_ZIPSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_RARSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_CABSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_FREEARCSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_ZPAQSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_GZIPSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_KWAJSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_SZDDSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_PYINSTALLER_SFX, FT_FLAG_STATICUNPACKERS},
     };
 
     const qint32 nCount = (qint32)(sizeof(g_arrCategory) / sizeof(g_arrCategory[0]));
@@ -23955,10 +24368,11 @@ static bool _unpResolveDirectoryName(_UNP_DIR_RESOLVE_CTX *pCtx, const QString &
     return true;
 }
 
-bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
+bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct, qint32 *pnSkippedEntries)
 {
     QPointer<XBinary> guardedThis(this);
     bool bResult = false;
+    if (pnSkippedEntries) *pnSkippedEntries = 0;
 
     PDSTRUCT pdStructEmpty = createPdStruct();
 
@@ -24093,7 +24507,20 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
             bResult = true;
             bool bContinue = false;
 
+            // Best-effort mode: a member that fails to decode (or fails its
+            // CRC / path / size checks) is skipped and counted instead of
+            // aborting and rolling back the whole archive.  Structural
+            // failures — state inconsistencies, lifetime loss, cancellation,
+            // and folder-transaction errors — still abort, because continuing
+            // past them cannot produce a trustworthy destination.
+            const bool bContinueOnError = mapEffectiveProperties.value(UNPACK_PROP_CONTINUEONERROR).toBool();
+            qint32 nFailedEntries = 0;
+            qint32 nSucceededEntries = 0;
+            QString sFirstEntryError;
+
             do {
+                bool bEntrySoftFail = false;
+                bool bEntryRecoveredFile = false;
                 if (guardedThis && isProgressAlive() && isPdStructNotCanceled(pPdStruct)) {
                     const qint32 nExpectedIndex = state.nCurrentIndex;
                     ARCHIVERECORD record = guardedThis->infoCurrent(&state, pPdStruct);
@@ -24155,6 +24582,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                     if (!bPathResolved) {
                         if (isProgressAlive()) setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot resolve output path")).arg(sFileName));
                         bResult = false;
+                        bEntrySoftFail = true;
                     } else if (!sFileName.isEmpty()) {
                         sFileName = QDir::fromNativeSeparators(sFileName);
                         QString sBaseFileName = sFileName;
@@ -24236,6 +24664,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                         if (!bOutputSelected) {
                             if (isProgressAlive()) setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot resolve output path")).arg(sFileName));
                             bResult = false;
+                            bEntrySoftFail = true;
                         } else if (bSkipFile) {
                             bResult = true;
                         } else if (!bDeclaredOutputSizeValid) {
@@ -24243,11 +24672,13 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                 setPdStructErrorString(pPdStruct, tr("Invalid unpacked output size"));
                             }
                             bResult = false;
+                            bEntrySoftFail = true;
                         } else if (bDeclaredOutputSizeOverLimit) {
                             if (isProgressAlive()) {
                                 setPdStructErrorString(pPdStruct, tr("Unpacked output exceeds the configured limit"));
                             }
                             bResult = false;
+                            bEntrySoftFail = true;
                         } else if (bIsDirectory) {
                             bResult = folderTransaction.ensureDirectory(sFilePath);
                             if (!bResult) reportTransactionError();
@@ -24266,17 +24697,23 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                     const bool bFlushed = temporaryFile.flush();
                                     const qint64 nStagedSize = temporaryFile.size();
                                     const bool bLimitExceeded = temporaryFile.limitExceeded() || ((nOutputLimit >= 0) && (nStagedSize > nOutputLimit));
-                                    if (bLimitExceeded) {
+                                    if (!guardedThis || !isProgressAlive() || (state.nCurrentIndex != nExpectedIndex) ||
+                                        (state.nNumberOfRecords != nNumberOfRecords)) {
+                                        // Lifetime loss or streaming-state inconsistency: hard
+                                        // abort, checked before any soft classification.
+                                        bResult = false;
+                                    } else if (bLimitExceeded) {
                                         if (isProgressAlive()) {
                                             setPdStructErrorString(pPdStruct, tr("Unpacked output exceeds the configured limit"));
                                         }
                                         bResult = false;
-                                    } else if (!guardedThis || !isProgressAlive() || !bFlushed || (nStagedSize < 0) || !bUnpacked ||
-                                               (state.nCurrentIndex != nExpectedIndex) || (state.nNumberOfRecords != nNumberOfRecords)) {
+                                        bEntrySoftFail = true;
+                                    } else if (!bUnpacked || !bFlushed || (nStagedSize < 0)) {
 #ifdef QT_DEBUG
                                         qDebug() << "Cannot unpack" << sFilePath;
 #endif
                                         bResult = false;
+                                        bEntrySoftFail = true;
                                     } else {
                                         bResult = true;
                                     }
@@ -24305,6 +24742,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 #endif
                                             if (!bCRCOk && isProgressAlive()) {
                                                 setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("CRC check failed")).arg(sFilePath));
+                                                bEntrySoftFail = true;
                                             }
                                         } else {
                                             bResult = false;
@@ -24335,6 +24773,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                     }
                                     if (bResult) {
                                         bResult = folderTransaction.markFilePublished(sFilePath);
+                                        if (bResult) bEntryRecoveredFile = true;
                                     }
 
                                     if (!bResult) {
@@ -24410,6 +24849,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                                 }
                                                 if (bResult) {
                                                     bResult = folderTransaction.markFilePublished(sFilePath);
+                                                    if (bResult) bEntryRecoveredFile = true;
                                                 }
                                             } else {
                                                 outputFile.cancelWriting();
@@ -24471,7 +24911,19 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                 }
 
                 if (!bResult) {
-                    break;
+                    if (bContinueOnError && bEntrySoftFail && guardedThis && isProgressAlive() && isPdStructNotCanceled(pPdStruct)) {
+                        ++nFailedEntries;
+                        if (sFirstEntryError.isEmpty()) sFirstEntryError = getPdStructErrorString(pPdStruct);
+                        setPdStructErrorString(pPdStruct, QString());
+                        bResult = true;
+                    } else {
+                        break;
+                    }
+                } else if (bEntryRecoveredFile) {
+                    // Only genuinely recovered files count: directories and
+                    // no-overwrite skips must not satisfy the
+                    // "recovered nothing -> fail" rule below.
+                    ++nSucceededEntries;
                 }
 
                 const qint32 nPreviousIndex = state.nCurrentIndex;
@@ -24496,6 +24948,26 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
             const bool bFinished = guardedThis && guardedThis->finishUnpack(&state, nullptr);
             bResult = bResult && guardedThis && bFinished && isProgressAlive() && isPdStructNotCanceled(pPdStruct);
+
+            if (bResult && (nFailedEntries > 0) && (nSucceededEntries == 0)) {
+                // Best-effort mode recovered nothing: report the original
+                // failure instead of committing an empty destination.
+                bResult = false;
+                if (isProgressAlive() && getPdStructErrorString(pPdStruct).isEmpty()) {
+                    setPdStructErrorString(pPdStruct, sFirstEntryError);
+                }
+            } else if (bResult && (nFailedEntries > 0) && isProgressAlive()) {
+                // Successful best-effort run: the destination commits, and the
+                // skipped-member tally is surfaced through the progress error
+                // string without flipping the result.  (Bytes debited from the
+                // output budget by failed members are deliberately not
+                // credited back: the budget stays a conservative ceiling.)
+                if (pnSkippedEntries) *pnSkippedEntries = nFailedEntries;
+                setPdStructErrorString(pPdStruct, QString("%1: %2 (%3)")
+                                                     .arg(tr("Some archive members were skipped"))
+                                                     .arg(nFailedEntries)
+                                                     .arg(sFirstEntryError.isEmpty() ? tr("unknown reason") : sFirstEntryError));
+            }
 
             if (bResult) {
                 bResult = folderTransaction.commit();
@@ -24759,6 +25231,62 @@ QList<QString> XBinary::getSearchSignatures()
         listResult.append("'PWAD'");
     } else if (XBinary::checkFileType(FT_BUILD_GRP, fileType)) {
         listResult.append("'KenSilverman'");
+    } else if (XBinary::checkFileType(FT_DESCENT_HOG, fileType)) {
+        listResult.append("'DHF'");
+    } else if (XBinary::checkFileType(FT_C64_T64, fileType)) {
+        listResult.append("'C64 tape image file'");
+        listResult.append("'C64S tape image file'");
+    } else if (XBinary::checkFileType(FT_APPLESINGLE, fileType)) {
+        listResult.append("00051600");
+        listResult.append("00051607");
+    } else if (XBinary::checkFileType(FT_CPM_LBR, fileType)) {
+        listResult.append("00'           '0000");
+    } else if (XBinary::checkFileType(FT_DMS, fileType)) {
+        listResult.append("'DMS!'");
+    } else if (XBinary::checkFileType(FT_PP20, fileType)) {
+        listResult.append("'PP11'");
+        listResult.append("'PP20'");
+        listResult.append("'PX20'");
+        listResult.append("'CHFC'");
+        listResult.append("'DEN!'");
+        listResult.append("'DXS9'");
+        listResult.append("'H.D.'");
+        listResult.append("'RVV!'");
+    } else if (XBinary::checkFileType(FT_RNC, fileType)) {
+        listResult.append("'RNC'01");
+        listResult.append("'RNC'02");
+        listResult.append("'...'01");
+    } else if (XBinary::checkFileType(FT_TPWM, fileType)) {
+        listResult.append("'TPWM'");
+    } else if (XBinary::checkFileType(FT_FREEZE, fileType)) {
+        listResult.append("1F9E");
+        listResult.append("1F9F");
+    } else if (XBinary::checkFileType(FT_UNIX_PACK, fileType)) {
+        listResult.append("1F1E");
+        listResult.append("1F1F");
+    } else if (XBinary::checkFileType(FT_BINHEX, fileType)) {
+        listResult.append("'(This file must be converted with BinHex'");
+    } else if (XBinary::checkFileType(FT_BTOA, fileType)) {
+        listResult.append("'xbtoa Begin'");
+    } else if (XBinary::checkFileType(FT_APPLE_2IMG, fileType)) {
+        listResult.append("'2IMG'");
+    } else if (XBinary::checkFileType(FT_WINTERMUTE_DCP, fileType)) {
+        listResult.append("DEADC0DE'JUNK'");
+    } else if (XBinary::checkFileType(FT_PYINSTALLER_PYZ, fileType)) {
+        listResult.append("'PYZ'00");
+    } else if (XBinary::checkFileType(FT_AMIGA_LZX, fileType)) {
+        listResult.append("'LZX'");
+    } else if (XBinary::checkFileType(FT_DEARK_LEGACY_ARCHIVE, fileType)) {
+        listResult.append("0D0A1A'CAZIP'");
+        listResult.append("'EDILZSS'");
+        listResult.append("'MRNZ'88F02733");
+    } else if (XBinary::checkFileType(FT_LIBDSK_IMAGE, fileType)) {
+        listResult.append("'IMD '");
+        listResult.append("'QRST'");
+    } else if (XBinary::checkFileType(FT_DISK_DOUBLER, fileType)) {
+        listResult.append("ABCD0054");
+    } else if (XBinary::checkFileType(FT_DISK_DOUBLER_DDA2, fileType)) {
+        listResult.append("'DDA2'");
     } else if (XBinary::checkFileType(FT_CKP, fileType)) {
         listResult.append("'.CKP'0001");
     } else if (XBinary::checkFileType(FT_EDP, fileType)) {

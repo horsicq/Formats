@@ -307,7 +307,59 @@ public:
         HANDLE_METHOD_QUANTUM_CAB,     // CAB compression type 2 (Quantum). Kept at the tail so persisted ids do not move.
         HANDLE_METHOD_COKTEL_LZ,       // Coktel Vision STK/ITK LZSS
         HANDLE_METHOD_WINZIP_JPEG,     // ZIP method 96: WinZip JPEG recompression
-        HANDLE_METHOD_WAVPACK          // ZIP method 97: WavPack audio
+        HANDLE_METHOD_WAVPACK,         // ZIP method 97: WavPack audio
+        HANDLE_METHOD_AMIGA_LZX,       // Historical Amiga LZX (not CAB/WIM LZX)
+        HANDLE_METHOD_COMPACT_PRO_RLE,
+        HANDLE_METHOD_COMPACT_PRO_LZH,
+        HANDLE_METHOD_DISKDOUBLER_ADN,
+        HANDLE_METHOD_DISKDOUBLER_DDN,
+        HANDLE_METHOD_DISKDOUBLER_COMPACT_PRO,
+        HANDLE_METHOD_LPAK_LZSS,
+        HANDLE_METHOD_CDI_2336,
+        HANDLE_METHOD_CDI_MODE1_2352,
+        HANDLE_METHOD_CDI_MODE2_2352,
+        HANDLE_METHOD_WISE_DEFLATE,
+        // East Point Software EPFS LZW. Appended so persisted method ids stay
+        // stable; unlike textbook LZW, a dictionary reset keeps its bit width.
+        HANDLE_METHOD_EPFS_LZW,
+        // Distinctive Software's multi-pass Stunts/4D resource compressor.
+        HANDLE_METHOD_STUNTS_DSI,
+        HANDLE_METHOD_XOR_A9,
+        // PKWARE Data Compression Library Implode stream (also called
+        // TTCOMP).  Unlike ZIP method 6, this stream carries its literal and
+        // dictionary selectors in the first two bytes and uses fixed trees.
+        HANDLE_METHOD_PKWARE_DCL_IMPLODE,
+        // EMT/LOADDSKF track records use F1,value,count RLE and carry a
+        // fixed per-track descriptor prefix.
+        HANDLE_METHOD_EMT_RLE,
+        // GPF Systems' GPFPACK wrapper stores independent 8192-byte blocks
+        // using an MSB-first, early-width-change LZW stream.
+        HANDLE_METHOD_GPFPACK_LZW,
+        // GEM-View PAX/LZF0 adaptive Huffman plus circular-window LZ.
+        HANDLE_METHOD_PAX_LZF,
+        // Eschalon Setup / EDI Install ARCV version-1 CHNK payload.  This is
+        // the 287-symbol Yoshizaki adaptive Huffman/LZSS variant with an
+        // explicit EOF symbol and a 4 KiB history window.
+        HANDLE_METHOD_ARCV_LZHUF,
+        // Windows Installer VISE exchanges each adjacent byte pair in its
+        // otherwise standard raw-Deflate streams.
+        HANDLE_METHOD_VISE_DEFLATE,
+        // IBM OS/2 PACK2/FTCOMP's proprietary fT19 codec.  The container and
+        // member metadata are supported; the codec is deliberately identified
+        // instead of being mislabeled as a generic unknown method.
+        HANDLE_METHOD_FTCOMP_FT19,
+        // DOS Navigator 1.x installer compression.  Stored records are
+        // extracted independently; compressed records retain this explicit
+        // method until the proprietary codec is implemented.
+        HANDLE_METHOD_DN_COMPRESSED,
+        // FoxPro Distribution Kit FPAK/FPPF stream.  The container and split
+        // volume segments are parsed without pretending that the codec is a
+        // standard LZ variant.
+        HANDLE_METHOD_FPAK_COMPRESSED,
+        // JASC's pre-InstallShield setup compressor.  Directory records are
+        // fully parsed even though its arithmetic/LZ payload is proprietary.
+        HANDLE_METHOD_JASC_COMPRESSED,
+        HANDLE_METHOD_SSM_PICTOOLS
         // TODO check more methods
     };
 
@@ -476,7 +528,8 @@ public:
         UNPACK_PROP_MAX_ENTRY_COUNT,         // qint64: member count per operation
         UNPACK_PROP_MAX_MEMORY_OUTPUT_SIZE,  // qint64: cap for in-memory (QByteArray) routes
         UNPACK_PROP_REQUIRE_FREE_SPACE,      // bool: opt-in destination free-space preflight
-        UNPACK_PROP_MAX_EXPANSION_RATIO      // reserved; deliberately never read in this plan
+        UNPACK_PROP_MAX_EXPANSION_RATIO,     // reserved; deliberately never read in this plan
+        UNPACK_PROP_CONTINUEONERROR          // bool: folder extraction skips members that fail to unpack instead of aborting the archive
     };
 
     // Accounts temporary decoder memory against the process-wide unpack
@@ -1117,6 +1170,105 @@ public:
         FT_SND,
         FT_PMA,
         FT_MDH,
+
+        // InstallShield installer executables with embedded ISc( media
+        // (XStaticUnpacker). Appended so persisted FT numeric IDs stay stable;
+        // XFormats::isStaticUnpacker() lists these explicitly because they sit
+        // outside the contiguous static-unpacker range above.
+        FT_PE32_INSTALLSHIELD,
+        FT_PE64_INSTALLSHIELD,
+
+        // Legacy archive-family SFX identities. These are architecture-neutral
+        // because the same payloads occur in DOS MZ/COM, Windows NE/PE, and
+        // other executable stubs. Keep appended to preserve persisted IDs.
+        FT_ARCSFX,
+        FT_ARJSFX,
+        FT_LHASFX,
+        FT_ZIPSFX,
+        FT_RARSFX,
+        FT_CABSFX,
+        FT_FREEARCSFX,
+        FT_ZPAQSFX,
+
+        // Single-stream Microsoft-era SFX identities. Appended to preserve
+        // every existing persisted FT numeric ID.
+        FT_GZIPSFX,
+        FT_KWAJSFX,
+        FT_SZDDSFX,
+
+        // Store-only legacy container identities. Appended to preserve every
+        // existing persisted FT numeric ID.
+        FT_DESCENT_HOG,
+        FT_C64_T64,
+        FT_APPLESINGLE,
+
+        // Store-only classic Macintosh and CP/M container identities.
+        // Appended to preserve every existing persisted FT numeric ID.
+        FT_MACBINARY,
+        FT_RESOURCE_FORK,
+        FT_CPM_LBR,
+
+        // Strongly identified single-stream legacy compression formats,
+        // decoded by the embedded BSD-licensed Ancient backend.
+        FT_DMS,
+        FT_PP20,
+        FT_RNC,
+        FT_TPWM,
+        FT_FREEZE,
+        FT_UNIX_PACK,
+
+        // Historical printable transport encodings. Appended to preserve
+        // every persisted numeric file-type identity.
+        FT_BINHEX,
+        FT_BTOA,
+        FT_APPLE_2IMG,
+        FT_WINTERMUTE_DCP,
+        FT_PYINSTALLER_PYZ,
+        FT_AMIGA_LZX,
+        FT_DEARK_LEGACY_ARCHIVE,
+        FT_LIBDSK_IMAGE,
+        FT_WOLF_VSWAP,
+        FT_COMPACT_PRO,
+        FT_DISK_DOUBLER,
+        FT_DISK_DOUBLER_DDA2,
+        FT_PYINSTALLER_SFX,
+
+        // Fully bounded legacy table containers and the Atari LPAK stream.
+        // Appended to preserve every existing persisted FT numeric ID.
+        FT_LEGACY_CAT,
+        FT_KA_ARCHIVE,
+        FT_MLB_ARCHIVE,
+        FT_LEGACY_RES,
+        FT_LEGACY_RSC,
+        FT_SHRINKWRAP_IMAGE,
+        FT_LPAK,
+        FT_DISKJUGGLER_CDI,
+        FT_INSTALLSHIELD_BOOT,
+        FT_SABDU_IMAGE,
+        FT_COMPAQ_LZH,
+        FT_WISE_SFX,
+        FT_EPFS_ARCHIVE,
+        FT_STUNTS_DSI,
+        FT_FINSTALL_ARCHIVE,
+        FT_IS_STORED,
+        FT_INSTALLSHIELD3_ARCHIVE,
+        FT_EMT_IMAGE,
+        FT_GPFPACK,
+        FT_PAX,
+        FT_SCF,
+        FT_SOLITAIRE_DELUXE,
+        FT_INSTALIT_DATA,
+        FT_ARCV,
+        FT_PIMP_SFX,
+        FT_VISE_SFX,
+        FT_FTCOMP,
+        FT_DN_ARCHIVE,
+        FT_FPAK,
+        FT_SOFTPAQ1_SFX,
+        FT_INSTALIT_SFX,
+        FT_LIF_COMPRESSED,
+        FT_JASC_ARCHIVE,
+        FT_SSM_MODULE,
 
         // TODO more
     };
@@ -3208,7 +3360,10 @@ public:
     virtual QVariant calculateHash(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
     static QVariant calculateHash(const QString &sFileName, PDSTRUCT *pPdStruct = nullptr);
 
-    bool unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
+    // pnSkippedEntries (optional): number of members skipped by
+    // UNPACK_PROP_CONTINUEONERROR on a successful best-effort run; 0 otherwise.
+    bool unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr,
+                        qint32 *pnSkippedEntries = nullptr);
     bool unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
     // Safely re-open the session, revalidate the expected record identity and
     // publish exactly one member transactionally to a seekable output device.
