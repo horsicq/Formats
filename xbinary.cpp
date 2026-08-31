@@ -24786,7 +24786,10 @@ QString unpackSanitizeDiagnosticIdentity(const QString &sText)
             sPiece = QStringLiteral("\\t");
         } else if ((ch.category() == QChar::Other_Control) || (ch.category() == QChar::Other_Format) ||
                    (ch.category() == QChar::Separator_Line) || (ch.category() == QChar::Separator_Paragraph)) {
-            sPiece = QStringLiteral("\\u%1").arg(ch.unicode(), 4, 16, QLatin1Char('0'));
+            // QChar::unicode() returns ushort on Qt5 but char16_t on Qt6, and
+            // QString::arg's numeric overload rejects character types, so the
+            // uncast call fails to compile under Qt6 (MSVC: error C2672).
+            sPiece = QStringLiteral("\\u%1").arg(static_cast<ushort>(ch.unicode()), 4, 16, QLatin1Char('0'));
         } else {
             sPiece = ch;
         }

@@ -23,6 +23,7 @@ contains(QT_ARCH, x86_64)|contains(QT_ARCH, i386) {
 
 HEADERS += \
     $$PWD/xformats.h \
+    $$PWD/xmetadataappender.h \
     $$PWD/xsearchprocess.h
 
 SOURCES += \

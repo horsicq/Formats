@@ -67,6 +67,7 @@ set(XFORMATS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xbinary.h
     ${CMAKE_CURRENT_LIST_DIR}/xbinary_def.h
+    ${CMAKE_CURRENT_LIST_DIR}/xmetadataappender.h
     ${CMAKE_CURRENT_LIST_DIR}/subdevice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/subdevice.h
     ${CMAKE_CURRENT_LIST_DIR}/xformats.cpp
