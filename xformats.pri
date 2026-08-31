@@ -1,5 +1,9 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
+INCLUDEPATH += $$PWD/archives
+DEPENDPATH += $$PWD/archives
+INCLUDEPATH += $$PWD/Algos
+DEPENDPATH += $$PWD/Algos
 
 # Enable AVX2 for optimized binary operations on x86/x64 architectures
 contains(QT_ARCH, x86_64)|contains(QT_ARCH, i386) {
@@ -83,20 +87,14 @@ SOURCES += \
     include($$PWD/exec/xatarist.pri)
 }
 
-contains(XCONFIG, use_dex) {
-    DEFINES += USE_DEX
-    !contains(XCONFIG, xdex) {
-        XCONFIG += xdex
-        include($$PWD/../XDEX/xdex.pri)
-    }
+!contains(XCONFIG, xdex) {
+    XCONFIG += xdex
+    include($$PWD/../XDEX/xdex.pri)
 }
 
-contains(XCONFIG, use_pdf) {
-    DEFINES += USE_PDF
-    !contains(XCONFIG, xpdf) {
-        XCONFIG += xpdf
-        include($$PWD/../XPDF/xpdf.pri)
-    }
+!contains(XCONFIG, xpdf) {
+    XCONFIG += xpdf
+    include($$PWD/../XPDF/xpdf.pri)
 }
 
 contains(XCONFIG, use_archive) {
@@ -107,10 +105,10 @@ contains(XCONFIG, use_archive) {
     }
 }
 
-# XZip and the Deflate/store/... decoders are always available, with or
-# without use_archive/USE_ARCHIVE (the flag keeps gating the other archive
-# formats). When use_archive is set the include above already pulled the same
-# unit through xarchive.pri, so the xzip flag makes this a no-op.
+# All classes relocated from XArchive to Formats are always available, with or
+# without use_archive/USE_ARCHIVE. The flag keeps gating only the classes that
+# remain in XArchive. When use_archive is set, the include above already pulled
+# this core through xarchive.pri, so the xzip flag makes this a no-op.
 !contains(XCONFIG, xzip) {
     XCONFIG += xzip
     include($$PWD/../XArchive/xzip.pri)

@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xavi.h"
+#include "../xmetadataappender.h"
 
 XBinary::XCONVERT _TABLE_XAVI_STRUCTID[] = {{XAVI::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
                                             {XAVI::STRUCTID_HEADER, "HEADER", QString("Header")},
@@ -138,16 +139,7 @@ QVector<XBinary::XMETADATA_STRUCT> XAVI::getMetadataStructs()
         return listResult;
     }
 
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     const qint64 nAvihOffset = find_ansiString(12, getSize() - 12, QString("avih"), nullptr);
     if ((nAvihOffset >= 0) && checkOffsetSize(nAvihOffset, 48) && (read_uint32(nAvihOffset + 4, false) >= 40)) {

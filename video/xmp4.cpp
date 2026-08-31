@@ -19,8 +19,48 @@
  * SOFTWARE.
  */
 #include "xmp4.h"
+#include "../xmetadataappender.h"
 
 #include <QTimeZone>
+
+namespace {
+
+class XMP4DateTimeAppender
+{
+public:
+    XMP4DateTimeAppender(XMP4 *pMP4, QVector<XBinary::XMETADATA_STRUCT> *pListResult, qint64 nMacToUnixEpoch)
+        : m_pMP4(pMP4), m_pListResult(pListResult), m_nMacToUnixEpoch(nMacToUnixEpoch)
+    {
+    }
+
+    void operator()(qint64 nOffset, qint64 nSize, quint64 nMacSeconds, XBinary::XMETADATA_ID id, const QString &sName) const
+    {
+        if ((nMacSeconds == 0) || (nMacSeconds > 0x7FFFFFFFFFFFFFFFULL)) {
+            return;
+        }
+
+        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch((qint64)nMacSeconds - m_nMacToUnixEpoch, QTimeZone(0));
+        if (!dateTime.isValid()) {
+            return;
+        }
+
+        XBinary::XMETADATA_STRUCT record = {};
+        record.nOffset = nOffset;
+        record.nSize = nSize;
+        record.nAddress = m_pMP4->offsetToAddress(nOffset);
+        record.id = id;
+        record.sName = sName;
+        record.varValue = dateTime;
+        m_pListResult->append(record);
+    }
+
+private:
+    XMP4 *m_pMP4;
+    QVector<XBinary::XMETADATA_STRUCT> *m_pListResult;
+    qint64 m_nMacToUnixEpoch;
+};
+
+}  // namespace
 
 XBinary::XCONVERT _TABLE_XMP4_STRUCTID[] = {
     {XMP4::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -109,36 +149,8 @@ QVector<XBinary::XMETADATA_STRUCT> XMP4::getMetadataStructs()
     qint32 nTrackCount = 0;
     quint32 nMovieTimescale = 0;
 
-    auto appendValue = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
-
-    auto appendDateTime = [this, &listResult, nMacToUnixEpoch](qint64 nOffset, qint64 nSize, quint64 nMacSeconds, XMETADATA_ID id, const QString &sName) {
-        if ((nMacSeconds == 0) || (nMacSeconds > 0x7FFFFFFFFFFFFFFFULL)) {
-            return;
-        }
-
-        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch((qint64)nMacSeconds - nMacToUnixEpoch, QTimeZone(0));
-        if (!dateTime.isValid()) {
-            return;
-        }
-
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = dateTime;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendValue(this, &listResult);
+    const XMP4DateTimeAppender appendDateTime(this, &listResult, nMacToUnixEpoch);
 
     while (!listRanges.isEmpty() && (nBoxCount < nMaxBoxes)) {
         const BOX_RANGE range = listRanges.takeLast();

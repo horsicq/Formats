@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xpma.h"
+#include "../xmetadataappender.h"
 
 namespace {
 
@@ -27,6 +28,11 @@ const qint64 kPMAControlSize = offsetof(XPMA::HEADER, anChannelOffsets);
 const qint64 kPMAChannelTableOffset = kPMAControlSize;
 const qint64 kPMAChannelTableSize = XPMA::CHANNEL_COUNT * (qint64)sizeof(quint16);
 const qint64 kPMAInstrumentSize = 12;
+
+bool isRangeWithinSize(qint64 nTotalSize, qint64 nOffset, qint64 nByteCount)
+{
+    return (nOffset >= 0) && (nByteCount >= 0) && (nOffset <= nTotalSize) && (nByteCount <= (nTotalSize - nOffset));
+}
 
 void appendFilePart(QList<XBinary::FPART> *pList, quint32 nRequestedFileParts, XBinary::FILEPART filePart, qint64 nOffset, qint64 nSize, const QString &sName,
                     qint32 nLimit)
@@ -70,8 +76,6 @@ bool XPMA::isValid(PDSTRUCT *pPdStruct)
     }
 
     bool bHasActiveChannel = false;
-    auto hasBytes = [nSize](qint64 nOffset, qint64 nByteCount) { return (nOffset >= 0) && (nByteCount >= 0) && (nOffset <= nSize) && (nByteCount <= (nSize - nOffset)); };
-
     for (qint32 i = 0; i < CHANNEL_COUNT; ++i) {
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
             return false;
@@ -100,7 +104,7 @@ bool XPMA::isValid(PDSTRUCT *pPdStruct)
             }
 
             if (nFlags & 0x80) {
-                if ((nFlags != 0x80) || !hasBytes(nOffset, 1)) {
+                if ((nFlags != 0x80) || !isRangeWithinSize(nSize, nOffset, 1)) {
                     return false;
                 }
                 ++nOffset;
@@ -108,23 +112,23 @@ bool XPMA::isValid(PDSTRUCT *pPdStruct)
             }
 
             if (nFlags & 0x01) {
-                if (!hasBytes(nOffset, 2)) {
+                if (!isRangeWithinSize(nSize, nOffset, 2)) {
                     return false;
                 }
                 const qint64 nInstrumentOffset = read_uint16(nOffset, false);
                 nOffset += 2;
-                if ((nInstrumentOffset < kPMAHeaderSize) || !hasBytes(nInstrumentOffset, kPMAInstrumentSize)) {
+                if ((nInstrumentOffset < kPMAHeaderSize) || !isRangeWithinSize(nSize, nInstrumentOffset, kPMAInstrumentSize)) {
                     return false;
                 }
             }
             if (nFlags & 0x02) {
-                if (!hasBytes(nOffset, 1)) {
+                if (!isRangeWithinSize(nSize, nOffset, 1)) {
                     return false;
                 }
                 ++nOffset;
             }
             if (nFlags & 0x08) {
-                if (!hasBytes(nOffset, 1)) {
+                if (!isRangeWithinSize(nSize, nOffset, 1)) {
                     return false;
                 }
                 const quint8 nNote = read_uint8(nOffset++);
@@ -133,13 +137,13 @@ bool XPMA::isValid(PDSTRUCT *pPdStruct)
                 }
             }
             if (nFlags & 0x10) {
-                if (!hasBytes(nOffset, 2)) {
+                if (!isRangeWithinSize(nSize, nOffset, 2)) {
                     return false;
                 }
                 nOffset += 2;
             }
             if (nFlags & 0x40) {
-                if (!hasBytes(nOffset, 2)) {
+                if (!isRangeWithinSize(nSize, nOffset, 2)) {
                     return false;
                 }
                 nOffset += 2;
@@ -147,7 +151,7 @@ bool XPMA::isValid(PDSTRUCT *pPdStruct)
 
             // Every ordinary event ends with its delay byte. Bits 2 and 5 do
             // not carry operands.
-            if (!hasBytes(nOffset, 1)) {
+            if (!isRangeWithinSize(nSize, nOffset, 1)) {
                 return false;
             }
             ++nOffset;
@@ -227,16 +231,7 @@ QVector<XBinary::XMETADATA_STRUCT> XPMA::getMetadataStructs()
     }
 
     const HEADER header = _read_HEADER();
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = XMETADATA_ID_UNKNOWN;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     appendMetadata(offsetof(HEADER, nMode), 1, tr("Mode"), header.nMode);
     appendMetadata(offsetof(HEADER, nSpeedScale), 1, tr("Speed scale"), header.nSpeedScale);

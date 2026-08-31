@@ -20,6 +20,66 @@
  */
 #include "xne.h"
 
+namespace {
+QString readNePascalString(XNE *pNe, qint64 nOffset)
+{
+    if (!pNe->checkOffsetSize(nOffset, 1)) {
+        return QString();
+    }
+
+    const quint8 nLength = pNe->read_uint8(nOffset);
+    if ((nLength == 0) || !pNe->checkOffsetSize(nOffset + 1, nLength)) {
+        return QString();
+    }
+
+    return QString::fromLatin1(pNe->read_array(nOffset + 1, nLength));
+}
+
+void readNeNameTable(XNE *pNe, QMap<quint16, QString> *pMapNames, qint64 nOffset, qint64 nSize)
+{
+    if (!pNe->isOffsetValid(nOffset) || (nSize <= 0)) {
+        return;
+    }
+
+    const qint64 nEnd = qMin<qint64>(pNe->getSize(), nOffset + nSize);
+    qint32 nGuard = 0;
+
+    while ((nOffset < nEnd) && (nGuard++ < 0x10000)) {
+        const quint8 nLength = pNe->read_uint8(nOffset++);
+        if (nLength == 0) {
+            break;
+        }
+        if ((nOffset > nEnd - nLength) || (nOffset + nLength > nEnd - 2)) {
+            break;
+        }
+
+        const QString sName = QString::fromLatin1(pNe->read_array(nOffset, nLength));
+        nOffset += nLength;
+        const quint16 nOrdinal = pNe->read_uint16(nOffset);
+        nOffset += 2;
+
+        if ((nOrdinal != 0) && !sName.isEmpty()) {
+            pMapNames->insert(nOrdinal, sName);
+        }
+    }
+}
+
+QString readNeResourceName(XNE *pNe, qint64 nTableOffset, quint16 nID)
+{
+    if (nID & 0x8000) {
+        return QString();
+    }
+
+    const qint64 nOffset = nTableOffset + nID;
+    if (!pNe->checkOffsetSize(nOffset, 1)) {
+        return QString();
+    }
+
+    const quint8 nLength = pNe->read_uint8(nOffset);
+    return pNe->checkOffsetSize(nOffset + 1, nLength) ? QString::fromLatin1(pNe->read_array(nOffset + 1, nLength)) : QString();
+}
+}  // namespace
+
 XBinary::XCONVERT _TABLE_XNE_STRUCTID[] = {
     {XNE::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XNE::STRUCTID_IMAGE_DOS_HEADER, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
@@ -899,26 +959,13 @@ QVector<XBinary::XIMPORT_STRUCT> XNE::getImportStructs()
         return listResult;
     }
 
-    auto readPascalString = [this](qint64 nOffset) -> QString {
-        if (!checkOffsetSize(nOffset, 1)) {
-            return QString();
-        }
-
-        const quint8 nLength = read_uint8(nOffset);
-        if ((nLength == 0) || !checkOffsetSize(nOffset + 1, nLength)) {
-            return QString();
-        }
-
-        return QString::fromLatin1(read_array(nOffset + 1, nLength));
-    };
-
     QStringList listModules;
     QVector<bool> listModuleUsed(nModuleCount, false);
     listModules.reserve(nModuleCount);
 
     for (quint16 i = 0; i < nModuleCount; ++i) {
         const quint16 nNameOffset = read_uint16(nModuleTableOffset + (qint64)i * 2);
-        listModules.append(readPascalString(nNamesOffset + nNameOffset));
+        listModules.append(readNePascalString(this, nNamesOffset + nNameOffset));
     }
 
     const QList<XNE_DEF::NE_SEGMENT> listSegments = getSegmentList();
@@ -973,7 +1020,7 @@ QVector<XBinary::XIMPORT_STRUCT> XNE::getImportStructs()
                 if (nTargetType == 1) {
                     record.nOrdinal = nTarget;
                 } else {
-                    record.sFunction = readPascalString(nNamesOffset + nTarget);
+                    record.sFunction = readNePascalString(this, nNamesOffset + nTarget);
                 }
 
                 listModuleUsed[nModuleIndex - 1] = true;
@@ -1004,38 +1051,10 @@ QVector<XBinary::XEXPORT_STRUCT> XNE::getExportStructs()
     QVector<XEXPORT_STRUCT> listResult;
     QMap<quint16, QString> mapNames;
 
-    auto readNameTable = [this, &mapNames](qint64 nOffset, qint64 nSize) {
-        if (!isOffsetValid(nOffset) || (nSize <= 0)) {
-            return;
-        }
-
-        const qint64 nEnd = qMin<qint64>(getSize(), nOffset + nSize);
-        qint32 nGuard = 0;
-
-        while ((nOffset < nEnd) && (nGuard++ < 0x10000)) {
-            const quint8 nLength = read_uint8(nOffset++);
-            if (nLength == 0) {
-                break;
-            }
-            if ((nOffset > nEnd - nLength) || (nOffset + nLength > nEnd - 2)) {
-                break;
-            }
-
-            const QString sName = QString::fromLatin1(read_array(nOffset, nLength));
-            nOffset += nLength;
-            const quint16 nOrdinal = read_uint16(nOffset);
-            nOffset += 2;
-
-            if ((nOrdinal != 0) && !sName.isEmpty()) {
-                mapNames.insert(nOrdinal, sName);
-            }
-        }
-    };
-
     const qint64 nResidentOffset = getResidentNameTableOffset();
     const qint64 nModuleOffset = getModuleReferenceTableOffset();
-    readNameTable(nResidentOffset, nModuleOffset - nResidentOffset);
-    readNameTable(getNotResindentNameTableOffset(), getImageOS2Header_cbnrestab());
+    readNeNameTable(this, &mapNames, nResidentOffset, nModuleOffset - nResidentOffset);
+    readNeNameTable(this, &mapNames, getNotResindentNameTableOffset(), getImageOS2Header_cbnrestab());
 
     const qint64 nEntryOffset = getEntryTableOffset();
     const qint64 nEntrySize = getEntryTableSize();
@@ -1112,20 +1131,6 @@ QVector<XBinary::XRESOURCE_STRUCT> XNE::getResourceStructs()
         return listResult;
     }
 
-    auto readResourceName = [this, nTableOffset](quint16 nID) -> QString {
-        if (nID & 0x8000) {
-            return QString();
-        }
-
-        const qint64 nOffset = nTableOffset + nID;
-        if (!checkOffsetSize(nOffset, 1)) {
-            return QString();
-        }
-
-        const quint8 nLength = read_uint8(nOffset);
-        return checkOffsetSize(nOffset + 1, nLength) ? QString::fromLatin1(read_array(nOffset + 1, nLength)) : QString();
-    };
-
     qint64 nCurrentOffset = nTableOffset + 2;
     qint32 nGuard = 0;
 
@@ -1136,7 +1141,7 @@ QVector<XBinary::XRESOURCE_STRUCT> XNE::getResourceStructs()
         }
 
         const quint16 nCount = qMin<quint16>(read_uint16(nCurrentOffset + 2), 0x4000);
-        const QString sTypeName = readResourceName(nTypeID);
+        const QString sTypeName = readNeResourceName(this, nTableOffset, nTypeID);
         nCurrentOffset += 8;
 
         if (!checkOffsetSize(nCurrentOffset, (qint64)nCount * 12)) {
@@ -1159,7 +1164,7 @@ QVector<XBinary::XRESOURCE_STRUCT> XNE::getResourceStructs()
             record.nAddress = offsetToAddress(nResourceOffset);
             record.nType = (nTypeID & 0x8000) ? (nTypeID & 0x7FFF) : 0;
             record.nID = (nNameID & 0x8000) ? (nNameID & 0x7FFF) : 0;
-            record.sName = readResourceName(nNameID);
+            record.sName = readNeResourceName(this, nTableOffset, nNameID);
 
             if (record.sName.isEmpty()) {
                 record.sName = sTypeName;

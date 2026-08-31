@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xxm.h"
+#include "../xmetadataappender.h"
 
 namespace {
 
@@ -374,16 +375,7 @@ QVector<XBinary::XMETADATA_STRUCT> XXM::getMetadataStructs()
     }
 
     const HEADER header = _read_HEADER(0);
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     QString sTitle = QString::fromLatin1(header.module_name, sizeof(header.module_name));
     sTitle.remove(QChar('\0'));

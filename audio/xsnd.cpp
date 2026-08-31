@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xsnd.h"
+#include "../xmetadataappender.h"
 
 #include <QSet>
 
@@ -253,16 +254,7 @@ QVector<XBinary::XMETADATA_STRUCT> XSND::getMetadataStructs()
     }
 
     const HEADER header = _read_HEADER();
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     appendMetadata(offsetof(HEADER, nVersion), sizeof(header.nVersion), XMETADATA_ID_FILE_VERSION, tr("Version"), getVersion());
     appendMetadata(offsetof(HEADER, nEntryPointCount), sizeof(header.nEntryPointCount), XMETADATA_ID_UNKNOWN, tr("Entry-point count"), header.nEntryPointCount);

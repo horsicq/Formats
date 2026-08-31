@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xbmp.h"
+#include "../xmetadataappender.h"
 
 XBinary::XCONVERT _TABLE_XBMP_STRUCTID[] = {
     {XBMP::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -247,16 +248,7 @@ QVector<XBinary::XMETADATA_STRUCT> XBMP::getMetadataStructs()
     }
 
     const BMPINFOHEADER header = getInfoHeader();
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     appendMetadata(18, 4, XMETADATA_ID_FRAME_WIDTH, QString("Width"), header.biWidth);
     appendMetadata(22, 4, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), qAbs((qint64)header.biHeight));

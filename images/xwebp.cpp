@@ -1,4 +1,5 @@
 #include "xwebp.h"
+#include "../xmetadataappender.h"
 
 XBinary::XCONVERT _TABLE_XWEBP_STRUCTID[] = {
     {XWEBP::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -266,16 +267,7 @@ QVector<XBinary::XMETADATA_STRUCT> XWEBP::getMetadataStructs()
         return listResult;
     }
 
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     const qint64 nDeclaredEnd = 8 + (qint64)read_uint32(4, false);
     const QByteArray baFirstType = read_array(12, 4);

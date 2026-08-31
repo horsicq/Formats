@@ -202,16 +202,22 @@ QVector<XBinary::XMETADATA_STRUCT> XPYC::getMetadataStructs()
         return listResult;
     }
 
-    auto appendMetadata = [&listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = (XADDR)-1;
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
+    struct PYC_METADATA_APPENDER {
+        QVector<XBinary::XMETADATA_STRUCT> &listResult;
+
+        void operator()(qint64 nOffset,qint64 nSize,XBinary::XMETADATA_ID id,const QString &sName,const QVariant &varValue) const
+        {
+            XBinary::XMETADATA_STRUCT record = {};
+            record.nOffset = nOffset;
+            record.nSize = nSize;
+            record.nAddress = (XADDR)-1;
+            record.id = id;
+            record.sName = sName;
+            record.varValue = varValue;
+            listResult.append(record);
+        }
     };
+    const PYC_METADATA_APPENDER appendMetadata{listResult};
 
     appendMetadata(0, 4, XMETADATA_ID_UNKNOWN, QString("Python version"), pInfo->sVersion);
     appendMetadata(0, 2, XMETADATA_ID_UNKNOWN, QString("Magic"), QString("0x%1").arg(pInfo->nMagicValue, 4, 16, QChar('0')));
@@ -347,7 +353,7 @@ bool XPYC::handleInternalInfo(PDSTRUCT *pPdStruct)
             return false;
         }
 
-        const auto memoryMap = guardedThis->getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+        const XBinary::_MEMORY_MAP memoryMap = guardedThis->getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
         if (!guardedThis) return false;
         if (!guardedThis->isInternalInfoTransactionCurrent(nTransaction) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
             guardedThis->rollbackInternalInfoTransaction(nTransaction);

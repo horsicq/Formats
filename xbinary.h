@@ -309,6 +309,7 @@ public:
         HANDLE_METHOD_WINZIP_JPEG,     // ZIP method 96: WinZip JPEG recompression
         HANDLE_METHOD_WAVPACK,         // ZIP method 97: WavPack audio
         HANDLE_METHOD_AMIGA_LZX,       // Historical Amiga LZX (not CAB/WIM LZX)
+        HANDLE_METHOD_MI10,            // Amiga MI10 backward escape-byte LZ
         HANDLE_METHOD_COMPACT_PRO_RLE,
         HANDLE_METHOD_COMPACT_PRO_LZH,
         HANDLE_METHOD_DISKDOUBLER_ADN,
@@ -341,25 +342,44 @@ public:
         // the 287-symbol Yoshizaki adaptive Huffman/LZSS variant with an
         // explicit EOF symbol and a 4 KiB history window.
         HANDLE_METHOD_ARCV_LZHUF,
+        // Stock Yoshizaki F=60 sub-variant (315 symbols: 256 literals,
+        // EOF=256, 257..314 = match lengths 3..60) whose header checksum is a
+        // JAMCRC over the decompressed member.
+        HANDLE_METHOD_ARCV_LZHUF60,
         // Windows Installer VISE exchanges each adjacent byte pair in its
         // otherwise standard raw-Deflate streams.
         HANDLE_METHOD_VISE_DEFLATE,
-        // IBM OS/2 PACK2/FTCOMP's proprietary fT19 codec.  The container and
-        // member metadata are supported; the codec is deliberately identified
-        // instead of being mislabeled as a generic unknown method.
+        // IBM OS/2 PACK2/FTCOMP's fT19 block codec.
         HANDLE_METHOD_FTCOMP_FT19,
-        // DOS Navigator 1.x installer compression.  Stored records are
-        // extracted independently; compressed records retain this explicit
-        // method until the proprietary codec is implemented.
+        // DOS Navigator 1.x raw-Deflate variant.  Dynamic blocks serialize
+        // their HDIST, HCLEN, and HLIT counts in that nonstandard order.
         HANDLE_METHOD_DN_COMPRESSED,
-        // FoxPro Distribution Kit FPAK/FPPF stream.  The container and split
-        // volume segments are parsed without pretending that the codec is a
-        // standard LZ variant.
+        // FoxPro Distribution Kit FPAK/FPPF Implode stream, including joined
+        // version-1 continuation volumes.
         HANDLE_METHOD_FPAK_COMPRESSED,
         // JASC's pre-InstallShield setup compressor.  Directory records are
         // fully parsed even though its arithmetic/LZ payload is proprietary.
         HANDLE_METHOD_JASC_COMPRESSED,
-        HANDLE_METHOD_SSM_PICTOOLS
+        HANDLE_METHOD_SSM_PICTOOLS,
+        HANDLE_METHOD_IS_SKIN_XOR,
+        HANDLE_METHOD_SPIS_RLE,
+        // IBM SaveRam/SaveRam2 adaptive-compression stream.
+        HANDLE_METHOD_FLS_LZ,
+        // Pocket Soft RTPatch counted banner lines.
+        HANDLE_METHOD_RTPATCH_TEXT,
+        // Canonical RNC1/RNC2 member stream inside an RNCA multi-file
+        // container. Verification remains mandatory in the Ancient backend.
+        HANDLE_METHOD_RNC,
+        // Pocket Soft's adaptive Huffman/LZSS whole-file stream. Binary-delta
+        // records remain HANDLE_METHOD_UNKNOWN because they need source data.
+        HANDLE_METHOD_RTPATCH,
+        HANDLE_METHOD_SQZ1,
+        HANDLE_METHOD_SQZ2,
+        HANDLE_METHOD_SQZ3,
+        HANDLE_METHOD_SQZ4,
+        HANDLE_METHOD_PAK_CRUSHED,
+        HANDLE_METHOD_PAK_DISTILLED,
+        HANDLE_METHOD_SSM_PICTOOLS5
         // TODO check more methods
     };
 
@@ -1088,9 +1108,9 @@ public:
         FT_CFBF_MSI,
         FT_PE32_NSIS,
         FT_PE64_NSIS,
-        FT_PE32_NSPACK,
-        FT_PE32_PETITE,
-        FT_PE32_SFX,
+    FT_PE32_NSPACK,
+    FT_PE32_PETITE,
+    FT_PE32_SFX,
         FT_PE64_SFX,
         FT_PE32_SMARTINSTALL,
         FT_PE64_SMARTINSTALL,
@@ -1225,6 +1245,7 @@ public:
         FT_WINTERMUTE_DCP,
         FT_PYINSTALLER_PYZ,
         FT_AMIGA_LZX,
+        FT_MI10,
         FT_DEARK_LEGACY_ARCHIVE,
         FT_LIBDSK_IMAGE,
         FT_WOLF_VSWAP,
@@ -1246,6 +1267,7 @@ public:
         FT_INSTALLSHIELD_BOOT,
         FT_SABDU_IMAGE,
         FT_COMPAQ_LZH,
+        FT_INSA,
         FT_WISE_SFX,
         FT_EPFS_ARCHIVE,
         FT_STUNTS_DSI,
@@ -1269,6 +1291,29 @@ public:
         FT_LIF_COMPRESSED,
         FT_JASC_ARCHIVE,
         FT_SSM_MODULE,
+        FT_SHAR,
+        FT_SSBOB,
+        FT_IS_SKIN,
+        FT_INSTALLSHIELD3_SFX,
+        FT_GPINSTALL_SFX,
+        FT_PE32_PFTW,
+        FT_PE64_PFTW,
+        FT_INSTALLSHIELD_LAUNCHER,
+        FT_IS14_SFX,
+        FT_MSDOS_COPYQM,
+        FT_DSKEXP,
+        FT_PE32_SETUPFACTORY,
+        FT_PE64_SETUPFACTORY,
+        FT_PE32_JUGGLOR,
+        FT_SPIS,
+        FT_SPISSFX,
+        FT_FLS,
+        FT_RTPATCH,
+        FT_ARQ,
+        FT_ARQSFX,
+        FT_SQZ,
+        FT_SQZSFX,
+        FT_RTPATCHSFX,
 
         // TODO more
     };
@@ -1915,6 +1960,12 @@ public:
         QString sInfoString;
         QString sErrorString;
         QAtomicInteger<bool> bForceStop;         // TODO !!!
+        // Absolute monotonic QDeadlineTimer timestamp in nanoseconds.
+        //  0: no caller policy (a probing API may install its default)
+        // -1: explicitly disabled
+        // >0: active deadline
+        QAtomicInteger<qint64> nDeadlineNSecs;
+        QAtomicInteger<bool> bDeadlineExpired;
         QAtomicInteger<qint32> nBufferSize;      // 0 => 0x4000
         QAtomicInteger<qint32> nFileBufferSize;  // 0 => 0x10000
         PDSTRUCT_CALLBACK pCallback;
@@ -2393,6 +2444,8 @@ public:
     QByteArray _signatureToSigBytes(const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
     bool _compareSigBytes(const QByteArray &baSigBytes, const QByteArray &baData, PDSTRUCT *pPdStruct = nullptr);
     bool _compareSigBytes(const char *pSigBytes, qint64 nSigBytesSize, const char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct = nullptr);
+    bool _compareSigBytesWithLifetime(const char *pSigBytes, qint64 nSigBytesSize, const char *pData, qint64 nDataSize, PDSTRUCT *pPdStruct,
+                                      const PDSTRUCTLIFETIME &progressLifetime);
     qint64 _findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigBytes, qint64 nSigBytesSize, PDSTRUCT *pPdStruct = nullptr);
 
     qint64 find_signature(qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize = 0, PDSTRUCT *pPdStruct = nullptr);
@@ -3199,6 +3252,12 @@ public:
     static bool isPdStructSuccess(PDSTRUCT *pPdStruct);
     static bool isPdStructStopped(PDSTRUCT *pPdStruct);
     static void setPdStructStopped(PDSTRUCT *pPdStruct);
+    static bool setPdStructDeadline(PDSTRUCT *pPdStruct, qint64 nTimeoutMs);
+    static void clearPdStructDeadline(PDSTRUCT *pPdStruct);
+    static void disablePdStructDeadline(PDSTRUCT *pPdStruct);
+    static bool hasPdStructDeadline(const PDSTRUCT *pPdStruct);
+    static bool isPdStructDeadlineDisabled(const PDSTRUCT *pPdStruct);
+    static bool isPdStructDeadlineExpired(const PDSTRUCT *pPdStruct);
     static qint32 getPdStructPercentage(PDSTRUCT *pPdStruct);  // 0-100
     static void setPdStructCallback(PDSTRUCT *pPdStruct, PDSTRUCT_CALLBACK pCallback, void *pCallbackUserData, PDSTRUCT_CALLBACK *pPreviousCallback = nullptr,
                                     void **pPreviousCallbackUserData = nullptr);

@@ -19,6 +19,57 @@
  * SOFTWARE.
  */
 #include "xmp3.h"
+#include "../xmetadataappender.h"
+
+namespace {
+
+quint32 readSynchsafeValue(XMP3 *pMP3, qint64 nOffset)
+{
+    return ((quint32)(pMP3->read_uint8(nOffset) & 0x7F) << 21) | ((quint32)(pMP3->read_uint8(nOffset + 1) & 0x7F) << 14) |
+           ((quint32)(pMP3->read_uint8(nOffset + 2) & 0x7F) << 7) | (pMP3->read_uint8(nOffset + 3) & 0x7F);
+}
+
+QString decodeID3Text(const QByteArray &baData)
+{
+    if (baData.isEmpty()) {
+        return QString();
+    }
+
+    const quint8 nEncoding = (quint8)baData.at(0);
+    const QByteArray baText = baData.mid(1);
+    QString sResult;
+    if (nEncoding == 0) {
+        sResult = QString::fromLatin1(baText);
+    } else if (nEncoding == 3) {
+        sResult = QString::fromUtf8(baText);
+    } else if ((nEncoding == 1) || (nEncoding == 2)) {
+        bool bBigEndian = (nEncoding == 2);
+        qint32 nStart = 0;
+        if (baText.size() >= 2) {
+            const quint8 nFirst = (quint8)baText.at(0);
+            const quint8 nSecond = (quint8)baText.at(1);
+            if ((nFirst == 0xFE) && (nSecond == 0xFF)) {
+                bBigEndian = true;
+                nStart = 2;
+            } else if ((nFirst == 0xFF) && (nSecond == 0xFE)) {
+                bBigEndian = false;
+                nStart = 2;
+            }
+        }
+        for (qint32 i = nStart; i + 1 < baText.size(); i += 2) {
+            const quint16 nCharacter =
+                bBigEndian ? (((quint8)baText.at(i) << 8) | (quint8)baText.at(i + 1)) : (((quint8)baText.at(i + 1) << 8) | (quint8)baText.at(i));
+            if (!nCharacter) {
+                break;
+            }
+            sResult.append(QChar(nCharacter));
+        }
+    }
+    sResult.remove(QChar('\0'));
+    return sResult.trimmed();
+}
+
+}  // namespace
 
 static XBinary::XCONVERT _TABLE_XMP3_STRUCTID[] = {
     {XMP3::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -113,69 +164,16 @@ QVector<XBinary::XMETADATA_STRUCT> XMP3::getMetadataStructs()
         return listResult;
     }
 
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
-
-    auto readSynchsafe = [this](qint64 nOffset) -> quint32 {
-        return ((quint32)(read_uint8(nOffset) & 0x7F) << 21) | ((quint32)(read_uint8(nOffset + 1) & 0x7F) << 14) | ((quint32)(read_uint8(nOffset + 2) & 0x7F) << 7) |
-               (read_uint8(nOffset + 3) & 0x7F);
-    };
-
-    auto decodeText = [](const QByteArray &baData) -> QString {
-        if (baData.isEmpty()) {
-            return QString();
-        }
-
-        const quint8 nEncoding = (quint8)baData.at(0);
-        const QByteArray baText = baData.mid(1);
-        QString sResult;
-        if (nEncoding == 0) {
-            sResult = QString::fromLatin1(baText);
-        } else if (nEncoding == 3) {
-            sResult = QString::fromUtf8(baText);
-        } else if ((nEncoding == 1) || (nEncoding == 2)) {
-            bool bBigEndian = (nEncoding == 2);
-            qint32 nStart = 0;
-            if (baText.size() >= 2) {
-                const quint8 nFirst = (quint8)baText.at(0);
-                const quint8 nSecond = (quint8)baText.at(1);
-                if ((nFirst == 0xFE) && (nSecond == 0xFF)) {
-                    bBigEndian = true;
-                    nStart = 2;
-                } else if ((nFirst == 0xFF) && (nSecond == 0xFE)) {
-                    bBigEndian = false;
-                    nStart = 2;
-                }
-            }
-            for (qint32 i = nStart; i + 1 < baText.size(); i += 2) {
-                const quint16 nCharacter =
-                    bBigEndian ? (((quint8)baText.at(i) << 8) | (quint8)baText.at(i + 1)) : (((quint8)baText.at(i + 1) << 8) | (quint8)baText.at(i));
-                if (!nCharacter) {
-                    break;
-                }
-                sResult.append(QChar(nCharacter));
-            }
-        }
-        sResult.remove(QChar('\0'));
-        return sResult.trimmed();
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     const quint8 nVersion = read_uint8(3);
     const quint8 nFlags = read_uint8(5);
-    const quint32 nTagSize = readSynchsafe(6);
+    const quint32 nTagSize = readSynchsafeValue(this, 6);
     const qint64 nTagEnd = qMin<qint64>(getSize(), 10 + (qint64)nTagSize);
     qint64 nFrameOffset = 10;
 
     if ((nFlags & 0x40) && (nFrameOffset + 4 <= nTagEnd)) {
-        const quint32 nExtendedSize = (nVersion == 4) ? readSynchsafe(nFrameOffset) : read_uint32(nFrameOffset, true);
+        const quint32 nExtendedSize = (nVersion == 4) ? readSynchsafeValue(this, nFrameOffset) : read_uint32(nFrameOffset, true);
         nFrameOffset += (nVersion == 4) ? nExtendedSize : (4 + nExtendedSize);
     }
 
@@ -195,7 +193,7 @@ QVector<XBinary::XMETADATA_STRUCT> XMP3::getMetadataStructs()
         if (nVersion == 2) {
             nFrameSize = read_uint24(nFrameOffset + 3, true);
         } else if (nVersion == 4) {
-            nFrameSize = readSynchsafe(nFrameOffset + 4);
+            nFrameSize = readSynchsafeValue(this, nFrameOffset + 4);
         } else {
             nFrameSize = read_uint32(nFrameOffset + 4, true);
         }
@@ -224,7 +222,7 @@ QVector<XBinary::XMETADATA_STRUCT> XMP3::getMetadataStructs()
         }
 
         if (id != XMETADATA_ID_UNKNOWN) {
-            const QString sValue = decodeText(read_array(nValueOffset, nFrameSize));
+            const QString sValue = decodeID3Text(read_array(nValueOffset, nFrameSize));
             if (!sValue.isEmpty()) {
                 appendMetadata(nValueOffset, nFrameSize, id, sName, sValue);
                 if ((id == XMETADATA_ID_TRACK_NUMBER) && sValue.contains(QChar('/'))) {

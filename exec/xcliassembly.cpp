@@ -20,6 +20,25 @@
  */
 #include "xcliassembly.h"
 
+namespace {
+void appendCliMetadata(QVector<XBinary::XMETADATA_STRUCT> *pListResult, XBinary::XMETADATA_ID id, qint64 nOffset, qint64 nSize, const QString &sName,
+                       const QVariant &varValue)
+{
+    if (!varValue.isValid() || varValue.toString().isEmpty()) {
+        return;
+    }
+
+    XBinary::XMETADATA_STRUCT record = {};
+    record.nOffset = nOffset;
+    record.nSize = nSize;
+    record.nAddress = (XADDR)-1;
+    record.id = id;
+    record.sName = sName;
+    record.varValue = varValue;
+    pListResult->append(record);
+}
+}  // namespace
+
 XBinary::XCONVERT _TABLE_XCLIASSEMBLY_STRUCTID[] = {
     {XCLIAssembly::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XCLIAssembly::STRUCTID_MZDOSHEADER, "MZDOSHEADER", QString("MZ DOS Header")},
@@ -1554,36 +1573,24 @@ QVector<XBinary::XMETADATA_STRUCT> XCLIAssembly::getMetadataStructs()
         return listResult;
     }
 
-    auto appendMetadata = [&listResult, &cliInfo](XMETADATA_ID id, qint64 nOffset, qint64 nSize, const QString &sName, const QVariant &varValue) {
-        if (!varValue.isValid() || varValue.toString().isEmpty()) {
-            return;
-        }
-
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = (XADDR)-1;
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
-
-    appendMetadata(XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Runtime version"), cliInfo.metaData.header.sVersion);
+    appendCliMetadata(&listResult, XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Runtime version"),
+                      cliInfo.metaData.header.sVersion);
     if (cliInfo.metaData.Tables_TablesNumberOfIndexes[XCLIASSEMBLY_DEF::metadata_Module] > 0) {
-        appendMetadata(XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Module"), getMetadataModuleName(&cliInfo, 0));
+        appendCliMetadata(&listResult, XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Module"),
+                          getMetadataModuleName(&cliInfo, 0));
 
         const XCLIASSEMBLY_DEF::S_METADATA_MODULE module = getMetadataModule(&cliInfo, 0);
         if (module.nMvid > 0) {
             const qint64 nGuidOffset = cliInfo.metaData.osGUID.nOffset + ((qint64)module.nMvid - 1) * 16;
             if ((nGuidOffset >= cliInfo.metaData.osGUID.nOffset) && (nGuidOffset + 16 <= cliInfo.metaData.osGUID.nOffset + cliInfo.metaData.osGUID.nSize) &&
                 checkOffsetSize(nGuidOffset, 16)) {
-                appendMetadata(XMETADATA_ID_UUID, nGuidOffset, 16, QString("Module version ID"), read_UUID(nGuidOffset));
+                appendCliMetadata(&listResult, XMETADATA_ID_UUID, nGuidOffset, 16, QString("Module version ID"), read_UUID(nGuidOffset));
             }
         }
     }
     if (cliInfo.metaData.Tables_TablesNumberOfIndexes[XCLIASSEMBLY_DEF::metadata_Assembly] > 0) {
-        appendMetadata(XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Assembly"), getMetadataAssemblyName(&cliInfo, 0));
+        appendCliMetadata(&listResult, XMETADATA_ID_UNKNOWN, cliInfo.nMetaDataOffset, cliInfo.metaData.osMetadata.nSize, QString("Assembly"),
+                          getMetadataAssemblyName(&cliInfo, 0));
     }
 
     return listResult;

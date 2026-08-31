@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xicon.h"
+#include "../xmetadataappender.h"
 #include "xpng.h"
 
 namespace {
@@ -452,17 +453,7 @@ QVector<XBinary::XMETADATA_STRUCT> XIcon::getMetadataStructs()
         const ICONDIRENTRY &entry = entries.at(i);
         const qint64 nEntryOffset = (qint64)sizeof(ICONDIR) + (qint64)i * sizeof(ICONDIRENTRY);
 
-        auto appendMetadata = [this, &listResult, i, nEntryOffset](qint64 nRelativeOffset, qint64 nSize, XMETADATA_ID id, const QString &sName,
-                                                                   const QVariant &varValue) {
-            XMETADATA_STRUCT record = {};
-            record.nOffset = nEntryOffset + nRelativeOffset;
-            record.nSize = nSize;
-            record.nAddress = offsetToAddress(record.nOffset);
-            record.id = id;
-            record.sName = QString("Image %1: %2").arg(i + 1).arg(sName);
-            record.varValue = varValue;
-            listResult.append(record);
-        };
+        const XMetadataAppender appendMetadata(this, &listResult, nEntryOffset, QString("Image %1: ").arg(i + 1));
 
         appendMetadata(offsetof(ICONDIRENTRY, bWidth), 1, XMETADATA_ID_FRAME_WIDTH, QString("Width"), entry.bWidth ? entry.bWidth : 256);
         appendMetadata(offsetof(ICONDIRENTRY, bHeight), 1, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), entry.bHeight ? entry.bHeight : 256);

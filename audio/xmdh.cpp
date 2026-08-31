@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xmdh.h"
+#include "../xmetadataappender.h"
 
 namespace {
 
@@ -172,16 +173,7 @@ QVector<XBinary::XMETADATA_STRUCT> XMDH::getMetadataStructs()
     }
 
     const HEADER header = _read_HEADER();
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = XMETADATA_ID_UNKNOWN;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     appendMetadata(offsetof(HEADER, nTrackOffset), 2, tr("Track data offset"), header.nTrackOffset);
     appendMetadata(offsetof(HEADER, nActiveRecordCount), 1, tr("Active record count"), header.nActiveRecordCount);

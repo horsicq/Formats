@@ -22,6 +22,29 @@
 
 #include <QTimeZone>
 
+namespace {
+
+void appendLongDateTimeMetadata(XTTF *pTTF, QVector<XBinary::XMETADATA_STRUCT> *pListResult, qint64 nOffset, XBinary::XMETADATA_ID id,
+                                const QString &sName, qint64 nMacToUnixEpoch)
+{
+    const qint64 nMacSeconds = (qint64)pTTF->read_uint64(nOffset, true);
+    const QDateTime dateTime = QDateTime::fromSecsSinceEpoch(nMacSeconds - nMacToUnixEpoch, QTimeZone(0));
+    if (!dateTime.isValid()) {
+        return;
+    }
+
+    XBinary::XMETADATA_STRUCT record = {};
+    record.nOffset = nOffset;
+    record.nSize = sizeof(quint64);
+    record.nAddress = pTTF->offsetToAddress(nOffset);
+    record.id = id;
+    record.sName = sName;
+    record.varValue = dateTime;
+    pListResult->append(record);
+}
+
+}  // namespace
+
 XBinary::XCONVERT _TABLE_XTTF_STRUCTID[] = {
     {XTTF::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XTTF::STRUCTID_HEADER, "HEADER", QObject::tr("Header")},
@@ -229,25 +252,8 @@ QVector<XBinary::XMETADATA_STRUCT> XTTF::getMetadataStructs()
     }
 
     const qint64 nMacToUnixEpoch = 2082844800LL;
-    auto appendLongDateTime = [this, &listResult, nMacToUnixEpoch](qint64 nOffset, XMETADATA_ID id, const QString &sName) {
-        const qint64 nMacSeconds = (qint64)read_uint64(nOffset, true);
-        const QDateTime dateTime = QDateTime::fromSecsSinceEpoch(nMacSeconds - nMacToUnixEpoch, QTimeZone(0));
-        if (!dateTime.isValid()) {
-            return;
-        }
-
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = sizeof(quint64);
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = dateTime;
-        listResult.append(record);
-    };
-
-    appendLongDateTime((qint64)headTable.offset + 20, XMETADATA_ID_DATETIME_CREATED, QString("Created"));
-    appendLongDateTime((qint64)headTable.offset + 28, XMETADATA_ID_MODIFICATED, QString("Modified"));
+    appendLongDateTimeMetadata(this, &listResult, (qint64)headTable.offset + 20, XMETADATA_ID_DATETIME_CREATED, QString("Created"), nMacToUnixEpoch);
+    appendLongDateTimeMetadata(this, &listResult, (qint64)headTable.offset + 28, XMETADATA_ID_MODIFICATED, QString("Modified"), nMacToUnixEpoch);
 
     return listResult;
 }

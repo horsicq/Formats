@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xjpeg.h"
+#include "../xmetadataappender.h"
 
 static XBinary::XCONVERT _TABLE_XJPEG_STRUCTID[] = {
     {XJpeg::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -472,6 +473,7 @@ QVector<XBinary::XMETADATA_STRUCT> XJpeg::getMetadataStructs()
 {
     QVector<XMETADATA_STRUCT> listResult;
     QList<CHUNK> listChunks = getChunks(nullptr);
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     for (qint32 i = 0; i < listChunks.count(); ++i) {
         const CHUNK &chunk = listChunks.at(i);
@@ -480,17 +482,6 @@ QVector<XBinary::XMETADATA_STRUCT> XJpeg::getMetadataStructs()
         if (!bStartOfFrame || (chunk.nDataSize < 9)) {
             continue;
         }
-
-        auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-            XMETADATA_STRUCT record = {};
-            record.nOffset = nOffset;
-            record.nSize = nSize;
-            record.nAddress = offsetToAddress(nOffset);
-            record.id = id;
-            record.sName = sName;
-            record.varValue = varValue;
-            listResult.append(record);
-        };
 
         appendMetadata(chunk.nDataOffset + 5, 2, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), read_uint16(chunk.nDataOffset + 5, true));
         appendMetadata(chunk.nDataOffset + 7, 2, XMETADATA_ID_FRAME_WIDTH, QString("Width"), read_uint16(chunk.nDataOffset + 7, true));

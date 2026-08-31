@@ -76,6 +76,63 @@ bool isValidMemoryMap(const XBinary::_MEMORY_MAP &memoryMap, qint64 nDeviceSize)
 
     return true;
 }
+
+class SEARCH_PROCESS_CLEANUP {
+public:
+    using CLEAR_CALLBACK_FUNCTION = void (XSearchProcess::*)();
+
+    SEARCH_PROCESS_CLEANUP(QPointer<XSearchProcess> &guardedProcess, QPointer<QIODevice> &guardedDevice, QPointer<XBinary> &guardedBinary,
+                           qint64 &nOriginalPosition, const XBinary::INDATA &inData, CLEAR_CALLBACK_FUNCTION clearCallbackFunction)
+        : m_guardedProcess(guardedProcess),
+          m_guardedDevice(guardedDevice),
+          m_guardedBinary(guardedBinary),
+          m_nOriginalPosition(nOriginalPosition),
+          m_inData(inData),
+          m_clearCallbackFunction(clearCallbackFunction)
+    {
+    }
+
+    void operator()() const
+    {
+        XBinary *pBinary = m_guardedBinary.data();
+        if (pBinary) delete pBinary;
+
+        if (m_guardedDevice && (m_nOriginalPosition >= 0)) {
+            m_guardedDevice->seek(m_nOriginalPosition);
+        }
+        XFormats::removeDevice(m_guardedDevice.data(), m_inData);
+
+        XSearchProcess *pProcess = m_guardedProcess.data();
+        if (pProcess) (pProcess->*m_clearCallbackFunction)();
+    }
+
+private:
+    QPointer<XSearchProcess> &m_guardedProcess;
+    QPointer<QIODevice> &m_guardedDevice;
+    QPointer<XBinary> &m_guardedBinary;
+    qint64 &m_nOriginalPosition;
+    const XBinary::INDATA &m_inData;
+    CLEAR_CALLBACK_FUNCTION m_clearCallbackFunction;
+};
+
+class SEARCH_PROCESS_PROGRESS_OWNER_CHECKER {
+public:
+    SEARCH_PROCESS_PROGRESS_OWNER_CHECKER(const QPointer<XSearchProcess> &guardedProcess, const QPointer<QIODevice> &guardedDevice,
+                                          const XBinary::PDSTRUCTLIFETIME &progressLifetime)
+        : m_guardedProcess(guardedProcess), m_guardedDevice(guardedDevice), m_progressLifetime(progressLifetime)
+    {
+    }
+
+    bool operator()() const
+    {
+        return m_guardedProcess && m_guardedDevice && XBinary::isPdStructLifetimeAlive(m_progressLifetime);
+    }
+
+private:
+    QPointer<XSearchProcess> m_guardedProcess;
+    QPointer<QIODevice> m_guardedDevice;
+    XBinary::PDSTRUCTLIFETIME m_progressLifetime;
+};
 }  // namespace
 
 XSearchProcess::XSearchProcess(QObject *pParent) : XThreadObject(pParent)
@@ -155,19 +212,8 @@ void XSearchProcess::process()
     // progress slot deleted it, its destructor already removed the callback
     // subscription while the local device/class still need deterministic
     // cleanup.
-    const auto cleanup = [&]() {
-        XBinary *pBinary = guardedBinary.data();
-        if (pBinary) delete pBinary;
-
-        if (guardedDevice && (nOriginalPosition >= 0)) {
-            guardedDevice->seek(nOriginalPosition);
-        }
-        XFormats::removeDevice(guardedDevice.data(), inData);
-
-        if (guardedThis) guardedThis->clearPdStructCallback();
-    };
-
-    const auto progressOwnerAlive = [&]() -> bool { return guardedThis && guardedDevice && XBinary::isPdStructLifetimeAlive(progressLifetime); };
+    const SEARCH_PROCESS_CLEANUP cleanup(guardedThis, guardedDevice, guardedBinary, nOriginalPosition, inData, &XSearchProcess::clearPdStructCallback);
+    const SEARCH_PROCESS_PROGRESS_OWNER_CHECKER progressOwnerAlive(guardedThis, guardedDevice, progressLifetime);
 
     if (!progressOwnerAlive() || !guardedDevice->isOpen() || !guardedDevice->isReadable()) {
         cleanup();

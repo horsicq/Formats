@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xjfif.h"
+#include "../xmetadataappender.h"
 
 namespace {
 const qint64 JFIF_HEADER_SIZE = 14;
@@ -150,16 +151,7 @@ QVector<XBinary::XMETADATA_STRUCT> XJFIF::getMetadataStructs()
 
     const HEADER header = getHeader();
 
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = XMETADATA_ID_UNKNOWN;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     appendMetadata(JFIF_VERSION_MAJOR_OFFSET, 2, QString("JFIF version"), getVersion());
     appendMetadata(JFIF_DENSITY_UNIT_OFFSET, 1, QString("Density unit"), getDensityUnitString());

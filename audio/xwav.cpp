@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xwav.h"
+#include "../xmetadataappender.h"
 
 XWAV::XWAV(QIODevice *pDevice) : XRiff(pDevice)
 {
@@ -99,16 +100,7 @@ QVector<XBinary::XMETADATA_STRUCT> XWAV::getMetadataStructs()
         return listResult;
     }
 
-    auto appendMetadata = [this, &listResult](qint64 nOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-        XMETADATA_STRUCT record = {};
-        record.nOffset = nOffset;
-        record.nSize = nSize;
-        record.nAddress = offsetToAddress(nOffset);
-        record.id = id;
-        record.sName = sName;
-        record.varValue = varValue;
-        listResult.append(record);
-    };
+    const XMetadataAppender appendMetadata(this, &listResult);
 
     const quint16 nFormat = read_uint16(nFmtOffset, false);
     const quint16 nChannels = read_uint16(nFmtOffset + 2, false);

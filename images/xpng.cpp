@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 #include "xpng.h"
+#include "../xmetadataappender.h"
 #include <QBuffer>
 #include <zlib.h>
 
@@ -285,16 +286,7 @@ QVector<XBinary::XMETADATA_STRUCT> XPNG::getMetadataStructs()
 
     const CHUNK ihdr = _readChunk(nOffset);
     if (ihdr.bValid && (ihdr.sName == QString("IHDR")) && (ihdr.nDataSize == 13) && _isChunkCRCValid(ihdr, nullptr)) {
-        auto appendMetadata = [this, &listResult, &ihdr](qint64 nRelativeOffset, qint64 nSize, XMETADATA_ID id, const QString &sName, const QVariant &varValue) {
-            XMETADATA_STRUCT record = {};
-            record.nOffset = ihdr.nDataOffset + nRelativeOffset;
-            record.nSize = nSize;
-            record.nAddress = offsetToAddress(record.nOffset);
-            record.id = id;
-            record.sName = sName;
-            record.varValue = varValue;
-            listResult.append(record);
-        };
+        const XMetadataAppender appendMetadata(this, &listResult, ihdr.nDataOffset);
 
         appendMetadata(0, 4, XMETADATA_ID_FRAME_WIDTH, QString("Width"), read_uint32(ihdr.nDataOffset, true));
         appendMetadata(4, 4, XMETADATA_ID_FRAME_HEIGHT, QString("Height"), read_uint32(ihdr.nDataOffset + 4, true));

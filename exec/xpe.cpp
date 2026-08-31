@@ -23,6 +23,29 @@
 #include <algorithm>
 #include <limits>
 
+namespace {
+XBinary::XMETADATA_ID versionKeyToMetadataId(const QString &sKey)
+{
+    const QString sNormalizedKey = sKey.toLower();
+
+    if (sNormalizedKey == "comments") return XBinary::XMETADATA_ID_COMMENTS;
+    if (sNormalizedKey == "companyname") return XBinary::XMETADATA_ID_COMPANY_NAME;
+    if (sNormalizedKey == "filedescription") return XBinary::XMETADATA_ID_FILE_DESCRIPTION;
+    if (sNormalizedKey == "fileversion") return XBinary::XMETADATA_ID_FILE_VERSION;
+    if (sNormalizedKey == "internalname") return XBinary::XMETADATA_ID_INTERNAL_NAME;
+    if (sNormalizedKey == "legalcopyright") return XBinary::XMETADATA_ID_LEGAL_COPYRIGHT;
+    if (sNormalizedKey == "legaltrademarks") return XBinary::XMETADATA_ID_LEGAL_TRADEMARKS;
+    if (sNormalizedKey == "originalfilename") return XBinary::XMETADATA_ID_ORIGINAL_FILENAME;
+    if (sNormalizedKey == "privatebuild") return XBinary::XMETADATA_ID_PRIVATE_BUILD;
+    if (sNormalizedKey == "productname") return XBinary::XMETADATA_ID_PRODUCT_NAME;
+    if (sNormalizedKey == "productversion") return XBinary::XMETADATA_ID_PRODUCT_VERSION;
+    if (sNormalizedKey == "specialbuild") return XBinary::XMETADATA_ID_SPECIAL_BUILD;
+    if (sNormalizedKey == "translation") return XBinary::XMETADATA_ID_TRANSLATION;
+
+    return XBinary::XMETADATA_ID_UNKNOWN;
+}
+}  // namespace
+
 XBinary::XCONVERT _TABLE_XPE_STRUCTID[] = {
     {XPE::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
     {XPE::STRUCTID_IMAGE_DOS_HEADER, "IMAGE_DOS_HEADER", QString("IMAGE_DOS_HEADER")},
@@ -14846,26 +14869,6 @@ QVector<XBinary::XRESOURCE_STRUCT> XPE::getResourceStructs()
 QVector<XBinary::XMETADATA_STRUCT> XPE::getMetadataStructs()
 {
     QVector<XMETADATA_STRUCT> listResult;
-
-    auto versionKeyToMetadataId = [](const QString &sKey) -> XMETADATA_ID {
-        const QString sNormalizedKey = sKey.toLower();
-
-        if (sNormalizedKey == "comments") return XMETADATA_ID_COMMENTS;
-        if (sNormalizedKey == "companyname") return XMETADATA_ID_COMPANY_NAME;
-        if (sNormalizedKey == "filedescription") return XMETADATA_ID_FILE_DESCRIPTION;
-        if (sNormalizedKey == "fileversion") return XMETADATA_ID_FILE_VERSION;
-        if (sNormalizedKey == "internalname") return XMETADATA_ID_INTERNAL_NAME;
-        if (sNormalizedKey == "legalcopyright") return XMETADATA_ID_LEGAL_COPYRIGHT;
-        if (sNormalizedKey == "legaltrademarks") return XMETADATA_ID_LEGAL_TRADEMARKS;
-        if (sNormalizedKey == "originalfilename") return XMETADATA_ID_ORIGINAL_FILENAME;
-        if (sNormalizedKey == "privatebuild") return XMETADATA_ID_PRIVATE_BUILD;
-        if (sNormalizedKey == "productname") return XMETADATA_ID_PRODUCT_NAME;
-        if (sNormalizedKey == "productversion") return XMETADATA_ID_PRODUCT_VERSION;
-        if (sNormalizedKey == "specialbuild") return XMETADATA_ID_SPECIAL_BUILD;
-        if (sNormalizedKey == "translation") return XMETADATA_ID_TRANSLATION;
-
-        return XMETADATA_ID_UNKNOWN;
-    };
 
     const qint64 nTimeDateStampOffset = getFileHeaderOffset() + offsetof(XPE_DEF::IMAGE_FILE_HEADER, TimeDateStamp);
     if (checkOffsetSize(nTimeDateStampOffset, sizeof(quint32))) {

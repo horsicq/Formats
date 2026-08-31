@@ -62,42 +62,62 @@
 #include "xdtc.h"
 #include "xdma.h"
 #include "../../XOptions/xthreadobject.h"
-#ifdef USE_DEX
 #include "xandroidbinary.h"
 #include "xdex.h"
-#endif
-#ifdef USE_PDF
 #include "xpdf.h"
-#endif
 #ifdef USE_PDB
 #include "xpdb.h"
 #endif
-// XZip and its family work without USE_ARCHIVE (see XArchive/xzip.cmake/.pri);
-// the define keeps gating the other archive formats.
-#include "xapk.h"
-#include "xapks.h"
-#include "xipa.h"
-#include "xjar.h"
-#include "xzip.h"
+// These relocated Formats classes work without USE_ARCHIVE; the define keeps
+// gating the archive implementations that remain in XArchive.
+#include "archives/xapk.h"
+#include "archives/xapks.h"
+#include "archives/xgzip.h"
+#include "archives/xipa.h"
+#include "archives/xiso9660.h"
+#include "archives/xjar.h"
+#include "archives/xnpm.h"
+#include "archives/xtar.h"
+#include "archives/xtar_compress.h"
+#include "archives/xtar_gz.h"
+#include "archives/xtarcompressed.h"
+#include "archives/xzip.h"
+#include "exec/xdos16.h"
+#include "exec/xmachofat.h"
+// The SFX detectors below are referenced from USE_STATICUNPACKER code paths in
+// xformats.cpp, and xstaticunpacker.cmake always include()s xarchives.cmake, so
+// their sources are compiled whenever that define is set -- with or without
+// USE_ARCHIVE.  Keep the declarations visible for both.
+#if defined(USE_ARCHIVE) || defined(USE_STATICUNPACKER)
+#include "xpyinstallercarchive.h"
+#include "xwisesfxarchive.h"
+#include "xis3sfxarchive.h"
+#include "xis14sfxarchive.h"
+#include "xlegacystorearchive.h"
+#endif
 #ifdef USE_ARCHIVE
 #include "x_ar.h"
 #include "xancient.h"
 #include "xlegacyencoded.h"
 #include "xdearkarchive.h"
+#include "xdskexp.h"
 #include "xlibdskarchive.h"
 #include "xcompactproarchive.h"
 #include "xdiskdoublerarchive.h"
-#include "xpyinstallercarchive.h"
-#include "xwisesfxarchive.h"
-#include "xlegacystorearchive.h"
+#include "xfls.h"
 #include "xdiskjugglerarchive.h"
 #include "xapplesingle.h"
 #include "x2img.h"
 #include "xpyz.h"
 #include "xlzxarchive.h"
+#include "xmi10archive.h"
 #include "xmacbinary.h"
 #include "xresourcefork.h"
 #include "xlbr.h"
+#include "xrtpatch.h"
+#include "xrncarchive.h"
+#include "xarq.h"
+#include "xsqz.h"
 #include "xace.h"
 #include "xarj.h"
 #include "xbcm.h"
@@ -110,9 +130,7 @@
 #include "xcpio.h"
 #include "xdeb.h"
 #include "xdmg.h"
-#include "xdos16.h"
 #include "xfreearc.h"
-#include "xgzip.h"
 #include "games/xpak.h"
 #include "games/xwad.h"
 #include "games/xgrp.h"
@@ -126,7 +144,6 @@
 #include "games/xbigf.h"
 #include "games/xparsecarchive.h"
 #include "games/xpmm.h"
-#include "xiso9660.h"
 #include "xlha.h"
 #include "xlpaq8.h"
 #include "xsar.h"
@@ -137,26 +154,20 @@
 #include "xlizard.h"
 #include "xlzma.h"
 #include "xlzo.h"
-#include "xmachofat.h"
 #include "xminidump.h"
-#include "xnpm.h"
 #include "xpea.h"
 #include "xrar.h"
 #include "xseaarc.h"
 #include "xsevenzip.h"
 #include "xsquashfs.h"
 #include "xszdd.h"
-#include "xtar.h"
 #include "xtar_bzip2.h"
-#include "xtar_compress.h"
-#include "xtar_gz.h"
 #include "xtar_lzip.h"
 #include "xtar_lzma.h"
 #include "xtar_lzop.h"
 #include "xtar_lz4.h"
 #include "xtar_xz.h"
 #include "xtar_zstd.h"
-#include "xtarcompressed.h"
 #include "xudf.h"
 #include "xwim.h"
 #include "xrpm.h"
@@ -171,10 +182,17 @@
 #include "xzstd.h"
 #include "xwarc.h"
 #include "xmtree.h"
+#include "xshar.h"
 #include "xuu.h"
 #endif
 #ifdef USE_STATICUNPACKER
+#include "../XStaticUnpacker/xarqsfx.h"
+#include "../XStaticUnpacker/xsqzsfx.h"
+#include "../XStaticUnpacker/xrtpatchsfx.h"
+#include "../XStaticUnpacker/xfpak.h"
 #include "../XStaticUnpacker/xrib.h"
+#include "../XStaticUnpacker/xspis.h"
+#include "../XStaticUnpacker/xspissfx.h"
 #include "../XStaticUnpacker/xsevenzipsfx.h"
 #include "../XStaticUnpacker/xburn.h"
 #include "../XStaticUnpacker/xcabsfx.h"
@@ -186,6 +204,7 @@
 #include "../XStaticUnpacker/xautoit.h"
 #include "../XStaticUnpacker/xboxedapp.h"
 #include "../XStaticUnpacker/xclickteam.h"
+#include "../XStaticUnpacker/xcopyqm.h"
 #include "../XStaticUnpacker/xcreateinstall.h"
 #include "../XStaticUnpacker/xenigmavb.h"
 #include "../XStaticUnpacker/xfsg.h"
@@ -193,7 +212,9 @@
 #include "../XStaticUnpacker/xgzipsfx.h"
 #include "../XStaticUnpacker/xiexpress.h"
 #include "../XStaticUnpacker/xinnosetup.h"
+#include "../XStaticUnpacker/xpftw.h"
 #include "../XStaticUnpacker/xinstallforge.h"
+#include "../XStaticUnpacker/xjugglor.h"
 #include "../XStaticUnpacker/xinstallshield.h"
 #include "../XStaticUnpacker/xiscab.h"
 #ifdef USE_XEMULATOR
@@ -209,6 +230,7 @@
 #include "../XStaticUnpacker/xkwajsfx.h"
 #include "../XStaticUnpacker/xsfx.h"
 #include "../XStaticUnpacker/xsmartinstall.h"
+#include "../XStaticUnpacker/xsetupfactory.h"
 #include "../XStaticUnpacker/xtarma.h"
 #include "../XStaticUnpacker/xupx.h"
 #include "../XStaticUnpacker/xwix.h"
@@ -321,13 +343,13 @@ public:
     static QSet<XBinary::FT> getFileTypes(QIODevice *pDevice, XArchive::RECORD *pRecord, quint32 nFTFlags);
     static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesZIP(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct);
-#ifdef USE_ARCHIVE
+    static QSet<XBinary::FT> getFileTypesGZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesTGZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
+#ifdef USE_ARCHIVE
     static QSet<XBinary::FT> getFileTypesTBZIP2(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesTXZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesTLZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesAR(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
-    static QSet<XBinary::FT> getFileTypesGZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesBZIP2(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesXZ(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
     static QSet<XBinary::FT> getFileTypesLZIP(QIODevice *pDevice, QList<XArchive::RECORD> *pListRecords, XBinary::PDSTRUCT *pPdStruct);
@@ -349,6 +371,11 @@ public:
 
 private:
     static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct);
+    QString _getTransactionError(const XBinary::UNPACK_FOLDER_TRANSACTION &transaction) const;
+    void _reportTransactionError(const XBinary::UNPACK_FOLDER_TRANSACTION &transaction, XBinary::PDSTRUCT *pPdStruct,
+                                 const XBinary::PDSTRUCTLIFETIME &progressLifetime);
+    void _rollbackTransaction(XBinary::UNPACK_FOLDER_TRANSACTION *pTransaction, XBinary::PDSTRUCT *pPdStruct,
+                              const XBinary::PDSTRUCTLIFETIME &progressLifetime);
 
 public:
     void setData(MODE mode, XBinary::FT fileFormat, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);
