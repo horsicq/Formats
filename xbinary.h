@@ -549,7 +549,12 @@ public:
         UNPACK_PROP_MAX_MEMORY_OUTPUT_SIZE,  // qint64: cap for in-memory (QByteArray) routes
         UNPACK_PROP_REQUIRE_FREE_SPACE,      // bool: opt-in destination free-space preflight
         UNPACK_PROP_MAX_EXPANSION_RATIO,     // reserved; deliberately never read in this plan
-        UNPACK_PROP_CONTINUEONERROR          // bool: folder extraction skips members that fail to unpack instead of aborting the archive
+        UNPACK_PROP_CONTINUEONERROR,         // bool: folder extraction skips members that fail to unpack instead of aborting the archive
+        // bool: leave an already-present destination FILE untouched instead of
+        // replacing it (unzip -n, 7-Zip -aos).  Archive-internal name collisions
+        // keep their existing duplicate-suffix handling, and directory entries are
+        // unaffected, so this can only ever write less than a default run.
+        UNPACK_PROP_SKIPEXISTINGFILES
     };
 
     // Accounts temporary decoder memory against the process-wide unpack

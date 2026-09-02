@@ -1835,23 +1835,95 @@ static bool unpackRemoveFileLiteral(const QString &sPath)
 #endif
 }
 
-static bool unpackPublishFileLiteral(const QString &sSourcePath, const QString &sDestinationPath, quint32 *pnSystemError = nullptr)
+struct UNPACK_PUBLISH_CONTROL {
+    QPointer<XBinary> guardedBinary;
+    XBinary::PDSTRUCT *pPdStruct = nullptr;
+    XBinary::PDSTRUCTLIFETIME progressLifetime;
+};
+
+static bool unpackPublicationMayContinue(const UNPACK_PUBLISH_CONTROL *pControl)
+{
+    return pControl && pControl->guardedBinary && XBinary::isPdStructLifetimeAlive(pControl->progressLifetime) &&
+           XBinary::isPdStructNotCanceled(pControl->pPdStruct);
+}
+
+#ifdef Q_OS_WIN
+static DWORD CALLBACK unpackPublishCopyProgress(LARGE_INTEGER totalFileSize, LARGE_INTEGER totalBytesTransferred, LARGE_INTEGER streamSize,
+                                                LARGE_INTEGER streamBytesTransferred, DWORD nStreamNumber, DWORD nCallbackReason, HANDLE hSourceFile,
+                                                HANDLE hDestinationFile, LPVOID pData)
+{
+    Q_UNUSED(totalFileSize)
+    Q_UNUSED(totalBytesTransferred)
+    Q_UNUSED(streamSize)
+    Q_UNUSED(streamBytesTransferred)
+    Q_UNUSED(nStreamNumber)
+    Q_UNUSED(nCallbackReason)
+    Q_UNUSED(hSourceFile)
+    Q_UNUSED(hDestinationFile)
+
+    const UNPACK_PUBLISH_CONTROL *pControl = static_cast<const UNPACK_PUBLISH_CONTROL *>(pData);
+    return unpackPublicationMayContinue(pControl) ? PROGRESS_CONTINUE : PROGRESS_CANCEL;
+}
+#endif
+
+static bool unpackPublishFileLiteral(const QString &sSourcePath, const QString &sDestinationPath, UNPACK_PUBLISH_CONTROL *pControl,
+                                     quint32 *pnSystemError = nullptr)
 {
     if (pnSystemError) *pnSystemError = 0;
+    if (!unpackPublicationMayContinue(pControl)) {
 #ifdef Q_OS_WIN
-    // QTemporaryFile keeps its Windows file engine alive until destruction. Even
-    // after close(), that can prevent MoveFileExW from acquiring delete access to
-    // the source. Copy into a second, closed staging file and atomically rename
-    // that file instead. The unique temporary source name also makes the staging
-    // name unique within the destination directory.
+        if (pnSystemError) *pnSystemError = ERROR_CANCELLED;
+#endif
+        return false;
+    }
+#ifdef Q_OS_WIN
+    // Publish the verified object without reopening its path or copying its
+    // contents. QTemporaryFile keeps the source object pinned until destruction,
+    // and CreateHardLinkW atomically fails if a concurrent writer has created the
+    // destination. The caller's automatic temporary-file cleanup removes the
+    // private source name after the destination link has been journaled.
     const QString sStagingPath = sSourcePath + QStringLiteral(".publish");
     const QString sNativeSource = XBinary::winExtendedNativePath(QFileInfo(sSourcePath).absoluteFilePath());
     const QString sNativeStaging = XBinary::winExtendedNativePath(QFileInfo(sStagingPath).absoluteFilePath());
     const QString sNativeDestination = XBinary::winExtendedNativePath(QFileInfo(sDestinationPath).absoluteFilePath());
 
     SetLastError(ERROR_SUCCESS);
-    if (!CopyFileW(reinterpret_cast<LPCWSTR>(sNativeSource.utf16()), reinterpret_cast<LPCWSTR>(sNativeStaging.utf16()), TRUE)) {
+    if (CreateHardLinkW(reinterpret_cast<LPCWSTR>(sNativeDestination.utf16()), reinterpret_cast<LPCWSTR>(sNativeSource.utf16()), nullptr)) {
+        // Publication itself succeeded. The still-open QTemporaryFile handle
+        // intentionally prevents deleting either hard-link name here. The
+        // caller records the destination as published, destroys the temporary
+        // file, and then performs its cancellation/lifetime check so the
+        // folder transaction can remove this link during rollback.
+        return true;
+    }
+
+    const DWORD nHardLinkError = GetLastError();
+    if ((nHardLinkError == ERROR_FILE_EXISTS) || (nHardLinkError == ERROR_ALREADY_EXISTS)) {
+        if (pnSystemError) *pnSystemError = static_cast<quint32>(nHardLinkError);
+        return false;
+    }
+
+    const bool bHardLinksUnsupported = (nHardLinkError == ERROR_NOT_SUPPORTED) || (nHardLinkError == ERROR_INVALID_FUNCTION) ||
+                                       (nHardLinkError == ERROR_CALL_NOT_IMPLEMENTED);
+    if (!bHardLinksUnsupported) {
+        if (pnSystemError) *pnSystemError = static_cast<quint32>(nHardLinkError);
+        return false;
+    }
+
+    // Filesystems without hard-link support retain the closed staging-copy
+    // fallback. The unique temporary source name also makes the staging name
+    // unique within the destination directory.
+    SetLastError(ERROR_SUCCESS);
+    if (!CopyFileExW(reinterpret_cast<LPCWSTR>(sNativeSource.utf16()), reinterpret_cast<LPCWSTR>(sNativeStaging.utf16()), unpackPublishCopyProgress,
+                     pControl, nullptr, COPY_FILE_FAIL_IF_EXISTS)) {
         if (pnSystemError) *pnSystemError = static_cast<quint32>(GetLastError());
+        DeleteFileW(reinterpret_cast<LPCWSTR>(sNativeStaging.utf16()));
+        return false;
+    }
+
+    if (!unpackPublicationMayContinue(pControl)) {
+        DeleteFileW(reinterpret_cast<LPCWSTR>(sNativeStaging.utf16()));
+        if (pnSystemError) *pnSystemError = ERROR_CANCELLED;
         return false;
     }
 
@@ -25070,6 +25142,10 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
     const PDSTRUCTLIFETIME progressLifetime = retainPdStructLifetime(pPdStruct);
     const UnpackProgressLifetimeProbe isProgressAlive(progressLifetime);
+    UNPACK_PUBLISH_CONTROL publishControl;
+    publishControl.guardedBinary = guardedThis;
+    publishControl.pPdStruct = pPdStruct;
+    publishControl.progressLifetime = progressLifetime;
 
     if (!isProgressAlive() || !isPdStructNotCanceled(pPdStruct)) {
         return false;
@@ -25111,6 +25187,10 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
         bool bFixFileNames = mapEffectiveProperties.value(UNPACK_PROP_FIXFILENAMES).toBool();
         bool bOverwriteFiles = mapEffectiveProperties.value(UNPACK_PROP_OVERWRITEFILES).toBool();
+        // Skipping existing files is independent of filename sanitisation.
+        // Clearing OVERWRITEFILES alone would otherwise suffix the name when
+        // FIXFILENAMES is enabled instead of preserving the on-disk file.
+        const bool bSkipExistingFiles = mapEffectiveProperties.value(UNPACK_PROP_SKIPEXISTINGFILES).toBool();
 
         QString sRootPath = QDir::fromNativeSeparators(QDir(sFolderName).absolutePath());
         QString sCanonicalRoot = QDir::fromNativeSeparators(QFileInfo(sRootPath).canonicalFilePath());
@@ -25331,6 +25411,16 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                 break;
                             }
 
+                            // Preserve a safe existing regular file. Archive-internal
+                            // duplicate names still use the normal suffix policy.
+                            if (bSkipExistingFiles && bDiskEntryExists && !bUsedByArchive) {
+                                bSkipFile = true;
+                                sFilePath = sCandidatePath;
+                                setUsedPaths.insert(sCandidateKey);
+                                bOutputSelected = true;
+                                break;
+                            }
+
                             bool bNeedsDifferentName = bUsedByArchive || (bDiskEntryExists && !bOverwriteFiles);
 
                             if (bFixFileNames && bNeedsDifferentName) {
@@ -25442,12 +25532,13 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
                                 if (bResult && (!bOverwriteFiles || unpackNeedsLiteralPublication(sFilePath))) {
                                     // The verified temporary file is already in the destination
-                                    // directory. Literal native publication is required for
-                                    // Windows shell-shortcut names because QSaveFile asks
-                                    // QFileInfo about the .lnk destination and follows Qt's
-                                    // shortcut semantics.
+                                    // directory. Publish through the literal native path: the
+                                    // Windows fast path links the pinned object atomically, while
+                                    // the fallback keeps the closed staging-file transaction.
                                     QString sTemporaryFilePath = temporaryFile.fileName();
-                                    bResult = temporaryFile.flush();
+                                    // unpackCurrent's verified flush above is the final write.
+                                    // CRC validation only reads, so a second per-member FlushFileBuffers
+                                    // call here adds latency without strengthening publication.
                                     temporaryFile.close();
 
                                     if (bResult && !bOverwriteFiles) {
@@ -25462,11 +25553,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                     }
                                     if (bResult) {
                                         quint32 nPublishError = 0;
-                                        if (unpackNeedsLiteralPublication(sFilePath)) {
-                                            bResult = unpackPublishFileLiteral(sTemporaryFilePath, sFilePath, &nPublishError);
-                                        } else {
-                                            bResult = unpackRenameFileLiteral(sTemporaryFilePath, sFilePath, &nPublishError);
-                                        }
+                                        bResult = unpackPublishFileLiteral(sTemporaryFilePath, sFilePath, &publishControl, &nPublishError);
                                         if (!bResult && isProgressAlive()) {
                                             setPdStructErrorString(pPdStruct,
                                                                    QStringLiteral("Cannot publish temporary extraction file (system error %1): %2")
@@ -25490,6 +25577,10 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                             setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot write file")).arg(sFilePath));
                                     }
                                 } else if (bResult) {
+                                    // For replacement of a normal file, QSaveFile gives us an
+                                    // atomic commit while the verified temporary source remains
+                                    // pinned. Windows .lnk paths stay on the literal native path
+                                    // above because QFileInfo follows shortcut semantics.
                                     bResult = temporaryFile.seek(0);
 
                                     if (bResult) {
@@ -25504,28 +25595,23 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                             } else {
                                                 const qint32 nBufferSize = qBound((qint32)0x1000, nRequestedBufferSize, (qint32)0x100000);
                                                 baBuffer.resize(nBufferSize);
-                                                if (baBuffer.size() != nBufferSize) {
-                                                    bResult = false;
-                                                }
+                                                if (baBuffer.size() != nBufferSize) bResult = false;
                                             }
 
                                             const qint64 nVerifiedSize = temporaryFile.size();
                                             qint64 nRemaining = nVerifiedSize;
-                                            if (nRemaining < 0) {
-                                                bResult = false;
-                                            }
+                                            if (nRemaining < 0) bResult = false;
 
-                                            while (bResult && isProgressAlive() && (nRemaining > 0) && isPdStructNotCanceled(pPdStruct)) {
+                                            while (bResult && isProgressAlive() && isPdStructNotCanceled(pPdStruct) && (nRemaining > 0)) {
                                                 const qint64 nToRead = qMin(nRemaining, (qint64)baBuffer.size());
                                                 const qint64 nRead = temporaryFile.read(baBuffer.data(), nToRead);
-
                                                 if ((nRead <= 0) || (nRead > nToRead)) {
                                                     bResult = false;
                                                     break;
                                                 }
 
                                                 qint64 nWrittenTotal = 0;
-                                                while (bResult && isProgressAlive() && (nWrittenTotal < nRead) && isPdStructNotCanceled(pPdStruct)) {
+                                                while (bResult && isProgressAlive() && isPdStructNotCanceled(pPdStruct) && (nWrittenTotal < nRead)) {
                                                     const qint64 nWritten = outputFile.write(baBuffer.constData() + nWrittenTotal, nRead - nWrittenTotal);
                                                     if ((nWritten <= 0) || (nWritten > (nRead - nWrittenTotal))) {
                                                         bResult = false;
@@ -25538,7 +25624,6 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                                                     bResult = false;
                                                     break;
                                                 }
-
                                                 nRemaining -= nRead;
                                             }
 
@@ -25565,11 +25650,6 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
                                     if (!bResult) {
                                         reportTransactionError();
-                                        // Only fall back to the generic text when the
-                                        // transaction did not already explain itself:
-                                        // setPdStructErrorString assigns, so doing this
-                                        // unconditionally discarded the precise cause
-                                        // reportTransactionError had just recorded.
                                         if (isProgressAlive() && getPdStructErrorString(pPdStruct).isEmpty())
                                             setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot write file")).arg(sFilePath));
                                     }
