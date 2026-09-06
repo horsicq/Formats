@@ -201,7 +201,9 @@ static void _filterXFRecordsBySize(QList<XBinary::XFRECORD> *pListRecords, qint6
 
     QList<XBinary::XFRECORD> listFiltered;
 
-    for (const XBinary::XFRECORD &record : qAsConst(*pListRecords)) {
+    const QList<XBinary::XFRECORD> &listRecords = *pListRecords;
+
+    for (const XBinary::XFRECORD &record : listRecords) {
         if ((record.nOffset >= 0) && ((qint64)record.nOffset + record.nSize <= nSize)) {
             listFiltered.append(record);
         }
@@ -3528,7 +3530,7 @@ bool XPE::setImports(QIODevice *pDevice, bool bIsImage, QList<XPE::IMPORT_HEADER
             QList<XADDR> listPatches;
 
             quint32 nIATSize = 0;
-            quint32 nImportTableSize = (pListImportHeaders->count() + 1) * sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR);
+            quint32 nImportTableSize = (quint32)((pListImportHeaders->count() + 1) * sizeof(XPE_DEF::IMAGE_IMPORT_DESCRIPTOR));
             quint32 nAnsiDataSize = 0;
 
             qint32 nNumberOfHeaders = pListImportHeaders->count();
@@ -10270,7 +10272,9 @@ QList<XBinary::XFRECORD> XPE::getXFRecords(FT fileType, quint32 nStructID, const
         if (nLoadConfigSize) {
             QList<XBinary::XFRECORD> listFiltered;
 
-            for (const XBinary::XFRECORD &record : qAsConst(listResult)) {
+            const QList<XBinary::XFRECORD> &listResultRef = listResult;
+
+            for (const XBinary::XFRECORD &record : listResultRef) {
                 if ((record.nOffset >= 0) && ((quint32)(record.nOffset + record.nSize) <= nLoadConfigSize)) {
                     listFiltered.append(record);
                 }
@@ -14775,7 +14779,9 @@ QVector<XBinary::XEXPORT_STRUCT> XPE::getExportStructs()
 {
     QVector<XEXPORT_STRUCT> listResult;
 
-    EXPORT_HEADER exportHeader = getExport();
+    _MEMORY_MAP memoryMap = getMemoryMap();
+
+    EXPORT_HEADER exportHeader = getExport(&memoryMap);
 
     qint32 nNumberOfPositions = exportHeader.listPositions.count();
 
@@ -14783,7 +14789,7 @@ QVector<XBinary::XEXPORT_STRUCT> XPE::getExportStructs()
         const EXPORT_POSITION &position = exportHeader.listPositions.at(i);
 
         XEXPORT_STRUCT record = {};
-        record.nOffset = 0;
+        record.nOffset = addressToOffset(&memoryMap, position.nAddress);  // -1 when not mapped
         record.nSize = 0;
         record.nAddress = position.nAddress;
         record.sFunction = position.sFunctionName;

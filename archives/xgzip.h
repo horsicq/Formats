@@ -87,6 +87,7 @@ public:
     virtual QMap<UNPACK_PROP, QVariant> getDefaultUnpackProperties() override;
     virtual bool initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr) override;
     virtual ARCHIVERECORD infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual bool unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr) override;
     virtual bool moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr) override;
     virtual bool finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<FPART_PROP> getAvailableFPARTProperties() override;
@@ -95,6 +96,14 @@ public:
     qint64 getHeaderSize();
 
 private:
+    struct GZIP_MEMBER_INFO {
+        qint64 nOffset;
+        qint64 nHeaderSize;
+        qint64 nCompressedSize;
+        qint64 nUncompressedSize;
+        quint32 nCRC32;
+    };
+
     // Format-specific unpacking context
     struct GZIP_UNPACK_CONTEXT {
         qint64 nHeaderSize;        // Size of GZIP header (variable)
@@ -103,10 +112,14 @@ private:
         quint32 nCRC32;            // CRC32 of uncompressed data from the footer
         bool bFooterValid;         // True when the mandatory 8-byte footer is present
         QString sFileName;         // Original file name (if available)
+        QList<GZIP_MEMBER_INFO> members;
+        qint64 nTotalUncompressedSize = 0;
+        qint64 nMembersEnd = 0;
     };
 
     bool _getHeaderInfo(qint64 *pHeaderSize, QString *pFileName = nullptr, PDSTRUCT *pPdStruct = nullptr);
     bool _getFirstMemberInfo(GZIP_UNPACK_CONTEXT *pContext, PDSTRUCT *pPdStruct = nullptr, const QMap<UNPACK_PROP, QVariant> *pUnpackProperties = nullptr);
+    bool _getAllMemberInfo(GZIP_UNPACK_CONTEXT *pContext, PDSTRUCT *pPdStruct, const QMap<UNPACK_PROP, QVariant> &mapProperties);
 
 private:
     INTERNAL_INFO m_internalInfo;

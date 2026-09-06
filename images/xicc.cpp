@@ -21,6 +21,7 @@
 #include "xicc.h"
 
 #include <limits>
+#include <QTimeZone>
 
 namespace {
 const quint32 ICC_MAX_TAG_COUNT = 262144;
@@ -226,7 +227,7 @@ QVector<XBinary::XMETADATA_STRUCT> XICC::getMetadataStructs()
 
     const QDate date(read_uint16(24, true), read_uint16(26, true), read_uint16(28, true));
     const QTime time(read_uint16(30, true), read_uint16(32, true), read_uint16(34, true));
-    const QDateTime dateTime(date, time, Qt::UTC);
+    const QDateTime dateTime(date, time, X_UTC_TZ);
 
     if (dateTime.isValid()) {
         XMETADATA_STRUCT record = {};

@@ -41,6 +41,7 @@
 #include <QSharedPointer>
 #include <QTemporaryFile>
 #include <QTextStream>
+#include <QTimeZone>
 #include <QUuid>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
@@ -54,6 +55,17 @@
 #endif
 #ifndef QT_VERSION_PATCH
 #define QT_VERSION_PATCH (QT_VERSION & 0xff)
+#endif
+
+// Lightweight UTC zone for QDateTime.  QTimeZone::utc() reads like the same thing
+// but is the *backend* IANA "UTC" zone: it gives timeSpec() == Qt::TimeZone, renders
+// as "+00:00" instead of "Z", and heap-allocates a QTimeZonePrivate on every call.
+// QTimeZone::UTC (the Initialization enumerator) arrived in Qt 6.5; before that the
+// Qt::TimeSpec overload is both correct and non-deprecated.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#define X_UTC_TZ QTimeZone(QTimeZone::UTC)
+#else
+#define X_UTC_TZ Qt::UTC
 #endif
 
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)) || defined(QT_CORE5COMPAT_LIB)
@@ -291,15 +303,12 @@ public:
         HANDLE_METHOD_LZH4,
         HANDLE_METHOD_KWAJ_MSZIP,  // KWAJ method 4: length-prefixed MSZIP blocks
         // SEA ARC. The run-length stage is part of the method, not a separate
-        // layer: 3/4/6/7/8 apply it, 5/9 do not. Methods 6 and 7 differ only in
-        // the encoder's hash function, so one decoder value covers both.
+        // layer: 3/4/6/7/8 apply it, 5/9 do not. Methods 6 and 7 require
+        // distinct hash-table decoders because hash slots are the stored codes.
         HANDLE_METHOD_ARC_PACK,     // ARC method 3: run-length only
         HANDLE_METHOD_ARC_SQUEEZE,  // ARC method 4: Huffman + run-length
-        // Reserved for ARC's original hash-table crunch, methods 5 (no
-        // run-length) and 6/7 (with it). That is a different decompressor from
-        // the dynamic LZW below, and no sample has been found to develop it
-        // against, so nothing maps to these yet and method 5-7 records report
-        // HANDLE_METHOD_UNKNOWN.
+        // Original ARC hash-table LZW recovered from U3: method 5 without
+        // run-length, method 6 with it. Method 7 uses the appended HASHNEW id.
         HANDLE_METHOD_ARC_CRUNCH_OLD,
         HANDLE_METHOD_ARC_CRUNCH,
         HANDLE_METHOD_ARC_CRUNCH_DYN,  // ARC method 8: dynamic-width LZW + run-length
@@ -379,8 +388,137 @@ public:
         HANDLE_METHOD_SQZ4,
         HANDLE_METHOD_PAK_CRUSHED,
         HANDLE_METHOD_PAK_DISTILLED,
-        HANDLE_METHOD_SSM_PICTOOLS5
+        HANDLE_METHOD_SSM_PICTOOLS5,
+        // Aldus gen1 payload: block table + per-block TIFF/PDF-style LZW. Whole-buffer decoder - add the name to the whole-buffer family list at xdecompress.cpp:3141-3160 alongside HANDLE_METHOD_GPFPACK_LZW, then the dispatch else-if next to it at :3254. A single record maps to one (offset,size,method) triple, so the block loop lives inside the decoder exactly as decGpfPack does.
+        HANDLE_METHOD_ALDUS_LZW,
+        // Aldus gen2 payload: block table + one complete PKWARE DCL implode stream per block (the decoder reuses XDclDecoder). Same whole-buffer family list + dispatch site as HANDLE_METHOD_ALDUS_LZW.
+        HANDLE_METHOD_ALDUS_PKZP,
+        // Adobe gen3 payload: block table + per-block [LE16 CRC-16/ARC][u8 method][data], method 0 stored / method 1 LHA -lh5- (dicbit 13, np 14, pbit 4), 1-2 LHA sub-blocks per container block. Same whole-buffer family list + dispatch site as HANDLE_METHOD_ALDUS_LZW.
+        HANDLE_METHOD_ALDUS_LZSH,
+        // Philip Gage Byte Pair Encoding (C/C++ Users Journal, Feb 1994) as used by the Park Place Productions "PAK" container. Written from the byte layout recovered from the samples; no third-party code vendored, licence clean. Append at the tail of the HANDLE_METHOD enum (after HANDLE_METHOD_SSM_PICTOOLS5) so persisted ids do not move. NOTE: besides the else-if body below, HANDLE_METHOD_BPE_GAGE must also be added to the method list in the guarding if-condition of that same branch (xdecompress.cpp ~lines 3141-3161, the branch that materialises `packed`/`unpacked` QByteArrays), next to HANDLE_METHOD_RTPATCH. It requires FPART_PROP_UNCOMPRESSEDSIZE to be defined, which XBTHPAK always publishes.
+        HANDLE_METHOD_BPE_GAGE,
+        // Eschalon Setup ARCV 2.00, scrambled writer variant: prefix-XOR delta filter (seed 0x56) over the packed member, then the ordinary narrow ARCV LZHUF stream. Place next to HANDLE_METHOD_ARCV_LZHUF (xbinary.h:344). Must ALSO be added to the buffered-method list at xdecompress.cpp:3145-3162, alongside HANDLE_METHOD_ARCV_LZHUF.
+        HANDLE_METHOD_ARCV2_LZHUF_DELTA,
+        // Eschalon Setup ARCV 2.00, stored member inside a scrambled archive: the prefix-XOR delta filter (seed 0x56) is the whole codec, length-preserving. Place next to HANDLE_METHOD_ARCV_LZHUF (xbinary.h:344). Must ALSO be added to the buffered-method list at xdecompress.cpp:3145-3162.
+        HANDLE_METHOD_ARCV_XOR_DELTA,
+        // AMPK method 2: Okumura LZSS, N=4096, F=18, LSB-first flag byte per 8 tokens. NOT HANDLE_METHOD_LZSS_SZDD: that path starts the ring cursor at N-16 instead of N-18 and fails silently (right byte count, wrong bytes). Place the dispatch inside the existing whole-buffer block that materialises `packed`/`unpacked` (xdecompress.cpp ~3140-3520) and ALSO add `(compressMethod == XBinary::HANDLE_METHOD_AMPK_LZSS)` to the disjunction at the top of that block (~line 3140) or the branch is never reached.
+        HANDLE_METHOD_AMPK_LZSS,
+        // AMPK method 1: Okumura LZARI (LZSS over an adaptive binary arithmetic coder), N=4096, F=60, THRESHOLD=2, N_CHAR=314, M=15. No existing HANDLE_METHOD decodes it. The coder primes 17 bits, so it reads 1-2 bytes past the member's declared compressedSize; the decoder returns zero bits there by design. Same placement rule as HANDLE_METHOD_AMPK_LZSS: add it to the block's disjunction as well as the else-if.
+        HANDLE_METHOD_AMPK_LZARI,
+        // Classic SysV/AIX `pack` Huffman stream in its HEADERLESS form (no 0x1F1E magic, no embedded raw size) - what BFF 0xEA6C members contain. NO NEW ALGORITHM: it is decoded by the already-vendored XAncientPrivate::UnixPackDecoder, reached through XAncientDecoder::TYPE_UNIX_PACK, exactly as HANDLE_METHOD_RNC already reaches XAncientDecoder today, so no new licence boundary. Two central edits: (1) append HANDLE_METHOD_UNIX_PACK at the END of the HANDLE_METHOD enum in _mylibs/Formats/xbinary.h (after HANDLE_METHOD_SSM_PICTOOLS5) so persisted ids do not move; (2) in _mylibs/XArchive/xdecompress.cpp add HANDLE_METHOD_UNIX_PACK to the `||` condition list of the buffered packed/unpacked block (the list around lines 3141-3161 that already carries HANDLE_METHOD_RNC) and add the else-if arm below next to the HANDLE_METHOD_RNC arm (~line 3242). That block's preamble already enforces bUncompressedSizeDefined and buffer-size sanity. Proof this decoder is the right one: I re-implemented its exact table construction independently and the four members of 99_yzpccqpjzspqkion_U471905.bff decode to md5 fcef242d.../3ceb5ed7.../272f2045.../87606c2c..., identical to U3's extraction; the plan's author separately compiled the real in-tree decoder and ran it over all 786 compressed members of the family, ok=786 bad=0. Largest packed member in the corpus is 5,519,197 raw / 4,365,781 packed, well inside XAncientDecoder::MAX_RAW_SIZE (128 MiB).
+        HANDLE_METHOD_UNIX_PACK,
+        // Add the enumerator in xbinary.h next to HANDLE_METHOD_MSZIP_CAB (line ~248). IMPORTANT - xdecompress.cpp needs TWO edits, not one: (1) add `(compressMethod == XBinary::HANDLE_METHOD_ASYMETRIX_BLOCKS) ||` to the whole-buffer method list that opens the `packed`/`unpacked` branch at lines ~3141-3161 (the same chain that contains HANDLE_METHOD_PKWARE_DCL_IMPLODE at line 3151), otherwise the new arm is unreachable and every member falls through to "Unknown compression method"; (2) add the else-if arm below to that branch's dispatch chain, next to the HANDLE_METHOD_PKWARE_DCL_IMPLODE arm at line ~3269. No codec maths is being added: the arm only walks the 6-byte {u16 method, u32 packedLength} block frames, and the PKWARE DCL explode inside XAsymetrixDecoder is a port of the existing decPkwareDcl (xdecompress.cpp:1325), kept local only because that function is static in another TU. Also add Algos/xasymetrixdecoder.h and .cpp to xarchive.pri and xarchive.cmake alongside xasymetrix.h/.cpp.
+        HANDLE_METHOD_ASYMETRIX_BLOCKS,
+        // PhysTechSoft BSA member codec: LHA -lh6- static Huffman (NC=510/CBIT=9, NT=19/TBIT=5, NP=16/PBIT=5, THRESHOLD=3, 32 KiB window) with a SOLID dictionary. The bit reader and Huffman state restart byte-aligned per member, but the window carries the preceding members' plaintext, so this cannot be aliased onto the existing HANDLE_METHOD_LZH6 (measured: a fresh window decodes only 355 of 853 members; the other 498 come out as garbage). XBSN supplies the required history as FPART_PROP_COMPRESSPROPERTIES, which the dispatch already has in scope as baProperty. PLACEMENT: add HANDLE_METHOD_BSN_LH6 to the OUTER group condition of the buffer-decoder arm in XDecompress::decompress (the big `else if ((compressMethod == XBinary::HANDLE_METHOD_COMPACT_PRO_RLE) || ...)` list, currently ~xdecompress.cpp:3141) so that `packed` / `unpacked` are materialised, then add the inner else-if below alongside the other decoders (~xdecompress.cpp:3193+). baProperty is a function-scope local declared at ~line 2770 and is in scope there; it is empty for the first member of an archive, which the decoder handles as the non-solid case.
+        HANDLE_METHOD_BSN_LH6,
+        // // Unix compress (LZW) stream that carries only the flags byte - the 1F 9D         // magic is not stored in the container, so XCompressDecoder's entry point         // cannot be pointed at it.         HANDLE_METHOD_COMPRESS_RAW
+        HANDLE_METHOD_COMPRESS_RAW,
+        // Eschalon Setup ARCV 2.00 written by the *Trial Edition* of the authoring tool: the payload is the very same prefix-XOR delta filter plus narrow ARCV LZHUF as HANDLE_METHOD_ARCV2_LZHUF_DELTA, only the filter seed is 0xab instead of the Release Edition's 0x56. Nothing in the container names the edition (SETUP.STX says "OEM=Eschalon Trial Edition" -- but that string only becomes readable after the stream is already decoded), so XARCV2::probeScramble has to try the seeds and let the stream decide. Appended at the tail of the enum so persisted ids do not move. Must ALSO be added to the buffered-method list at xdecompress.cpp:3149-3183, alongside HANDLE_METHOD_ARCV2_LZHUF_DELTA.
+        HANDLE_METHOD_ARCV2_LZHUF_DELTA_TRIAL,
+        // Stored member inside a Trial-Edition-scrambled ARCV 2.00 archive: the 0xab-seeded prefix-XOR delta filter is the whole codec, length-preserving. Same placement rule as HANDLE_METHOD_ARCV2_LZHUF_DELTA_TRIAL.
+        HANDLE_METHOD_ARCV_XOR_DELTA_TRIAL,
+        // bzip 0.21 ('BZ0') stream: RLE1 -> Burrows-Wheeler -> move-to-front -> Fenwick structured model -> Moffat/Neal/Witten adaptive arithmetic coding. NOT an alias of HANDLE_METHOD_BZIP2: bzip2 replaced the arithmetic back end with Huffman, so the two entropy stages share no code, and this container has no block magic, no cleartext CRC and no cleartext origPtr - everything after the 4-byte header is already inside the coder. Decoded by XBZIP1Decoder (Algos/xbzip1decoder.*), which is a STREAMING decoder because the uncompressed size is not knowable before decoding; it is therefore dispatched next to HANDLE_METHOD_BZIP2 in xdecompress.cpp and must NOT be added to the whole-buffer method list (that list requires bUncompressedSizeDefined).
+        HANDLE_METHOD_BZIP1,
         // TODO check more methods
+        // ARC3 extensions: append to preserve persisted identifiers.
+        HANDLE_METHOD_LHA_LEGACY,
+        HANDLE_METHOD_DISKDOUBLER_LZW,
+        HANDLE_METHOD_ARC_CRUNCH_HASHNEW,  // ARC 7: multiplicative hash LZW + RLE90.
+        HANDLE_METHOD_ARC_COMPRESSED,     // ARC 0x7f: flag-prefixed Unix compress.
+        // ARC4 corpus wave 1 codecs.
+        HANDLE_METHOD_NETWARE_PACK2,
+        HANDLE_METHOD_MATHCAD,
+        HANDLE_METHOD_PCOMM_OS2,
+        HANDLE_METHOD_KOLIBRI_KPACK,
+        HANDLE_METHOD_INFOGRAMES_PAK,
+        HANDLE_METHOD_SOLARIS_BOOT,
+        HANDLE_METHOD_MWAVE_Z,
+        // ARC4 corpus wave 2 codecs.
+        HANDLE_METHOD_NPACK,
+        HANDLE_METHOD_LZPIS2,
+        // ARC4 corpus wave 3 codecs.
+        // Eschalon Setup ARCV 4.00, member method 2: adaptive Huffman over a
+        // 3245-symbol alphabet driving LZ77 with a 32 KiB window, LSB-first bit
+        // packing. Shares nothing with HANDLE_METHOD_ARCV_LZHUF but the family name.
+        HANDLE_METHOD_ARCV4_M2,
+        HANDLE_METHOD_SILMARILS,
+        // ARC4 corpus wave 4 codecs (unused ones are stripped after registration).
+        HANDLE_METHOD_IS11,
+        HANDLE_METHOD_EA,
+        HANDLE_METHOD_SOFTPAQ_2,
+        HANDLE_METHOD_GKSETUP,
+        HANDLE_METHOD_EALIB,
+        HANDLE_METHOD_MVA,
+        HANDLE_METHOD_HFE,
+        HANDLE_METHOD_SW,
+        HANDLE_METHOD_SWAG,
+        HANDLE_METHOD_QNX_BASE,
+        HANDLE_METHOD_FLD,
+        HANDLE_METHOD_MEGATECH_VOL,
+        HANDLE_METHOD_QUANTUM,
+        HANDLE_METHOD_HUFF,
+        HANDLE_METHOD_JGPAK,
+        HANDLE_METHOD_LZDIET,
+        HANDLE_METHOD_RECOGNITA,
+        HANDLE_METHOD_SLS,
+        HANDLE_METHOD_MARC,
+        HANDLE_METHOD_OPC,
+        HANDLE_METHOD_NID,
+        HANDLE_METHOD_PKT,
+        HANDLE_METHOD_RSVK,
+        HANDLE_METHOD_SAF,
+        HANDLE_METHOD_STYLUS,
+        HANDLE_METHOD_GAMOS,
+        HANDLE_METHOD_GLU,
+        HANDLE_METHOD_IGF1,
+        HANDLE_METHOD_IRIX_SA,
+        HANDLE_METHOD_LZHCXP,
+        HANDLE_METHOD_PACKIT,
+        HANDLE_METHOD_QUALITAS,
+        HANDLE_METHOD_INTEDU_FT,
+        HANDLE_METHOD_PC_SECURE,
+        HANDLE_METHOD_STORK,
+        HANDLE_METHOD_GOB2,
+        HANDLE_METHOD_HAP,
+        HANDLE_METHOD_HDCOPY,
+        HANDLE_METHOD_HZL,
+        HANDLE_METHOD_IGF2,
+        HANDLE_METHOD_SETTLERS_FT,
+        HANDLE_METHOD_SOS,
+        HANDLE_METHOD_JAM,
+        HANDLE_METHOD_JETBBS,
+        HANDLE_METHOD_JM93,
+        HANDLE_METHOD_KRML,
+        HANDLE_METHOD_LOFI,
+        HANDLE_METHOD_LZV1,
+        HANDLE_METHOD_PAPERPORT,
+        HANDLE_METHOD_PM_DISKCOPY,
+        HANDLE_METHOD_SEA_DATA,
+        HANDLE_METHOD_SQ,
+        HANDLE_METHOD_EXE_EBOOKCREATOR,
+        HANDLE_METHOD_IVT,
+        HANDLE_METHOD_JBF,
+        HANDLE_METHOD_RCF,
+        HANDLE_METHOD_RIVERSOFT,
+        HANDLE_METHOD_EXE_SBOOKBUILDER,
+        HANDLE_METHOD_FMC1,
+        HANDLE_METHOD_MAKESELF,
+        HANDLE_METHOD_NEXTSTEP_DISKIMAGE,
+        HANDLE_METHOD_QIP1,
+        HANDLE_METHOD_SCI,
+        HANDLE_METHOD_IS7_INX,
+        HANDLE_METHOD_RAW_LZW15V,
+        HANDLE_METHOD_GTU,
+        HANDLE_METHOD_NOTETAB,
+        HANDLE_METHOD_IZPACK,
+        HANDLE_METHOD_RID,
+        HANDLE_METHOD_ROMPAQ,
+        HANDLE_METHOD_GAS_HUFF,
+        HANDLE_METHOD_IRWINPAC,
+        HANDLE_METHOD_COREL_LTEC,
+        HANDLE_METHOD_EA_REFPACK,
+        HANDLE_METHOD_NETWARE_PACK,
+
     };
 
     struct PM_INFO {
@@ -516,6 +654,32 @@ public:
         // FPART_PROP_NEEDCONVERT
         // FPART_PROP_COMPRESSION_OPTION_0,
         // FPART_PROP_COMPRESSION_OPTION_1,
+        // Container header fields kept so an archive can be reproduced
+        // byte-for-byte: without them a repack invents its own.
+        FPART_PROP_VERSIONMADEBY,
+        FPART_PROP_VERSIONNEEDED,
+        FPART_PROP_INTERNALATTRIBUTES,
+        FPART_PROP_EXTERNALATTRIBUTES,
+        // Individual general-purpose flag bits, named so a listing says what a
+        // record is rather than leaving the reader to decode a bit mask.
+        FPART_PROP_ISUTF8NAME,
+        FPART_PROP_HASDATADESCRIPTOR,
+        FPART_PROP_ISSTRONGENCRYPTED,
+        // Readable forms of VERSIONMADEBY / VERSIONNEEDED: "2.0" and the host
+        // system that wrote the entry. The numeric fields above stay as they
+        // are, because a byte-exact repack has to write them back verbatim.
+        FPART_PROP_VERSION,
+        FPART_PROP_VERSIONCREATED,
+        FPART_PROP_HOSTSYSTEM,
+        // Raw bytes, not just the offset/length pair, so a repack can put them
+        // back. The local and central extra fields are separate because a
+        // container is free to differ between the two.
+        FPART_PROP_EXTRAFIELD,
+        FPART_PROP_EXTRAFIELDLOCAL,
+        FPART_PROP_FILECOMMENT,
+        // Which encoder produced a compressed stream, read from the stream's
+        // own block layout rather than from anything the container claims.
+        FPART_PROP_ENCODER
     };
 
     enum UNPACK_PROP {
@@ -554,7 +718,13 @@ public:
         // replacing it (unzip -n, 7-Zip -aos).  Archive-internal name collisions
         // keep their existing duplicate-suffix handling, and directory entries are
         // unaffected, so this can only ever write less than a default run.
-        UNPACK_PROP_SKIPEXISTINGFILES
+        UNPACK_PROP_SKIPEXISTINGFILES,
+        // Read supported guest filesystems inside virtual disks instead of exporting disk.raw.
+        UNPACK_PROP_DISK_FILESYSTEM,
+        // U3 x3 collision style inside the common folder transaction.
+        UNPACK_PROP_U3_RENAME,
+        // Expose UU/base64 transport payloads using their declared names.
+        UNPACK_PROP_TRANSPORT_ONLY
     };
 
     // Accounts temporary decoder memory against the process-wide unpack
@@ -1319,8 +1489,170 @@ public:
         FT_SQZ,
         FT_SQZSFX,
         FT_RTPATCHSFX,
+        FT_AMIGA_ADF,
+        FT_GODOT_PCK,
+        FT_WBFS,
+        FT_RVZ,
+
+        // ARC2 legacy archive families.  Appended so persisted FT
+        // numeric IDs of existing formats stay stable.
+        FT_ALDUS,
+        FT_BLUEBYTE_LIB,
+        FT_BTH_PAK,
+        FT_ARCV2,
+        FT_AMPK,
+        FT_AIX_BFF,
+        FT_AR_PDP11,
+        FT_ASYMETRIX,
+        FT_BINARY2,
+        FT_ASCEND,
+        FT_ARCV4,
+        FT_BVRP_PAC,
+        FT_PCINSTALL,
+        FT_BOO,
+        FT_ARTIPACK,
+        FT_BINSH_SFX,
+        FT_AGIS,
+        FT_BSN,
+        FT_AODOS,
+        FT_BZIP1,
+        FT_INSTALLANYWHERE_SFX,
+        FT_ASCEND_BACKUP,
+        FT_BORLAND_PACK,
 
         // TODO more
+        // ARC3 extensions: append to preserve persisted identifiers.
+        FT_VHD,
+        FT_VDI,
+        FT_QCOW2,
+        FT_DISK_DOUBLER_DDAR,
+        // Recovered U3 handler ports; append without renumbering saved types.
+        FT_VHDX,
+        FT_SQLITE,
+        FT_CPM_CRUNCH,
+        FT_CPM_LZH,
+        FT_UNIX_COMPACT,
+        FT_GIT_OBJECT,
+        FT_ALZ,
+        FT_RZIP,
+        FT_BZIP2SFX,
+        FT_NTFS,
+        FT_CHM,
+        FT_DESCENT_HOG2,
+        FT_BOHEMIA_PBO,
+        // ARC4 corpus wave 1: formats U3 handles and XFU did not.
+        FT_NETWARE_PACK2,
+        FT_IBM_ZPAK,
+        FT_NETWARE_PACK,
+        FT_MSCOMPRESS_SZ,
+        FT_MATHCAD_PACK,
+        FT_PCOMM_OS2,
+        FT_KOLIBRI_KPACK,
+        FT_INFOGRAMES_PAK,
+        FT_IBM_SPACK,
+        FT_QDECK_QIP,
+        FT_SWAG_PACKET,
+        FT_MAXIS_MXS,
+        FT_PALM_PDB,
+        FT_SOLARIS_BOOT,
+        FT_MWAVE_Z,
+        // ARC4 corpus wave 2.
+        FT_FINEREADER_PACK,
+        FT_ECM_PACK,
+        FT_DT_PACK,
+        FT_NPACK,
+        FT_POVLAB_LZH,
+        FT_GST_PACK,
+        FT_LZPIS2,
+        FT_PRINTSHOP_DELUXE,
+        FT_POWERBOARD_BBS,
+        // ARC4 corpus wave 3 (ported from the recovered U3 handlers).
+        FT_SILMARILS,
+        // ARC4 corpus wave 4 (ported from the recovered U3 handlers).
+        FT_IS11,
+        FT_EA,
+        FT_SOFTPAQ_2,
+        FT_GKSETUP,
+        FT_EALIB,
+        FT_MVA,
+        FT_HFE,
+        FT_SW,
+        FT_SWAG,
+        FT_QNX_BASE,
+        FT_FLD,
+        FT_MEGATECH_VOL,
+        FT_QUANTUM,
+        FT_HUFF,
+        FT_JGPAK,
+        FT_LZDIET,
+        FT_RECOGNITA,
+        FT_SLS,
+        FT_MARC,
+        FT_OPC,
+        FT_NID,
+        FT_PKT,
+        FT_RSVK,
+        FT_SAF,
+        FT_STYLUS,
+        FT_GAMOS,
+        FT_GLU,
+        FT_IGF1,
+        FT_IRIX_SA,
+        FT_LZHCXP,
+        FT_PACKIT,
+        FT_QUALITAS,
+        FT_INTEDU_FT,
+        FT_PC_SECURE,
+        FT_STORK,
+        FT_GOB2,
+        FT_HAP,
+        FT_HDCOPY,
+        FT_HZL,
+        FT_IGF2,
+        FT_SETTLERS_FT,
+        FT_SOS,
+        FT_JAM,
+        FT_JETBBS,
+        FT_JM93,
+        FT_KRML,
+        FT_LOFI,
+        FT_LZV1,
+        FT_PAPERPORT,
+        FT_PM_DISKCOPY,
+        FT_SEA_DATA,
+        FT_SQ,
+        FT_EXE_EBOOKCREATOR,
+        FT_IVT,
+        FT_JBF,
+        FT_RCF,
+        FT_RIVERSOFT,
+        FT_EXE_SBOOKBUILDER,
+        FT_FMC1,
+        FT_MAKESELF,
+        FT_NEXTSTEP_DISKIMAGE,
+        FT_QIP1,
+        FT_SCI,
+        FT_IS7_INX,
+        FT_LBR_COBOL,
+        FT_RAW_LZW15V,
+        FT_LSZ,
+        FT_GOB,
+        FT_GTU,
+        FT_NOTETAB,
+        FT_IZPACK,
+        FT_SOLARIS_PKG,
+        FT_HLB,
+        FT_RID,
+        FT_ROMPAQ,
+        FT_FIZ,
+        FT_MIZ,
+        FT_GAS_HUFF,
+        FT_IRWINPAC,
+        FT_SECOND_NATURE,
+        FT_COREL_LTEC,
+        FT_EA_REFPACK,
+        FT_FRONTPAGE_THEME,
+
     };
 
     enum INDATA_MODE {

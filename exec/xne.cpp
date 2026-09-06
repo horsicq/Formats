@@ -1515,6 +1515,7 @@ QList<XBinary::XFHEADER> XNE::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT *p
             xfHeader.fileType = xfStruct.fileType;
             xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_SEGMENT_TABLE);
             xfHeader.xLoc = offsetToLoc(nOffset);
+            xfHeader.nSize = sizeof(XNE_DEF::NE_SEGMENT);
             xfHeader.xfType = XFTYPE_TABLE;
             xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_SEGMENT_TABLE, xfHeader.xLoc);
 

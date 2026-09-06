@@ -20,6 +20,8 @@
  */
 #include "xgzip.h"
 #include "Algos/xdeflatedecoder.h"
+#include <QTemporaryFile>
+#include <QBuffer>
 
 #include <limits>
 #include <new>
@@ -27,7 +29,8 @@
 namespace {
 class GzipDiscardDevice : public QIODevice {
 public:
-    GzipDiscardDevice() : m_nCRC32(0xFFFFFFFFU), m_nSize(0), m_bError(false)
+    explicit GzipDiscardDevice(QIODevice *pTarget = nullptr, qint64 nLimit = -1)
+        : m_nCRC32(0xFFFFFFFFU), m_nSize(0), m_bError(false), m_pTarget(pTarget), m_bHasTarget(pTarget != nullptr), m_nLimit(nLimit)
     {
     }
 
@@ -67,6 +70,20 @@ protected:
             return -1;
         }
 
+        if ((m_nLimit >= 0) && (nMaxSize > m_nLimit - m_nSize)) {
+            m_bError = true;
+            return -1;
+        }
+        if (m_bHasTarget) {
+            qint64 nWritten = 0;
+            while (nWritten < nMaxSize) {
+                if (!m_pTarget) { m_bError = true; return -1; }
+                const qint64 nChunk = m_pTarget->write(pData + nWritten, nMaxSize - nWritten);
+                if (!m_pTarget || (nChunk <= 0) || (nChunk > nMaxSize - nWritten)) { m_bError = true; return -1; }
+                nWritten += nChunk;
+            }
+        }
+
         qint64 nDone = 0;
         while (nDone < nMaxSize) {
             const qint32 nChunk = (qint32)qMin<qint64>(nMaxSize - nDone, (std::numeric_limits<qint32>::max)());
@@ -82,6 +99,9 @@ private:
     quint32 m_nCRC32;
     qint64 m_nSize;
     bool m_bError;
+    QPointer<QIODevice> m_pTarget;
+    bool m_bHasTarget;
+    qint64 m_nLimit;
 };
 }  // namespace
 
@@ -688,6 +708,109 @@ bool XGzip::_getFirstMemberInfo(GZIP_UNPACK_CONTEXT *pContext, PDSTRUCT *pPdStru
     return XBinary::isPdStructNotCanceled(pPdStruct);
 }
 
+bool XGzip::_getAllMemberInfo(GZIP_UNPACK_CONTEXT *pContext, PDSTRUCT *pPdStruct, const QMap<UNPACK_PROP, QVariant> &mapProperties)
+{
+    QPointer<XGzip> guardedThis(this);
+    QPointer<QIODevice> source(getDevice());
+    if (!pContext || !source || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+    const qint64 nSize = source->size();
+    qint64 nOutputLimit = -1;
+    if (!guardedThis || !source || (nSize < 18) || !XBinary::getUnpackOutputLimit(mapProperties, &nOutputLimit)) return false;
+    GZIP_UNPACK_CONTEXT result = {};
+    qint64 nOffset = 0;
+    while (nOffset < nSize) {
+        if ((result.members.size() >= 100000) || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+        SubDevice memberDevice(source.data(), nOffset, nSize - nOffset);
+        if (!memberDevice.open(QIODevice::ReadOnly) || !guardedThis || !source) return false;
+        XGzip memberArchive(&memberDevice);
+        GZIP_UNPACK_CONTEXT member = {};
+        QMap<UNPACK_PROP, QVariant> memberProperties = mapProperties;
+        if (nOutputLimit >= 0) memberProperties.insert(UNPACK_PROP_MAX_OUTPUT_SIZE, nOutputLimit - result.nTotalUncompressedSize);
+        const bool bMember = memberArchive._getFirstMemberInfo(&member, pPdStruct, &memberProperties);
+        if (!guardedThis || !source || !bMember || !member.bFooterValid || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+        if ((member.nHeaderSize < 10) || (member.nCompressedSize <= 0) || (member.nUncompressedSize < 0) ||
+            (member.nHeaderSize > nSize - nOffset) || (member.nCompressedSize > nSize - nOffset - member.nHeaderSize) ||
+            (nSize - nOffset - member.nHeaderSize - member.nCompressedSize < 8) ||
+            (member.nUncompressedSize > (std::numeric_limits<qint64>::max)() - result.nTotalUncompressedSize)) return false;
+        if (result.members.isEmpty()) {
+            result = member;
+            if (result.sFileName.isEmpty()) result.sFileName = XBinary::getDeviceFileBaseName(source.data());
+        }
+        GZIP_MEMBER_INFO info = {};
+        info.nOffset = nOffset;
+        info.nHeaderSize = member.nHeaderSize;
+        info.nCompressedSize = member.nCompressedSize;
+        info.nUncompressedSize = member.nUncompressedSize;
+        info.nCRC32 = member.nCRC32;
+        result.members.append(info);
+        result.nTotalUncompressedSize += member.nUncompressedSize;
+        if (!XBinary::isUnpackOutputSizeAllowed(mapProperties, result.nTotalUncompressedSize)) return false;
+        nOffset += member.nHeaderSize + member.nCompressedSize + 8;
+    }
+    if (result.members.isEmpty() || !guardedThis || !source || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+    result.nMembersEnd = nOffset;
+    *pContext = result;
+    return true;
+}
+
+bool XGzip::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct)
+{
+    UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress);
+    QPointer<XGzip> guardedThis(this);
+    QPointer<QIODevice> output(pDevice);
+    QPointer<QIODevice> source(getDevice());
+    if (!operationGuard.isAcquired() || !pState || !pState->pContext || !output || !source ||
+        (pState->nCurrentIndex != 0) || (pState->nNumberOfRecords != 1) || !isUnpackSourceCurrent(pState, pPdStruct) || !guardedThis || !source || !output) return false;
+    const bool bSupported = isUnpackOutputSupported(output.data());
+    if (!guardedThis || !source || !output || !bSupported) return false;
+    const bool bAliases = XBinary::devicesAlias(source.data(), output.data());
+    if (!guardedThis || !source || !output || bAliases || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+    // Keep a value copy across callback-bearing I/O. Archive destruction can
+    // release its registered context while this operation's guard survives.
+    const GZIP_UNPACK_CONTEXT context = *static_cast<const GZIP_UNPACK_CONTEXT *>(pState->pContext);
+    if (context.members.isEmpty() || (context.nMembersEnd != pState->nTotalSize) ||
+        !XBinary::isUnpackOutputSizeAllowed(pState->mapUnpackProperties, context.nTotalUncompressedSize)) return false;
+    OUTPUT_POLICY policy = {};
+    if (!XBinary::resolveUnpackOutputPolicy(pState->mapUnpackProperties, &policy) ||
+        (dynamic_cast<QBuffer *>(output.data()) && (policy.nMaxMemoryOutputSize >= 0) && (context.nTotalUncompressedSize > policy.nMaxMemoryOutputSize))) return false;
+    if (pState->spOutputBudget && !pState->spOutputBudget->beginEntry(0, context.sFileName)) {
+        if (pState->spOutputBudget->isEnforcing()) return false;
+        OUTPUT_BUDGET::noteShadowRefusal(pState->spOutputBudget.data());
+    }
+    QTemporaryFile stage;
+    if (!stage.open()) return false;
+    qint64 nOutputSize = 0;
+    for (const GZIP_MEMBER_INFO &member : context.members) {
+        if (!guardedThis || !source || !output || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+        SubDevice input(source.data(), member.nOffset + member.nHeaderSize, member.nCompressedSize);
+        GzipDiscardDevice writer(&stage, member.nUncompressedSize);
+        if (!input.open(QIODevice::ReadOnly) || !guardedThis || !source || !output || !writer.open(QIODevice::WriteOnly)) return false;
+        DATAPROCESS_STATE state = {};
+        state.pDeviceInput = &input;
+        state.pDeviceOutput = &writer;
+        state.nInputOffset = 0;
+        state.nInputLimit = member.nCompressedSize;
+        state.nProcessedOffset = 0;
+        state.nProcessedLimit = -1;
+        state.mapProperties.insert(FPART_PROP_UNCOMPRESSEDSIZE, member.nUncompressedSize);
+        state.mapUnpackProperties = pState->mapUnpackProperties;
+        state.spOutputBudget = pState->spOutputBudget;
+        const bool bDecoded = XDeflateDecoder::decompress(&state, pPdStruct);
+        if (!guardedThis || !source || !output || !bDecoded || state.bReadError || state.bWriteError || writer.hasError() ||
+            (state.nCountInput != member.nCompressedSize) || (state.nCountOutput != member.nUncompressedSize) ||
+            (writer.outputSize() != member.nUncompressedSize) || (writer.crc32() != member.nCRC32)) return false;
+        nOutputSize += state.nCountOutput;
+    }
+    if ((nOutputSize != context.nTotalUncompressedSize) || (stage.size() != nOutputSize) || !stage.flush() || !stage.seek(0) ||
+        !guardedThis || !source || !output || !isUnpackSourceCurrent(pState, pPdStruct) || !guardedThis || !source || !output ||
+        !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+    const bool bPublished = publishUnpackOutput(&stage, output.data(), pState, pPdStruct);
+    if (!guardedThis || !output || !bPublished) return false;
+    pState->nCurrentOffset = context.nMembersEnd;
+    return true;
+}
+
+
 QList<XBinary::PM_INFO> XGzip::unpackImplemented()
 {
     QList<PM_INFO> listResult;
@@ -745,7 +868,7 @@ bool XGzip::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &
     }
 
     GZIP_UNPACK_CONTEXT parsedContext = {};
-    const bool bMemberInfo = guardedThis->_getFirstMemberInfo(&parsedContext, pPdStruct, &mapProperties);
+    const bool bMemberInfo = guardedThis->_getAllMemberInfo(&parsedContext, pPdStruct, mapProperties);
     if (!guardedThis) return false;
     if (!bMemberInfo || !XBinary::isPdStructNotCanceled(pPdStruct)) {
         guardedThis->releaseUnpackSource(pState);
@@ -763,7 +886,7 @@ bool XGzip::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &
     pState->nCurrentOffset = 0;
     pState->nTotalSize = getSize();
     pState->nCurrentIndex = 0;
-    pState->nNumberOfRecords = 1;  // GZIP contains single compressed stream
+    pState->nNumberOfRecords = 1;  // Concatenated members form one logical output.
     pState->mapUnpackProperties = mapProperties;
     pState->pContext = pContext;
 
@@ -805,22 +928,14 @@ XBinary::ARCHIVERECORD XGzip::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStr
         return ARCHIVERECORD();
     }
 
-    // Fill ARCHIVERECORD
-    result.nStreamOffset = pContext->nHeaderSize;
-    result.nStreamSize = pContext->nCompressedSize;
-    // result.nDecompressedOffset = 0;
-    // result.nDecompressedSize = pContext->nUncompressedSize;
-
-    // Set properties
+    // RFC 1952 concatenation is one logical stream. Its byte ranges are
+    // disjoint raw Deflate payloads, so publish only a logical archive record.
+    if (pContext->members.isEmpty() || (pContext->nMembersEnd != pState->nTotalSize)) return ARCHIVERECORD();
     result.mapProperties.insert(FPART_PROP_ORIGINALNAME, pContext->sFileName);
-    result.mapProperties.insert(FPART_PROP_COMPRESSEDSIZE, pContext->nCompressedSize);
-    result.mapProperties.insert(FPART_PROP_UNCOMPRESSEDSIZE, pContext->nUncompressedSize);
-    result.mapProperties.insert(FPART_PROP_HANDLEMETHOD, HANDLE_METHOD_DEFLATE);
-
-    if (pContext->bFooterValid) {
-        result.mapProperties.insert(FPART_PROP_RESULTCRC, pContext->nCRC32);
-        result.mapProperties.insert(FPART_PROP_CRC_TYPE, CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF);
-    }
+    result.mapProperties.insert(FPART_PROP_COMPRESSEDSIZE, pContext->nMembersEnd);
+    result.mapProperties.insert(FPART_PROP_UNCOMPRESSEDSIZE, pContext->nTotalUncompressedSize);
+    result.mapProperties.insert(FPART_PROP_REPORTEDMETHOD, QStringLiteral("GZIP / Deflate"));
+    if (!markArchiveStreamRecord(&result, pState->nCurrentIndex)) return ARCHIVERECORD();
 
     return result;
 }

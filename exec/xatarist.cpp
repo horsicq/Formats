@@ -400,7 +400,7 @@ QList<XBinary::XFHEADER> XAtariST::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRU
         xfHeader.fileType = xfStruct.fileType;
         xfHeader.structID = static_cast<XBinary::STRUCTID>(STRUCTID_HEADER);
         xfHeader.xLoc = headerLoc;
-        xfHeader.nSize = qMin((qint64)sizeof(XATARIST_DEF::HEADER), getSize());
+        xfHeader.nSize = qMin(g_nAtariSTHeaderSize, getSize());
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, STRUCTID_HEADER, headerLoc);
         xfHeader.sTag = xfHeaderToTag(xfHeader, structIDToString(STRUCTID_HEADER), xfHeader.sParentTag);

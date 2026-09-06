@@ -20,6 +20,9 @@
  */
 #include "xtar_gz.h"
 #include "xgzip.h"
+#include <QBuffer>
+#include <memory>
+#include <new>
 
 XTAR_GZ::XTAR_GZ(QIODevice *pDevice) : XTARCOMPRESSED(pDevice)
 {
@@ -68,81 +71,41 @@ QString XTAR_GZ::getMIMEString()
 
 bool XTAR_GZ::getOuterStreamInfo(qint64 &nOuterStreamOffset, qint64 &nOuterStreamSize, HANDLE_METHOD &handleMethod)
 {
-    XGzip xgzip(getDevice());
-    if (!xgzip.isValid()) {
-        return false;
-    }
-    qint64 nHeaderSize = xgzip.getHeaderSize();
-    qint64 nTotalSize = getSize();
-    if (nTotalSize <= (nHeaderSize + 8)) {
-        return false;
-    }
-    nOuterStreamOffset = nHeaderSize;
-    nOuterStreamSize = nTotalSize - nHeaderSize - 8;
-    handleMethod = HANDLE_METHOD_DEFLATE;
-    return true;
+    // A concatenated gzip transport has no single raw Deflate extent. The
+    // base class already extracts from the fully verified materialized TAR
+    // when no outer codec coordinates are advertised.
+    nOuterStreamOffset = 0;
+    nOuterStreamSize = 0;
+    handleMethod = HANDLE_METHOD_UNKNOWN;
+    return false;
 }
 
 QIODevice *XTAR_GZ::decompressData(PDSTRUCT *pPdStruct)
 {
+    QPointer<XTAR_GZ> guardedThis(this);
+    QPointer<QIODevice> source(getDevice());
     const PDSTRUCTLIFETIME progressLifetime = pPdStruct ? retainPdStructLifetime(pPdStruct) : PDSTRUCTLIFETIME();
-    XGzip xgzip(getDevice());
-
-    if (!xgzip.isValid(pPdStruct)) {
+    const qint64 nOutputLimit = m_nMaterializedOutputLimit;
+    if (!source || (nOutputLimit < 0) || !XBinary::isPdStructNotCanceled(pPdStruct)) return nullptr;
+    XGzip gzip(source.data());
+    UNPACK_STATE state = {};
+    QMap<UNPACK_PROP, QVariant> properties;
+    properties.insert(UNPACK_PROP_MAX_OUTPUT_SIZE, nOutputLimit);
+    const bool bInitialized = gzip.initUnpack(&state, properties, pPdStruct);
+    if (!guardedThis || !source || !bInitialized || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime))) {
+        gzip.finishUnpack(&state, nullptr);
         return nullptr;
     }
-
-    qint64 nHeaderSize = xgzip.getHeaderSize();
-    qint64 nTotalSize = getSize();
-
-    if (nTotalSize <= (nHeaderSize + 8)) {
+    std::unique_ptr<QBuffer> result(new (std::nothrow) QBuffer());
+    if (!result || !result->open(QIODevice::ReadWrite)) {
+        gzip.finishUnpack(&state, nullptr);
         return nullptr;
     }
-
-    qint64 nCompressedOffset = nHeaderSize;
-    qint64 nCompressedSize = nTotalSize - nHeaderSize - 8;  // Footer: CRC32 + ISIZE
-
-    QIODevice *pResult = decompressByMethod(HANDLE_METHOD_DEFLATE, nCompressedOffset, nCompressedSize, pPdStruct);
-    if (!pResult) {
-        return nullptr;
-    }
-
-    // decompressByMethod() intentionally receives only the raw DEFLATE
-    // payload.  Validate the RFC 1952 footer here; otherwise a .tar.gz with a
-    // corrupted CRC32 or ISIZE can still contain a parseable TAR and be
-    // accepted by the compressed-TAR detector.
-    const QByteArray baFooter = read_array(nTotalSize - 8, 8);
-    if (baFooter.size() != 8) {
-        delete pResult;
-        return nullptr;
-    }
-
-    const quint32 nExpectedCRC =
-        (quint32)(quint8)baFooter.at(0) | ((quint32)(quint8)baFooter.at(1) << 8) | ((quint32)(quint8)baFooter.at(2) << 16) | ((quint32)(quint8)baFooter.at(3) << 24);
-    const quint32 nExpectedSize =
-        (quint32)(quint8)baFooter.at(4) | ((quint32)(quint8)baFooter.at(5) << 8) | ((quint32)(quint8)baFooter.at(6) << 16) | ((quint32)(quint8)baFooter.at(7) << 24);
-
-    QPointer<QIODevice> guardedResult(pResult);
-    const qint64 nResultSize = guardedResult->size();
-    if (!guardedResult) return nullptr;
-    if (pPdStruct && !isPdStructLifetimeAlive(progressLifetime)) {
-        delete guardedResult.data();
-        return nullptr;
-    }
-    const bool bCRCValid =
-        ((quint32)nResultSize == nExpectedSize) && XBinary::checkCRC(guardedResult.data(), CRC_TYPE_FFFFFFFF_EDB88320_FFFFFFFFF, nExpectedCRC, pPdStruct);
-    if (!guardedResult) return nullptr;
-    if (pPdStruct && !isPdStructLifetimeAlive(progressLifetime)) {
-        delete guardedResult.data();
-        return nullptr;
-    }
-    const bool bFooterValid = bCRCValid && XBinary::isPdStructNotCanceled(pPdStruct);
-    if (!bFooterValid) {
-        delete guardedResult.data();
-        return nullptr;
-    }
-
-    return guardedResult.data();
+    const bool bDecoded = gzip.unpackCurrent(&state, result.get(), pPdStruct);
+    const bool bFinished = gzip.finishUnpack(&state, nullptr);
+    if (!guardedThis || !source || !bDecoded || !bFinished || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime)) ||
+        !XBinary::isPdStructNotCanceled(pPdStruct) || (result->size() <= 0) || (result->size() > nOutputLimit) || !result->seek(0)) return nullptr;
+    return result.release();
 }
 
 bool XTAR_GZ::handleInternalInfo(PDSTRUCT *pPdStruct)

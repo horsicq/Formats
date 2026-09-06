@@ -790,7 +790,7 @@ static bool archiveFingerprintSource(XArchive *pOwner, const XArchive::SOURCE_DE
             bResult = false;
             break;
         }
-        hash.addData(baBuffer.constData(), (int)nRead);
+        hash.addData(QByteArray::fromRawData(baBuffer.constData(), (int)nRead));
         nOffset += nRead;
         nRemaining -= nRead;
     }

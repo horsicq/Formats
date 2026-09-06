@@ -49,6 +49,23 @@ XBinary::XCONVERT _TABLE_XJAR_STRUCTID[] = {
     {XJAR::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
 };
 
+// XJAR reuses XZip::getXFHeaders, so ZIP structure ids must resolve to the ZIP names
+static bool _isXJARStructID(quint32 nID)
+{
+    bool bResult = false;
+
+    qint32 nNumberOfRecords = sizeof(_TABLE_XJAR_STRUCTID) / sizeof(XBinary::XCONVERT);
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (_TABLE_XJAR_STRUCTID[i].nID == nID) {
+            bResult = true;
+            break;
+        }
+    }
+
+    return bResult;
+}
+
 XJAR::XJAR(QIODevice *pDevice) : XZip(pDevice)
 {
 }
@@ -202,17 +219,33 @@ QString XJAR::typeIdToString(qint32 nType)
 
 QString XJAR::structIDToString(quint32 nID)
 {
+    if (!_isXJARStructID(nID)) {
+        return XZip::structIDToString(nID);
+    }
+
     return XBinary::XCONVERT_idToTransString(nID, _TABLE_XJAR_STRUCTID, sizeof(_TABLE_XJAR_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
 QString XJAR::structIDToFtString(quint32 nID)
 {
+    if (!_isXJARStructID(nID)) {
+        return XZip::structIDToFtString(nID);
+    }
+
     return XBinary::XCONVERT_idToFtString(nID, _TABLE_XJAR_STRUCTID, sizeof(_TABLE_XJAR_STRUCTID) / sizeof(XBinary::XCONVERT));
 }
 
 quint32 XJAR::ftStringToStructID(const QString &sFtString)
 {
-    return XCONVERT_ftStringToId(sFtString, _TABLE_XJAR_STRUCTID, sizeof(_TABLE_XJAR_STRUCTID) / sizeof(XBinary::XCONVERT));
+    // The ZIP names first: the JAR-only table would log a "Not found" for every
+    // inherited ZIP structure name before the fallback resolved it.
+    quint32 nResult = XZip::ftStringToStructID(sFtString);
+
+    if (nResult == STRUCTID_UNKNOWN) {
+        nResult = XCONVERT_ftStringToId(sFtString, _TABLE_XJAR_STRUCTID, sizeof(_TABLE_XJAR_STRUCTID) / sizeof(XBinary::XCONVERT));
+    }
+
+    return nResult;
 }
 
 bool XJAR::handleInternalInfo(PDSTRUCT *pPdStruct)

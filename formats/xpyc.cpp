@@ -898,7 +898,7 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     QList<MARSHAL_OBJECT> listNamesObjects = _readMarshalTuple(&nOffset, pPdStruct);
     // qDebug("getCodeObject: Read %d names, nOffset=%lld", listNamesObjects.count(), nOffset);
     for (qint32 i = 0; i < listNamesObjects.size(); i++) {
-        if (listNamesObjects[i].vValue.type() == QVariant::String) {
+        if (listNamesObjects[i].vValue.userType() == QMetaType::QString) {
             codeObject.listNames.append(listNamesObjects[i].vValue.toString());
         }
     }
@@ -906,7 +906,7 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     // Read varnames (tuple of local variable names)
     QList<MARSHAL_OBJECT> listVarNamesObjects = _readMarshalTuple(&nOffset, pPdStruct);
     for (qint32 i = 0; i < listVarNamesObjects.size(); i++) {
-        if (listVarNamesObjects[i].vValue.type() == QVariant::String) {
+        if (listVarNamesObjects[i].vValue.userType() == QMetaType::QString) {
             codeObject.listVarNames.append(listVarNamesObjects[i].vValue.toString());
         }
     }
@@ -914,7 +914,7 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     // Read freevars (tuple of free variable names)
     QList<MARSHAL_OBJECT> listFreeVarsObjects = _readMarshalTuple(&nOffset, pPdStruct);
     for (qint32 i = 0; i < listFreeVarsObjects.size(); i++) {
-        if (listFreeVarsObjects[i].vValue.type() == QVariant::String) {
+        if (listFreeVarsObjects[i].vValue.userType() == QMetaType::QString) {
             codeObject.listFreeVars.append(listFreeVarsObjects[i].vValue.toString());
         }
     }
@@ -922,7 +922,7 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     // Read cellvars (tuple of cell variable names)
     QList<MARSHAL_OBJECT> listCellVarsObjects = _readMarshalTuple(&nOffset, pPdStruct);
     for (qint32 i = 0; i < listCellVarsObjects.size(); i++) {
-        if (listCellVarsObjects[i].vValue.type() == QVariant::String) {
+        if (listCellVarsObjects[i].vValue.userType() == QMetaType::QString) {
             codeObject.listCellVars.append(listCellVarsObjects[i].vValue.toString());
         }
     }
@@ -960,7 +960,7 @@ bool XPYC::isConstPresent(const QString &sConstValue, PDSTRUCT *pPdStruct)
     }
 
     for (qint32 i = 0; i < codeObject.listConsts.size(); i++) {
-        if (codeObject.listConsts[i].vValue.type() == QVariant::String) {
+        if (codeObject.listConsts[i].vValue.userType() == QMetaType::QString) {
             QString sValue = codeObject.listConsts[i].vValue.toString();
             if (sValue == sConstValue) {
                 return true;
@@ -980,7 +980,7 @@ bool XPYC::isConstPresent(const CODE_OBJECT *pCodeObject, const QString &sConstV
     }
 
     for (qint32 i = 0; i < pCodeObject->listConsts.size(); i++) {
-        if (pCodeObject->listConsts[i].vValue.type() == QVariant::String) {
+        if (pCodeObject->listConsts[i].vValue.userType() == QMetaType::QString) {
             QString sValue = pCodeObject->listConsts[i].vValue.toString();
             if (sValue == sConstValue) {
                 return true;

@@ -6268,6 +6268,7 @@ QList<XBinary::XFHEADER> XMACH::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT 
         xfHeader.fileType = xfStruct.fileType;
         xfHeader.structID = static_cast<XBinary::STRUCTID>(nStructID);
         xfHeader.xLoc = headerLoc;
+        xfHeader.nSize = bIs64 ? (qint64)sizeof(XMACH_DEF::mach_header_64) : (qint64)sizeof(XMACH_DEF::mach_header);
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = getXFRecords(xfStruct.fileType, nStructID, headerLoc);
         xfHeader.listDataSt.append({0, 0, XFDATASTYPE_LIST, _TABLE_XMACH_HeaderMagics, sizeof(_TABLE_XMACH_HeaderMagics) / sizeof(XBinary::XIDSTRING)});

@@ -48,6 +48,11 @@ void XFModel_table::setData(const XBinary::INDATA &inData, const XBinary::XFHEAD
     if (pBinary) {
         qint32 nRowCount = m_xfHeader.listRowLocations.count();
 
+        // One memory map per table: relAddressToOffset() would rebuild it for
+        // every string field of every row.
+        XBinary::_MEMORY_MAP memoryMap = {};
+        bool bMemoryMapBuilt = false;
+
         for (qint32 i = 0; i < nRowCount; i++) {
             XBinary::XLOC rowLoc = {};
             rowLoc.locType = XBinary::LT_OFFSET;
@@ -69,7 +74,11 @@ void XFModel_table::setData(const XBinary::INDATA &inData, const XBinary::XFHEAD
 
                 if (rec.nFlags & XBinary::XFRECORD_FLAG_RELATIVE_ADDRESS_STRING) {
                     if (nValue) {
-                        qint64 nStringOffset = pBinary->relAddressToOffset((qint64)nValue);
+                        if (!bMemoryMapBuilt) {
+                            memoryMap = pBinary->getMemoryMap();
+                            bMemoryMapBuilt = true;
+                        }
+                        qint64 nStringOffset = XBinary::relAddressToOffset(&memoryMap, (qint64)nValue);
                         if (nStringOffset != -1) {
                             QString sTmp = pBinary->read_utf8String(nStringOffset);
                             bool bValid = !sTmp.isEmpty();

@@ -1345,7 +1345,7 @@ xsimd_int64 xsimd_create_ansi_mask(const void* pBuffer, xsimd_int64 nSize, void*
     }
 
     /* Initialize mask to zero */
-    memset(pMaskData, 0, (nSize + 7) / 8);
+    memset(pMaskData, 0, (size_t)((nSize + 7) / 8));
 
 #ifdef XSIMD_CUDA
     if ((g_nEnabledFeatures & XSIMD_FEATURE_CUDA) && nSize >= XSIMD_CUDA_MIN_SIZE) {

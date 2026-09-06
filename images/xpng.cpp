@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <limits>
 #include <new>
+#include <QTimeZone>
 
 namespace {
 const qint64 PNG_MAX_ENCODE_BUFFER_SIZE = 256LL * 1024 * 1024;
@@ -303,7 +304,7 @@ QVector<XBinary::XMETADATA_STRUCT> XPNG::getMetadataStructs()
         if ((chunk.sName == QString("tIME")) && (chunk.nDataSize == 7) && _isChunkCRCValid(chunk, nullptr)) {
             const QDate date(read_uint16(chunk.nDataOffset, true), read_uint8(chunk.nDataOffset + 2), read_uint8(chunk.nDataOffset + 3));
             const QTime time(read_uint8(chunk.nDataOffset + 4), read_uint8(chunk.nDataOffset + 5), read_uint8(chunk.nDataOffset + 6));
-            const QDateTime dateTime(date, time, Qt::UTC);
+            const QDateTime dateTime(date, time, X_UTC_TZ);
 
             if (dateTime.isValid()) {
                 XMETADATA_STRUCT record = {};

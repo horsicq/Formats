@@ -792,6 +792,29 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_LZIP, "LZIP", QString("LZIP")},
     {XBinary::HANDLE_METHOD_LZOP, "LZOP", QString("LZOP")},
     {XBinary::HANDLE_METHOD_COMPRESS, "COMPRESS", QString("Compress (LZW)")},
+    {XBinary::HANDLE_METHOD_ARCV4_M2, "ARCV4_M2", QString("ARCV 4.00 adaptive Huffman + LZ77")},
+    {XBinary::HANDLE_METHOD_SILMARILS, "SILMARILS", QString("Silmarils bit-stream")},
+    {XBinary::HANDLE_METHOD_IS7_INX, "IS7_INX", QString("InstallShield INX de-obfuscation")},
+    {XBinary::HANDLE_METHOD_RAW_LZW15V, "RAW_LZW15V", QString("Raw LZW15V")},
+    {XBinary::HANDLE_METHOD_GTU, "GTU", QString("GTU frame chain (LZARI)")},
+    {XBinary::HANDLE_METHOD_NOTETAB, "NOTETAB", QString("NoteTab clip assembly")},
+    {XBinary::HANDLE_METHOD_IZPACK, "IZPACK", QString("IzPack block-data run")},
+    {XBinary::HANDLE_METHOD_RID, "RID", QString("RID member codec")},
+    {XBinary::HANDLE_METHOD_ROMPAQ, "ROMPAQ", QString("ROMPAQ part codec")},
+    {XBinary::HANDLE_METHOD_NETWARE_PACK, "NETWARE_PACK", QString("Novell NetWare pack (LZ77 + Huffman)")},
+    {XBinary::HANDLE_METHOD_EA_REFPACK, "EA_REFPACK", QString("EA RefPack / QFS")},
+    {XBinary::HANDLE_METHOD_NPACK, "NPACK", QString("Symantec MSTSM pack")},
+    {XBinary::HANDLE_METHOD_IRWINPAC, "IRWINPAC", QString("IrwinPac LZ")},
+    {XBinary::HANDLE_METHOD_GAS_HUFF, "GAS_HUFF", QString("Huffman (GAS)")},
+    {XBinary::HANDLE_METHOD_COREL_LTEC, "COREL_LTEC", QString("Corel LTEC solid block")},
+    {XBinary::HANDLE_METHOD_LZPIS2, "LZPIS2", QString("LZPIS2 chunk LZ")},
+    {XBinary::HANDLE_METHOD_NETWARE_PACK2, "NETWARE_PACK2", QString("Novell NetWare install PackedData (undecoded)")},
+    {XBinary::HANDLE_METHOD_MATHCAD, "MATHCAD", QString("MathCAD .MCDCOMPRESSION")},
+    {XBinary::HANDLE_METHOD_PCOMM_OS2, "PCOMM_OS2", QString("IBM PCOMM for OS/2 LZ")},
+    {XBinary::HANDLE_METHOD_KOLIBRI_KPACK, "KOLIBRI_KPACK", QString("KolibriOS kpack LZMA")},
+    {XBinary::HANDLE_METHOD_INFOGRAMES_PAK, "INFOGRAMES_PAK", QString("Infogrames PAK")},
+    {XBinary::HANDLE_METHOD_SOLARIS_BOOT, "SOLARIS_BOOT", QString("Solaris boot TG deflate group")},
+    {XBinary::HANDLE_METHOD_MWAVE_Z, "MWAVE_Z", QString("IBM Mwave (compress LZW)")},
     {XBinary::HANDLE_METHOD_ARJ, "ARJ", QString("ARJ")},
     {XBinary::HANDLE_METHOD_ARJ_FASTEST, "ARJ_FASTEST", QString("ARJ Fastest")},
     {XBinary::HANDLE_METHOD_BROTLI, "BROTLI", QString("Brotli")},
@@ -822,6 +845,8 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_ARC_SQUEEZE, "ARC_SQUEEZE", QString("ARC squeezed")},
     {XBinary::HANDLE_METHOD_ARC_CRUNCH_OLD, "ARC_CRUNCH_OLD", QString("ARC crunched (old)")},
     {XBinary::HANDLE_METHOD_ARC_CRUNCH, "ARC_CRUNCH", QString("ARC crunched")},
+    {XBinary::HANDLE_METHOD_ARC_CRUNCH_HASHNEW, "ARC_CRUNCH_HASHNEW", QString("ARC crunched (new hash)")},
+    {XBinary::HANDLE_METHOD_ARC_COMPRESSED, "ARC_COMPRESSED", QString("ARC Unix compress")},
     {XBinary::HANDLE_METHOD_ARC_CRUNCH_DYN, "ARC_CRUNCH_DYN", QString("ARC crunched (dynamic)")},
     {XBinary::HANDLE_METHOD_ARC_SQUASH, "ARC_SQUASH", QString("ARC squashed")},
     {XBinary::HANDLE_METHOD_COKTEL_LZ, "COKTEL_LZ", QString("Coktel LZ")},
@@ -851,6 +876,8 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_FPAK_COMPRESSED, "FPAK_COMPRESSED", QString("FoxPro FPAK compression")},
     {XBinary::HANDLE_METHOD_JASC_COMPRESSED, "JASC_COMPRESSED", QString("JASC installer LZH -lh5-")},
     {XBinary::HANDLE_METHOD_SSM_PICTOOLS, "SSM_PICTOOLS", QString("PICTools SSM module compression (method 3)")},
+    {XBinary::HANDLE_METHOD_LHA_LEGACY, "LHA_LEGACY", QString("LHA legacy")},
+    {XBinary::HANDLE_METHOD_DISKDOUBLER_LZW, "DISKDOUBLER_LZW", QString("DiskDoubler Compress (LZW)")},
     {XBinary::HANDLE_METHOD_IS_SKIN_XOR, "IS_SKIN_XOR", QString("InstallShield skin XOR/nibble stored data")},
     {XBinary::HANDLE_METHOD_SPIS_RLE, "SPIS_RLE", QString("SPIS escape-byte RLE")},
     {XBinary::HANDLE_METHOD_FLS_LZ, "FLS_LZ", QString("SaveRam FLS compression")},
@@ -864,6 +891,7 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_PAK_CRUSHED, "PAK_CRUSHED", QString("PAK 2.51 Crushed")},
     {XBinary::HANDLE_METHOD_PAK_DISTILLED, "PAK_DISTILLED", QString("PAK 2.51 Distilled")},
     {XBinary::HANDLE_METHOD_SSM_PICTOOLS5, "SSM_PICTOOLS5", QString("PICTools SSM module compression (method 5)")},
+    {XBinary::HANDLE_METHOD_BZIP1, "BZIP1", QString("bzip 0.21 (BWT + MTF + arithmetic coding)")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -986,6 +1014,22 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_SQUASHFS, "SquashFS", QString("SquashFS")},
     {XBinary::FT_MINIDUMP, "MiniDump", QString("Windows MiniDump")},
     {XBinary::FT_DMG, "DMG", QString("Apple Disk Image")},
+    {XBinary::FT_VHD, "VHD", QString("Virtual Hard Disk")},
+    {XBinary::FT_VDI, "VDI", QString("VirtualBox Disk Image")},
+    {XBinary::FT_QCOW2, "QCOW2", QString("QEMU QCOW2 disk image")},
+    {XBinary::FT_VHDX, "VHDX", QString("Virtual Hard Disk v2")},
+    {XBinary::FT_SQLITE, "SQLITE", QString("SQLite table text export")},
+    {XBinary::FT_CPM_CRUNCH, "CPM_CRUNCH", QString("CP/M Crunch compressed file")},
+    {XBinary::FT_CPM_LZH, "CPM_LZH", QString("CP/M LZH compressed file")},
+    {XBinary::FT_UNIX_COMPACT, "UNIX_COMPACT", QString("Unix Compact compressed file")},
+    {XBinary::FT_GIT_OBJECT, "GIT_OBJECT", QString("Git object")},
+    {XBinary::FT_ALZ, "ALZ", QString("ALZip archive")},
+    {XBinary::FT_RZIP, "RZIP", QString("RZIP compressed stream")},
+    {XBinary::FT_CHM, "CHM", QString("Compiled HTML Help")},
+    {XBinary::FT_NTFS, "NTFS", QString("NTFS filesystem")},
+    {XBinary::FT_BOHEMIA_PBO, "BOHEMIA_PBO", QString("Bohemia PBO archive")},
+    {XBinary::FT_DESCENT_HOG2, "DESCENT_HOG2", QString("Descent 3 HOG2")},
+    {XBinary::FT_DISK_DOUBLER_DDAR, "DISK_DOUBLER_DDAR", QString("DiskDoubler DDAR archive")},
     {XBinary::FT_ARC, "ARC", QString("ARC")},
     {XBinary::FT_FREEARC, "FreeARC", QString("FreeARC")},
     {XBinary::FT_ARJ, "ARJ", QString("ARJ")},
@@ -1118,6 +1162,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_FREEARCSFX, "FREEARCSFX", QString("FreeArc SFX")},
     {XBinary::FT_ZPAQSFX, "ZPAQSFX", QString("ZPAQ SFX")},
     {XBinary::FT_GZIPSFX, "GZIPSFX", QString("GZIP SFX")},
+    {XBinary::FT_BZIP2SFX, "BZIP2SFX", QString("BZIP2 SFX")},
     {XBinary::FT_KWAJSFX, "KWAJSFX", QString("KWAJ SFX")},
     {XBinary::FT_SZDDSFX, "SZDDSFX", QString("SZDD SFX")},
     {XBinary::FT_DESCENT_HOG, "DESCENT_HOG", QString("Descent HOG")},
@@ -1193,9 +1238,144 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_RTPATCH, "RTPATCH", QString("RTPatch update package")},
     {XBinary::FT_ARQ, "ARQ", QString("Crusher ARQ archive")},
     {XBinary::FT_ARQSFX, "ARQSFX", QString("Crusher ARQ SFX")},
+    {XBinary::FT_ALDUS, "ALDUS", QString("Aldus/Adobe Setup compressed container")},
+    {XBinary::FT_BLUEBYTE_LIB, "BLUEBYTE_LIB", QString("Blue Byte engine resource library")},
+    {XBinary::FT_BTH_PAK, "BTH_PAK", QString("Beat The House PAK archive")},
+    {XBinary::FT_ARCV2, "ARCV2", QString("Eschalon Setup ARCV 2.00 archive")},
+    {XBinary::FT_AMPK, "AMPK", QString("Amiga AMPK archive")},
+    {XBinary::FT_AIX_BFF, "AIX_BFF", QString("IBM AIX backup (BFF)")},
+    {XBinary::FT_AR_PDP11, "AR_PDP11", QString("UNIX V7 / PDP-11 ar archive")},
+    {XBinary::FT_ASYMETRIX, "ASYMETRIX", QString("Asymetrix ToolBook Setup disk-set archive")},
+    {XBinary::FT_BINARY2, "BINARY2", QString("Apple II Binary II archive")},
+    {XBinary::FT_ASCEND, "ASCEND", QString("Ascend for Windows compressed file")},
+    {XBinary::FT_ARCV4, "ARCV4", QString("Eschalon Setup ARCV 4 installer archive")},
+    {XBinary::FT_BVRP_PAC, "BVRP_PAC", QString("BVRP PAC archive")},
+    {XBinary::FT_PCINSTALL, "PCINSTALL", QString("PC-Install disk set archive")},
+    {XBinary::FT_BOO, "BOO", QString("BOO transport encoding")},
+    {XBinary::FT_ARTIPACK, "ARTIPACK", QString("Artisoft ARTIPACK installer archive")},
+    {XBinary::FT_BINSH_SFX, "BINSH_SFX", QString("Shell self-extractor (tail carve)")},
+    {XBinary::FT_NETWARE_PACK, "NETWARE_PACK", QString("Personal NetWare Packed File")},
+    {XBinary::FT_POVLAB_LZH, "POVLAB_LZH", QString("POVLAB LZH archive (-ARA- tag)")},
+    {XBinary::FT_EA_REFPACK, "EA_REFPACK", QString("EA RefPack / QFS compressed file")},
+    {XBinary::FT_PRINTSHOP_DELUXE, "PRINTSHOP_DELUXE", QString("Print Shop Deluxe install file")},
+    {XBinary::FT_FRONTPAGE_THEME, "FRONTPAGE_THEME", QString("FrontPage theme package (.elm)")},
+    {XBinary::FT_SECOND_NATURE, "SECOND_NATURE", QString("Second Nature Software archive")},
+    {XBinary::FT_LZPIS2, "LZPIS2", QString("LZPIS2 chunked compressed file")},
+    {XBinary::FT_FINEREADER_PACK, "FINEREADER_PACK", QString("FineReader install packed file")},
+    {XBinary::FT_ECM_PACK, "ECM_PACK", QString("ECM install-time packed file")},
+    {XBinary::FT_GST_PACK, "GST_PACK", QString("GST Software install archive")},
+    {XBinary::FT_NPACK, "NPACK", QString("Symantec MSTSM packed file")},
+    {XBinary::FT_COREL_LTEC, "COREL_LTEC", QString("Corel LTEC installer archive")},
+    {XBinary::FT_IRWINPAC, "IRWINPAC", QString("IrwinPac compressed install file")},
+    {XBinary::FT_DT_PACK, "DT_PACK", QString("Delrina DT packed file")},
+    {XBinary::FT_GAS_HUFF, "GAS_HUFF", QString("Huffman packed file (GAS)")},
+    {XBinary::FT_POWERBOARD_BBS, "POWERBOARD_BBS", QString("Powerboard BBS library")},
+    {XBinary::FT_SILMARILS, "SILMARILS", QString("Silmarils game resource container")},
+    {XBinary::FT_IS7_INX, "IS7_INX", QString("InstallShield compiled InstallScript")},
+    {XBinary::FT_RAW_LZW15V, "RAW_LZW15V", QString("Raw LZW15V stream")},
+    {XBinary::FT_LBR_COBOL, "LBR_COBOL", QString("Micro Focus COBOL Library File")},
+    {XBinary::FT_LSZ, "LSZ", QString("Delrina WinFax LSZ archive")},
+    {XBinary::FT_GOB, "GOB", QString("LucasArts GOB archive")},
+    {XBinary::FT_GTU, "GTU", QString("GTU indexed archive")},
+    {XBinary::FT_NOTETAB, "NOTETAB", QString("NoteTab Clipbook Library")},
+    {XBinary::FT_IZPACK, "IZPACK", QString("IzPack Java installer pack")},
+    {XBinary::FT_SOLARIS_PKG, "SOLARIS_PKG", QString("Solaris package datastream")},
+    {XBinary::FT_HLB, "HLB", QString("HLB resource library")},
+    {XBinary::FT_RID, "RID", QString("RID installer archive")},
+    {XBinary::FT_ROMPAQ, "ROMPAQ", QString("Compaq ROMPAQ firmware image")},
+    {XBinary::FT_FIZ, "FIZ", QString("Maximus BBS FIZ archive")},
+    {XBinary::FT_MIZ, "MIZ", QString("DKCL/SBRW packed installer member")},
+    {XBinary::FT_IBM_SPACK, "IBM_SPACK", QString("IBM install-diskette packed file ('S')")},
+    {XBinary::FT_EA, "EA", QString("Electronic Arts DOS archive (.PEA)")},
+    {XBinary::FT_SLS, "SLS", QString("WinSense compressed file (SLS)")},
+    {XBinary::FT_PC_SECURE, "PC_SECURE", QString("PC Tools PCSECURE protected file")},
+    {XBinary::FT_PM_DISKCOPY, "PM_DISKCOPY", QString("OS/2 PM Diskcopy floppy image")},
+    {XBinary::FT_MEGATECH_VOL, "MEGATECH_VOL", QString("Megatech Software resource volume (.VOL)")},
+    {XBinary::FT_IGF1, "IGF1", QString("IGF installer compressed file")},
+    {XBinary::FT_JETBBS, "JETBBS", QString("JetBBS archive (LHA with -mg5- tag)")},
+    {XBinary::FT_MAKESELF, "MAKESELF", QString("Makeself self-extracting shell archive (.run)")},
+    {XBinary::FT_FLD, "FLD", QString("Sequiter CodeBase install file group (.FLD)")},
+    {XBinary::FT_GLU, "GLU", QString("GLU BBS/FidoNet distribution container")},
+    {XBinary::FT_JAM, "JAM", QString("JAM game resource archive")},
+    {XBinary::FT_FMC1, "FMC1", QString("Form Master .CMP archive (FMC1)")},
+    {XBinary::FT_SOFTPAQ_2, "SOFTPAQ_2", QString("Compaq/HP SoftPaq distribution EXE")},
+    {XBinary::FT_MARC, "MARC", QString("MARC resource archive (MSN Explorer)")},
+    {XBinary::FT_STORK, "STORK", QString("Stork DOS install archive")},
+    {XBinary::FT_SEA_DATA, "SEA_DATA", QString("Sea Data asset bundle (TE2#)")},
+    {XBinary::FT_QNX_BASE, "QNX_BASE", QString("QNX Neutrino boot image (IFS)")},
+    {XBinary::FT_GAMOS, "GAMOS", QString("GAMOS packed file (Gamos game resource container)")},
+    {XBinary::FT_SOS, "SOS", QString("SOS bootable Amiga disk (Sanity Operating System)")},
+    {XBinary::FT_EXE_SBOOKBUILDER, "EXE_SBOOKBUILDER", QString("SbookBuilder 2 self-running Sbook (EXE)")},
+    {XBinary::FT_HUFF, "HUFF", QString("HUF multi-file Huffman archive")},
+    {XBinary::FT_LZHCXP, "LZHCXP", QString("LZ block-framed LZW stream")},
+    {XBinary::FT_KRML, "KRML", QString("KREML game resource archive")},
+    {XBinary::FT_QIP1, "QIP1", QString("Quarterdeck QIP install archive")},
+    {XBinary::FT_QUANTUM, "QUANTUM", QString("Quantum archive (Q.EXE / Borland .PAK)")},
+    {XBinary::FT_IRIX_SA, "IRIX_SA", QString("SGI IRIX standalone tools volume")},
+    {XBinary::FT_JM93, "JM93", QString("JM93 compressed file (.CMP)")},
+    {XBinary::FT_NEXTSTEP_DISKIMAGE, "NEXTSTEP_DISKIMAGE", QString("NeXTSTEP disk image (.diskimage)")},
+    {XBinary::FT_MVA, "MVA", QString("MVA multi-volume installer archive")},
+    {XBinary::FT_PKT, "PKT", QString("FidoNet mail packet (FTS-0001 type 2)")},
+    {XBinary::FT_HDCOPY, "HDCOPY", QString("HD-COPY disk image")},
+    {XBinary::FT_IVT, "IVT", QString("Multimedia Viewer / MediaView title")},
+    {XBinary::FT_SWAG, "SWAG", QString("SWAG Pascal snippet collection (.SWG)")},
+    {XBinary::FT_STYLUS, "STYLUS", QString("Stylus/PROMT compressed dictionary (.#SD)")},
+    {XBinary::FT_SETTLERS_FT, "SETTLERS_FT", QString("The Settlers / Serf City data archive (.PA)")},
+    {XBinary::FT_RIVERSOFT, "RIVERSOFT", QString("RiverSoft Data Library (.RDL)")},
+    {XBinary::FT_GKSETUP, "GKSETUP", QString("GkSetup installer data file")},
+    {XBinary::FT_OPC, "OPC", QString("OS2Point distribution package")},
+    {XBinary::FT_GOB2, "GOB2", QString("LucasArts Jedi Knight GOB archive")},
+    {XBinary::FT_SQ, "SQ", QString("SQ squeezed single file")},
+    {XBinary::FT_IS11, "IS11", QString("InstallShield compressed install file")},
+    {XBinary::FT_RECOGNITA, "RECOGNITA", QString("Recognita OCR archive")},
+    {XBinary::FT_INTEDU_FT, "INTEDU_FT", QString("Russian edutainment resource pack")},
+    {XBinary::FT_PAPERPORT, "PAPERPORT", QString("Visioneer PaperPort document")},
+    {XBinary::FT_EALIB, "EALIB", QString("EALIB resource library (Electronic Arts DOS)")},
+    {XBinary::FT_NID, "NID", QString("NI DOS install-set volume (.NID/.DAT/.PAC)")},
+    {XBinary::FT_HAP, "HAP", QString("HAP archive (Harri Hirvola, DOS)")},
+    {XBinary::FT_EXE_EBOOKCREATOR, "EXE_EBOOKCREATOR", QString("EBook self-running executable (MFC CUpdateDir overlay)")},
+    {XBinary::FT_LZDIET, "LZDIET", QString("lZdIeT chunked LZW container")},
+    {XBinary::FT_QUALITAS, "QUALITAS", QString("Qualitas 386MAX/BlueMAX install disk")},
+    {XBinary::FT_LZV1, "LZV1", QString("LZV1 compressed file")},
+    {XBinary::FT_SW, "SW", QString("SGI IRIX inst/swmgr distribution image")},
+    {XBinary::FT_SAF, "SAF", QString("Stac Electronics SAF archive")},
+    {XBinary::FT_IGF2, "IGF2", QString("IGF installer SETUP.IGF container")},
+    {XBinary::FT_RCF, "RCF", QString("RCF installer archive")},
+    {XBinary::FT_HFE, "HFE", QString("HxC Floppy Emulator HFE v1 disk image")},
+    {XBinary::FT_RSVK, "RSVK", QString("RSVKDATA/DLIBDATA block-sorting archive")},
+    {XBinary::FT_HZL, "HZL", QString("!HZL compressed file")},
+    {XBinary::FT_JBF, "JBF", QString("JBF DOS archive (headerless, trailing directory)")},
+    {XBinary::FT_JGPAK, "JGPAK", QString("JGsoft JGPAK archive (HelpScribble)")},
+    {XBinary::FT_PACKIT, "PACKIT", QString("PACKIT by MJP archive")},
+    {XBinary::FT_LOFI, "LOFI", QString("Solaris compressed lofi disk image")},
+    {XBinary::FT_SCI, "SCI", QString("SCI100/SCI200 sixxac/INSTALL archive")},
+    {XBinary::FT_AGIS, "AGIS", QString("AGIS 1.0 install archive")},
+    {XBinary::FT_MWAVE_Z, "MwaveZ", QString("IBM Mwave packed file (.Z)")},
+    {XBinary::FT_MSCOMPRESS_SZ, "MSCOMPRESS_SZ", QString("Microsoft COMPRESS SZ (pre-SZDD)")},
+    {XBinary::FT_KOLIBRI_KPACK, "KOLIBRI_KPACK", QString("KolibriOS kpack")},
+    {XBinary::FT_MATHCAD_PACK, "MATHCAD_PACK", QString("MathCAD compressed worksheet")},
+    {XBinary::FT_PCOMM_OS2, "PCOMM_OS2", QString("IBM PCOMM for OS/2 packed file")},
+    {XBinary::FT_SOLARIS_BOOT, "SOLARIS_BOOT", QString("Solaris boot compressed archive")},
+    {XBinary::FT_INFOGRAMES_PAK, "INFOGRAMES_PAK", QString("Infogrames PAK resource archive (Alone in the Dark)")},
+    {XBinary::FT_IBM_ZPAK, "IBM_ZPAK", QString("IBM -ZPAK packed file")},
+    {XBinary::FT_QDECK_QIP, "QDECK_QIP", QString("Quarterdeck QIP install archive")},
+    {XBinary::FT_MAXIS_MXS, "MAXIS_MXS", QString("Maxis DOS install archive")},
+    {XBinary::FT_SWAG_PACKET, "SWAG_PACKET", QString("SWAG snippet packet (SWAGOLX)")},
+    {XBinary::FT_PALM_PDB, "PALM_PDB", QString("Palm OS database (PDB/PRC)")},
+    {XBinary::FT_NETWARE_PACK2, "NETWARE_PACK2", QString("Novell NetWare install packed file")},
+    {XBinary::FT_BSN, "BSN", QString("PTS BSA archive")},
+    {XBinary::FT_AODOS, "AODOS", QString("AO-DOS/MicroDOS BK disk image")},
+    {XBinary::FT_BZIP1, "BZip1", QString("bzip 0.21 (pre-bzip2, arithmetic-coded)")},
+    {XBinary::FT_INSTALLANYWHERE_SFX, "INSTALLANYWHERE_SFX", QString("InstallAnywhere UNIX Self Extractor")},
+    {XBinary::FT_ASCEND_BACKUP, "ASCEND_BACKUP", QString("Ascend backup volume")},
+    {XBinary::FT_BORLAND_PACK, "BORLAND_PACK", QString("Borland PACK archive")},
     {XBinary::FT_SQZ, "SQZ", QString("Squeeze It SQZ archive")},
     {XBinary::FT_SQZSFX, "SQZSFX", QString("Squeeze It SQZ SFX")},
     {XBinary::FT_RTPATCHSFX, "RTPATCHSFX", QString("RTPatch SFX")},
+    {XBinary::FT_AMIGA_ADF, "AMIGA_ADF", QString("AmigaDOS disk image")},
+    {XBinary::FT_GODOT_PCK, "GODOT_PCK", QString("Godot PCK package")},
+    {XBinary::FT_WBFS, "WBFS", QString("Wii Backup File System image")},
+    {XBinary::FT_RVZ, "RVZ", QString("Dolphin RVZ disc image")},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -3539,8 +3719,17 @@ QList<QVariant> XBinary::getXFRecordValues(const QList<XFRECORD> &listXFRecords,
 {
     QList<QVariant> listResult;
 
-    _MEMORY_MAP memoryMap = getMemoryMap();
-    qint64 nBaseOffset = locToOffset(&memoryMap, xLoc);
+    // Table rows are addressed by file offset; only address-typed locations
+    // need the memory map (building it per row is quadratic on formats whose
+    // map walks the whole file, e.g. DEX).
+    qint64 nBaseOffset = -1;
+
+    if (xLoc.locType == LT_OFFSET) {
+        nBaseOffset = (qint64)xLoc.nLocation;
+    } else {
+        _MEMORY_MAP memoryMap = getMemoryMap();
+        nBaseOffset = locToOffset(&memoryMap, xLoc);
+    }
     qint32 nCount = listXFRecords.count();
     bool bIsBigEndian = isBigEndian();
 
@@ -4429,7 +4618,7 @@ QDateTime XBinary::winFileTimeToQDateTime(quint64 nWinFileTime)
 
     quint64 nMsecsSinceEpoch = (nWinFileTime - nEpochDelta) / Q_UINT64_C(10000);
 
-    return QDateTime::fromMSecsSinceEpoch((qint64)nMsecsSinceEpoch, Qt::UTC);
+    return QDateTime::fromMSecsSinceEpoch((qint64)nMsecsSinceEpoch, X_UTC_TZ);
 }
 
 bool XBinary::setFileProperties(const QMap<FPART_PROP, QVariant> &mapProperties, const QString &sFileName)
@@ -5656,7 +5845,7 @@ QString XBinary::read_utf32String(qint64 nOffset, qint64 nMaxByteSize, bool bIsB
 
     const QByteArray baBuffer = read_array(nOffset, nMaxByteSize);
     const qint32 nActualDwords = baBuffer.size() / 4;
-    QVector<uint> listCodepoints;
+    QVector<char32_t> listCodepoints;
     listCodepoints.reserve(nActualDwords);
 
     for (qint32 i = 0; i < nActualDwords; i++) {
@@ -5677,7 +5866,7 @@ QString XBinary::read_utf32String(qint64 nOffset, qint64 nMaxByteSize, bool bIsB
             nCode = 0xFFFD;
         }
 
-        listCodepoints.append((uint)nCode);
+        listCodepoints.append((char32_t)nCode);
     }
 
     if (!listCodepoints.isEmpty()) {
@@ -9525,6 +9714,10 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
 {
     qint64 nResult = -1;
 
+    if (pnResultSize) {
+        *pnResultSize = getValueSize(varValue, valueType);
+    }
+
     // TODO more mb pascal strings
     if (valueType == XBinary::VT_A) {
         nResult = find_ansiString(nOffset, nSize, varValue.toString(), pPdStruct);
@@ -9572,6 +9765,10 @@ qint64 XBinary::find_value(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize
 #ifdef QT_DEBUG
         qDebug() << "Unknown valueType" << valueTypeToString(valueType, 1);
 #endif
+    }
+
+    if ((nResult == -1) && pnResultSize) {
+        *pnResultSize = 0;
     }
 
     return nResult;
@@ -14361,6 +14558,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_FREEARCSFX,
         FT_ZPAQSFX,
         FT_GZIPSFX,
+        FT_BZIP2SFX,
         FT_KWAJSFX,
         FT_SZDDSFX,
         FT_PYINSTALLER_SFX,
@@ -14465,9 +14663,144 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_RTPATCH,
         FT_ARQ,
         FT_ARQSFX,
+        FT_ALDUS,
+        FT_BLUEBYTE_LIB,
+        FT_BTH_PAK,
+        FT_ARCV2,
+        FT_AMPK,
+        FT_AIX_BFF,
+        FT_AR_PDP11,
+        FT_ASYMETRIX,
+        FT_BINARY2,
+        FT_ASCEND,
+        FT_ARCV4,
+        FT_BVRP_PAC,
+        FT_PCINSTALL,
+        FT_BOO,
+        FT_ARTIPACK,
+        FT_BINSH_SFX,
+        FT_NETWARE_PACK,
+        FT_POVLAB_LZH,
+        FT_EA_REFPACK,
+        FT_PRINTSHOP_DELUXE,
+        FT_FRONTPAGE_THEME,
+        FT_SECOND_NATURE,
+        FT_LZPIS2,
+        FT_FINEREADER_PACK,
+        FT_ECM_PACK,
+        FT_GST_PACK,
+        FT_NPACK,
+        FT_COREL_LTEC,
+        FT_IRWINPAC,
+        FT_DT_PACK,
+        FT_GAS_HUFF,
+        FT_POWERBOARD_BBS,
+        FT_SILMARILS,
+        FT_IS7_INX,
+        FT_RAW_LZW15V,
+        FT_LBR_COBOL,
+        FT_LSZ,
+        FT_GOB,
+        FT_GTU,
+        FT_NOTETAB,
+        FT_IZPACK,
+        FT_SOLARIS_PKG,
+        FT_HLB,
+        FT_RID,
+        FT_ROMPAQ,
+        FT_FIZ,
+        FT_MIZ,
+        FT_IBM_SPACK,
+        FT_EA,
+        FT_SLS,
+        FT_PC_SECURE,
+        FT_PM_DISKCOPY,
+        FT_MEGATECH_VOL,
+        FT_IGF1,
+        FT_JETBBS,
+        FT_MAKESELF,
+        FT_FLD,
+        FT_GLU,
+        FT_JAM,
+        FT_FMC1,
+        FT_SOFTPAQ_2,
+        FT_MARC,
+        FT_STORK,
+        FT_SEA_DATA,
+        FT_QNX_BASE,
+        FT_GAMOS,
+        FT_SOS,
+        FT_EXE_SBOOKBUILDER,
+        FT_HUFF,
+        FT_LZHCXP,
+        FT_KRML,
+        FT_QIP1,
+        FT_QUANTUM,
+        FT_IRIX_SA,
+        FT_JM93,
+        FT_NEXTSTEP_DISKIMAGE,
+        FT_MVA,
+        FT_PKT,
+        FT_HDCOPY,
+        FT_IVT,
+        FT_SWAG,
+        FT_STYLUS,
+        FT_SETTLERS_FT,
+        FT_RIVERSOFT,
+        FT_GKSETUP,
+        FT_OPC,
+        FT_GOB2,
+        FT_SQ,
+        FT_IS11,
+        FT_RECOGNITA,
+        FT_INTEDU_FT,
+        FT_PAPERPORT,
+        FT_EALIB,
+        FT_NID,
+        FT_HAP,
+        FT_EXE_EBOOKCREATOR,
+        FT_LZDIET,
+        FT_QUALITAS,
+        FT_LZV1,
+        FT_SW,
+        FT_SAF,
+        FT_IGF2,
+        FT_RCF,
+        FT_HFE,
+        FT_RSVK,
+        FT_HZL,
+        FT_JBF,
+        FT_JGPAK,
+        FT_PACKIT,
+        FT_LOFI,
+        FT_SCI,
+        FT_AGIS,
+        FT_MWAVE_Z,
+        FT_MSCOMPRESS_SZ,
+        FT_KOLIBRI_KPACK,
+        FT_MATHCAD_PACK,
+        FT_PCOMM_OS2,
+        FT_SOLARIS_BOOT,
+        FT_INFOGRAMES_PAK,
+        FT_IBM_ZPAK,
+        FT_QDECK_QIP,
+        FT_MAXIS_MXS,
+        FT_SWAG_PACKET,
+        FT_PALM_PDB,
+        FT_NETWARE_PACK2,
+        FT_BSN,
+        FT_AODOS,
+        FT_BZIP1,
+        FT_INSTALLANYWHERE_SFX,
+        FT_ASCEND_BACKUP,
+        FT_BORLAND_PACK,
         FT_SQZ,
         FT_SQZSFX,
         FT_RTPATCHSFX,
+        FT_AMIGA_ADF,
+        FT_GODOT_PCK,
+        FT_WBFS,
+        FT_RVZ,
         FT_DN_ARCHIVE,
         FT_FPAK,
         FT_SOFTPAQ1_SFX,
@@ -14527,6 +14860,22 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_SQUASHFS,
         FT_MINIDUMP,
         FT_DMG,
+        FT_VHD,
+        FT_VDI,
+        FT_QCOW2,
+        FT_VHDX,
+        FT_SQLITE,
+        FT_CPM_CRUNCH,
+        FT_CPM_LZH,
+        FT_UNIX_COMPACT,
+        FT_GIT_OBJECT,
+        FT_ALZ,
+        FT_RZIP,
+        FT_CHM,
+        FT_NTFS,
+        FT_BOHEMIA_PBO,
+        FT_DESCENT_HOG2,
+        FT_DISK_DOUBLER_DDAR,
         FT_WIM,
         FT_RPM,
         FT_XAR,
@@ -14728,6 +15077,22 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_SQUASHFS, FT_FLAG_ARCHIVES},
         {FT_MINIDUMP, FT_FLAG_ARCHIVES},
         {FT_DMG, FT_FLAG_ARCHIVES},
+        {FT_VHD, FT_FLAG_ARCHIVES},
+        {FT_VDI, FT_FLAG_ARCHIVES},
+        {FT_QCOW2, FT_FLAG_ARCHIVES},
+        {FT_VHDX, FT_FLAG_ARCHIVES},
+        {FT_SQLITE, FT_FLAG_ARCHIVES},
+        {FT_CPM_CRUNCH, FT_FLAG_ARCHIVES},
+        {FT_CPM_LZH, FT_FLAG_ARCHIVES},
+        {FT_UNIX_COMPACT, FT_FLAG_ARCHIVES},
+        {FT_GIT_OBJECT, FT_FLAG_ARCHIVES},
+        {FT_ALZ, FT_FLAG_ARCHIVES},
+        {FT_RZIP, FT_FLAG_ARCHIVES},
+        {FT_CHM, FT_FLAG_ARCHIVES},
+        {FT_NTFS, FT_FLAG_ARCHIVES},
+        {FT_BOHEMIA_PBO, FT_FLAG_ARCHIVES},
+        {FT_DESCENT_HOG2, FT_FLAG_ARCHIVES},
+        {FT_DISK_DOUBLER_DDAR, FT_FLAG_ARCHIVES},
         {FT_WIM, FT_FLAG_ARCHIVES},
         {FT_RPM, FT_FLAG_ARCHIVES},
         {FT_XAR, FT_FLAG_ARCHIVES},
@@ -14798,10 +15163,145 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_FLS, FT_FLAG_ARCHIVES},
         {FT_RTPATCH, FT_FLAG_ARCHIVES},
         {FT_ARQ, FT_FLAG_ARCHIVES},
+        {FT_ALDUS, FT_FLAG_ARCHIVES},
+        {FT_BLUEBYTE_LIB, FT_FLAG_ARCHIVES},
+        {FT_BTH_PAK, FT_FLAG_ARCHIVES},
+        {FT_ARCV2, FT_FLAG_ARCHIVES},
+        {FT_AMPK, FT_FLAG_ARCHIVES},
+        {FT_AIX_BFF, FT_FLAG_ARCHIVES},
+        {FT_AR_PDP11, FT_FLAG_ARCHIVES},
+        {FT_ASYMETRIX, FT_FLAG_ARCHIVES},
+        {FT_BINARY2, FT_FLAG_ARCHIVES},
+        {FT_ASCEND, FT_FLAG_ARCHIVES},
+        {FT_ARCV4, FT_FLAG_ARCHIVES},
+        {FT_BVRP_PAC, FT_FLAG_ARCHIVES},
+        {FT_PCINSTALL, FT_FLAG_ARCHIVES},
+        {FT_BOO, FT_FLAG_ARCHIVES},
+        {FT_ARTIPACK, FT_FLAG_ARCHIVES},
+        {FT_BINSH_SFX, FT_FLAG_ARCHIVES},
+        {FT_NETWARE_PACK, FT_FLAG_ARCHIVES},
+        {FT_POVLAB_LZH, FT_FLAG_ARCHIVES},
+        {FT_EA_REFPACK, FT_FLAG_ARCHIVES},
+        {FT_PRINTSHOP_DELUXE, FT_FLAG_ARCHIVES},
+        {FT_FRONTPAGE_THEME, FT_FLAG_ARCHIVES},
+        {FT_SECOND_NATURE, FT_FLAG_ARCHIVES},
+        {FT_LZPIS2, FT_FLAG_ARCHIVES},
+        {FT_FINEREADER_PACK, FT_FLAG_ARCHIVES},
+        {FT_ECM_PACK, FT_FLAG_ARCHIVES},
+        {FT_GST_PACK, FT_FLAG_ARCHIVES},
+        {FT_NPACK, FT_FLAG_ARCHIVES},
+        {FT_COREL_LTEC, FT_FLAG_ARCHIVES},
+        {FT_IRWINPAC, FT_FLAG_ARCHIVES},
+        {FT_DT_PACK, FT_FLAG_ARCHIVES},
+        {FT_GAS_HUFF, FT_FLAG_ARCHIVES},
+        {FT_POWERBOARD_BBS, FT_FLAG_ARCHIVES},
+        {FT_SILMARILS, FT_FLAG_ARCHIVES},
+        {FT_IS7_INX, FT_FLAG_ARCHIVES},
+        {FT_RAW_LZW15V, FT_FLAG_ARCHIVES},
+        {FT_LBR_COBOL, FT_FLAG_ARCHIVES},
+        {FT_LSZ, FT_FLAG_ARCHIVES},
+        {FT_GOB, FT_FLAG_ARCHIVES},
+        {FT_GTU, FT_FLAG_ARCHIVES},
+        {FT_NOTETAB, FT_FLAG_ARCHIVES},
+        {FT_IZPACK, FT_FLAG_ARCHIVES},
+        {FT_SOLARIS_PKG, FT_FLAG_ARCHIVES},
+        {FT_HLB, FT_FLAG_ARCHIVES},
+        {FT_RID, FT_FLAG_ARCHIVES},
+        {FT_ROMPAQ, FT_FLAG_ARCHIVES},
+        {FT_FIZ, FT_FLAG_ARCHIVES},
+        {FT_MIZ, FT_FLAG_ARCHIVES},
+        {FT_IBM_SPACK, FT_FLAG_ARCHIVES},
+        {FT_EA, FT_FLAG_ARCHIVES},
+        {FT_SLS, FT_FLAG_ARCHIVES},
+        {FT_PC_SECURE, FT_FLAG_ARCHIVES},
+        {FT_PM_DISKCOPY, FT_FLAG_ARCHIVES},
+        {FT_MEGATECH_VOL, FT_FLAG_ARCHIVES},
+        {FT_IGF1, FT_FLAG_ARCHIVES},
+        {FT_JETBBS, FT_FLAG_ARCHIVES},
+        {FT_MAKESELF, FT_FLAG_ARCHIVES},
+        {FT_FLD, FT_FLAG_ARCHIVES},
+        {FT_GLU, FT_FLAG_ARCHIVES},
+        {FT_JAM, FT_FLAG_ARCHIVES},
+        {FT_FMC1, FT_FLAG_ARCHIVES},
+        {FT_SOFTPAQ_2, FT_FLAG_ARCHIVES},
+        {FT_MARC, FT_FLAG_ARCHIVES},
+        {FT_STORK, FT_FLAG_ARCHIVES},
+        {FT_SEA_DATA, FT_FLAG_ARCHIVES},
+        {FT_QNX_BASE, FT_FLAG_ARCHIVES},
+        {FT_GAMOS, FT_FLAG_ARCHIVES},
+        {FT_SOS, FT_FLAG_ARCHIVES},
+        {FT_EXE_SBOOKBUILDER, FT_FLAG_ARCHIVES},
+        {FT_HUFF, FT_FLAG_ARCHIVES},
+        {FT_LZHCXP, FT_FLAG_ARCHIVES},
+        {FT_KRML, FT_FLAG_ARCHIVES},
+        {FT_QIP1, FT_FLAG_ARCHIVES},
+        {FT_QUANTUM, FT_FLAG_ARCHIVES},
+        {FT_IRIX_SA, FT_FLAG_ARCHIVES},
+        {FT_JM93, FT_FLAG_ARCHIVES},
+        {FT_NEXTSTEP_DISKIMAGE, FT_FLAG_ARCHIVES},
+        {FT_MVA, FT_FLAG_ARCHIVES},
+        {FT_PKT, FT_FLAG_ARCHIVES},
+        {FT_HDCOPY, FT_FLAG_ARCHIVES},
+        {FT_IVT, FT_FLAG_ARCHIVES},
+        {FT_SWAG, FT_FLAG_ARCHIVES},
+        {FT_STYLUS, FT_FLAG_ARCHIVES},
+        {FT_SETTLERS_FT, FT_FLAG_ARCHIVES},
+        {FT_RIVERSOFT, FT_FLAG_ARCHIVES},
+        {FT_GKSETUP, FT_FLAG_ARCHIVES},
+        {FT_OPC, FT_FLAG_ARCHIVES},
+        {FT_GOB2, FT_FLAG_ARCHIVES},
+        {FT_SQ, FT_FLAG_ARCHIVES},
+        {FT_IS11, FT_FLAG_ARCHIVES},
+        {FT_RECOGNITA, FT_FLAG_ARCHIVES},
+        {FT_INTEDU_FT, FT_FLAG_ARCHIVES},
+        {FT_PAPERPORT, FT_FLAG_ARCHIVES},
+        {FT_EALIB, FT_FLAG_ARCHIVES},
+        {FT_NID, FT_FLAG_ARCHIVES},
+        {FT_HAP, FT_FLAG_ARCHIVES},
+        {FT_EXE_EBOOKCREATOR, FT_FLAG_ARCHIVES},
+        {FT_LZDIET, FT_FLAG_ARCHIVES},
+        {FT_QUALITAS, FT_FLAG_ARCHIVES},
+        {FT_LZV1, FT_FLAG_ARCHIVES},
+        {FT_SW, FT_FLAG_ARCHIVES},
+        {FT_SAF, FT_FLAG_ARCHIVES},
+        {FT_IGF2, FT_FLAG_ARCHIVES},
+        {FT_RCF, FT_FLAG_ARCHIVES},
+        {FT_HFE, FT_FLAG_ARCHIVES},
+        {FT_RSVK, FT_FLAG_ARCHIVES},
+        {FT_HZL, FT_FLAG_ARCHIVES},
+        {FT_JBF, FT_FLAG_ARCHIVES},
+        {FT_JGPAK, FT_FLAG_ARCHIVES},
+        {FT_PACKIT, FT_FLAG_ARCHIVES},
+        {FT_LOFI, FT_FLAG_ARCHIVES},
+        {FT_SCI, FT_FLAG_ARCHIVES},
+        {FT_AGIS, FT_FLAG_ARCHIVES},
+        {FT_MWAVE_Z, FT_FLAG_ARCHIVES},
+        {FT_MSCOMPRESS_SZ, FT_FLAG_ARCHIVES},
+        {FT_KOLIBRI_KPACK, FT_FLAG_ARCHIVES},
+        {FT_MATHCAD_PACK, FT_FLAG_ARCHIVES},
+        {FT_PCOMM_OS2, FT_FLAG_ARCHIVES},
+        {FT_SOLARIS_BOOT, FT_FLAG_ARCHIVES},
+        {FT_INFOGRAMES_PAK, FT_FLAG_ARCHIVES},
+        {FT_IBM_ZPAK, FT_FLAG_ARCHIVES},
+        {FT_QDECK_QIP, FT_FLAG_ARCHIVES},
+        {FT_MAXIS_MXS, FT_FLAG_ARCHIVES},
+        {FT_SWAG_PACKET, FT_FLAG_ARCHIVES},
+        {FT_PALM_PDB, FT_FLAG_ARCHIVES},
+        {FT_NETWARE_PACK2, FT_FLAG_ARCHIVES},
+        {FT_BSN, FT_FLAG_ARCHIVES},
+        {FT_AODOS, FT_FLAG_ARCHIVES},
+        {FT_BZIP1, FT_FLAG_ARCHIVES},
+        {FT_INSTALLANYWHERE_SFX, FT_FLAG_ARCHIVES},
+        {FT_ASCEND_BACKUP, FT_FLAG_ARCHIVES},
+        {FT_BORLAND_PACK, FT_FLAG_ARCHIVES},
         {FT_ARQSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_SQZ, FT_FLAG_ARCHIVES},
         {FT_SQZSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_RTPATCHSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_AMIGA_ADF, FT_FLAG_ARCHIVES},
+        {FT_GODOT_PCK, FT_FLAG_ARCHIVES},
+        {FT_WBFS, FT_FLAG_ARCHIVES},
+        {FT_RVZ, FT_FLAG_ARCHIVES},
         {FT_DN_ARCHIVE, FT_FLAG_ARCHIVES},
         {FT_FPAK, FT_FLAG_ARCHIVES},
         {FT_SOFTPAQ1_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
@@ -14948,6 +15448,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_FREEARCSFX, FT_FLAG_STATICUNPACKERS},
         {FT_ZPAQSFX, FT_FLAG_STATICUNPACKERS},
         {FT_GZIPSFX, FT_FLAG_STATICUNPACKERS},
+        {FT_BZIP2SFX, FT_FLAG_STATICUNPACKERS},
         {FT_KWAJSFX, FT_FLAG_STATICUNPACKERS},
         {FT_SZDDSFX, FT_FLAG_STATICUNPACKERS},
         {FT_PYINSTALLER_SFX, FT_FLAG_STATICUNPACKERS},
@@ -16069,7 +16570,7 @@ QString XBinary::getHash(HASH hash, QList<OFFSETSIZE> *pListOS, PDSTRUCT *pPdStr
                 break;
             }
 
-            crypto.addData(pBuffer, (int)nTemp);
+            crypto.addData(QByteArray::fromRawData(pBuffer, (int)nTemp));
 
             nSize -= nTemp;
             nOffset += nTemp;
@@ -20277,7 +20778,7 @@ QDateTime XBinary::valueToTime(quint64 nValue, DT_TYPE type)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
         result = QDateTime::fromSecsSinceEpoch((quint32)nValue, QTimeZone(0));
 #else
-        result = QDateTime::fromMSecsSinceEpoch((quint32)nValue * 1000, Qt::UTC);
+        result = QDateTime::fromMSecsSinceEpoch((quint32)nValue * 1000, X_UTC_TZ);
 #endif
     } else if (type == DT_TYPE_DOSTIME) {
         // MS-DOS time is always a 16-bit packed value; mask higher bits explicitly.
@@ -23047,7 +23548,8 @@ bool XBinary::invokePdStructCallbackChecked(PDSTRUCT *pPdStruct, const PDSTRUCTL
     InvokeEntry invokeEntry{pState, pPdStruct};
 
     if (!invokeEntry(pLegacyEntry)) return false;
-    for (const QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> &pEntry : qAsConst(listSubscribers)) {
+    const QList<QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY>> &listSubscribersRef = listSubscribers;
+    for (const QSharedPointer<PDSTRUCT_CALLBACK_STATE::ENTRY> &pEntry : listSubscribersRef) {
         if (!invokeEntry(pEntry)) return false;
     }
     return isPdCallbackOwnerAlive(pState);
@@ -25013,6 +25515,13 @@ static QString _unpAppendDuplicateSuffix(const QString &sName, qint32 nSuffix)
     return sDirectory + sBaseName + sSuffix;
 }
 
+// U3 0079af37..0079afef: prefix the leaf, keeping its extension and directory.
+static QString _unpU3RenameCandidate(const QString &sName, qint32 nAttempt)
+{
+    const qint32 nSlash = sName.lastIndexOf(QLatin1Char('/'));
+    return sName.left(nSlash + 1) + QStringLiteral("(%1)").arg(nAttempt) + sName.mid(nSlash + 1);
+}
+
 static bool _unpIsUnsafeExistingDiskEntry(const QFileInfo &fileInfo, bool bExpectDirectory)
 {
     const UNPACK_FILE_SYSTEM_ENTRY_TYPE entryType = unpackFileSystemEntryType(fileInfo.absoluteFilePath());
@@ -25191,6 +25700,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
         // Clearing OVERWRITEFILES alone would otherwise suffix the name when
         // FIXFILENAMES is enabled instead of preserving the on-disk file.
         const bool bSkipExistingFiles = mapEffectiveProperties.value(UNPACK_PROP_SKIPEXISTINGFILES).toBool();
+        const bool bU3Rename = mapEffectiveProperties.value(UNPACK_PROP_U3_RENAME).toBool();
 
         QString sRootPath = QDir::fromNativeSeparators(QDir(sFolderName).absolutePath());
         QString sCanonicalRoot = QDir::fromNativeSeparators(QFileInfo(sRootPath).canonicalFilePath());
@@ -25303,16 +25813,14 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                     if (!sMethod.isEmpty()) sEntryIdentity += QStringLiteral(" [%1]").arg(sMethod);
                     sEntryIdentity = unpackSanitizeDiagnosticIdentity(sEntryIdentity);
 
+                    // Links retain their archive metadata; filesystem link
+                    // publication is not implemented by this extraction route.
+                    const bool bIsLink = record.mapProperties.contains(FPART_PROP_LINKNAME);
                     // Check if this is a directory entry (ends with '/' and has zero size)
                     bool bIsDirectory = sFileName.endsWith(QLatin1Char('/')) || record.mapProperties.value(FPART_PROP_ISFOLDER).toBool();
 
                     if (bFixFileNames) {
                         sFileName = fixFileName(sFileName);
-
-                        QString sLinkName = record.mapProperties.value(FPART_PROP_LINKNAME).toString();
-                        if (!sLinkName.isEmpty()) {
-                            bIsDirectory = true;
-                        }
 
                         if (sFileName.isEmpty() && !bIsDirectory) {
                             sFileName = QLatin1String("file");
@@ -25348,7 +25856,11 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                         }
                     }
 
-                    if (!bPathResolved) {
+                    if (bIsLink) {
+                        if (isProgressAlive()) setPdStructErrorString(pPdStruct, tr("Archive link publication is not supported: %1").arg(sEntryIdentity));
+                        bResult = false;
+                        bEntrySoftFail = true;
+                    } else if (!bPathResolved) {
                         if (isProgressAlive()) setPdStructErrorString(pPdStruct, QString("%1: %2").arg(tr("Cannot resolve output path")).arg(sFileName));
                         bResult = false;
                         bEntrySoftFail = true;
@@ -25361,7 +25873,9 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                         qint32 nSuffix = 1;
 
                         while (!bOutputSelected) {
-                            QString sCandidateName = (nSuffix == 1) ? sBaseFileName : _unpAppendDuplicateSuffix(sBaseFileName, nSuffix);
+                            QString sCandidateName = (nSuffix == 1) ? sBaseFileName :
+                                ((bU3Rename && !bIsDirectory) ? _unpU3RenameCandidate(sBaseFileName, nSuffix - 2) :
+                                                             _unpAppendDuplicateSuffix(sBaseFileName, nSuffix));
                             QString sCandidatePath = QDir::cleanPath(QDir(sRootPath).absoluteFilePath(sCandidateName));
 
                             if (!_unpIsSafeOutputPath(pathCaseSensitivity, sRootPath, sCanonicalRoot, sCandidatePath)) {
@@ -25424,6 +25938,14 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                             bool bNeedsDifferentName = bUsedByArchive || (bDiskEntryExists && !bOverwriteFiles);
 
                             if (bFixFileNames && bNeedsDifferentName) {
+                                if (bU3Rename && nSuffix >= 1001) {
+                                    // All '(0)'..'(999)' paths exist. U3 skips this
+                                    // member; retain the common no-overwrite transaction.
+                                    bSkipFile = true;
+                                    sFilePath = sCandidatePath;
+                                    bOutputSelected = true;
+                                    break;
+                                }
                                 if (nSuffix >= 1000000) {
                                     break;
                                 }
@@ -25999,6 +26521,10 @@ XBinary::FFSEARCH_INFO XBinary::searchFFNext(FFSEARCH_STATE *pState, PDSTRUCT *p
     return isSearchContextAlive() ? result : FFSEARCH_INFO();
 }
 
+// One else-if link per detected file type, and the chain has outgrown MSVC's
+// 128-block nesting limit (C1061).  The links are mutually exclusive and every
+// body only appends literals, so returning at the end of each one keeps the same
+// first-match-wins order while holding the whole function at nesting depth 1.
 QList<QString> XBinary::getSearchSignatures()
 {
     QList<QString> listResult;
@@ -26007,68 +26533,626 @@ QList<QString> XBinary::getSearchSignatures()
 
     if (XBinary::checkFileType(FT_PE, fileType)) {
         listResult.append("'MZ'");
-    } else if (XBinary::checkFileType(FT_ELF, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ELF, fileType)) {
         listResult.append("7F'ELF'");
-    } else if (XBinary::checkFileType(FT_MACHOFAT, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MACHOFAT, fileType)) {
         listResult.append("CAFEBABE");
         listResult.append("BEBAFECA");
         listResult.append("CAFEBABF");
         listResult.append("BFBAFECA");
-    } else if (XBinary::checkFileType(FT_MACHO, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MACHO, fileType)) {
         listResult.append("FEEDFACE");
         listResult.append("CEFAEDFE");
         listResult.append("FEEDFACF");
         listResult.append("CFFAEDFE");
-    } else if (XBinary::checkFileType(FT_PDF, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PDF, fileType)) {
         listResult.append("'%PDF'");
-    } else if (XBinary::checkFileType(FT_PDB, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PDB, fileType)) {
         listResult.append("'Microsoft C/C++ MSF 7.00'0D0A1A'DS'000000");
         listResult.append("'Microsoft C/C++ program database 2.00'0D0A1A'JG'0000");
         listResult.append("'BSJB'............'PDB v1.0'");
-    } else if (XBinary::checkFileType(FT_PNG, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PNG, fileType)) {
         listResult.append("89'PNG\r\n'1A0A");
-    } else if (XBinary::checkFileType(FT_JPEG, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_JPEG, fileType)) {
         listResult.append("FFD8FF");
-    } else if (XBinary::checkFileType(FT_TIFF, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_TIFF, fileType)) {
         listResult.append("'MM'002A");
         listResult.append("'II'2A00");
-    } else if (XBinary::checkFileType(FT_BMP, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BMP, fileType)) {
         listResult.append("'BM'");
-    } else if (XBinary::checkFileType(FT_GIF, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_GIF, fileType)) {
         listResult.append("'GIF8'");
-    } else if (XBinary::checkFileType(FT_ICO, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ICO, fileType)) {
         listResult.append("00000100");
-    } else if (XBinary::checkFileType(FT_DEX, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DEX, fileType)) {
         listResult.append("'dex\n'");
-    } else if (XBinary::checkFileType(FT_QUAKE_PAK, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_QUAKE_PAK, fileType)) {
         listResult.append("'PACK'");
-    } else if (XBinary::checkFileType(FT_DOOM_WAD, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DOOM_WAD, fileType)) {
         listResult.append("'IWAD'");
         listResult.append("'PWAD'");
-    } else if (XBinary::checkFileType(FT_BUILD_GRP, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BUILD_GRP, fileType)) {
         listResult.append("'KenSilverman'");
-    } else if (XBinary::checkFileType(FT_DESCENT_HOG, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DESCENT_HOG, fileType)) {
         listResult.append("'DHF'");
-    } else if (XBinary::checkFileType(FT_C64_T64, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_C64_T64, fileType)) {
         listResult.append("'C64 tape image file'");
         listResult.append("'C64S tape image file'");
-    } else if (XBinary::checkFileType(FT_APPLESINGLE, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_APPLESINGLE, fileType)) {
         listResult.append("00051600");
         listResult.append("00051607");
-    } else if (XBinary::checkFileType(FT_CPM_LBR, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_CPM_LBR, fileType)) {
         listResult.append("00'           '0000");
-    } else if (XBinary::checkFileType(FT_RTPATCH, fileType) ||
-               XBinary::checkFileType(FT_RTPATCHSFX, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RTPATCH, fileType) ||
+        XBinary::checkFileType(FT_RTPATCHSFX, fileType)) {
         listResult.append("'K*'");
-    } else if (XBinary::checkFileType(FT_ARQ, fileType) ||
-               XBinary::checkFileType(FT_ARQSFX, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ARQ, fileType) ||
+        XBinary::checkFileType(FT_ARQSFX, fileType)) {
         listResult.append("67570402");
-    } else if (XBinary::checkFileType(FT_SQZ, fileType) ||
-               XBinary::checkFileType(FT_SQZSFX, fileType)) {
+        listResult.append("67570401");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ALDUS, fileType)) {
+        listResult.append("'ALDUS LZW   1.00'");
+        listResult.append("'ALDUS PKZP  2.00'");
+        listResult.append("'ADOBE LZSH  3.00'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BTH_PAK, fileType)) {
+        listResult.append("'PAK'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ARCV2, fileType)) {
+        listResult.append("'ARCV'0002");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_AMPK, fileType)) {
+        listResult.append("'AMPK'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_AIX_BFF, fileType)) {
+        listResult.append("09006BEA");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ASYMETRIX, fileType)) {
+        listResult.append("602213636c000000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BINARY2, fileType)) {
+        listResult.append("0A'GL'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ARCV4, fileType)) {
+        listResult.append("'ARCV'0004");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BVRP_PAC, fileType)) {
+        listResult.append("'PAC - (c) BVRP Software 1990'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PCINSTALL, fileType)) {
+        listResult.append("'[20/20]'00");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ARTIPACK, fileType)) {
+        listResult.append("'ARTIPACK'0001");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BINSH_SFX, fileType)) {
+        listResult.append("'#!/bin/sh'");
+        listResult.append("'#! /bin/sh'");
+        listResult.append("'#!/sbin/sh'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_NETWARE_PACK, fileType)) {
+        listResult.append("'Packed File '");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_EA_REFPACK, fileType)) {
+        listResult.append("10FB");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LZPIS2, fileType)) {
+        listResult.append("'LZPIS2'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_FINEREADER_PACK, fileType)) {
+        listResult.append("'FINEAR'DD88DD");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ECM_PACK, fileType)) {
+        listResult.append("'ECM'00");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_NPACK, fileType)) {
+        listResult.append("'MSTSM'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_COREL_LTEC, fileType)) {
+        listResult.append("'LTEC'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_IRWINPAC, fileType)) {
+        listResult.append("'IrwinPac'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_IS7_INX, fileType)) {
+        listResult.append("74C42C84E1E5D428");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LBR_COBOL, fileType)) {
+        listResult.append("'Micro Focus COBOL Library File'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LSZ, fileType)) {
+        listResult.append("37F0FFFF0003");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_GOB, fileType)) {
+        listResult.append("'GOB'0A");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SOLARIS_PKG, fileType)) {
+        listResult.append("'# PaCkAgE DaTaStReAm'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_FIZ, fileType)) {
+        listResult.append("'FIZ'1A");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MIZ, fileType)) {
+        listResult.append("'DKCL'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_EA, fileType)) {
+        listResult.append("1A'EA'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SLS, fileType)) {
+        listResult.append("1F'S/L?SOA_'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PC_SECURE, fileType)) {
+        listResult.append("'PCT'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PM_DISKCOPY, fileType)) {
+        listResult.append("'PM Diskcopy'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_IGF1, fileType)) {
+        listResult.append("DBEC0002");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_JETBBS, fileType)) {
+        listResult.append("....'-mg'..2D");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MAKESELF, fileType)) {
+        listResult.append("'#!/bin/sh'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_JAM, fileType)) {
+        listResult.append("'JAM'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_FMC1, fileType)) {
+        listResult.append("'FMC1'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SOFTPAQ_2, fileType)) {
+        listResult.append("'MZ'........................................................'PKLITE Copr. 199'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MARC, fileType)) {
+        listResult.append("'MARC'03000000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_STORK, fileType)) {
+        listResult.append("0A'@ASSOC.SAV'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SEA_DATA, fileType)) {
+        listResult.append("43342112'TE2#'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_QNX_BASE, fileType)) {
+        listResult.append("EB4C'DDDD'0000000000010000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_GAMOS, fileType)) {
+        listResult.append("1A'GAMOS PACKED FILE'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SOS, fileType)) {
+        listResult.append("'DOS'........................'SOS1'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_EXE_SBOOKBUILDER, fileType)) {
+        listResult.append("'MZP'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_HUFF, fileType)) {
+        listResult.append("BD01");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LZHCXP, fileType)) {
+        listResult.append("'LZ'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_KRML, fileType)) {
+        listResult.append("'KRML'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_QIP1, fileType)) {
+        listResult.append("'QD'0000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_QUANTUM, fileType)) {
+        listResult.append("'DS'00");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_IRIX_SA, fileType)) {
+        listResult.append("ACED1234");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_JM93, fileType)) {
+        listResult.append("'JM93'00");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MVA, fileType)) {
+        listResult.append("'mflh'01000000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_HDCOPY, fileType)) {
+        listResult.append("FF18");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_IVT, fileType)) {
+        listResult.append("3F5F0401");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SWAG, fileType)) {
+        listResult.append("....'-sw1-'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_STYLUS, fileType)) {
+        listResult.append("'DP'1A07010003'SDC'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RIVERSOFT, fileType)) {
+        listResult.append("'RiverSoft Data Library'1A");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_GKSETUP, fileType)) {
+        listResult.append("'This is a binary data file. Keep out !'1A");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_OPC, fileType)) {
+        listResult.append("'OS2POINT'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_GOB2, fileType)) {
+        listResult.append("'GOB '14000000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SQ, fileType)) {
+        listResult.append("5351ACAE");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_IS11, fileType)) {
+        listResult.append("655D138C");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_INTEDU_FT, fileType)) {
+        listResult.append("7C2E0704");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PAPERPORT, fileType)) {
+        listResult.append("'ViG'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_EALIB, fileType)) {
+        listResult.append("'EALIB'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_NID, fileType)) {
+        listResult.append("'NI'1501");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_HAP, fileType)) {
+        listResult.append("91334846");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_EXE_EBOOKCREATOR, fileType)) {
+        listResult.append("'MZ'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LZDIET, fileType)) {
+        listResult.append("'lZdIeT'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LZV1, fileType)) {
+        listResult.append("'LZV1'5D1901AD0000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SW, fileType)) {
+        listResult.append("'im001'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SAF, fileType)) {
+        listResult.append("'SAF, (c)'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_IGF2, fileType)) {
+        listResult.append("2413");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RCF, fileType)) {
+        listResult.append("03F7E8EB");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_HFE, fileType)) {
+        listResult.append("'HXCPICFE'00");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RSVK, fileType)) {
+        listResult.append("'RSVKDATA'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_HZL, fileType)) {
+        listResult.append("'!HZL'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_JBF, fileType)) {
+        listResult.append("E4633130B370B45C");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_JGPAK, fileType)) {
+        listResult.append("'JGPAK'0001");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PACKIT, fileType)) {
+        listResult.append("'PACKIT by MJP'0D0A1A");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LOFI, fileType)) {
+        listResult.append("'lzma'0000000000000000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SCI, fileType)) {
+        listResult.append("'SCI'..'00 -'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_AGIS, fileType)) {
+        listResult.append("'AGIS'10");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MSCOMPRESS_SZ, fileType)) {
+        listResult.append("'SZ '88F02733D1");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_KOLIBRI_KPACK, fileType)) {
+        listResult.append("'KPCK'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MATHCAD_PACK, fileType)) {
+        listResult.append("'.MCDCOMPRESSION'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_IBM_ZPAK, fileType)) {
+        listResult.append("'-ZPAK'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BSN, fileType)) {
+        listResult.append("FF425347");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_AODOS, fileType)) {
+        listResult.append("A0001601");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BZIP1, fileType)) {
+        listResult.append("'BZ0'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_INSTALLANYWHERE_SFX, fileType)) {
+        listResult.append("'#!/bin/sh'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BORLAND_PACK, fileType)) {
+        listResult.append("'This is a packed file.'1A");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SQZ, fileType) ||
+         XBinary::checkFileType(FT_SQZSFX, fileType)) {
         listResult.append("'HLSQZ'");
-    } else if (XBinary::checkFileType(FT_DMS, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_AMIGA_ADF, fileType)) {
+        listResult.append("'DOS'00");
+        listResult.append("'DOS'01");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_GODOT_PCK, fileType)) {
+        listResult.append("'GDPC'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_WBFS, fileType)) {
+        listResult.append("'WBFS'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RVZ, fileType)) {
+        listResult.append("'RVZ'01");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DMS, fileType)) {
         listResult.append("'DMS!'");
-    } else if (XBinary::checkFileType(FT_PP20, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PP20, fileType)) {
         listResult.append("'PP11'");
         listResult.append("'PP20'");
         listResult.append("'PX20'");
@@ -26077,133 +27161,301 @@ QList<QString> XBinary::getSearchSignatures()
         listResult.append("'DXS9'");
         listResult.append("'H.D.'");
         listResult.append("'RVV!'");
-    } else if (XBinary::checkFileType(FT_RNC, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RNC, fileType)) {
         listResult.append("'RNC'01");
         listResult.append("'RNC'02");
         listResult.append("'...'01");
         listResult.append("'RNCA'");
         listResult.append("'BULLFROGRNC'01");
-    } else if (XBinary::checkFileType(FT_TPWM, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_TPWM, fileType)) {
         listResult.append("'TPWM'");
-    } else if (XBinary::checkFileType(FT_FREEZE, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_FREEZE, fileType)) {
         listResult.append("1F9E");
         listResult.append("1F9F");
-    } else if (XBinary::checkFileType(FT_UNIX_PACK, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_UNIX_PACK, fileType)) {
         listResult.append("1F1E");
         listResult.append("1F1F");
-    } else if (XBinary::checkFileType(FT_BINHEX, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BINHEX, fileType)) {
         listResult.append("'(This file must be converted with BinHex'");
-    } else if (XBinary::checkFileType(FT_BTOA, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BTOA, fileType)) {
         listResult.append("'xbtoa Begin'");
-    } else if (XBinary::checkFileType(FT_APPLE_2IMG, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_APPLE_2IMG, fileType)) {
         listResult.append("'2IMG'");
-    } else if (XBinary::checkFileType(FT_WINTERMUTE_DCP, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_WINTERMUTE_DCP, fileType)) {
         listResult.append("DEADC0DE'JUNK'");
-    } else if (XBinary::checkFileType(FT_PYINSTALLER_PYZ, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PYINSTALLER_PYZ, fileType)) {
         listResult.append("'PYZ'00");
-    } else if (XBinary::checkFileType(FT_AMIGA_LZX, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_AMIGA_LZX, fileType)) {
         listResult.append("'LZX'");
-    } else if (XBinary::checkFileType(FT_MI10, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MI10, fileType)) {
         listResult.append("'MI10'");
-    } else if (XBinary::checkFileType(FT_DEARK_LEGACY_ARCHIVE, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DEARK_LEGACY_ARCHIVE, fileType)) {
         listResult.append("0D0A1A'CAZIP'");
         listResult.append("'EDILZSS'");
         listResult.append("'MRNZ'88F02733");
-    } else if (XBinary::checkFileType(FT_LIBDSK_IMAGE, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LIBDSK_IMAGE, fileType)) {
         listResult.append("'IMD '");
         listResult.append("'QRST'");
-    } else if (XBinary::checkFileType(FT_DISK_DOUBLER, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DISK_DOUBLER, fileType)) {
         listResult.append("ABCD0054");
-    } else if (XBinary::checkFileType(FT_DISK_DOUBLER_DDA2, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DISK_DOUBLER_DDA2, fileType)) {
         listResult.append("'DDA2'");
-    } else if (XBinary::checkFileType(FT_CKP, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_CKP, fileType)) {
         listResult.append("'.CKP'0001");
-    } else if (XBinary::checkFileType(FT_EDP, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_EDP, fileType)) {
         listResult.append("'.EDP'0001");
-    } else if (XBinary::checkFileType(FT_MPQ, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MPQ, fileType)) {
         listResult.append("'MPQ'1A");
         listResult.append("'MPQ'1B");
-    } else if (XBinary::checkFileType(FT_BIGF, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BIGF, fileType)) {
         listResult.append("'BIGF'..'ZBL'");
-    } else if (XBinary::checkFileType(FT_ISCAB, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ISCAB, fileType)) {
         listResult.append("'ISc('");
-    } else if (XBinary::checkFileType(FT_RIB, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RIB, fileType)) {
         listResult.append("'RIB'00");
-    } else if (XBinary::checkFileType(FT_SPIS, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SPIS, fileType)) {
         listResult.append("'SPIS'1A");
-    } else if (XBinary::checkFileType(FT_PMM, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PMM, fileType)) {
         listResult.append("'MTCVTS PSM 2.00'00");
-    } else if (XBinary::checkFileType(FT_SM8, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SM8, fileType)) {
         listResult.append("'SM8'000001");
-    } else if (XBinary::checkFileType(FT_DTC, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DTC, fileType)) {
         listResult.append("'DTC'00");
-    } else if (XBinary::checkFileType(FT_DMA, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DMA, fileType)) {
         listResult.append("'DMA'00");
-    } else if (XBinary::checkFileType(FT_MUS, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MUS, fileType)) {
         listResult.append("'MUS'00");
-    } else if (XBinary::checkFileType(FT_SND, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SND, fileType)) {
         listResult.append("'SND'00");
-    } else if (XBinary::checkFileType(FT_PMA, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PMA, fileType)) {
         listResult.append("'PLX'");
-    } else if (XBinary::checkFileType(FT_MDH, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MDH, fileType)) {
         listResult.append("'MDH'00");
-    } else if (XBinary::checkFileType(FT_ZIP, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ZIP, fileType)) {
         listResult.append("'PK'0304");
-    } else if (XBinary::checkFileType(FT_RAR, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RAR, fileType)) {
         listResult.append("'Rar!'1A07");
-    } else if (XBinary::checkFileType(FT_GZIP, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_GZIP, fileType)) {
         listResult.append("1F8B08");
-    } else if (XBinary::checkFileType(FT_ZLIB, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ZLIB, fileType)) {
         listResult.append("785E");
         listResult.append("789C");
         listResult.append("78DA");
-    } else if (XBinary::checkFileType(FT_7Z, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_7Z, fileType)) {
         listResult.append("'7z'BCAF271C");
-    } else if (XBinary::checkFileType(FT_CAB, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_CAB, fileType)) {
         listResult.append("'MSCF'");
-    } else if (XBinary::checkFileType(FT_MP3, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MP3, fileType)) {
         listResult.append("'ID3'");
-    } else if (XBinary::checkFileType(FT_MP4, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_MP4, fileType)) {
         listResult.append("'ftyp'");
-    } else if (XBinary::checkFileType(FT_RIFF, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RIFF, fileType)) {
         listResult.append("'RIFF'");
-    } else if (XBinary::checkFileType(FT_LE, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LE, fileType)) {
         listResult.append("'MZ'");
-    } else if (XBinary::checkFileType(FT_NE, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_NE, fileType)) {
         listResult.append("'MZ'");
-    } else if (XBinary::checkFileType(FT_AMIGAHUNK, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_AMIGAHUNK, fileType)) {
         listResult.append("000003F3");
         listResult.append("000003E7");
-    } else if (XBinary::checkFileType(FT_JAVACLASS, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_JAVACLASS, fileType)) {
         listResult.append("CAFEBABE");
-    } else if (XBinary::checkFileType(FT_WASM, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_WASM, fileType)) {
         listResult.append("0061736D01000000");
-    } else if (XBinary::checkFileType(FT_SZDD, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_SZDD, fileType)) {
         listResult.append("'SZDD'88F027'3A'");
-    } else if (XBinary::checkFileType(FT_BZIP2, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BZIP2, fileType)) {
         listResult.append("314159265359");
         listResult.append("17724538509000000000");
-    } else if (XBinary::checkFileType(FT_LZ4, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LZ4, fileType)) {
         listResult.append("04224D18");
-    } else if (XBinary::checkFileType(FT_LZ5, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LZ5, fileType)) {
         listResult.append("05224D18");
-    } else if (XBinary::checkFileType(FT_LIZARD, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LIZARD, fileType)) {
         listResult.append("06224D18");
-    } else if (XBinary::checkFileType(FT_ZPAQ, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ZPAQ, fileType)) {
         listResult.append("376B5374A03183D38CB228B0D3'zPQ'");
-    } else if (XBinary::checkFileType(FT_BCM, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_BCM, fileType)) {
         listResult.append("'BCM1'");
-    } else if (XBinary::checkFileType(FT_LPAQ8, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LPAQ8, fileType)) {
         listResult.append("'pQ'08");
-    } else if (XBinary::checkFileType(FT_PEA, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_PEA, fileType)) {
         listResult.append("EA01................0000'POD'00");
-    } else if (XBinary::checkFileType(FT_LZMA, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LZMA, fileType)) {
         listResult.append("5D000000");
-    } else if (XBinary::checkFileType(FT_LHA, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_LHA, fileType)) {
         listResult.append("'-lh'..2d");
         listResult.append("'-lz'..2d");
         listResult.append("'-pm'..2d");
-    } else if (XBinary::checkFileType(FT_DJVU, fileType)) {
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_DJVU, fileType)) {
         listResult.append("'AT&TFORM'");
         listResult.append("'SDJVFORM'");
     }

@@ -199,7 +199,13 @@ public:
         qint64 nHeaderOffset;
         qint64 nDataOffset;
         quint32 nExternalFileAttributes;
-        // TODO Comment!!!
+        quint16 nInternalFileAttributes;
+        // The extra field may legitimately differ between the local header and
+        // the central directory (Info-ZIP's UT record is the usual case), so
+        // the two are kept apart rather than shared.
+        QByteArray baExtraFieldLocal;
+        QByteArray baExtraFieldCentral;
+        QByteArray baFileComment;
     };
 
     struct ZIP_PACK_CONTEXT {

@@ -10685,3 +10685,434 @@ bool XDeflateDecoder::compress_zlib(XBinary::DATAPROCESS_STATE *pCompressState, 
 {
     return Algo_utils::compressDeflate(pCompressState, pPdStruct, nCompressionLevel, MAX_WBITS);
 }
+
+// ---------------------------------------------------------------------------
+// Deflate stream structure
+//
+// Only the block framing is decoded here: enough Huffman work to find where one
+// block ends and the next begins, and never the payload. The point is the
+// encoder's decisions, not the data.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// LSB-first bit reader over a fixed buffer. Every read is bounds-checked; once
+// it runs past the end it latches an error and stops returning data, so a
+// truncated or malformed stream ends the walk instead of reading wild.
+class XDeflateBitReader {
+public:
+    XDeflateBitReader(const QByteArray &baData) : m_baData(baData), m_nBitPos(0), m_bError(false)
+    {
+    }
+
+    bool isError() const
+    {
+        return m_bError;
+    }
+
+    qint64 getBitPos() const
+    {
+        return m_nBitPos;
+    }
+
+    bool isFinished() const
+    {
+        return m_bError || (m_nBitPos >= ((qint64)m_baData.size() * 8));
+    }
+
+    quint32 readBit()
+    {
+        if (m_nBitPos >= ((qint64)m_baData.size() * 8)) {
+            m_bError = true;
+            return 0;
+        }
+
+        const quint8 nByte = (quint8)m_baData.at((qint32)(m_nBitPos >> 3));
+        const quint32 nResult = (nByte >> (m_nBitPos & 7)) & 1;
+        m_nBitPos++;
+
+        return nResult;
+    }
+
+    quint32 readBits(qint32 nCount)
+    {
+        quint32 nResult = 0;
+
+        for (qint32 i = 0; i < nCount; i++) {
+            nResult |= readBit() << i;
+        }
+
+        return nResult;
+    }
+
+    void alignToByte()
+    {
+        m_nBitPos = (m_nBitPos + 7) & ~((qint64)7);
+    }
+
+    void skipBytes(qint64 nCount)
+    {
+        m_nBitPos += nCount * 8;
+
+        if (m_nBitPos > ((qint64)m_baData.size() * 8)) {
+            m_bError = true;
+        }
+    }
+
+private:
+    QByteArray m_baData;
+    qint64 m_nBitPos;
+    bool m_bError;
+};
+
+// Canonical Huffman decoder built from a code-length table, as RFC 1951 3.2.2
+// defines it.
+class XDeflateHuffman {
+public:
+    XDeflateHuffman() : m_bValid(false)
+    {
+    }
+
+    bool setLengths(const QVector<quint8> &vLengths)
+    {
+        m_vCounts.fill(0, 16);
+        m_vSymbols.fill(0, vLengths.count());
+
+        for (qint32 i = 0; i < vLengths.count(); i++) {
+            m_vCounts[vLengths.at(i)]++;
+        }
+
+        m_vCounts[0] = 0;
+
+        QVector<qint32> vOffsets(16, 0);
+
+        for (qint32 i = 1; i < 16; i++) {
+            vOffsets[i] = vOffsets[i - 1] + m_vCounts.at(i - 1);
+        }
+
+        for (qint32 i = 0; i < vLengths.count(); i++) {
+            if (vLengths.at(i) != 0) {
+                m_vSymbols[vOffsets[vLengths.at(i)]++] = i;
+            }
+        }
+
+        m_bValid = true;
+
+        return true;
+    }
+
+    qint32 decode(XDeflateBitReader *pReader) const
+    {
+        if (!m_bValid) return -1;
+
+        qint32 nCode = 0;
+        qint32 nFirst = 0;
+        qint32 nIndex = 0;
+
+        for (qint32 nLength = 1; nLength < 16; nLength++) {
+            nCode |= (qint32)pReader->readBit();
+
+            if (pReader->isError()) return -1;
+
+            const qint32 nCount = m_vCounts.at(nLength);
+
+            if ((nCode - nFirst) < nCount) {
+                return m_vSymbols.at(nIndex + (nCode - nFirst));
+            }
+
+            nIndex += nCount;
+            nFirst = (nFirst + nCount) << 1;
+            nCode <<= 1;
+        }
+
+        return -1;
+    }
+
+private:
+    QVector<qint32> m_vCounts;
+    QVector<qint32> m_vSymbols;
+    bool m_bValid;
+};
+
+const qint32 g_nDeflateLengthExtra[29] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
+const qint32 g_nDeflateDistanceExtra[30] = {0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
+const qint32 g_nDeflateCodeLengthOrder[19] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
+
+void _deflateFixedTables(XDeflateHuffman *pLiteral, XDeflateHuffman *pDistance)
+{
+    QVector<quint8> vLiteral(288);
+
+    for (qint32 i = 0; i < 288; i++) {
+        if (i < 144) vLiteral[i] = 8;
+        else if (i < 256) vLiteral[i] = 9;
+        else if (i < 280) vLiteral[i] = 7;
+        else vLiteral[i] = 8;
+    }
+
+    pLiteral->setLengths(vLiteral);
+    pDistance->setLengths(QVector<quint8>(30, 5));
+}
+
+}  // namespace
+
+QList<XDeflateDecoder::BLOCK> XDeflateDecoder::getDeflateBlocks(const QByteArray &baData, qint32 nMaxBlocks)
+{
+    QList<BLOCK> listResult;
+
+    if (baData.isEmpty()) {
+        return listResult;
+    }
+
+    XDeflateBitReader reader(baData);
+
+    while (!reader.isFinished()) {
+        BLOCK block = {};
+        block.nBitOffset = reader.getBitPos();
+        block.nStoredSize = 0;
+        block.nHLIT = 0;
+        block.nHDIST = 0;
+        block.nHCLEN = 0;
+        block.nNumberOfSymbols = 0;
+        block.bFinal = (reader.readBit() != 0);
+        block.blockType = (BLOCKTYPE)reader.readBits(2);
+
+        if (reader.isError() || (block.blockType == BLOCKTYPE_RESERVED)) {
+            return QList<BLOCK>();
+        }
+
+        if (block.blockType == BLOCKTYPE_STORED) {
+            reader.alignToByte();
+            block.nStoredSize = (qint64)reader.readBits(16);
+            reader.readBits(16);  // the one's complement, not needed to walk
+            reader.skipBytes(block.nStoredSize);
+
+            if (reader.isError()) {
+                return QList<BLOCK>();
+            }
+        } else {
+            XDeflateHuffman literalTable;
+            XDeflateHuffman distanceTable;
+
+            if (block.blockType == BLOCKTYPE_FIXED) {
+                _deflateFixedTables(&literalTable, &distanceTable);
+            } else {
+                block.nHLIT = (qint32)reader.readBits(5) + 257;
+                block.nHDIST = (qint32)reader.readBits(5) + 1;
+                block.nHCLEN = (qint32)reader.readBits(4) + 4;
+
+                if (reader.isError() || (block.nHLIT > 288) || (block.nHDIST > 32)) {
+                    return QList<BLOCK>();
+                }
+
+                QVector<quint8> vCodeLengths(19, 0);
+
+                for (qint32 i = 0; i < block.nHCLEN; i++) {
+                    vCodeLengths[g_nDeflateCodeLengthOrder[i]] = (quint8)reader.readBits(3);
+                }
+
+                XDeflateHuffman codeLengthTable;
+                codeLengthTable.setLengths(vCodeLengths);
+
+                QVector<quint8> vLengths;
+                vLengths.reserve(block.nHLIT + block.nHDIST);
+
+                while (vLengths.count() < (block.nHLIT + block.nHDIST)) {
+                    const qint32 nSymbol = codeLengthTable.decode(&reader);
+
+                    if (nSymbol < 0) {
+                        return QList<BLOCK>();
+                    }
+
+                    if (nSymbol < 16) {
+                        vLengths.append((quint8)nSymbol);
+                    } else if (nSymbol == 16) {
+                        if (vLengths.isEmpty()) return QList<BLOCK>();
+
+                        const quint8 nPrevious = vLengths.last();
+                        const qint32 nRepeat = 3 + (qint32)reader.readBits(2);
+
+                        for (qint32 i = 0; i < nRepeat; i++) vLengths.append(nPrevious);
+                    } else if (nSymbol == 17) {
+                        const qint32 nRepeat = 3 + (qint32)reader.readBits(3);
+
+                        for (qint32 i = 0; i < nRepeat; i++) vLengths.append(0);
+                    } else {
+                        const qint32 nRepeat = 11 + (qint32)reader.readBits(7);
+
+                        for (qint32 i = 0; i < nRepeat; i++) vLengths.append(0);
+                    }
+
+                    if (reader.isError() || (vLengths.count() > (block.nHLIT + block.nHDIST))) {
+                        return QList<BLOCK>();
+                    }
+                }
+
+                literalTable.setLengths(vLengths.mid(0, block.nHLIT));
+                distanceTable.setLengths(vLengths.mid(block.nHLIT));
+            }
+
+            // Walk the symbols to the end-of-block marker. Match lengths and
+            // distances are read and discarded: their extra bits have to be
+            // consumed to stay aligned, but the data itself is not wanted.
+            while (true) {
+                const qint32 nSymbol = literalTable.decode(&reader);
+
+                if (nSymbol < 0) {
+                    return QList<BLOCK>();
+                }
+
+                block.nNumberOfSymbols++;
+
+                if (nSymbol == 256) {
+                    break;
+                }
+
+                if (nSymbol > 256) {
+                    const qint32 nLengthIndex = nSymbol - 257;
+
+                    if (nLengthIndex >= 29) {
+                        return QList<BLOCK>();
+                    }
+
+                    reader.readBits(g_nDeflateLengthExtra[nLengthIndex]);
+
+                    const qint32 nDistance = distanceTable.decode(&reader);
+
+                    if ((nDistance < 0) || (nDistance >= 30)) {
+                        return QList<BLOCK>();
+                    }
+
+                    reader.readBits(g_nDeflateDistanceExtra[nDistance]);
+                }
+
+                if (reader.isError()) {
+                    return QList<BLOCK>();
+                }
+            }
+        }
+
+        block.nBitSize = reader.getBitPos() - block.nBitOffset;
+        listResult.append(block);
+
+        if (block.bFinal) {
+            break;
+        }
+
+        if ((nMaxBlocks > 0) && (listResult.count() >= nMaxBlocks)) {
+            break;
+        }
+    }
+
+    return listResult;
+}
+
+XDeflateDecoder::ENCODERINFO XDeflateDecoder::identifyEncoder(const QByteArray &baData)
+{
+    ENCODERINFO result = {};
+    result.encoder = ENCODER_UNKNOWN;
+    result.nSymbolsPerBlock = -1;
+    result.nMemLevel = -1;
+    result.nNumberOfBlocks = 0;
+    result.bReliable = false;
+
+    // Eight blocks is enough to see whether the block size repeats or drifts,
+    // and cheap enough to run over every member of an archive.
+    const QList<BLOCK> listBlocks = getDeflateBlocks(baData, 8);
+
+    if (listBlocks.isEmpty()) {
+        return result;
+    }
+
+    result.nNumberOfBlocks = listBlocks.count();
+
+    // Only a block that was cut short by a full buffer says anything about the
+    // encoder. The last block ends because the input ended, and a stored block
+    // carries no symbols at all, so neither is evidence.
+    QList<qint32> listCounts;
+
+    for (qint32 i = 0; i < listBlocks.count(); i++) {
+        const BLOCK &block = listBlocks.at(i);
+
+        if (block.bFinal || (block.blockType == BLOCKTYPE_STORED)) {
+            continue;
+        }
+
+        listCounts.append(block.nNumberOfSymbols);
+    }
+
+    if (listCounts.isEmpty()) {
+        // A single final block never filled a buffer, so every encoder would
+        // have produced the same layout.
+        return result;
+    }
+
+    result.bReliable = true;
+    result.nSymbolsPerBlock = listCounts.at(0);
+
+    bool bUniform = true;
+    bool bSevenZip = true;
+
+    for (qint32 i = 0; i < listCounts.count(); i++) {
+        const qint32 nCount = listCounts.at(i);
+
+        if (nCount != listCounts.at(0)) {
+            bUniform = false;
+        }
+
+        // 7-Zip's fast modes cut a block at 11264 symbols plus the end-of-block
+        // code, overshooting a little to finish the chunk it is parsing
+        // (11265..11269 measured over -mx=1..5). No zlib buffer size, all of
+        // which are powers of two, falls anywhere in this window.
+        if ((nCount < 11265) || (nCount > 11328)) {
+            bSevenZip = false;
+        }
+    }
+
+    if (bSevenZip) {
+        result.encoder = ENCODER_SEVENZIP;
+        return result;
+    }
+
+    if (bUniform) {
+        const qint32 nCount = listCounts.at(0);
+
+        if (nCount == 32768) {
+            // zlib reaches this at memLevel 9 and Info-ZIP's own deflate uses
+            // the same 32K buffer, so the two cannot be separated on framing.
+            result.encoder = ENCODER_ZLIB_OR_INFOZIP;
+            result.nMemLevel = 9;
+            return result;
+        }
+
+        // zlib ends a block when its literal buffer fills:
+        // lit_bufsize = 1 << (memLevel + 6), for memLevel 1..9.
+        for (qint32 nMemLevel = 1; nMemLevel <= 9; nMemLevel++) {
+            if (nCount == (1 << (nMemLevel + 6))) {
+                result.encoder = ENCODER_ZLIB;
+                result.nMemLevel = nMemLevel;
+                return result;
+            }
+        }
+    }
+
+    // Every zlib-derived encoder flushes at one fixed power-of-two buffer size,
+    // so block sizes that drift, or that are not such a size, rule zlib and
+    // Info-ZIP out. What did produce it cannot be named from framing alone -
+    // 7-Zip above -mx=5, zopfli and libdeflate all parse optimally and choose
+    // block boundaries by cost, which is data-dependent.
+    result.encoder = ENCODER_NOT_ZLIB;
+
+    return result;
+}
+QString XDeflateDecoder::encoderIdToString(ENCODER encoder)
+{
+    QString sResult;
+
+    if (encoder == ENCODER_ZLIB) sResult = QString("zlib");
+    else if (encoder == ENCODER_ZLIB_OR_INFOZIP) sResult = QString("Info-ZIP or zlib(memLevel 9)");
+    else if (encoder == ENCODER_SEVENZIP) sResult = QString("7-Zip");
+    else if (encoder == ENCODER_NOT_ZLIB) sResult = QString("Not zlib/Info-ZIP");
+    else sResult = QString("Unknown");
+
+    return sResult;
+}

@@ -897,7 +897,8 @@ QList<XBinary::XFHEADER> XMSDOS::getXFHeaders(const XFSTRUCT &xfStruct, PDSTRUCT
         xfHeader.xfType = XFTYPE_HEADER;
         xfHeader.listFields = XMSDOS::getXFRecords(xfStruct.fileType, nStructID, headerLoc);
         QList<XFRECORD> listFilteredFields;
-        for (const XFRECORD &record : qAsConst(xfHeader.listFields)) {
+        const QList<XFRECORD> &listHeaderFields = xfHeader.listFields;
+        for (const XFRECORD &record : listHeaderFields) {
             if ((record.nOffset >= 0) && ((qint64)record.nOffset + record.nSize <= nHeaderSize)) {
                 listFilteredFields.append(record);
             }
@@ -928,9 +929,9 @@ QList<XBinary::XFRECORD> XMSDOS::getXFRecords(FT fileType, quint32 nStructID, co
         listResult.append({"e_cblp", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cblp), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
         listResult.append({"e_cp", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cp), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
         listResult.append({"e_crlc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_crlc), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
-        listResult.append({"e_cparhdr", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cparhdr), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
-        listResult.append({"e_minalloc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_minalloc), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
-        listResult.append({"e_maxalloc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_maxalloc), 2, XFRECORD_FLAG_SIZE, VT_UINT16});
+        listResult.append({"e_cparhdr", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_cparhdr), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"e_minalloc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_minalloc), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
+        listResult.append({"e_maxalloc", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_maxalloc), 2, XFRECORD_FLAG_COUNT, VT_UINT16});
         listResult.append({"e_ss", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_ss), 2, XFRECORD_FLAG_NONE, VT_UINT16});
         listResult.append({"e_sp", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_sp), 2, XFRECORD_FLAG_NONE, VT_UINT16});
         listResult.append({"e_csum", (qint32)offsetof(XMSDOS_DEF::IMAGE_DOS_HEADER, e_csum), 2, XFRECORD_FLAG_NONE, VT_UINT16});

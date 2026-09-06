@@ -346,12 +346,17 @@ bool XTARCOMPRESSED::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QV
     UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress);
     if (!operationGuard.isAcquired()) return false;
 
-    qint64 nConfiguredOutputLimit = -1;
-    if (!XBinary::getUnpackOutputLimit(mapProperties, &nConfiguredOutputLimit)) {
+    OUTPUT_POLICY outputPolicy = {};
+    if (!XBinary::resolveUnpackOutputPolicy(mapProperties, &outputPolicy)) {
         return false;
     }
-    guardedArchive->m_nMaterializedOutputLimit =
-        (nConfiguredOutputLimit >= 0) ? qMin(TARCOMPRESSED_MAX_DECOMPRESSED_SIZE, nConfiguredOutputLimit) : TARCOMPRESSED_MAX_DECOMPRESSED_SIZE;
+    guardedArchive->m_nMaterializedOutputLimit = TARCOMPRESSED_MAX_DECOMPRESSED_SIZE;
+    if (outputPolicy.nMaxEntryOutputSize >= 0)
+        guardedArchive->m_nMaterializedOutputLimit = qMin(guardedArchive->m_nMaterializedOutputLimit, outputPolicy.nMaxEntryOutputSize);
+    // Materializing the transport into a QBuffer is an in-memory route even
+    // when the eventual TAR members are extracted to disk.
+    if (outputPolicy.nMaxMemoryOutputSize >= 0)
+        guardedArchive->m_nMaterializedOutputLimit = qMin(guardedArchive->m_nMaterializedOutputLimit, outputPolicy.nMaxMemoryOutputSize);
 
     QPointer<QIODevice> guardedOriginal(guardedArchive->getDevice());
     if (!guardedOriginal || !XBinary::isPdStructNotCanceled(pPdStruct)) {

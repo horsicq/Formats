@@ -97,6 +97,7 @@ public:
     virtual QMap<UNPACK_PROP, QVariant> getDefaultUnpackProperties() override;
     virtual bool initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr) override;
     virtual ARCHIVERECORD infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr) override;
+    virtual bool unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr) override;
     virtual bool moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr) override;
     virtual bool finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr) override;
     virtual QList<FPART_PROP> getAvailableFPARTProperties() override;
@@ -113,7 +114,10 @@ protected:
         qint64 nHeaderOffset;
         qint64 nDataOffset;
         qint64 nFileSize;
+        qint64 nStoredSize;
         qint64 nRecordSize;
+        bool bSparse;
+        QList<QPair<qint64, qint64> > listSparseBlocks;  // Logical offset and stored length; holes are implicit.
         QString sPath;
         QString sLinkPath;
         bool bHasLinkPath;
@@ -135,6 +139,7 @@ private:
     bool _readRecord(qint64 nOffset, qint64 nTotalSize, posix_header *pHeader, qint64 *pFileSize, qint64 *pRecordSize, bool *pIsZeroBlock, PDSTRUCT *pPdStruct,
                      qint64 nSizeOverride = -1);
     bool _collectRecords(qint64 nOffset, qint64 nTotalSize, QList<TAR_RECORD> *pListRecords, qint64 *pEndOffset, PDSTRUCT *pPdStruct);
+    bool _prepareSparseRecord(TAR_RECORD *pRecord, qint64 nTotalSize, PDSTRUCT *pPdStruct);
     bool _scanArchive(qint64 nOffset, qint64 nTotalSize, qint32 *pNumberOfRecords, qint64 *pEndOffset, PDSTRUCT *pPdStruct);
     static bool createHeader(const QString &sFileName, const QString &sBasePath, qint64 nFileSize, quint32 nMode, qint64 nMTime, posix_header *pHeader);
     static quint32 calculateChecksum(const posix_header &header);
