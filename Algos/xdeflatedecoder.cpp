@@ -162,7 +162,7 @@ void *_Cdecl farmalloc(unsigned long nbytes);
 #endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
 #define OS_CODE 7
 #ifndef Z_SOLO
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
@@ -743,7 +743,7 @@ void *_Cdecl farmalloc(unsigned long nbytes);
 #endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
 #define OS_CODE 7
 #ifndef Z_SOLO
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
@@ -2514,7 +2514,7 @@ void *_Cdecl farmalloc(unsigned long nbytes);
 #endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
 #define OS_CODE 7
 #ifndef Z_SOLO
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
@@ -3145,7 +3145,7 @@ void *_Cdecl farmalloc(unsigned long nbytes);
 #endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
 #define OS_CODE 7
 #ifndef Z_SOLO
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
@@ -4988,7 +4988,7 @@ void *_Cdecl farmalloc(unsigned long nbytes);
 #endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
 #define OS_CODE 7
 #ifndef Z_SOLO
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
@@ -5581,7 +5581,7 @@ void *_Cdecl farmalloc(unsigned long nbytes);
 #endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
 #define OS_CODE 7
 #ifndef Z_SOLO
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
@@ -8182,7 +8182,7 @@ void *_Cdecl farmalloc(unsigned long nbytes);
 #endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
 #define OS_CODE 7
 #ifndef Z_SOLO
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
@@ -9098,7 +9098,7 @@ void *_Cdecl farmalloc(unsigned long nbytes);
 #endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
 #define OS_CODE 7
 #ifndef Z_SOLO
 #if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
@@ -9477,6 +9477,13 @@ uLong ZEXPORT adler32_combine64(uLong adler1, uLong adler2, z_off64_t len2)
 #endif
 #ifdef adler32
 #undef adler32
+#endif
+
+#ifdef local
+#undef local
+#endif
+#ifdef fdopen
+#undef fdopen
 #endif
 
 #include "xdeflatedecoder.h"
