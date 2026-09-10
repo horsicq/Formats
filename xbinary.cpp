@@ -892,6 +892,8 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_PAK_DISTILLED, "PAK_DISTILLED", QString("PAK 2.51 Distilled")},
     {XBinary::HANDLE_METHOD_SSM_PICTOOLS5, "SSM_PICTOOLS5", QString("PICTools SSM module compression (method 5)")},
     {XBinary::HANDLE_METHOD_BZIP1, "BZIP1", QString("bzip 0.21 (BWT + MTF + arithmetic coding)")},
+    {XBinary::HANDLE_METHOD_XPAK, "XPAK", QString("XPAK compression (not implemented)")},
+    {XBinary::HANDLE_METHOD_XOR_69, "XOR_69", QString("Humongous 0x69 XOR")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -1259,6 +1261,78 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_EA_REFPACK, "EA_REFPACK", QString("EA RefPack / QFS compressed file")},
     {XBinary::FT_PRINTSHOP_DELUXE, "PRINTSHOP_DELUXE", QString("Print Shop Deluxe install file")},
     {XBinary::FT_FRONTPAGE_THEME, "FRONTPAGE_THEME", QString("FrontPage theme package (.elm)")},
+    {XBinary::FT_CLAY, "CLAY", QString("Clay archive")},
+    {XBinary::FT_ARCFS, "ARCFS", QString("ArcFS (Acorn RISC OS) archive")},
+    {XBinary::FT_CMP_ARCHIVE, "CMP_ARCHIVE", QString("CMP compressed file")},
+    {XBinary::FT_BEOS_PACKAGE, "BEOS_PACKAGE", QString("BeOS SoftwareValet package")},
+    {XBinary::FT_SCL, "SCL", QString("Sinclair TR-DOS SCL image")},
+    {XBinary::FT_COPYQM, "COPYQM", QString("CopyQM disk image")},
+    {XBinary::FT_KBOOM, "KBOOM", QString("KBOOM 1.1 compressed file")},
+    {XBinary::FT_EA_BIG, "EA_BIG", QString("Electronic Arts BIG archive")},
+    {XBinary::FT_FDI, "FDI", QString("FDI floppy image")},
+    {XBinary::FT_PCM, "PCM", QString("PCM floppy image")},
+    {XBinary::FT_POWERARC, "POWERARC", QString("PowerArc (bzip2)")},
+    {XBinary::FT_APRICOT, "APRICOT", QString("ACT Apricot disk image")},
+    {XBinary::FT_CISO, "CISO", QString("CISO compressed ISO")},
+    {XBinary::FT_CLOOP, "CLOOP", QString("Linux cloop image")},
+    {XBinary::FT_AIX_BIGAF, "AIX_BIGAF", QString("AIX big archive")},
+    {XBinary::FT_ROMFS, "ROMFS", QString("romfs filesystem")},
+    {XBinary::FT_CHIEFLZ, "CHIEFLZ", QString("ChiefLZ compressed file")},
+    {XBinary::FT_HA, "HA", QString("HA archive")},
+    {XBinary::FT_CLP, "CLP", QString("Windows Clipboard file")},
+    {XBinary::FT_LIM, "LIM", QString("LIM archive")},
+    {XBinary::FT_AIN, "AIN", QString("AIN archive")},
+    {XBinary::FT_OBFUSCATED_ARCHIVE, "OBFUSCATED", QString("Obfuscated archive")},
+    {XBinary::FT_ULEAD, "ULEAD", QString("ULEAD archive")},
+    {XBinary::FT_TOPSPEED, "TOPSPEED", QString("TopSpeed archive")},
+    {XBinary::FT_TWS, "TWS", QString("TWS archive")},
+    {XBinary::FT_ZZ, "ZZ", QString("ZZ archive")},
+    {XBinary::FT_CRU, "CRU", QString("CRU archive")},
+    {XBinary::FT_SFXGZIP, "SFXGZIP", QString("gzip SFX")},
+    {XBinary::FT_TARX2, "TARX2", QString("TARX 2 archive")},
+    {XBinary::FT_SQX, "SQX", QString("SQX archive")},
+    {XBinary::FT_PAKLEO, "PAKLEO", QString("PAKLEO archive")},
+    {XBinary::FT_TPS, "TPS", QString("TPS archive")},
+    {XBinary::FT_TGCF, "TGCF", QString("TGCF archive")},
+    {XBinary::FT_ZXZIP, "ZXZIP", QString("ZXZIP archive")},
+    {XBinary::FT_IMP, "IMP", QString("IMP archive")},
+    {XBinary::FT_SFPACK, "SFPACK", QString("SFPack SoundFont")},
+    {XBinary::FT_VMARC, "VMARC", QString("VMARC archive")},
+    {XBinary::FT_TERSE, "TERSE", QString("IBM TERSE")},
+    {XBinary::FT_VMDK, "VMDK", QString("VMDK disk image")},
+    {XBinary::FT_PANORAMA, "PANORAMA", QString("Panorama archive")},
+    {XBinary::FT_VMSSAVESET, "VMSSAVESET", QString("VMS BACKUP saveset")},
+    {XBinary::FT_ZIE, "ZIE", QString("ZIE protected ZIP")},
+    {XBinary::FT_TELEDISK, "TELEDISK", QString("TeleDisk disk image")},
+    {XBinary::FT_TEACY, "TEACY", QString("Teacy archive")},
+    {XBinary::FT_X64, "X64", QString("C64 disk image")},
+    {XBinary::FT_CHIEFLZMULTI, "CHIEFLZMULTI", QString("ChiefLZ multi-file archive")},
+    {XBinary::FT_CFL, "CFL", QString("CFL archive")},
+    {XBinary::FT_TNEF, "TNEF", QString("TNEF attachment container")},
+    {XBinary::FT_QDA, "QDA", QString("QDA archive")},
+    {XBinary::FT_DPK, "DPK", QString("DPK archive")},
+    {XBinary::FT_DSL2, "DSL2", QString("DSL 2 archive")},
+    {XBinary::FT_ZLWB, "ZLWB", QString("ZLWB archive")},
+    {XBinary::FT_C64WRAPTOR, "C64WRAPTOR", QString("C64 Wraptor")},
+    {XBinary::FT_VMSDATABASE, "VMSDATABASE", QString("VMS database")},
+    {XBinary::FT_TARX1, "TARX1", QString("TARX archive")},
+    {XBinary::FT_VMSPCSI, "VMSPCSI", QString("VMS PCSI kit")},
+    {XBinary::FT_ZAP, "ZAP", QString("ZAP archive")},
+    {XBinary::FT_TRCPAK, "TRCPAK", QString("TRCPAK archive")},
+    {XBinary::FT_ZZZ, "ZZZ", QString("ZZZ archive")},
+    {XBinary::FT_ZFSF, "ZFSF", QString("ZFSF archive")},
+    {XBinary::FT_TI99ARC, "TI99ARC", QString("TI99 ARC archive")},
+    {XBinary::FT_TARNEXTSTEP, "TARNEXTSTEP", QString("NeXTSTEP tar")},
+    {XBinary::FT_TRDOS, "TRDOS", QString("TR-DOS disk image")},
+    {XBinary::FT_XEDITPACK, "XEDITPACK", QString("XEDIT PACK archive")},
+    {XBinary::FT_ZOOM, "ZOOM", QString("Zoom disk image")},
+    {XBinary::FT_ZCMP, "ZCMP", QString("Zcmp archive")},
+    {XBinary::FT_WINTERSOFT, "WINTERSOFT", QString("Wintersoft archive")},
+    {XBinary::FT_ZPAK, "ZPAK", QString("ZPAK archive")},
+    {XBinary::FT_ZTC, "ZTC", QString("ZTC archive")},
+    {XBinary::FT_TIVOLI, "TIVOLI", QString("Tivoli Filepack")},
+    {XBinary::FT_WPK, "WPK", QString("WPK archive")},
+    {XBinary::FT_TRC, "TRC", QString("TRC archive")},
     {XBinary::FT_SECOND_NATURE, "SECOND_NATURE", QString("Second Nature Software archive")},
     {XBinary::FT_LZPIS2, "LZPIS2", QString("LZPIS2 chunked compressed file")},
     {XBinary::FT_FINEREADER_PACK, "FINEREADER_PACK", QString("FineReader install packed file")},
@@ -1337,6 +1411,14 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_LZDIET, "LZDIET", QString("lZdIeT chunked LZW container")},
     {XBinary::FT_QUALITAS, "QUALITAS", QString("Qualitas 386MAX/BlueMAX install disk")},
     {XBinary::FT_LZV1, "LZV1", QString("LZV1 compressed file")},
+    {XBinary::FT_XPAK, "XPAK", QString("XPAK compressed file")},
+    {XBinary::FT_HE_TLKB, "HE_TLKB", QString("Humongous Entertainment TLKB speech pack")},
+    {XBinary::FT_ORACLE_SQUEEZE, "ORACLE_SQUEEZE", QString("Oracle squeezed file")},
+    {XBinary::FT_ZPAK_SFX, "ZPAK_SFX", QString("ZPAK self-extracting installer")},
+    {XBinary::FT_SYDEX_SFX, "SYDEX_SFX", QString("Sydex self-extracting disk image")},
+    {XBinary::FT_LARC_PFX, "LARC_PFX", QString("LArc PFX self-extracting Atari program")},
+    {XBinary::FT_PCINSTALL_SFX, "PCINSTALL_SFX", QString("PC-Install self-extracting installer")},
+    {XBinary::FT_GENTEE, "GENTEE", QString("Gentee installer")},
     {XBinary::FT_SW, "SW", QString("SGI IRIX inst/swmgr distribution image")},
     {XBinary::FT_SAF, "SAF", QString("Stac Electronics SAF archive")},
     {XBinary::FT_IGF2, "IGF2", QString("IGF installer SETUP.IGF container")},
@@ -1371,6 +1453,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_BORLAND_PACK, "BORLAND_PACK", QString("Borland PACK archive")},
     {XBinary::FT_SQZ, "SQZ", QString("Squeeze It SQZ archive")},
     {XBinary::FT_SQZSFX, "SQZSFX", QString("Squeeze It SQZ SFX")},
+    {XBinary::FT_BSNSFX, "BSNSFX", QString("PTS BSA SFX")},
     {XBinary::FT_RTPATCHSFX, "RTPATCHSFX", QString("RTPatch SFX")},
     {XBinary::FT_AMIGA_ADF, "AMIGA_ADF", QString("AmigaDOS disk image")},
     {XBinary::FT_GODOT_PCK, "GODOT_PCK", QString("Godot PCK package")},
@@ -10868,44 +10951,69 @@ bool XBinary::devicesAlias(QIODevice *pFirstDevice, QIODevice *pSecondDevice)
     return !guardedFirstDevice || !guardedSecondDevice || !guardedFirstRoot || !guardedSecondRoot;
 }
 
-static bool _copyDeviceReadExactAt(qint64 nMax, XBinary::PDSTRUCT *pPdStruct, QIODevice *pDevice, qint64 nOffset, char *pData, qint64 nLength)
+// Both helpers below drive a CALLER-SUPPLIED QIODevice, so every seek()/read()/
+// write() here is an entry point back into caller code, and that code may
+// legitimately destroy the very PDSTRUCT this operation was handed - the
+// progress object is the caller's, not ours.  A QPointer covers the device;
+// nothing covers the PDSTRUCT, so the raw pointer must not be touched again
+// after a callback without asking the retained lifetime token first.  Getting
+// this wrong is invisible in an ordinary build - the freed bytes still read
+// back plausibly and the operation still returns false - and only shows up as
+// an AddressSanitizer heap-use-after-free.  The selftest pins it with
+// "device-copy callback-owned progress destruction", whose ProgressDeletingSeekBuffer
+// deletes the progress object from inside seek().
+//
+// copyDeviceMemory() already retains the token and checks it before every one
+// of its own progress accesses; it passes the same token in rather than having
+// these re-retain it, so there is one source of truth for the owner's liveness.
+static bool _copyDeviceReadExactAt(qint64 nMax, XBinary::PDSTRUCT *pPdStruct, const XBinary::PDSTRUCTLIFETIME &progressLifetime, QIODevice *pDevice, qint64 nOffset,
+                                   char *pData, qint64 nLength)
 {
     if (!pDevice || (nOffset < 0) || (nLength < 0) || ((nLength > 0) && !pData) || (nLength > nMax - nOffset)) {
         return false;
     }
     QPointer<QIODevice> guardedDevice(pDevice);
+    if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) return false;
     qint64 nDone = 0;
     while ((nDone < nLength) && XBinary::isPdStructNotCanceled(pPdStruct)) {
         if (!guardedDevice || (nDone > nMax - nOffset)) return false;
         const bool bSeeked = guardedDevice->seek(nOffset + nDone);
+        if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) return false;
         if (!guardedDevice || !bSeeked) return false;
         const qint64 nRead = guardedDevice->read(pData + nDone, nLength - nDone);
+        if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) return false;
         if (!guardedDevice) return false;
         if ((nRead <= 0) || (nRead > nLength - nDone)) return false;
         nDone += nRead;
     }
-    if (!guardedDevice || (nDone != nLength) || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+    // Device and length first, so a dead owner is never reported as a length
+    // mismatch, and the progress read below is only reached while it is alive.
+    if (!guardedDevice || (nDone != nLength) || !XBinary::isPdStructLifetimeAlive(progressLifetime) || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
     const bool bSeeked = guardedDevice->seek(nOffset + nLength);
     return guardedDevice && bSeeked;
 }
 
-static bool _copyDeviceWriteExactAt(qint64 nMax, XBinary::PDSTRUCT *pPdStruct, QIODevice *pDevice, qint64 nOffset, const char *pData, qint64 nLength)
+static bool _copyDeviceWriteExactAt(qint64 nMax, XBinary::PDSTRUCT *pPdStruct, const XBinary::PDSTRUCTLIFETIME &progressLifetime, QIODevice *pDevice, qint64 nOffset,
+                                    const char *pData, qint64 nLength)
 {
     if (!pDevice || (nOffset < 0) || (nLength < 0) || ((nLength > 0) && !pData) || (nLength > nMax - nOffset)) {
         return false;
     }
     QPointer<QIODevice> guardedDevice(pDevice);
+    if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) return false;
     qint64 nDone = 0;
     while ((nDone < nLength) && XBinary::isPdStructNotCanceled(pPdStruct)) {
         if (!guardedDevice || (nDone > nMax - nOffset)) return false;
         const bool bSeeked = guardedDevice->seek(nOffset + nDone);
+        if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) return false;
         if (!guardedDevice || !bSeeked) return false;
         const qint64 nWritten = guardedDevice->write(pData + nDone, nLength - nDone);
+        if (!XBinary::isPdStructLifetimeAlive(progressLifetime)) return false;
         if (!guardedDevice) return false;
         if ((nWritten <= 0) || (nWritten > nLength - nDone)) return false;
         nDone += nWritten;
     }
-    if (!guardedDevice || (nDone != nLength) || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+    if (!guardedDevice || (nDone != nLength) || !XBinary::isPdStructLifetimeAlive(progressLifetime) || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
     const bool bSeeked = guardedDevice->seek(nOffset + nLength);
     return guardedDevice && bSeeked;
 }
@@ -11010,8 +11118,8 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, Q
         bool bStaged = true;
         while ((nStaged < nSize) && isPdStructLifetimeAlive(progressLifetime) && XBinary::isPdStructNotCanceled(pPdStruct)) {
             const qint64 nChunkSize = qMin(nSize - nStaged, (qint64)nBufferSize);
-            if (!guardedSource || !guardedDestination || !_copyDeviceReadExactAt(nMax, pPdStruct, guardedSource.data(), nSourceOffset + nStaged, pBuffer, nChunkSize) ||
-                !_copyDeviceWriteExactAt(nMax, pPdStruct, pStagingDevice, nStaged, pBuffer, nChunkSize)) {
+            if (!guardedSource || !guardedDestination || !_copyDeviceReadExactAt(nMax, pPdStruct, progressLifetime, guardedSource.data(), nSourceOffset + nStaged, pBuffer, nChunkSize) ||
+                !_copyDeviceWriteExactAt(nMax, pPdStruct, progressLifetime, pStagingDevice, nStaged, pBuffer, nChunkSize)) {
                 bStaged = false;
                 break;
             }
@@ -11044,8 +11152,8 @@ bool XBinary::copyDeviceMemory(QIODevice *pSourceDevice, qint64 nSourceOffset, Q
         const qint64 nChunkSourceOffset = nEffectiveSourceOffset + nProcessed;
         const qint64 nChunkDestOffset = nDestOffset + nProcessed;
 
-        if (!guardedSource || !guardedDestination || !_copyDeviceReadExactAt(nMax, pPdStruct, pEffectiveSourceDevice, nChunkSourceOffset, pBuffer, nChunkSize) ||
-            !_copyDeviceWriteExactAt(nMax, pPdStruct, guardedDestination.data(), nChunkDestOffset, pBuffer, nChunkSize)) {
+        if (!guardedSource || !guardedDestination || !_copyDeviceReadExactAt(nMax, pPdStruct, progressLifetime, pEffectiveSourceDevice, nChunkSourceOffset, pBuffer, nChunkSize) ||
+            !_copyDeviceWriteExactAt(nMax, pPdStruct, progressLifetime, guardedDestination.data(), nChunkDestOffset, pBuffer, nChunkSize)) {
             bResult = false;
             bProgressOwnerAlive = isPdStructLifetimeAlive(progressLifetime);
             break;
@@ -14469,9 +14577,11 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         // whenever both a packer type and its base container are detected.
         FT_ISCAB,
         FT_SPISSFX,
+        FT_GENTEE,
         FT_ARQSFX,
         FT_SQZSFX,
         FT_RTPATCHSFX,
+        FT_BSNSFX,
         FT_SPIS,
         FT_RIB,
         FT_PE64_SETUPFACTORY,
@@ -14684,8 +14794,84 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_EA_REFPACK,
         FT_PRINTSHOP_DELUXE,
         FT_FRONTPAGE_THEME,
+        // ARC5 corpus wave 1. getPrefFileType() answers FT_UNKNOWN for any
+        // type missing from this array, so a class registered everywhere else
+        // still reports "Unknown" if it is left out here.
+        FT_CLAY,
+        FT_ARCFS,
+        FT_CMP_ARCHIVE,
+        FT_BEOS_PACKAGE,
         FT_SECOND_NATURE,
+        FT_SCL,
+        FT_COPYQM,
+        FT_KBOOM,
+        FT_EA_BIG,
+        // ARC5 corpus wave 3.
+        FT_FDI,
+        FT_PCM,
+        FT_POWERARC,
+        FT_APRICOT,
+        FT_CISO,
+        FT_CLOOP,
+        FT_AIX_BIGAF,
+        FT_ROMFS,
         FT_LZPIS2,
+        FT_CHIEFLZ,
+        FT_HA,
+        FT_CLP,
+        FT_LIM,
+        FT_AIN,
+        FT_OBFUSCATED_ARCHIVE,
+        FT_ULEAD,
+        FT_TOPSPEED,
+        FT_TWS,
+        FT_ZZ,
+        FT_CRU,
+        FT_SFXGZIP,
+        FT_TARX2,
+        FT_SQX,
+        FT_PAKLEO,
+        FT_TPS,
+        FT_TGCF,
+        FT_ZXZIP,
+        FT_IMP,
+        FT_SFPACK,
+        FT_VMARC,
+        FT_TERSE,
+        FT_VMDK,
+        FT_PANORAMA,
+        FT_VMSSAVESET,
+        FT_ZIE,
+        FT_TELEDISK,
+        FT_TEACY,
+        FT_X64,
+        FT_CHIEFLZMULTI,
+        FT_CFL,
+        FT_TNEF,
+        FT_QDA,
+        FT_DPK,
+        FT_DSL2,
+        FT_ZLWB,
+        FT_C64WRAPTOR,
+        FT_VMSDATABASE,
+        FT_TARX1,
+        FT_VMSPCSI,
+        FT_ZAP,
+        FT_TRCPAK,
+        FT_ZZZ,
+        FT_ZFSF,
+        FT_TI99ARC,
+        FT_TARNEXTSTEP,
+        FT_TRDOS,
+        FT_XEDITPACK,
+        FT_ZOOM,
+        FT_ZCMP,
+        FT_WINTERSOFT,
+        FT_ZPAK,
+        FT_ZTC,
+        FT_TIVOLI,
+        FT_WPK,
+        FT_TRC,
         FT_FINEREADER_PACK,
         FT_ECM_PACK,
         FT_GST_PACK,
@@ -14762,6 +14948,13 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_LZDIET,
         FT_QUALITAS,
         FT_LZV1,
+        FT_XPAK,
+        FT_HE_TLKB,
+        FT_ORACLE_SQUEEZE,
+        FT_ZPAK_SFX,
+        FT_PCINSTALL_SFX,
+        FT_SYDEX_SFX,
+        FT_LARC_PFX,
         FT_SW,
         FT_SAF,
         FT_IGF2,
@@ -15184,6 +15377,78 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_EA_REFPACK, FT_FLAG_ARCHIVES},
         {FT_PRINTSHOP_DELUXE, FT_FLAG_ARCHIVES},
         {FT_FRONTPAGE_THEME, FT_FLAG_ARCHIVES},
+        {FT_CLAY, FT_FLAG_ARCHIVES},
+        {FT_ARCFS, FT_FLAG_ARCHIVES},
+        {FT_CMP_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_BEOS_PACKAGE, FT_FLAG_ARCHIVES},
+        {FT_SCL, FT_FLAG_ARCHIVES},
+        {FT_COPYQM, FT_FLAG_ARCHIVES},
+        {FT_KBOOM, FT_FLAG_ARCHIVES},
+        {FT_EA_BIG, FT_FLAG_ARCHIVES},
+        {FT_FDI, FT_FLAG_ARCHIVES},
+        {FT_PCM, FT_FLAG_ARCHIVES},
+        {FT_POWERARC, FT_FLAG_ARCHIVES},
+        {FT_APRICOT, FT_FLAG_ARCHIVES},
+        {FT_CISO, FT_FLAG_ARCHIVES},
+        {FT_CLOOP, FT_FLAG_ARCHIVES},
+        {FT_AIX_BIGAF, FT_FLAG_ARCHIVES},
+        {FT_ROMFS, FT_FLAG_ARCHIVES},
+        {FT_CHIEFLZ, FT_FLAG_ARCHIVES},
+        {FT_HA, FT_FLAG_ARCHIVES},
+        {FT_CLP, FT_FLAG_ARCHIVES},
+        {FT_LIM, FT_FLAG_ARCHIVES},
+        {FT_AIN, FT_FLAG_ARCHIVES},
+        {FT_OBFUSCATED_ARCHIVE, FT_FLAG_ARCHIVES},
+        {FT_ULEAD, FT_FLAG_ARCHIVES},
+        {FT_TOPSPEED, FT_FLAG_ARCHIVES},
+        {FT_TWS, FT_FLAG_ARCHIVES},
+        {FT_ZZ, FT_FLAG_ARCHIVES},
+        {FT_CRU, FT_FLAG_ARCHIVES},
+        {FT_SFXGZIP, FT_FLAG_ARCHIVES},
+        {FT_TARX2, FT_FLAG_ARCHIVES},
+        {FT_SQX, FT_FLAG_ARCHIVES},
+        {FT_PAKLEO, FT_FLAG_ARCHIVES},
+        {FT_TPS, FT_FLAG_ARCHIVES},
+        {FT_TGCF, FT_FLAG_ARCHIVES},
+        {FT_ZXZIP, FT_FLAG_ARCHIVES},
+        {FT_IMP, FT_FLAG_ARCHIVES},
+        {FT_SFPACK, FT_FLAG_ARCHIVES},
+        {FT_VMARC, FT_FLAG_ARCHIVES},
+        {FT_TERSE, FT_FLAG_ARCHIVES},
+        {FT_VMDK, FT_FLAG_ARCHIVES},
+        {FT_PANORAMA, FT_FLAG_ARCHIVES},
+        {FT_VMSSAVESET, FT_FLAG_ARCHIVES},
+        {FT_ZIE, FT_FLAG_ARCHIVES},
+        {FT_TELEDISK, FT_FLAG_ARCHIVES},
+        {FT_TEACY, FT_FLAG_ARCHIVES},
+        {FT_X64, FT_FLAG_ARCHIVES},
+        {FT_CHIEFLZMULTI, FT_FLAG_ARCHIVES},
+        {FT_CFL, FT_FLAG_ARCHIVES},
+        {FT_TNEF, FT_FLAG_ARCHIVES},
+        {FT_QDA, FT_FLAG_ARCHIVES},
+        {FT_DPK, FT_FLAG_ARCHIVES},
+        {FT_DSL2, FT_FLAG_ARCHIVES},
+        {FT_ZLWB, FT_FLAG_ARCHIVES},
+        {FT_C64WRAPTOR, FT_FLAG_ARCHIVES},
+        {FT_VMSDATABASE, FT_FLAG_ARCHIVES},
+        {FT_TARX1, FT_FLAG_ARCHIVES},
+        {FT_VMSPCSI, FT_FLAG_ARCHIVES},
+        {FT_ZAP, FT_FLAG_ARCHIVES},
+        {FT_TRCPAK, FT_FLAG_ARCHIVES},
+        {FT_ZZZ, FT_FLAG_ARCHIVES},
+        {FT_ZFSF, FT_FLAG_ARCHIVES},
+        {FT_TI99ARC, FT_FLAG_ARCHIVES},
+        {FT_TARNEXTSTEP, FT_FLAG_ARCHIVES},
+        {FT_TRDOS, FT_FLAG_ARCHIVES},
+        {FT_XEDITPACK, FT_FLAG_ARCHIVES},
+        {FT_ZOOM, FT_FLAG_ARCHIVES},
+        {FT_ZCMP, FT_FLAG_ARCHIVES},
+        {FT_WINTERSOFT, FT_FLAG_ARCHIVES},
+        {FT_ZPAK, FT_FLAG_ARCHIVES},
+        {FT_ZTC, FT_FLAG_ARCHIVES},
+        {FT_TIVOLI, FT_FLAG_ARCHIVES},
+        {FT_WPK, FT_FLAG_ARCHIVES},
+        {FT_TRC, FT_FLAG_ARCHIVES},
         {FT_SECOND_NATURE, FT_FLAG_ARCHIVES},
         {FT_LZPIS2, FT_FLAG_ARCHIVES},
         {FT_FINEREADER_PACK, FT_FLAG_ARCHIVES},
@@ -15262,6 +15527,13 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_LZDIET, FT_FLAG_ARCHIVES},
         {FT_QUALITAS, FT_FLAG_ARCHIVES},
         {FT_LZV1, FT_FLAG_ARCHIVES},
+        {FT_XPAK, FT_FLAG_ARCHIVES},
+        {FT_HE_TLKB, FT_FLAG_ARCHIVES},
+        {FT_ORACLE_SQUEEZE, FT_FLAG_ARCHIVES},
+        {FT_ZPAK_SFX, FT_FLAG_ARCHIVES},
+        {FT_SYDEX_SFX, FT_FLAG_ARCHIVES},
+        {FT_LARC_PFX, FT_FLAG_ARCHIVES},
+        {FT_PCINSTALL_SFX, FT_FLAG_ARCHIVES},
         {FT_SW, FT_FLAG_ARCHIVES},
         {FT_SAF, FT_FLAG_ARCHIVES},
         {FT_IGF2, FT_FLAG_ARCHIVES},
@@ -15297,6 +15569,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_ARQSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_SQZ, FT_FLAG_ARCHIVES},
         {FT_SQZSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_BSNSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_RTPATCHSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_AMIGA_ADF, FT_FLAG_ARCHIVES},
         {FT_GODOT_PCK, FT_FLAG_ARCHIVES},
@@ -15315,6 +15588,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_GPINSTALL_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_SPIS, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_SPISSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_GENTEE, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_INSTALLSHIELD_LAUNCHER, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_IS14_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_MSDOS_COPYQM, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
@@ -23205,13 +23479,34 @@ bool XBinary::isPdStructFinished(PDSTRUCT *pPdStruct)
     return bResult;
 }
 
+// The deadline clock is sampled by isPdStructNotCanceled(), which is the
+// innermost cancellation check of every scan and decode loop in the tree - about
+// sixty million calls for one detection probe of a 34 MB carrier.
+// QDeadlineTimer::current() is backed by QueryPerformanceCounter on Windows and
+// costs ~53 ns per call, so sampling it on every check made an armed probe
+// budget inflate the very work it was timing: +3.1..3.4 s on a 17.1 s listing,
+// paired and interleaved, which is exactly what pushed that listing past the
+// 20 s budget (ISSUE-29).  GetTickCount64() reads the shared user-mode data page
+// instead (~6 ns measured) and its ~16 ms resolution is immaterial against a
+// budget expressed in seconds.  setPdStructDeadline() stores an instant taken
+// from this same function, so both ends of the comparison always share a clock;
+// nDeadlineNSecs is not read anywhere outside this file.
+static qint64 _getDeadlineClockNSecs()
+{
+#ifdef Q_OS_WIN
+    return (qint64)GetTickCount64() * 1000000;
+#else
+    return QDeadlineTimer::current(Qt::PreciseTimer).deadlineNSecs();
+#endif
+}
+
 bool XBinary::isPdStructNotCanceled(PDSTRUCT *pPdStruct)
 {
     if (!pPdStruct) return true;
     if (pPdStruct->bIsStop.loadAcquire()) return false;
 
     const qint64 nDeadlineNSecs = pPdStruct->nDeadlineNSecs.loadAcquire();
-    if ((nDeadlineNSecs > 0) && (QDeadlineTimer::current(Qt::PreciseTimer).deadlineNSecs() >= nDeadlineNSecs)) {
+    if ((nDeadlineNSecs > 0) && (_getDeadlineClockNSecs() >= nDeadlineNSecs)) {
         pPdStruct->bDeadlineExpired.storeRelease(true);
         pPdStruct->bIsStop.storeRelease(true);
         return false;
@@ -23252,9 +23547,17 @@ bool XBinary::setPdStructDeadline(PDSTRUCT *pPdStruct, qint64 nTimeoutMs)
 {
     if (!pPdStruct || (nTimeoutMs < 0) || pPdStruct->bIsStop.loadAcquire()) return false;
 
-    const QDeadlineTimer deadline(nTimeoutMs, Qt::PreciseTimer);
+    // Saturating conversion onto the clock _getDeadlineClockNSecs() reports.
+    // 0 and -1 are the "none" and "disabled" sentinels, so the stored instant
+    // must stay strictly positive.
+    const qint64 nMaxNSecs = (std::numeric_limits<qint64>::max)();
+    const qint64 nSpanNSecs = (nTimeoutMs > (nMaxNSecs / 1000000)) ? nMaxNSecs : (nTimeoutMs * 1000000);
+    const qint64 nNowNSecs = _getDeadlineClockNSecs();
+    qint64 nDeadlineNSecs = (nNowNSecs > (nMaxNSecs - nSpanNSecs)) ? nMaxNSecs : (nNowNSecs + nSpanNSecs);
+    if (nDeadlineNSecs <= 0) nDeadlineNSecs = 1;
+
     pPdStruct->bDeadlineExpired.storeRelease(false);
-    pPdStruct->nDeadlineNSecs.storeRelease(deadline.deadlineNSecs());
+    pPdStruct->nDeadlineNSecs.storeRelease(nDeadlineNSecs);
 
     return true;
 }
@@ -25515,8 +25818,8 @@ static QString _unpAppendDuplicateSuffix(const QString &sName, qint32 nSuffix)
     return sDirectory + sBaseName + sSuffix;
 }
 
-// U3 0079af37..0079afef: prefix the leaf, keeping its extension and directory.
-static QString _unpU3RenameCandidate(const QString &sName, qint32 nAttempt)
+// prefix the leaf, keeping its extension and directory.
+static QString _unpLegacyRenameCandidate(const QString &sName, qint32 nAttempt)
 {
     const qint32 nSlash = sName.lastIndexOf(QLatin1Char('/'));
     return sName.left(nSlash + 1) + QStringLiteral("(%1)").arg(nAttempt) + sName.mid(nSlash + 1);
@@ -25700,7 +26003,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
         // Clearing OVERWRITEFILES alone would otherwise suffix the name when
         // FIXFILENAMES is enabled instead of preserving the on-disk file.
         const bool bSkipExistingFiles = mapEffectiveProperties.value(UNPACK_PROP_SKIPEXISTINGFILES).toBool();
-        const bool bU3Rename = mapEffectiveProperties.value(UNPACK_PROP_U3_RENAME).toBool();
+        const bool bLegacyRename = mapEffectiveProperties.value(UNPACK_PROP_LEGACY_RENAME).toBool();
 
         QString sRootPath = QDir::fromNativeSeparators(QDir(sFolderName).absolutePath());
         QString sCanonicalRoot = QDir::fromNativeSeparators(QFileInfo(sRootPath).canonicalFilePath());
@@ -25874,7 +26177,7 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
 
                         while (!bOutputSelected) {
                             QString sCandidateName = (nSuffix == 1) ? sBaseFileName :
-                                ((bU3Rename && !bIsDirectory) ? _unpU3RenameCandidate(sBaseFileName, nSuffix - 2) :
+                                ((bLegacyRename && !bIsDirectory) ? _unpLegacyRenameCandidate(sBaseFileName, nSuffix - 2) :
                                                              _unpAppendDuplicateSuffix(sBaseFileName, nSuffix));
                             QString sCandidatePath = QDir::cleanPath(QDir(sRootPath).absoluteFilePath(sCandidateName));
 
@@ -25938,8 +26241,8 @@ bool XBinary::unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP,
                             bool bNeedsDifferentName = bUsedByArchive || (bDiskEntryExists && !bOverwriteFiles);
 
                             if (bFixFileNames && bNeedsDifferentName) {
-                                if (bU3Rename && nSuffix >= 1001) {
-                                    // All '(0)'..'(999)' paths exist. U3 skips this
+                                if (bLegacyRename && nSuffix >= 1001) {
+                                    // All '(0)'..'(999)' paths exist. The reference implementation skips this
                                     // member; retain the common no-overwrite transaction.
                                     bSkipFile = true;
                                     sFilePath = sCandidatePath;
@@ -27005,6 +27308,17 @@ QList<QString> XBinary::getSearchSignatures()
         return listResult;
     }
 
+    if (XBinary::checkFileType(FT_HE_TLKB, fileType)) {
+        // 'TLKB' through the container's own 0x69 XOR.
+        listResult.append("3D25222B");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_XPAK, fileType)) {
+        listResult.append("'XPAK'..........................................09FFFE008000040020FF");
+        return listResult;
+    }
+
     if (XBinary::checkFileType(FT_LZV1, fileType)) {
         listResult.append("'LZV1'5D1901AD0000");
         return listResult;
@@ -27095,7 +27409,8 @@ QList<QString> XBinary::getSearchSignatures()
         return listResult;
     }
 
-    if (XBinary::checkFileType(FT_BSN, fileType)) {
+    if (XBinary::checkFileType(FT_BSN, fileType) ||
+        XBinary::checkFileType(FT_BSNSFX, fileType)) {
         listResult.append("FF425347");
         return listResult;
     }

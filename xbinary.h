@@ -307,7 +307,7 @@ public:
         // distinct hash-table decoders because hash slots are the stored codes.
         HANDLE_METHOD_ARC_PACK,     // ARC method 3: run-length only
         HANDLE_METHOD_ARC_SQUEEZE,  // ARC method 4: Huffman + run-length
-        // Original ARC hash-table LZW recovered from U3: method 5 without
+        // Original ARC hash-table LZW reconstructed from the format: method 5 without
         // run-length, method 6 with it. Method 7 uses the appended HASHNEW id.
         HANDLE_METHOD_ARC_CRUNCH_OLD,
         HANDLE_METHOD_ARC_CRUNCH,
@@ -405,7 +405,7 @@ public:
         HANDLE_METHOD_AMPK_LZSS,
         // AMPK method 1: Okumura LZARI (LZSS over an adaptive binary arithmetic coder), N=4096, F=60, THRESHOLD=2, N_CHAR=314, M=15. No existing HANDLE_METHOD decodes it. The coder primes 17 bits, so it reads 1-2 bytes past the member's declared compressedSize; the decoder returns zero bits there by design. Same placement rule as HANDLE_METHOD_AMPK_LZSS: add it to the block's disjunction as well as the else-if.
         HANDLE_METHOD_AMPK_LZARI,
-        // Classic SysV/AIX `pack` Huffman stream in its HEADERLESS form (no 0x1F1E magic, no embedded raw size) - what BFF 0xEA6C members contain. NO NEW ALGORITHM: it is decoded by the already-vendored XAncientPrivate::UnixPackDecoder, reached through XAncientDecoder::TYPE_UNIX_PACK, exactly as HANDLE_METHOD_RNC already reaches XAncientDecoder today, so no new licence boundary. Two central edits: (1) append HANDLE_METHOD_UNIX_PACK at the END of the HANDLE_METHOD enum in _mylibs/Formats/xbinary.h (after HANDLE_METHOD_SSM_PICTOOLS5) so persisted ids do not move; (2) in _mylibs/XArchive/xdecompress.cpp add HANDLE_METHOD_UNIX_PACK to the `||` condition list of the buffered packed/unpacked block (the list around lines 3141-3161 that already carries HANDLE_METHOD_RNC) and add the else-if arm below next to the HANDLE_METHOD_RNC arm (~line 3242). That block's preamble already enforces bUncompressedSizeDefined and buffer-size sanity. Proof this decoder is the right one: I re-implemented its exact table construction independently and the four members of 99_yzpccqpjzspqkion_U471905.bff decode to md5 fcef242d.../3ceb5ed7.../272f2045.../87606c2c..., identical to U3's extraction; the plan's author separately compiled the real in-tree decoder and ran it over all 786 compressed members of the family, ok=786 bad=0. Largest packed member in the corpus is 5,519,197 raw / 4,365,781 packed, well inside XAncientDecoder::MAX_RAW_SIZE (128 MiB).
+        // Classic SysV/AIX `pack` Huffman stream in its HEADERLESS form (no 0x1F1E magic, no embedded raw size) - what BFF 0xEA6C members contain. NO NEW ALGORITHM: it is decoded by the already-vendored XAncientPrivate::UnixPackDecoder, reached through XAncientDecoder::TYPE_UNIX_PACK, exactly as HANDLE_METHOD_RNC already reaches XAncientDecoder today, so no new licence boundary. Two central edits: (1) append HANDLE_METHOD_UNIX_PACK at the END of the HANDLE_METHOD enum in _mylibs/Formats/xbinary.h (after HANDLE_METHOD_SSM_PICTOOLS5) so persisted ids do not move; (2) in _mylibs/XArchive/xdecompress.cpp add HANDLE_METHOD_UNIX_PACK to the `||` condition list of the buffered packed/unpacked block (the list around lines 3141-3161 that already carries HANDLE_METHOD_RNC) and add the else-if arm below next to the HANDLE_METHOD_RNC arm (~line 3242). That block's preamble already enforces bUncompressedSizeDefined and buffer-size sanity. Proof this decoder is the right one: I re-implemented its exact table construction independently and the four members of 99_yzpccqpjzspqkion_U471905.bff decode to md5 fcef242d.../3ceb5ed7.../272f2045.../87606c2c..., identical to the reference implementation's extraction; the plan's author separately compiled the real in-tree decoder and ran it over all 786 compressed members of the family, ok=786 bad=0. Largest packed member in the corpus is 5,519,197 raw / 4,365,781 packed, well inside XAncientDecoder::MAX_RAW_SIZE (128 MiB).
         HANDLE_METHOD_UNIX_PACK,
         // Add the enumerator in xbinary.h next to HANDLE_METHOD_MSZIP_CAB (line ~248). IMPORTANT - xdecompress.cpp needs TWO edits, not one: (1) add `(compressMethod == XBinary::HANDLE_METHOD_ASYMETRIX_BLOCKS) ||` to the whole-buffer method list that opens the `packed`/`unpacked` branch at lines ~3141-3161 (the same chain that contains HANDLE_METHOD_PKWARE_DCL_IMPLODE at line 3151), otherwise the new arm is unreachable and every member falls through to "Unknown compression method"; (2) add the else-if arm below to that branch's dispatch chain, next to the HANDLE_METHOD_PKWARE_DCL_IMPLODE arm at line ~3269. No codec maths is being added: the arm only walks the 6-byte {u16 method, u32 packedLength} block frames, and the PKWARE DCL explode inside XAsymetrixDecoder is a port of the existing decPkwareDcl (xdecompress.cpp:1325), kept local only because that function is static in another TU. Also add Algos/xasymetrixdecoder.h and .cpp to xarchive.pri and xarchive.cmake alongside xasymetrix.h/.cpp.
         HANDLE_METHOD_ASYMETRIX_BLOCKS,
@@ -518,6 +518,82 @@ public:
         HANDLE_METHOD_COREL_LTEC,
         HANDLE_METHOD_EA_REFPACK,
         HANDLE_METHOD_NETWARE_PACK,
+        // ARC5 corpus wave 1 codecs.
+        HANDLE_METHOD_CLAY_LZ,
+        HANDLE_METHOD_ARCFS_PACKED,
+        HANDLE_METHOD_ARCFS_CRUNCHED,
+        HANDLE_METHOD_ARCFS_COMPRESSED,
+        HANDLE_METHOD_CMP_LZW,
+        HANDLE_METHOD_CMP_LZSS,
+        // ARC5 corpus wave 2 codecs.
+        HANDLE_METHOD_SCL_SECTORS,
+        HANDLE_METHOD_COPYQM_RLE,
+        HANDLE_METHOD_KBOOM_LZW,
+        // ARC5 corpus wave 3 codecs.
+        HANDLE_METHOD_APRICOT_RLE,
+        HANDLE_METHOD_CISO_BLOCKS,
+        HANDLE_METHOD_CLOOP_BLOCKS,
+        HANDLE_METHOD_CHIEFLZ,
+        HANDLE_METHOD_HA_HSC,
+        HANDLE_METHOD_HA_ASC,
+        HANDLE_METHOD_LIM,
+        HANDLE_METHOD_AIN,
+        HANDLE_METHOD_DEOBFUSCATE,
+        HANDLE_METHOD_ULEAD,
+        HANDLE_METHOD_TOPSPEED,
+        HANDLE_METHOD_PAKLEO,
+        HANDLE_METHOD_TPS,
+        HANDLE_METHOD_ZXZIP,
+        HANDLE_METHOD_IMP,
+        HANDLE_METHOD_SFPACK,
+        HANDLE_METHOD_SQX,
+        HANDLE_METHOD_VMARC,
+        HANDLE_METHOD_TERSE,
+        HANDLE_METHOD_VMDK,
+        HANDLE_METHOD_SQUASHFS,
+        HANDLE_METHOD_TARX2,
+        HANDLE_METHOD_PANORAMA,
+        HANDLE_METHOD_VMSSAVESET,
+        HANDLE_METHOD_ZIE,
+        HANDLE_METHOD_TELEDISK,
+        HANDLE_METHOD_SZ_LZSS,
+        HANDLE_METHOD_QDA,
+        HANDLE_METHOD_C64WRAPTOR,
+        HANDLE_METHOD_VMSDATABASE,
+        HANDLE_METHOD_TARX1,
+        HANDLE_METHOD_VMSPCSI,
+        HANDLE_METHOD_TI99ARC,
+        HANDLE_METHOD_XEDITPACK,
+        HANDLE_METHOD_ZOOM,
+        HANDLE_METHOD_ZCMP_BLOCKS,
+        HANDLE_METHOD_WINTERSOFT_AHUFF,
+        HANDLE_METHOD_WINTERSOFT_LZW15V,
+        HANDLE_METHOD_ZPAK_DCL,
+        HANDLE_METHOD_ZPAK_LZW,
+        HANDLE_METHOD_ZTC,
+        HANDLE_METHOD_TIVOLI,
+        HANDLE_METHOD_WPK_B,
+        HANDLE_METHOD_WPK_A,
+        // 'XPAK' container payload. Declared with NO decoder on purpose: the
+        // container is understood but its bit-oriented codec is not, and a
+        // record left without a method would be read as HANDLE_METHOD_STORE
+        // and hand back the compressed bytes as if they were the file.
+        HANDLE_METHOD_XPAK,
+        // Humongous Entertainment TLKB obfuscation: a constant 0x69 XOR over
+        // the whole member, length-preserving. Named rather than left at STORE
+        // so the record cannot publish obfuscated bytes as the file.
+        HANDLE_METHOD_XOR_69,
+        // Gentee installer member codec: LZ77 over a 0x8000 window driven by three
+        // ADAPTIVE Huffman trees whose state runs continuously across the members,
+        // so a member is produced only by replaying the members in front of it.
+        // XGentee publishes the member index as FPART_PROP_COMPRESSPROPERTIES and
+        // XGenteeDecoder does that replay itself, which is why the record must NOT
+        // publish FPART_PROP_ISSOLID - that property selects the 7z folder path,
+        // which needs FPART_PROP_STREAMUNPACKEDSIZE or FPART_PROP_SOLIDFOLDERINDEX
+        // and refuses the record without them.  Besides decGenteeWholeBuffer(), it
+        // must also be added to the whole-buffer method list that materialises
+        // packed/unpacked in XDecompress::decompress.
+        HANDLE_METHOD_GENTEE,
 
     };
 
@@ -721,8 +797,8 @@ public:
         UNPACK_PROP_SKIPEXISTINGFILES,
         // Read supported guest filesystems inside virtual disks instead of exporting disk.raw.
         UNPACK_PROP_DISK_FILESYSTEM,
-        // U3 x3 collision style inside the common folder transaction.
-        UNPACK_PROP_U3_RENAME,
+        // Legacy collision-rename style inside the common folder transaction.
+        UNPACK_PROP_LEGACY_RENAME,
         // Expose UU/base64 transport payloads using their declared names.
         UNPACK_PROP_TRANSPORT_ONLY
     };
@@ -1526,7 +1602,7 @@ public:
         FT_VDI,
         FT_QCOW2,
         FT_DISK_DOUBLER_DDAR,
-        // Recovered U3 handler ports; append without renumbering saved types.
+        // Recovered handler ports; append without renumbering saved types.
         FT_VHDX,
         FT_SQLITE,
         FT_CPM_CRUNCH,
@@ -1540,7 +1616,7 @@ public:
         FT_CHM,
         FT_DESCENT_HOG2,
         FT_BOHEMIA_PBO,
-        // ARC4 corpus wave 1: formats U3 handles and XFU did not.
+        // ARC4 corpus wave 1: formats the reference tool handles and XFU did not.
         FT_NETWARE_PACK2,
         FT_IBM_ZPAK,
         FT_NETWARE_PACK,
@@ -1566,9 +1642,9 @@ public:
         FT_LZPIS2,
         FT_PRINTSHOP_DELUXE,
         FT_POWERBOARD_BBS,
-        // ARC4 corpus wave 3 (ported from the recovered U3 handlers).
+        // ARC4 corpus wave 3 (ported from legacy handlers).
         FT_SILMARILS,
-        // ARC4 corpus wave 4 (ported from the recovered U3 handlers).
+        // ARC4 corpus wave 4 (ported from legacy handlers).
         FT_IS11,
         FT_EA,
         FT_SOFTPAQ_2,
@@ -1652,6 +1728,107 @@ public:
         FT_COREL_LTEC,
         FT_EA_REFPACK,
         FT_FRONTPAGE_THEME,
+        // ARC5 corpus wave 1.
+        FT_CLAY,
+        FT_ARCFS,
+        FT_CMP_ARCHIVE,
+        FT_BEOS_PACKAGE,
+        // ARC5 corpus wave 2.
+        FT_SCL,
+        FT_COPYQM,
+        FT_KBOOM,
+        FT_EA_BIG,
+        // ARC5 corpus wave 3.
+        FT_FDI,
+        FT_PCM,
+        FT_POWERARC,
+        FT_APRICOT,
+        FT_CISO,
+        FT_CLOOP,
+        FT_AIX_BIGAF,
+        FT_ROMFS,
+        FT_CHIEFLZ,
+        FT_HA,
+        FT_CLP,
+        FT_LIM,
+        FT_AIN,
+        FT_OBFUSCATED_ARCHIVE,
+        FT_ULEAD,
+        FT_TOPSPEED,
+        FT_TWS,
+        FT_WPK,
+        FT_TIVOLI,
+        FT_ZTC,
+        FT_ZPAK,
+        FT_WINTERSOFT,
+        FT_ZCMP,
+        FT_ZOOM,
+        FT_XEDITPACK,
+        FT_TRDOS,
+        FT_TARNEXTSTEP,
+        FT_TI99ARC,
+        FT_ZFSF,
+        FT_ZZZ,
+        FT_TRCPAK,
+        FT_ZAP,
+        FT_ZZ,
+        FT_CRU,
+        FT_SFXGZIP,
+        FT_TARX2,
+        FT_SQX,
+        FT_PAKLEO,
+        FT_TPS,
+        FT_TGCF,
+        FT_ZXZIP,
+        FT_IMP,
+        FT_SFPACK,
+        FT_VMARC,
+        FT_TERSE,
+        FT_VMDK,
+        FT_PANORAMA,
+        FT_VMSSAVESET,
+        FT_ZIE,
+        FT_TELEDISK,
+        FT_TEACY,
+        FT_X64,
+        FT_CHIEFLZMULTI,
+        FT_CFL,
+        FT_TNEF,
+        FT_QDA,
+        FT_DPK,
+        FT_DSL2,
+        FT_ZLWB,
+        FT_C64WRAPTOR,
+        FT_VMSDATABASE,
+        FT_TARX1,
+        FT_VMSPCSI,
+        FT_TRC,
+        FT_XPAK,
+        FT_HE_TLKB,
+        FT_ORACLE_SQUEEZE,
+        // Gentee installer self-extractor: a PE32 stub whose overlay carries one
+        // adaptive-Huffman block chain.  Appended at the tail so persisted FT
+        // identifiers do not move.
+        FT_GENTEE,
+        // The "-ZPAK" self-extracting installer.  Distinct from FT_IBM_ZPAK,
+        // which is the bare container at offset 0, and from FT_ZPAK.
+        FT_ZPAK_SFX,
+        // Sydex's self-extracting DISK IMAGE ("WB" text stage + "SXD" image).
+        // Not FT_MSDOS_COPYQM, which is the same vendor's TX help screens.
+        FT_SYDEX_SFX,
+        // LArc "PFX" self-extracting Atari ST program: a GEMDOS executable
+        // whose TEXT segment ends in DE AD FA CE and whose DATA segment is one
+        // level-0 "-lz5-" member with an unusable compressed-size field.
+        FT_LARC_PFX,
+        // PC-Install self-extracting installer: a PE32/NE setup stub whose
+        // overlay carries the "[20/20]" container.  Distinct from
+        // FT_PCINSTALL, which is the bare DISK1.BND volume whose record chain
+        // starts at file offset 16.
+        FT_PCINSTALL_SFX,
+        // PTS BSA (".BSN") self-extractor: a DOS MZ stub with the complete BSA
+        // container appended behind the declared executable image. Distinct from
+        // FT_BSN, which is the bare container at offset 0.
+        FT_BSNSFX,
 
     };
 

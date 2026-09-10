@@ -849,6 +849,8 @@ bool XArchive::captureSourceDeviceSnapshot(QIODevice *pDevice, SOURCE_DEVICE_SNA
     snapshot.rootKind = SOURCE_DEVICE_ROOT_UNKNOWN;
     snapshot.nRootSize = -1;
     snapshot.nBufferBackingIdentity = 0;
+    snapshot.nBufferBlockIdentity = 0;
+    snapshot.nBufferBlockSize = -1;
     snapshot.bContentFingerprintRequired = false;
     snapshot.nOwnerDeviceGeneration = nDeviceGeneration;
 
@@ -910,12 +912,40 @@ bool XArchive::captureSourceDeviceSnapshot(QIODevice *pDevice, SOURCE_DEVICE_SNA
         snapshot.rootKind = SOURCE_DEVICE_ROOT_BUFFER;
         snapshot.nBufferBackingIdentity = reinterpret_cast<quintptr>(&guardedBuffer->buffer());
         if (!guardedArchive || !guardedBuffer) return false;
-        // Keep the cheap implicit-shared value here. bindUnpackSource() turns
-        // the retained baseline into an independent byte copy exactly once;
-        // subsequent candidates can then be compared byte-for-byte without
-        // repeatedly applying a cryptographic hash to a large memory buffer.
-        snapshot.baBufferSnapshot = guardedBuffer->buffer();
+        // Take the copy-on-write reference before reading the block address,
+        // so the recorded address is the one the reference pins.  This is an
+        // atomic refcount step, not a byte copy: none of QBuffer::buffer(),
+        // QByteArray's copy constructor, constData() or size() is virtual or
+        // reenters the device.
+        snapshot.baBufferBlockGuard = guardedBuffer->buffer();
         if (!guardedArchive || !guardedBuffer) return false;
+        snapshot.nBufferBlockIdentity = reinterpret_cast<quintptr>(guardedBuffer->buffer().constData());
+        if (!guardedArchive || !guardedBuffer) return false;
+        snapshot.nBufferBlockSize = guardedBuffer->buffer().size();
+        if (!guardedArchive || !guardedBuffer || (snapshot.nBufferBlockSize < 0) || (snapshot.nBufferBlockIdentity == 0)) return false;
+        // The block identity above catches every mutation that goes through a
+        // QByteArray write path, because the retained reference forces those to
+        // reallocate.  It cannot catch a write through a raw char * taken from
+        // the array before that reference existed: such a write moves neither
+        // the address nor the size.  Only a buffer this library made, filled
+        // and sealed is known to have no such pointer aimed at it; a
+        // caller-supplied QBuffer may legally have one, so it is authenticated
+        // by content instead.  See the SOURCE_DEVICE_SNAPSHOT comment.
+        XPrivateSourceBuffer *pPrivateBuffer = dynamic_cast<XPrivateSourceBuffer *>(guardedBuffer.data());
+        if (!guardedArchive || !guardedBuffer) return false;
+        const bool bSealed = (pPrivateBuffer != nullptr) && pPrivateBuffer->isSealed();
+        if (!guardedArchive || !guardedBuffer) return false;
+        snapshot.bBufferSealed = bSealed;
+        if (!bSealed) {
+            // Shallow here on purpose - this is the candidate side, which must
+            // reflect the buffer's CURRENT bytes.  bindUnpackSource() deepens
+            // the baseline copy so that comparing the two actually reads bytes.
+            snapshot.baBufferSnapshot = guardedBuffer->buffer();
+            if (!guardedArchive || !guardedBuffer) return false;
+        }
+        // The byte comparison above (unsealed) or the block identity (sealed)
+        // covers a QBuffer completely, so it never needs the hash that a
+        // generic device does.
         snapshot.bContentFingerprintRequired = false;
     } else if (QFile *pFile = dynamic_cast<QFile *>(pRootDevice)) {
         QPointer<QFile> guardedFile(pFile);
@@ -958,11 +988,23 @@ bool XArchive::captureSourceDeviceSnapshot(QIODevice *pDevice, SOURCE_DEVICE_SNA
     return true;
 }
 
+// Every comparison below is O(1) in the size of the source EXCEPT the
+// baBufferSnapshot one, which is empty - and therefore also O(1) - for every
+// root kind but an unsealed QBuffer.  Keeping it that way matters: this runs on
+// every record operation of every streaming session, so anything proportional
+// to the archive turns listing and extraction of a large source into an
+// O(size x records) walk.  That is exactly what a materialized filter buffer
+// used to pay, and why such a buffer is now a sealed XPrivateSourceBuffer that
+// leaves baBufferSnapshot empty and is matched on block identity instead.  A
+// caller's own QBuffer still pays it, because nothing cheaper can see an
+// in-place write through a raw pointer; see the SOURCE_DEVICE_SNAPSHOT comment.
 static bool archiveSnapshotStructureMatches(const XArchive::SOURCE_DEVICE_SNAPSHOT &snapshot, const XArchive::SOURCE_DEVICE_SNAPSHOT &candidate)
 {
     if ((candidate.pRootDevice.data() != snapshot.pRootDevice.data()) || (candidate.listChain.size() != snapshot.listChain.size()) ||
         (candidate.rootKind != snapshot.rootKind) || (candidate.nRootSize != snapshot.nRootSize) ||
-        (candidate.nBufferBackingIdentity != snapshot.nBufferBackingIdentity) || (candidate.baBufferSnapshot != snapshot.baBufferSnapshot) ||
+        (candidate.nBufferBackingIdentity != snapshot.nBufferBackingIdentity) || (candidate.nBufferBlockIdentity != snapshot.nBufferBlockIdentity) ||
+        (candidate.nBufferBlockSize != snapshot.nBufferBlockSize) || (candidate.bBufferSealed != snapshot.bBufferSealed) ||
+        (candidate.baBufferSnapshot != snapshot.baBufferSnapshot) ||
         (candidate.sFilePath != snapshot.sFilePath) || (candidate.baFilePhysicalIdentity != snapshot.baFilePhysicalIdentity) ||
         (candidate.baFileMutationIdentity != snapshot.baFileMutationIdentity) || (candidate.bContentFingerprintRequired != snapshot.bContentFingerprintRequired) ||
         (candidate.nOwnerDeviceGeneration != snapshot.nOwnerDeviceGeneration)) {
@@ -1030,40 +1072,40 @@ bool XArchive::bindUnpackSource(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
         return false;
     }
 
-    if (snapshot.rootKind == SOURCE_DEVICE_ROOT_BUFFER) {
-        // Establish a non-typed lifetime guard before doing any type query.
-        // qobject_cast() calls virtual metaObject() and is therefore not safe
-        // on an unguarded caller-controlled QBuffer subclass. dynamic_cast has
-        // no device callback; create the typed guard immediately afterwards.
-        QPointer<QIODevice> guardedRoot(snapshot.pRootDevice.data());
-        if (!guardedArchive || !guardedRoot) return false;
-        QBuffer *pBuffer = dynamic_cast<QBuffer *>(guardedRoot.data());
-        QPointer<QBuffer> guardedBuffer(pBuffer);
-        if (!guardedArchive || !guardedRoot || !guardedBuffer) return false;
-
-        // QByteArray's ordinary copy is implicit-shared and a writable pointer
-        // acquired before initialization could mutate both aliases.  Retain an
-        // independent baseline instead.  Candidate snapshots remain shallow,
-        // so QByteArray equality performs an exact byte comparison against
-        // this baseline while avoiding an allocation on every state check.
-        QByteArray baIndependentBaseline;
-        try {
-            const QByteArray &baCurrent = guardedBuffer->buffer();
-            baIndependentBaseline = QByteArray(baCurrent.constData(), baCurrent.size());
-        } catch (const std::bad_alloc &) {
-            return false;
-        }
-        if (!guardedArchive || !guardedBuffer || (guardedArchive->getDeviceGeneration() != snapshot.nOwnerDeviceGeneration) ||
-            (guardedArchive->getDevice() != snapshot.pSourceDevice.data())) {
-            return false;
-        }
-        snapshot.baBufferSnapshot.swap(baIndependentBaseline);
+    // An UNSEALED QBuffer - a buffer supplied or reachable by a caller - is
+    // authenticated by content, so its baseline must stop sharing with the live
+    // buffer: while the two share a block, comparing them matches on the
+    // pointer and would see nothing.  Deepen it here, once per bind, and only
+    // for that case.  A caller may hold a raw char * into its own array and
+    // write through it in place, which moves neither the block address nor the
+    // size, so nothing cheaper than reading the bytes can detect it.
+    if ((snapshot.rootKind == SOURCE_DEVICE_ROOT_BUFFER) && !snapshot.bBufferSealed) {
+        snapshot.baBufferSnapshot = QByteArray(snapshot.baBufferSnapshot.constData(), snapshot.baBufferSnapshot.size());
+        if (!guardedArchive || (snapshot.baBufferSnapshot.size() != snapshot.nBufferBlockSize)) return false;
     }
+
+    // A sealed XPrivateSourceBuffer source needs nothing extra here.
+    // captureSourceDeviceSnapshot()
+    // already retained the copy-on-write reference that pins the backing block
+    // plus that block's address and size, and the retained snapshot below keeps
+    // the reference alive for the whole session.  This function used to build
+    // an independent full-size byte copy of the buffer at this point; it must
+    // not do that again, and neither must it reallocate the buffer to move it
+    // out of reach of older pointers.  Both are O(decoded size), and every
+    // filter format rebinds per record operation - XTARCOMPRESSED constructs a
+    // fresh inner archive and binds it in infoCurrent(), moveToNext() and
+    // unpackCurrent() alike - so a full-buffer copy inside bind() is the same
+    // O(size x records) cost as the byte comparison it would be replacing.
+    // Measured on 127 MB / 1562 members through a gzip filter, listing only:
+    // 2223 s with the byte comparison this replaced, 596 s with a full-buffer
+    // copy in bind() instead of it, 18 s with neither.  The same bytes read
+    // from a file rather than through the filter take 3.2 s in all three.
 
     // Backings without a trustworthy mutation generation get a complete
     // content fingerprint. QFile uses its physical identity plus kernel
-    // last-write/change metadata. QBuffer uses the independent exact-byte
-    // baseline above, including for same-backing raw-pointer writes.
+    // last-write/change metadata. A sealed XPrivateSourceBuffer uses the
+    // pinned backing block captured above, so it needs no fingerprint at all;
+    // any other QBuffer still does.
     QByteArray baFingerprint;
     if (snapshot.bContentFingerprintRequired &&
         (!archiveFingerprintSource(guardedArchive.data(), snapshot, &baFingerprint, pPdStruct) || !guardedArchive || baFingerprint.isEmpty())) {
@@ -1073,8 +1115,8 @@ bool XArchive::bindUnpackSource(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 
     // Assign the expected digest before validation. Generic devices are hashed
     // once more so no read callback can change them between baseline capture
-    // and publication. QBuffer validation compares the independent byte
-    // baseline, and QFile validation is metadata-only.
+    // and publication. Sealed-QBuffer validation compares the pinned block identity,
+    // and QFile validation is metadata-only.
     if (!guardedArchive->isSourceDeviceSnapshotCurrent(snapshot, guardedArchive->getDevice(), pPdStruct) || !guardedArchive ||
         !XBinary::isPdStructNotCanceled(pPdStruct)) {
         return false;
@@ -3729,8 +3771,35 @@ bool XArchive::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT 
     bResult = bResult && guardedArchive && guardedOutput && guardedSource;
     if (bResult) {
         const qint64 nDecodedSize = pWorkDevice->size();
-        bResult = (nDecodedSize >= 0) && (!bExpectedSizeDefined || (nDecodedSize == nExpectedSize)) &&
-                  XBinary::isUnpackOutputSizeAllowed(pState->mapUnpackProperties, nDecodedSize);
+        // HANDLE_METHOD_SZ_LZSS is the one method whose stream may legitimately
+        // stop before the declared size is reached: a Microsoft COMPRESS "SZ "
+        // file carries no end marker and the corpus holds members that were
+        // physically truncated in transit, so running out of input is normal
+        // termination there and the bytes recovered up to that point are the
+        // correct partial result.  Its decoder (XAMPKDecoder::decodeLZSS with
+        // bAllowTruncated, reached only from that method) already refuses
+        // malformed input, so a short buffer here means "the stream ended", not
+        // "the decode went wrong".  Every other method keeps the exact-size
+        // contract, and no method may ever produce MORE than it declared.
+        const bool bAllowShortOutput =
+            (static_cast<XBinary::HANDLE_METHOD>(archiveRecord.mapProperties.value(XBinary::FPART_PROP_HANDLEMETHOD, XBinary::HANDLE_METHOD_UNKNOWN).toUInt()) ==
+             XBinary::HANDLE_METHOD_SZ_LZSS);
+        bool bSizeOK = false;
+        if (nDecodedSize >= 0) {
+            if (!bExpectedSizeDefined) {
+                bSizeOK = true;
+            } else if (bAllowShortOutput) {
+                // Exact stays the norm, so a member that declares nothing still
+                // matches at zero.  A SHORT result is accepted only when the
+                // stream actually produced bytes: a member truncated before its
+                // first token recovers nothing and must fail rather than
+                // publish an empty file.
+                bSizeOK = (nDecodedSize == nExpectedSize) || ((nDecodedSize > 0) && (nDecodedSize < nExpectedSize));
+            } else {
+                bSizeOK = (nDecodedSize == nExpectedSize);
+            }
+        }
+        bResult = bSizeOK && XBinary::isUnpackOutputSizeAllowed(pState->mapUnpackProperties, nDecodedSize);
     }
     if (bResult) {
         bResult = guardedArchive->isSourceDeviceSnapshotCurrent(sourceSnapshot, guardedArchive->getDevice(), pPdStruct);

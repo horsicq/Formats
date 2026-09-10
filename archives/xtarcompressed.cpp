@@ -126,6 +126,56 @@ XTARCOMPRESSED::XTARCOMPRESSED(QIODevice *pDevice) : XTAR(pDevice)
     m_nOuterStreamSize = 0;
     m_outerHandleMethod = HANDLE_METHOD_UNKNOWN;
     m_nMaterializedOutputLimit = TARCOMPRESSED_MAX_DECOMPRESSED_SIZE;
+    m_nMaterializedBlockIdentity = 0;
+    m_nMaterializedBlockSize = 0;
+}
+
+bool XTARCOMPRESSED::captureMaterializedSourceGuard()
+{
+    clearMaterializedSourceGuard();
+
+    // Only a SEALED XPrivateSourceBuffer may be guarded this way: the whole
+    // argument is that this library made the block, filled it and never handed
+    // it out, so the reference below is the only thing that can be sharing it
+    // at capture time.  Every backend produces exactly that - the eight that go
+    // through createMemoryBuffer() and XTAR_GZ, which builds its own - so a
+    // failure here means a new backend broke the contract, and the session must
+    // not start.
+    const XPrivateSourceBuffer *pBuffer = dynamic_cast<const XPrivateSourceBuffer *>(m_pDecompressedData.data());
+    if (!pBuffer || !pBuffer->isSealed()) return false;
+
+    // Take the reference before reading the address, so the recorded address is
+    // the one this reference pins.  Refcount step, not a byte copy.
+    const QByteArray &baBacking = pBuffer->buffer();
+    m_baMaterializedBlockGuard = baBacking;
+    m_nMaterializedBlockIdentity = reinterpret_cast<quintptr>(baBacking.constData());
+    m_nMaterializedBlockSize = baBacking.size();
+
+    if ((m_nMaterializedBlockIdentity == 0) || (m_nMaterializedBlockSize < 0)) {
+        clearMaterializedSourceGuard();
+        return false;
+    }
+
+    return true;
+}
+
+void XTARCOMPRESSED::clearMaterializedSourceGuard()
+{
+    m_baMaterializedBlockGuard = QByteArray();
+    m_nMaterializedBlockIdentity = 0;
+    m_nMaterializedBlockSize = 0;
+}
+
+bool XTARCOMPRESSED::isMaterializedSourceCurrent() const
+{
+    if (m_nMaterializedBlockIdentity == 0) return false;
+
+    const XPrivateSourceBuffer *pBuffer = dynamic_cast<const XPrivateSourceBuffer *>(m_pDecompressedData.data());
+    if (!pBuffer || !pBuffer->isSealed()) return false;
+
+    const QByteArray &baBacking = pBuffer->buffer();
+
+    return (reinterpret_cast<quintptr>(baBacking.constData()) == m_nMaterializedBlockIdentity) && (baBacking.size() == m_nMaterializedBlockSize);
 }
 
 bool XTARCOMPRESSED::isSolidRecordAuthorized() const
@@ -135,6 +185,8 @@ bool XTARCOMPRESSED::isSolidRecordAuthorized() const
 
 XTARCOMPRESSED::~XTARCOMPRESSED()
 {
+    clearMaterializedSourceGuard();
+
     if (m_pDecompressedData) {
         delete m_pDecompressedData.data();
         m_pDecompressedData = nullptr;
@@ -317,6 +369,14 @@ struct TARC_INITUNPACK_FAIL_CONTEXT {
     qint64 *pnOuterStreamOffset;
     qint64 *pnOuterStreamSize;
     XBinary::HANDLE_METHOD *pOuterHandleMethod;
+    // Pointers rather than a call to clearMaterializedSourceGuard(), which is
+    // protected and therefore out of reach of this free function.  Releasing
+    // the reference matters for more than tidiness: it is what stops a failed
+    // init from keeping the whole decompressed image (up to 512 MiB) alive
+    // after the buffer itself has been deleted.
+    QByteArray *pbaMaterializedBlockGuard;
+    quintptr *pnMaterializedBlockIdentity;
+    qint64 *pnMaterializedBlockSize;
 };
 
 static bool tarcFailInitUnpack(TARC_INITUNPACK_FAIL_CONTEXT *pFailContext)
@@ -328,6 +388,9 @@ static bool tarcFailInitUnpack(TARC_INITUNPACK_FAIL_CONTEXT *pFailContext)
         *(pFailContext->pnOuterStreamOffset) = 0;
         *(pFailContext->pnOuterStreamSize) = 0;
         *(pFailContext->pOuterHandleMethod) = XBinary::HANDLE_METHOD_UNKNOWN;
+        *(pFailContext->pbaMaterializedBlockGuard) = QByteArray();
+        *(pFailContext->pnMaterializedBlockIdentity) = 0;
+        *(pFailContext->pnMaterializedBlockSize) = 0;
         (*(pFailContext->pGuardedArchive))->releaseUnpackSource(pFailContext->pState);
         if (guardedDecompressed) delete guardedDecompressed.data();
     }
@@ -373,6 +436,9 @@ bool XTARCOMPRESSED::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QV
     failContext.pnOuterStreamOffset = &m_nOuterStreamOffset;
     failContext.pnOuterStreamSize = &m_nOuterStreamSize;
     failContext.pOuterHandleMethod = &m_outerHandleMethod;
+    failContext.pbaMaterializedBlockGuard = &m_baMaterializedBlockGuard;
+    failContext.pnMaterializedBlockIdentity = &m_nMaterializedBlockIdentity;
+    failContext.pnMaterializedBlockSize = &m_nMaterializedBlockSize;
 
     pState->mapUnpackProperties = mapProperties;
 
@@ -400,6 +466,21 @@ bool XTARCOMPRESSED::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QV
     guardedArchive->m_pDecompressedData = guardedDecompressed;
 
     if (!guardedDecompressed || !guardedOriginal || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+        return tarcFailInitUnpack(&failContext);
+    }
+
+    // Pin the block now, while the buffer is provably still exactly as
+    // decompressData() sealed it and before any record operation has run.  From
+    // here on the block is permanently shared, so the only way for anything to
+    // obtain a writable char * into it is to reallocate it - which moves it off
+    // the address recorded here and is caught by isMaterializedSourceCurrent().
+    const bool bGuardCaptured = guardedArchive->captureMaterializedSourceGuard();
+    if (!guardedArchive) {
+        if (guardedDecompressed) delete guardedDecompressed.data();
+        *pState = UNPACK_STATE();
+        return false;
+    }
+    if (!bGuardCaptured || !guardedDecompressed || !guardedOriginal) {
         return tarcFailInitUnpack(&failContext);
     }
 
@@ -468,7 +549,7 @@ XBinary::ARCHIVERECORD XTARCOMPRESSED::infoCurrent(UNPACK_STATE *pState, PDSTRUC
     }
     QPointer<QIODevice> guardedDecompressed(guardedArchive->m_pDecompressedData);
     QPointer<QIODevice> guardedOriginal(guardedArchive->m_pOriginalDevice);
-    if (!guardedDecompressed || !guardedOriginal) {
+    if (!guardedDecompressed || !guardedOriginal || !guardedArchive->isMaterializedSourceCurrent()) {
         return XBinary::ARCHIVERECORD{};
     }
     XTAR materializedArchive(guardedDecompressed.data());
@@ -577,16 +658,39 @@ QIODevice *XTARCOMPRESSED::getRecordStreamDevice(UNPACK_STATE *pState)
 {
     Q_UNUSED(pState)
 
-    // The TAR structure is parsed out of the private decompressed buffer.  The
-    // outer-stream record shape - the only one whose coordinates are measured
-    // on the original compressed file - is now built exclusively for this
-    // class's own decode (see infoCurrent), so this answer is about that
-    // internal shape; no published record carries an extent on either device.
+    // This method is PUBLIC and hands back a device pointer, so whatever it
+    // names becomes reachable by anyone holding this archive.  It must
+    // therefore never name m_pDecompressedData.  That buffer is the sealed
+    // XPrivateSourceBuffer whose whole security argument is that the library
+    // made it, filled it and never exposes it (see the SOURCE_DEVICE_SNAPSHOT
+    // comment in xarchive.h): publishing the QBuffer * retires that argument,
+    // because QBuffer::buffer() is a non-const accessor and a char * taken
+    // from it between two record operations - when no bind holds the block
+    // shared - aliases the very block the next bind records, so an in-place
+    // write of the same length moves neither address nor size and no identity
+    // check can see it.
+    //
+    // The contract this implements (xbinary.h) is "the device that a PUBLISHED
+    // record's nStreamOffset/nStreamSize address", and answering it costs
+    // nothing here:
+    //
+    //  * With outer-stream coordinates the answer is the original compressed
+    //    device, which is this archive's own getDevice() and already public.
+    //  * Without them - .tar.xz/.tar.bz2/.tar.Z/.tar.lz/.tar.lzo/.tar.lz4/
+    //    .tar.zst/.tar.lzma, and .tar.gz, whose getOuterStreamInfo() returns
+    //    false deliberately - every publicly visible record is an index-paired
+    //    ARCHIVE_STREAM record that carries NO extent at all (see infoCurrent),
+    //    so there is no device against which any published offset resolves.
+    //    nullptr states exactly that.  It is also the fail-closed answer: the
+    //    one caller of this method rejects a coordinate-bearing record whenever
+    //    this disagrees with getDevice(), so should such a record ever be
+    //    published from this branch it is refused rather than silently
+    //    resolved against the compressed container.
     if ((m_nOuterStreamSize > 0) && (m_outerHandleMethod != HANDLE_METHOD_UNKNOWN)) {
         return m_pOriginalDevice.data();
     }
 
-    return m_pDecompressedData.data();
+    return nullptr;
 }
 
 bool XTARCOMPRESSED::getOuterStreamInfo(qint64 &nOuterStreamOffset, qint64 &nOuterStreamSize, HANDLE_METHOD &handleMethod)
@@ -608,7 +712,7 @@ bool XTARCOMPRESSED::moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
     }
     QPointer<QIODevice> guardedDecompressed(guardedArchive->m_pDecompressedData);
     QPointer<QIODevice> guardedOriginal(guardedArchive->m_pOriginalDevice);
-    if (!guardedDecompressed || !guardedOriginal) return false;
+    if (!guardedDecompressed || !guardedOriginal || !guardedArchive->isMaterializedSourceCurrent()) return false;
     XTAR materializedArchive(guardedDecompressed.data());
     UNPACK_STATE materializedState = *pState;
     materializedState.pContext = nullptr;
@@ -640,8 +744,9 @@ bool XTARCOMPRESSED::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDS
     }
     QPointer<QIODevice> guardedOriginal(guardedArchive->m_pOriginalDevice);
     QPointer<QIODevice> guardedDecompressed(guardedArchive->m_pDecompressedData);
-    if (!guardedOriginal || !guardedDecompressed || !guardedOutput->isOpen() || !guardedArchive || !guardedOutput || !guardedOutput->isWritable() || !guardedArchive ||
-        !guardedOutput || guardedOutput->isSequential() || !guardedArchive || !guardedOutput) {
+    if (!guardedOriginal || !guardedDecompressed || !guardedArchive->isMaterializedSourceCurrent() || !guardedArchive || !guardedOutput ||
+        !guardedOutput->isOpen() || !guardedArchive || !guardedOutput || !guardedOutput->isWritable() || !guardedArchive || !guardedOutput ||
+        guardedOutput->isSequential() || !guardedArchive || !guardedOutput) {
         return false;
     }
     const QIODevice::OpenMode outputMode = guardedOutput->openMode();
@@ -725,6 +830,10 @@ bool XTARCOMPRESSED::finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
     guardedArchive->releaseUnpackSource(pState);
     pState->pContext = nullptr;
     delete pContext;
+
+    // Release the block reference before the buffer goes away, so a finished
+    // session holds nothing of the decompressed image.
+    guardedArchive->clearMaterializedSourceGuard();
 
     if (guardedArchive->m_pDecompressedData) {
         QPointer<QIODevice> guardedDecompressed(guardedArchive->m_pDecompressedData);
@@ -821,10 +930,21 @@ QIODevice *XTARCOMPRESSED::createMemoryBuffer(const QByteArray &baData)
         return nullptr;
     }
 
-    QBuffer *pBuffer = new QBuffer();
+    // PRECONDITION: baData must be a fully decoded buffer that the caller is
+    // about to drop and into which nobody holds a raw char *.  Both callers -
+    // decompressByMethod() here and XTAR_BZIP2::decompressData() - satisfy it:
+    // baData is a local of theirs, written solely through a QBuffer, and
+    // destroyed as soon as this returns, so the block below ends up reachable
+    // only through pBuffer.  That is what makes the seal true, and the seal is
+    // what keeps infoCurrent()/moveToNext()/unpackCurrent() from re-comparing
+    // the whole decompressed image on every record - each of them binds a fresh
+    // XTAR over this buffer.  Do not pass an array that outlives this call or
+    // that anything else can write to.
+    XPrivateSourceBuffer *pBuffer = new XPrivateSourceBuffer();
     pBuffer->setData(baData);
+    pBuffer->seal();
 
-    if (!pBuffer->open(QIODevice::ReadOnly)) {
+    if (!pBuffer->isSealed() || !pBuffer->open(QIODevice::ReadOnly)) {
         delete pBuffer;
         return nullptr;
     }

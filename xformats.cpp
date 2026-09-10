@@ -505,6 +505,9 @@ static XBinary *createInstanceArc4(XBinary::FT fileType, QIODevice *pDevice)
     if (XBinary::checkFileType(XBinary::FT_SOLARIS_BOOT, fileType)) return new XSolarisBootArchive(pDevice);
     if (XBinary::checkFileType(XBinary::FT_INFOGRAMES_PAK, fileType)) return new XInfogramesPak(pDevice);
     if (XBinary::checkFileType(XBinary::FT_IBM_ZPAK, fileType)) return new XIBMZPak(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZPAK_SFX, fileType)) return new XZPakSFXArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_SYDEX_SFX, fileType)) return new XSydexSFXArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_PCINSTALL_SFX, fileType)) return new XPCInstallSFX(pDevice);
     if (XBinary::checkFileType(XBinary::FT_QDECK_QIP, fileType)) return new XQuarterdeckQP(pDevice);
     if (XBinary::checkFileType(XBinary::FT_MAXIS_MXS, fileType)) return new XMaxisInstall(pDevice);
     if (XBinary::checkFileType(XBinary::FT_SWAG_PACKET, fileType)) return new XSwagPacket(pDevice);
@@ -592,6 +595,9 @@ static XBinary *createInstanceArc4(XBinary::FT fileType, QIODevice *pDevice)
     if (XBinary::checkFileType(XBinary::FT_LZDIET, fileType)) return new XLZDIET(pDevice);
     if (XBinary::checkFileType(XBinary::FT_QUALITAS, fileType)) return new XQualitas(pDevice);
     if (XBinary::checkFileType(XBinary::FT_LZV1, fileType)) return new XLZV1(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_XPAK, fileType)) return new XXPAKArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_HE_TLKB, fileType)) return new XHETLKB(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ORACLE_SQUEEZE, fileType)) return new XOracleSqueeze(pDevice);
     if (XBinary::checkFileType(XBinary::FT_SW, fileType)) return new XSW(pDevice);
     if (XBinary::checkFileType(XBinary::FT_SAF, fileType)) return new XSAF(pDevice);
     if (XBinary::checkFileType(XBinary::FT_IGF2, fileType)) return new XIGF2(pDevice);
@@ -605,6 +611,78 @@ static XBinary *createInstanceArc4(XBinary::FT fileType, QIODevice *pDevice)
     if (XBinary::checkFileType(XBinary::FT_LOFI, fileType)) return new XLOFI(pDevice);
     if (XBinary::checkFileType(XBinary::FT_SCI, fileType)) return new XSCI(pDevice);
     if (XBinary::checkFileType(XBinary::FT_POWERBOARD_BBS, fileType)) return new XPowerBoardBBS(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CLAY, fileType)) return new XClayArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ARCFS, fileType)) return new XArcFS(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CMP_ARCHIVE, fileType)) return new XCMPArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_BEOS_PACKAGE, fileType)) return new XBeOSPackage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_SCL, fileType)) return new XSCLArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_COPYQM, fileType)) return new XCopyQMArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_KBOOM, fileType)) return new XKBoomArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_EA_BIG, fileType)) return new XBigfArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_FDI, fileType)) return new XFDIImage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_PCM, fileType)) return new XPCMImage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_POWERARC, fileType)) return new XPowerArc(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_APRICOT, fileType)) return new XApricotImage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CISO, fileType)) return new XCisoImage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CLOOP, fileType)) return new XCloopImage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_AIX_BIGAF, fileType)) return new XBigafArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ROMFS, fileType)) return new XRomfsArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CHIEFLZ, fileType)) return new XChiefLZArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_HA, fileType)) return new XHAArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CLP, fileType)) return new XCLPArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_LIM, fileType)) return new XLIMArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_AIN, fileType)) return new XAINArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_OBFUSCATED_ARCHIVE, fileType)) return new XObfuscatedArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ULEAD, fileType)) return new XULEADArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TOPSPEED, fileType)) return new XTopSpeedArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TWS, fileType)) return new XTWSArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZZ, fileType)) return new XZZArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CRU, fileType)) return new XCRUArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_SFXGZIP, fileType)) return new XSFXGzipArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TARX2, fileType)) return new XTARX2Archive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_SQX, fileType)) return new XSQXArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_PAKLEO, fileType)) return new XPAKLEOArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TPS, fileType)) return new XTPSArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TGCF, fileType)) return new XTGCFArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZXZIP, fileType)) return new XZXZIPArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_IMP, fileType)) return new XIMPArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_SFPACK, fileType)) return new XSFPACKArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_VMARC, fileType)) return new XVMARCArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TERSE, fileType)) return new XTERSEArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_VMDK, fileType)) return new XVMDKArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_PANORAMA, fileType)) return new XPanoramaArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_VMSSAVESET, fileType)) return new XVMSSaveSetArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZIE, fileType)) return new XZIEArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TELEDISK, fileType)) return new XTeleDiskArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TEACY, fileType)) return new XTeacyArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_X64, fileType)) return new XX64Archive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CHIEFLZMULTI, fileType)) return new XChiefLZMultiArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_CFL, fileType)) return new XCFLArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TNEF, fileType)) return new XTNEFArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_QDA, fileType)) return new XQDAArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_DPK, fileType)) return new XDPKArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_DSL2, fileType)) return new XDSL2Archive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZLWB, fileType)) return new XZLWBArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_C64WRAPTOR, fileType)) return new XC64WraptorArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_VMSDATABASE, fileType)) return new XVMSDataBaseArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TARX1, fileType)) return new XTARX1Archive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_VMSPCSI, fileType)) return new XVMSPCSIArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZAP, fileType)) return new XZAPArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TRCPAK, fileType)) return new XTRCPAKArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZZZ, fileType)) return new XZZZArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZFSF, fileType)) return new XZFSFArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TI99ARC, fileType)) return new XTI99ARCArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TARNEXTSTEP, fileType)) return new XTarNextStepArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TRDOS, fileType)) return new XTRDOSArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_XEDITPACK, fileType)) return new XXEditPackArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZOOM, fileType)) return new XZoomArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZCMP, fileType)) return new XZcmpArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_WINTERSOFT, fileType)) return new XWintersoftArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZPAK, fileType)) return new XZPAKArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_ZTC, fileType)) return new XZTCArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TIVOLI, fileType)) return new XTivoliArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_WPK, fileType)) return new XWPKArchive(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_TRC, fileType)) return new XTRCArchive(pDevice);
     return nullptr;
 }
 #endif
@@ -630,12 +708,23 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
         default: break;
     }
 #endif
+    // FT_FPAK has two readers: XFpakArchive, which can join a lead .PAK with its
+    // .PA1/.PA2 siblings, and XLegacyStoreArchive, which is single-device.  This
+    // dispatch must precede the USE_ARCHIVE chain below, which would otherwise
+    // hand FPAK to the lesser one.  It is guarded on either define because
+    // XFpakArchive compiles into any build that has XArchive at all — gating it
+    // on USE_STATICUNPACKER alone left it unreachable in USE_ARCHIVE-only
+    // consumers (xbinaryviewer, main_test/formats).
+#if defined(USE_ARCHIVE) || defined(USE_STATICUNPACKER)
+    if (fileType == XBinary::FT_FPAK) return new XFpakArchive(pDevice);
+#endif
 #ifdef USE_STATICUNPACKER
     if (fileType == XBinary::FT_SPISSFX) return new XSpisSFX(pDevice, bIsImage, nModuleAddress);
+    if (fileType == XBinary::FT_GENTEE) return new XGentee(pDevice);
     if (fileType == XBinary::FT_ARQSFX) return new XArqSFX(pDevice, bIsImage, nModuleAddress);
     if (fileType == XBinary::FT_SQZSFX) return new XSqzSFX(pDevice, bIsImage, nModuleAddress);
+    if (fileType == XBinary::FT_BSNSFX) return new XBsnSFX(pDevice, bIsImage, nModuleAddress);
     if (fileType == XBinary::FT_RTPATCHSFX) return new XRTPatchSFX(pDevice, bIsImage, nModuleAddress);
-    if (fileType == XBinary::FT_FPAK) return new XFpakArchive(pDevice);
     if (fileType == XBinary::FT_GZIPSFX) return new XGzipSFX(pDevice, bIsImage, nModuleAddress);
     if (fileType == XBinary::FT_BZIP2SFX) return new XBzip2SFX(pDevice, bIsImage, nModuleAddress);
     if (fileType == XBinary::FT_KWAJSFX) return new XKwajSFX(pDevice, bIsImage, nModuleAddress);
@@ -735,7 +824,24 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
     else if (XBinary::checkFileType(XBinary::FT_APK, fileType)) return new XAPK(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_IPA, fileType)) return new XIPA(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_APKS, fileType)) return new XAPKS(pDevice);
-    else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) return new XGzip(pDevice);
+    else if (XBinary::checkFileType(XBinary::FT_GZIP, fileType)) {
+#ifdef USE_ARCHIVE
+        // GZIP is a filter envelope exactly like BZIP2/XZ/LZMA/ZSTD, which are
+        // routed to the nested adapter further down this chain.  Without the
+        // same routing here a gzip-wrapped archive (.warc.gz, .cpio.gz, ...)
+        // can only ever be one opaque member, because this branch returns
+        // before that one is reached.  The dedicated compressed-TAR readers
+        // keep their priority: FT_TAR_GZ is a distinct file type matched below
+        // and the adapter refuses an outer layer that detects as one.  The
+        // recursion guard is the property XFilteredArchive itself sets while it
+        // asks for the native reader of a gzip layer, so the plain reader stays
+        // reachable from inside it.
+        if (!XFilteredArchive::isRecursionSuppressed(pDevice) && XFilteredArchive::isValid(pDevice, XBinary::FT_GZIP)) {
+            return new XFilteredArchive(pDevice, XBinary::FT_GZIP);
+        }
+#endif
+        return new XGzip(pDevice);
+    }
     else if (XBinary::checkFileType(XBinary::FT_ISO9660, fileType)) return new XISO9660(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MACHOFAT, fileType)) return new XMACHOFat(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_NPM, fileType)) return new XNPM(pDevice);
@@ -857,7 +963,12 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
              XBinary::checkFileType(XBinary::FT_VISE_SFX, fileType) ||
              XBinary::checkFileType(XBinary::FT_FTCOMP, fileType) ||
              XBinary::checkFileType(XBinary::FT_DN_ARCHIVE, fileType) ||
-             XBinary::checkFileType(XBinary::FT_FPAK, fileType) ||
+             // FT_FPAK is NOT listed here: the XFpakArchive dispatch above
+             // returns first in every build that reaches this chain, so naming
+             // it would be dead code claiming a second owner for the format.
+             // XLegacyStoreArchive still DETECTS FPAK - detectFileType() and its
+             // scanFormat() validator stay load-bearing - it just no longer
+             // reads it.
              XBinary::checkFileType(XBinary::FT_SOFTPAQ1_SFX, fileType) ||
              XBinary::checkFileType(XBinary::FT_INSTALIT_SFX, fileType) ||
               XBinary::checkFileType(XBinary::FT_LIF_COMPRESSED, fileType) ||
@@ -905,13 +1016,16 @@ XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bI
         if (XRncArchive::isValid(pDevice, nullptr)) return new XRncArchive(pDevice);
         return new XAncient(pDevice, fileType);
     }
+    else if (XBinary::checkFileType(XBinary::FT_LARC_PFX, fileType)) return new XLArcPfx(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_DMS, fileType) || XBinary::checkFileType(XBinary::FT_PP20, fileType) ||
              XBinary::checkFileType(XBinary::FT_TPWM, fileType) ||
              XBinary::checkFileType(XBinary::FT_FREEZE, fileType) || XBinary::checkFileType(XBinary::FT_UNIX_PACK, fileType))
         return new XAncient(pDevice, fileType);
     else if (XBinary::checkFileType(XBinary::FT_BINHEX, fileType) || XBinary::checkFileType(XBinary::FT_BTOA, fileType))
         return new XLegacyEncoded(pDevice, fileType);
-    else if (XBinary::checkFileType(XBinary::FT_SQUASHFS, fileType)) return new XSquashfs(pDevice);
+    // XSquashfs is a headers/map viewer with no unpack support; the archive
+    // reader offers the same map and file-parts surface and can extract.
+    else if (XBinary::checkFileType(XBinary::FT_SQUASHFS, fileType)) return new XSquashFSArchive(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MINIDUMP, fileType)) return new XMiniDump(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_WARC, fileType)) return new XWARC(pDevice);
     else if (XBinary::checkFileType(XBinary::FT_MTREE, fileType)) return new XMTree(pDevice);
@@ -1208,6 +1322,78 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_EA_REFPACK);
     listResult.append(XBinary::FT_PRINTSHOP_DELUXE);
     listResult.append(XBinary::FT_FRONTPAGE_THEME);
+    listResult.append(XBinary::FT_CLAY);
+    listResult.append(XBinary::FT_ARCFS);
+    listResult.append(XBinary::FT_CMP_ARCHIVE);
+    listResult.append(XBinary::FT_BEOS_PACKAGE);
+    listResult.append(XBinary::FT_SCL);
+    listResult.append(XBinary::FT_COPYQM);
+    listResult.append(XBinary::FT_KBOOM);
+    listResult.append(XBinary::FT_EA_BIG);
+    listResult.append(XBinary::FT_FDI);
+    listResult.append(XBinary::FT_PCM);
+    listResult.append(XBinary::FT_POWERARC);
+    listResult.append(XBinary::FT_APRICOT);
+    listResult.append(XBinary::FT_CISO);
+    listResult.append(XBinary::FT_CLOOP);
+    listResult.append(XBinary::FT_AIX_BIGAF);
+    listResult.append(XBinary::FT_ROMFS);
+    listResult.append(XBinary::FT_CHIEFLZ);
+    listResult.append(XBinary::FT_HA);
+    listResult.append(XBinary::FT_CLP);
+    listResult.append(XBinary::FT_LIM);
+    listResult.append(XBinary::FT_AIN);
+    listResult.append(XBinary::FT_OBFUSCATED_ARCHIVE);
+    listResult.append(XBinary::FT_ULEAD);
+    listResult.append(XBinary::FT_TOPSPEED);
+    listResult.append(XBinary::FT_TWS);
+    listResult.append(XBinary::FT_ZZ);
+    listResult.append(XBinary::FT_CRU);
+    listResult.append(XBinary::FT_SFXGZIP);
+    listResult.append(XBinary::FT_TARX2);
+    listResult.append(XBinary::FT_SQX);
+    listResult.append(XBinary::FT_PAKLEO);
+    listResult.append(XBinary::FT_TPS);
+    listResult.append(XBinary::FT_TGCF);
+    listResult.append(XBinary::FT_ZXZIP);
+    listResult.append(XBinary::FT_IMP);
+    listResult.append(XBinary::FT_SFPACK);
+    listResult.append(XBinary::FT_VMARC);
+    listResult.append(XBinary::FT_TERSE);
+    listResult.append(XBinary::FT_VMDK);
+    listResult.append(XBinary::FT_PANORAMA);
+    listResult.append(XBinary::FT_VMSSAVESET);
+    listResult.append(XBinary::FT_ZIE);
+    listResult.append(XBinary::FT_TELEDISK);
+    listResult.append(XBinary::FT_TEACY);
+    listResult.append(XBinary::FT_X64);
+    listResult.append(XBinary::FT_CHIEFLZMULTI);
+    listResult.append(XBinary::FT_CFL);
+    listResult.append(XBinary::FT_TNEF);
+    listResult.append(XBinary::FT_QDA);
+    listResult.append(XBinary::FT_DPK);
+    listResult.append(XBinary::FT_DSL2);
+    listResult.append(XBinary::FT_ZLWB);
+    listResult.append(XBinary::FT_C64WRAPTOR);
+    listResult.append(XBinary::FT_VMSDATABASE);
+    listResult.append(XBinary::FT_TARX1);
+    listResult.append(XBinary::FT_VMSPCSI);
+    listResult.append(XBinary::FT_ZAP);
+    listResult.append(XBinary::FT_TRCPAK);
+    listResult.append(XBinary::FT_ZZZ);
+    listResult.append(XBinary::FT_ZFSF);
+    listResult.append(XBinary::FT_TI99ARC);
+    listResult.append(XBinary::FT_TARNEXTSTEP);
+    listResult.append(XBinary::FT_TRDOS);
+    listResult.append(XBinary::FT_XEDITPACK);
+    listResult.append(XBinary::FT_ZOOM);
+    listResult.append(XBinary::FT_ZCMP);
+    listResult.append(XBinary::FT_WINTERSOFT);
+    listResult.append(XBinary::FT_ZPAK);
+    listResult.append(XBinary::FT_ZTC);
+    listResult.append(XBinary::FT_TIVOLI);
+    listResult.append(XBinary::FT_WPK);
+    listResult.append(XBinary::FT_TRC);
     listResult.append(XBinary::FT_SECOND_NATURE);
     listResult.append(XBinary::FT_LZPIS2);
     listResult.append(XBinary::FT_FINEREADER_PACK);
@@ -1286,6 +1472,9 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_LZDIET);
     listResult.append(XBinary::FT_QUALITAS);
     listResult.append(XBinary::FT_LZV1);
+    listResult.append(XBinary::FT_XPAK);
+    listResult.append(XBinary::FT_HE_TLKB);
+    listResult.append(XBinary::FT_ORACLE_SQUEEZE);
     listResult.append(XBinary::FT_SW);
     listResult.append(XBinary::FT_SAF);
     listResult.append(XBinary::FT_IGF2);
@@ -1307,6 +1496,10 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_SOLARIS_BOOT);
     listResult.append(XBinary::FT_INFOGRAMES_PAK);
     listResult.append(XBinary::FT_IBM_ZPAK);
+    listResult.append(XBinary::FT_ZPAK_SFX);
+    listResult.append(XBinary::FT_SYDEX_SFX);
+    listResult.append(XBinary::FT_LARC_PFX);
+    listResult.append(XBinary::FT_PCINSTALL_SFX);
     listResult.append(XBinary::FT_QDECK_QIP);
     listResult.append(XBinary::FT_MAXIS_MXS);
     listResult.append(XBinary::FT_SWAG_PACKET);
@@ -1342,9 +1535,11 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_ISCAB);
     listResult.append(XBinary::FT_SPIS);
     listResult.append(XBinary::FT_SPISSFX);
+    listResult.append(XBinary::FT_GENTEE);
     listResult.append(XBinary::FT_ARQSFX);
     listResult.append(XBinary::FT_SQZSFX);
     listResult.append(XBinary::FT_RTPATCHSFX);
+    listResult.append(XBinary::FT_BSNSFX);
     listResult.append(XBinary::FT_RIB);
 #endif
 
@@ -2158,6 +2353,7 @@ bool XFormats::isStaticUnpacker(XBinary::FT fileType)
     // ranges and is the non-PE counterpart used for ELF, Mach-O, and DOS streams.
     return (fileType == XBinary::FT_UPX) || (fileType == XBinary::FT_RIB) || (fileType == XBinary::FT_SPIS) || (fileType == XBinary::FT_SPISSFX) ||
            (fileType == XBinary::FT_ARQSFX) || (fileType == XBinary::FT_SQZSFX) || (fileType == XBinary::FT_RTPATCHSFX) ||
+           (fileType == XBinary::FT_BSNSFX) ||
            (fileType == XBinary::FT_ISCAB) || (fileType == XBinary::FT_ELF32_SFX) ||
            (fileType == XBinary::FT_ELF64_SFX) || (fileType == XBinary::FT_PE32_INSTALLSHIELD) || (fileType == XBinary::FT_PE64_INSTALLSHIELD) ||
            (fileType == XBinary::FT_GZIPSFX) || (fileType == XBinary::FT_BZIP2SFX) || (fileType == XBinary::FT_KWAJSFX) || (fileType == XBinary::FT_SZDDSFX) ||
@@ -2174,6 +2370,7 @@ bool XFormats::isStaticUnpacker(XBinary::FT fileType)
            (fileType == XBinary::FT_PE32_JUGGLOR) ||
            (fileType == XBinary::FT_PE32_PFTW) ||
            (fileType == XBinary::FT_PE64_PFTW) ||
+           (fileType == XBinary::FT_GENTEE) ||
            ((fileType >= XBinary::FT_ARCSFX) && (fileType <= XBinary::FT_ZPAQSFX)) ||
            ((fileType >= XBinary::FT_PE32_ZIPSFX) && (fileType <= XBinary::FT_ELF64_ZPAQSFX)) ||
            ((fileType >= XBinary::FT_PE32_7ZSFX) && (fileType <= XBinary::FT_PE64_WIXBURN));
@@ -2589,6 +2786,26 @@ QSet<XBinary::FT> XFormats::getFileTypesLZIP(QIODevice *pDevice, QList<XArchive:
 #ifdef USE_ARCHIVE
 static bool detectArc4Run1(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct, QSet<XBinary::FT> *pResult)
 {
+    // The "-ZPAK" self-extractor hides its container behind an MZ/NE stub and is
+    // located from a fixed-size trailer, so it costs one 38-byte tail read and
+    // fails immediately on anything that does not name a "-ZPAK" header there.
+    // It sits at the head of this helper instead of in the caller's else-if
+    // chain because that chain is at MSVC's C1061 nesting limit, which is why
+    // this helper exists at all.
+    if (XZPakSFXArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZPAK_SFX);
+        return true;
+    }
+    // Sydex's self-extracting disk image.  The probe is a 0x40-byte DOS header
+    // read plus ten bytes at the DOS image end, and stops at the first of them
+    // that is not "WB": over 74,015 files of F:\ARC and F:\tests (6,987 of them
+    // MZ carriers) it fires on 32 and on nothing else.
+    if (XSydexSFXArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_SYDEX_SFX);
+        return true;
+    }
     if (XMacBinary::isValid(pDevice, pPdStruct)) {
         pResult->insert(XBinary::FT_ARCHIVE);
         pResult->insert(XBinary::FT_MACBINARY);
@@ -2679,6 +2896,16 @@ static bool detectArc4Run1(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct, QSe
         pResult->insert(XBinary::FT_PCINSTALL);
         return true;
     }
+    // The self-extracting shape of the same container.  It MUST be tested
+    // after XPCInstall: a plain DISK1.BND has to keep answering FT_PCINSTALL.
+    // The two cannot both match - XPCInstall demands the record chain at file
+    // offset 16 behind a sixteen-byte volume header, XPCInstallSFX demands it
+    // at <overlay>+8 behind an eight-byte "[20/20]\0" head tag.
+    if (XPCInstallSFX::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_PCINSTALL_SFX);
+        return true;
+    }
     if (XBOO::isValid(pDevice, pPdStruct)) {
         pResult->insert(XBinary::FT_ARCHIVE);
         pResult->insert(XBinary::FT_BOO);
@@ -2717,6 +2944,366 @@ static bool detectArc4Run1(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct, QSe
     if (XFrontPageTheme::isValid(pDevice, pPdStruct)) {
         pResult->insert(XBinary::FT_ARCHIVE);
         pResult->insert(XBinary::FT_FRONTPAGE_THEME);
+        return true;
+    }
+    if (XClayArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CLAY);
+        return true;
+    }
+    if (XArcFS::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ARCFS);
+        return true;
+    }
+    if (XCMPArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CMP_ARCHIVE);
+        return true;
+    }
+    if (XBeOSPackage::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_BEOS_PACKAGE);
+        return true;
+    }
+    if (XSCLArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_SCL);
+        return true;
+    }
+    if (XKBoomArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_KBOOM);
+        return true;
+    }
+    if (XBigfArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_EA_BIG);
+        return true;
+    }
+    if (XFDIImage::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_FDI);
+        return true;
+    }
+    if (XPCMImage::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_PCM);
+        return true;
+    }
+    if (XPowerArc::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_POWERARC);
+        return true;
+    }
+    if (XApricotImage::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_APRICOT);
+        return true;
+    }
+    if (XCisoImage::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CISO);
+        return true;
+    }
+    if (XCloopImage::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CLOOP);
+        return true;
+    }
+    if (XBigafArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_AIX_BIGAF);
+        return true;
+    }
+    if (XRomfsArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ROMFS);
+        return true;
+    }
+    if (XChiefLZArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CHIEFLZ);
+        return true;
+    }
+    if (XHAArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_HA);
+        return true;
+    }
+    if (XCLPArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CLP);
+        return true;
+    }
+    if (XLIMArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_LIM);
+        return true;
+    }
+    if (XAINArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_AIN);
+        return true;
+    }
+    if (XULEADArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ULEAD);
+        return true;
+    }
+    if (XObfuscatedArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_OBFUSCATED_ARCHIVE);
+        return true;
+    }
+    if (XTopSpeedArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TOPSPEED);
+        return true;
+    }
+    if (XTWSArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TWS);
+        return true;
+    }
+    if (XZZArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZZ);
+        return true;
+    }
+    if (XCRUArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CRU);
+        return true;
+    }
+    if (XSFXGzipArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_SFXGZIP);
+        return true;
+    }
+    if (XTARX2Archive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TARX2);
+        return true;
+    }
+    if (XSQXArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_SQX);
+        return true;
+    }
+    if (XPAKLEOArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_PAKLEO);
+        return true;
+    }
+    if (XTPSArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TPS);
+        return true;
+    }
+    if (XTGCFArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TGCF);
+        return true;
+    }
+    if (XZXZIPArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZXZIP);
+        return true;
+    }
+    if (XIMPArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_IMP);
+        return true;
+    }
+    if (XSFPACKArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_SFPACK);
+        return true;
+    }
+    if (XVMARCArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_VMARC);
+        return true;
+    }
+    if (XTERSEArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TERSE);
+        return true;
+    }
+    if (XVMDKArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_VMDK);
+        return true;
+    }
+    if (XPanoramaArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_PANORAMA);
+        return true;
+    }
+    if (XVMSSaveSetArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_VMSSAVESET);
+        return true;
+    }
+    if (XZIEArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZIE);
+        return true;
+    }
+    if (XTeleDiskArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TELEDISK);
+        return true;
+    }
+    if (XTeacyArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TEACY);
+        return true;
+    }
+    if (XX64Archive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_X64);
+        return true;
+    }
+    if (XChiefLZMultiArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CHIEFLZMULTI);
+        return true;
+    }
+    if (XCFLArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_CFL);
+        return true;
+    }
+    if (XTNEFArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TNEF);
+        return true;
+    }
+    if (XQDAArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_QDA);
+        return true;
+    }
+    if (XDPKArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_DPK);
+        return true;
+    }
+    if (XDSL2Archive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_DSL2);
+        return true;
+    }
+    if (XZLWBArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZLWB);
+        return true;
+    }
+    if (XC64WraptorArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_C64WRAPTOR);
+        return true;
+    }
+    if (XVMSDataBaseArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_VMSDATABASE);
+        return true;
+    }
+    if (XTARX1Archive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TARX1);
+        return true;
+    }
+    if (XVMSPCSIArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_VMSPCSI);
+        return true;
+    }
+    if (XZAPArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZAP);
+        return true;
+    }
+    if (XTRCPAKArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TRCPAK);
+        return true;
+    }
+    if (XZZZArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZZZ);
+        return true;
+    }
+    if (XZFSFArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZFSF);
+        return true;
+    }
+    if (XTI99ARCArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TI99ARC);
+        return true;
+    }
+    if (XTarNextStepArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TARNEXTSTEP);
+        return true;
+    }
+    if (XTRDOSArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TRDOS);
+        return true;
+    }
+    if (XXEditPackArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_XEDITPACK);
+        return true;
+    }
+    if (XZoomArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZOOM);
+        return true;
+    }
+    if (XZcmpArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZCMP);
+        return true;
+    }
+    if (XWintersoftArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_WINTERSOFT);
+        return true;
+    }
+    if (XZPAKArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZPAK);
+        return true;
+    }
+    if (XZTCArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_ZTC);
+        return true;
+    }
+    if (XTivoliArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TIVOLI);
+        return true;
+    }
+    if (XWPKArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_WPK);
+        return true;
+    }
+    if (XTRCArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_TRC);
+        return true;
+    }
+    if (XCopyQMArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_COPYQM);
         return true;
     }
     if (XSecondNature::isValid(pDevice, pPdStruct)) {
@@ -3024,6 +3611,16 @@ static bool detectArc4Run1(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct, QSe
         pResult->insert(XBinary::FT_LZDIET);
         return true;
     }
+    if (XHETLKB::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_HE_TLKB);
+        return true;
+    }
+    if (XXPAKArchive::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_XPAK);
+        return true;
+    }
     if (XLZV1::isValid(pDevice, pPdStruct)) {
         pResult->insert(XBinary::FT_ARCHIVE);
         pResult->insert(XBinary::FT_LZV1);
@@ -3277,6 +3874,14 @@ static bool detectArc4Run1(QIODevice *pDevice, XBinary::PDSTRUCT *pPdStruct, QSe
     if (XRncArchive::isValid(pDevice, pPdStruct)) {
         pResult->insert(XBinary::FT_ARCHIVE);
         pResult->insert(XBinary::FT_RNC);
+        return true;
+    }
+    // Only a LArc PFX carrier whose member OVERRUNS the bytes present reaches
+    // this branch; every well-formed LArc/LHarc self-extractor keeps the extent
+    // its header declares and stays on the XSFX/XLHA path.
+    if (XLArcPfx::isValid(pDevice, pPdStruct)) {
+        pResult->insert(XBinary::FT_ARCHIVE);
+        pResult->insert(XBinary::FT_LARC_PFX);
         return true;
     }
     return false;
@@ -3778,6 +4383,15 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
             } else if (isValidDskExpArchive(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_DSKEXP);
+            } else if (XOracleSqueeze::isValid(pDevice, pPdStruct)) {
+                // Ahead of the Deark bridge on purpose.  Deark's "squeeze" module
+                // only knows the classic CP/M header, so on Oracle's variant it
+                // reads an empty name at 0x04, starts decoding four bytes early
+                // and still emits a zero-length member.  XOracleSqueeze refuses
+                // anything that parses as the classic layout, so plain CP/M
+                // Squeeze keeps going to Deark.
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_ORACLE_SQUEEZE);
             } else if (XDearkArchive::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_DEARK_LEGACY_ARCHIVE);
@@ -3907,10 +4521,21 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
                 stResult.insert(XBinary::FT_TAR_Z);
             }
 #ifdef USE_ARCHIVE
+            // The (stResult.size() <= 1) guard below covers only the FIRST link
+            // of this chain.  When it is false control does not skip the chain,
+            // it falls through to the LZMA link - and by then the raw/CUE ISO
+            // block above may already have inserted FT_ISO9660 for a headerless
+            // MODE2/2336 image whose subheader also satisfies the deliberately
+            // permissive five-byte LZMA-alone header probe (properties 0x01,
+            // dictionary 0x01000000).  FT_LZMA outranks FT_ISO9660 in the
+            // preferred-type order, so the authenticated descriptor/root layout
+            // would lose the very election that block exists to win, and the
+            // central decompress route would hand an ISO record to XLZMA.
+            // Repeat the exclusion on the LZMA link itself.
             if ((stResult.size() <= 1) && XTAR_LZMA::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_TAR_LZMA);
-            } else if (XLZMA::isValid(pDevice, pPdStruct)) {
+            } else if (!stResult.contains(XBinary::FT_ISO9660) && XLZMA::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_ARCHIVE);
                 stResult.insert(XBinary::FT_LZMA);
             } else if (XTAR_LZOP::isValid(pDevice, pPdStruct)) {
@@ -4210,6 +4835,22 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
                 XSpisSFX::isValid(pDevice, pPdStruct)) {
                 stResult.insert(XBinary::FT_SPISSFX);
             }
+            // THIS is the registration that makes a PE-carried type reachable.
+            // A Gentee installer is a PE32 stub whose overlay opens with the
+            // runtime block; with no probe here the carrier is reported as a
+            // plain PE32 with no container no matter what else is wired.
+            if (stResult.contains(XBinary::FT_PE) &&
+                XGentee::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_GENTEE);
+            }
+            // THIS is the registration that makes a PE-carried type reachable.
+            // A Gentee installer is a PE32 stub whose overlay opens with the
+            // runtime block; with no probe here the carrier is reported as a
+            // plain PE32 with no container no matter what else is wired.
+            if (stResult.contains(XBinary::FT_PE) &&
+                XGentee::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_GENTEE);
+            }
             if (stResult.contains(XBinary::FT_PE) &&
                 !stResult.contains(XBinary::FT_SPISSFX) &&
                 XLegacyStoreArchive::isValid(pDevice, XBinary::FT_GPINSTALL_SFX, pPdStruct)) {
@@ -4235,6 +4876,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
                 !stResult.contains(XBinary::FT_PE32_JUGGLOR) &&
                 !stResult.contains(XBinary::FT_SPISSFX) &&
                 !stResult.contains(XBinary::FT_GPINSTALL_SFX) &&
+                !stResult.contains(XBinary::FT_GENTEE) &&
                 !stResult.contains(XBinary::FT_INSTALLSHIELD_LAUNCHER)) {
                 {
                     XBurn x(pDevice);
@@ -4387,6 +5029,24 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
                 // suffix is their only inexpensive entry to XUPX's structurally
                 // validated DOS pack-header detector.
                 XUPX x(pDevice);
+                if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
+            }
+            // An LHarc / LArc self-extractor is a raw DOS COM image: it has no
+            // container signature, so FT_COM above is only reached when the
+            // FILE NAME ends in ".COM" and a stub whose extension was lost
+            // never gets to XSFX at all.  XSFX::isLhaSfxStubCarrier recognises
+            // the loader itself (short jump, fixed prologue past its
+            // displacement, method tag at one of four fixed payload offsets)
+            // from at most 1300 bytes.  Measured over the 42,616-file reference
+            // corpus it fires on 436 of 436 "LHARC SFX" carriers, 33 "SFX LHA"
+            // carriers and ZERO files in the other 352 families, so it cannot
+            // take a file away from another format.  It runs AFTER the block
+            // above and is skipped for a PE, so it can never pre-empt an
+            // executable identity that was already established.
+            if (!stResult.contains(XBinary::FT_PE) &&
+                !stResult.contains(XBinary::FT_LHASFX) &&
+                XSFX::isLhaSfxStubCarrier(pDevice, pPdStruct)) {
+                XSFX x(pDevice);
                 if (x.isValid(pPdStruct)) stResult.insert(x.getFileType());
             }
             if (stResult.contains(XBinary::FT_NE) &&

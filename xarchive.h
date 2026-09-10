@@ -31,7 +31,48 @@
 #include "Algos/xbzip2decoder.h"
 #include "Algos/xlzmadecoder.h"
 #include "Algos/xlzssdecoder.h"
+#include <QBuffer>
 #include <QSharedPointer>
+
+// A QBuffer this library allocates, fills once, and never lets anything else
+// address.  Only such a buffer may skip the per-validation content check that
+// captureSourceDeviceSnapshot() otherwise requires for a QBuffer root; see the
+// SOURCE_DEVICE_SNAPSHOT comment for the full argument.
+//
+// seal() is the producer's assertion that the fill is finished and that the
+// backing block is unreachable from outside.  It is only sound for a buffer
+// whose bytes live in QBuffer's OWN internal QByteArray - never one handed an
+// external array through QBuffer(QByteArray *) or setBuffer() - because an
+// external array is exactly what lets somebody hold a raw char * into the
+// block and write through it in place.  Sealing also refuses further
+// QIODevice writes, so the assertion is enforced rather than merely promised.
+class XPrivateSourceBuffer : public QBuffer {
+public:
+    XPrivateSourceBuffer() : QBuffer(), m_bSealed(false)
+    {
+    }
+
+    void seal()
+    {
+        m_bSealed = true;
+    }
+
+    bool isSealed() const
+    {
+        return m_bSealed;
+    }
+
+protected:
+    virtual qint64 writeData(const char *pData, qint64 nMaximumSize) override
+    {
+        if (m_bSealed) return -1;
+        return QBuffer::writeData(pData, nMaximumSize);
+    }
+
+private:
+    Q_DISABLE_COPY(XPrivateSourceBuffer)
+    bool m_bSealed;
+};
 
 class XArchive : public XBinary {
     Q_OBJECT
@@ -56,9 +97,69 @@ public:
     // Immutable description of the device object/backing that was parsed by
     // initUnpack().  QPointers make destroyed caller-owned devices fail closed;
     // the complete SubDevice chain prevents an open wrapper from being
-    // retargeted to another range of the same backing object.  The content
-    // fingerprint also covers same-sized changes, including writes through a
-    // QBuffer raw pointer acquired before the snapshot.
+    // retargeted to another range of the same backing object.  A generic
+    // seekable device, which has neither a backing identity nor a mutation
+    // generation, is still covered by a full content fingerprint.
+    //
+    // A QBuffer has no mutation generation.  A SEALED XPrivateSourceBuffer -
+    // one this library made, filled and never exposed - is covered by
+    // baBufferBlockGuard, nBufferBlockIdentity and nBufferBlockSize together,
+    // and needs no content comparison:
+    //
+    //  * baBufferBlockGuard is a copy-on-write reference to the backing
+    //    QByteArray, held for as long as the snapshot is retained.  While it
+    //    is held the array is shared, so every QByteArray write path -
+    //    data(), operator[](), resize(), squeeze(), append(), setData(),
+    //    setBuffer(), ... - must reallocate rather than write in place, which
+    //    moves the block.  The reference also keeps the old block allocated,
+    //    so no later allocation can be handed the address that was recorded.
+    //  * nBufferBlockIdentity/nBufferBlockSize record that block's address and
+    //    length.  Comparing them is O(1) and, because of the reference above,
+    //    a mismatch is exactly "somebody wrote to this buffer".
+    //
+    // For a sealed buffer those replace the byte-for-byte comparison this
+    // structure used to carry unconditionally, which cost O(decoded size) on
+    // every single record operation - hours instead of seconds on a large
+    // filter-backed archive.  Do not extend the sealed shortcut to an unsealed
+    // buffer, and do not reallocate the buffer in bindUnpackSource() to get out
+    // of reach of pointers taken before it: every filter format rebinds once
+    // per record operation, so anything O(decoded size) in a bind or a
+    // validation puts the O(size x records) cost straight back.
+    //
+    // What that leaves uncovered is one case: a raw char * taken from the
+    // backing array before this snapshot existed, written through in place.
+    // Address and size do not move, so only reading the bytes can see it.
+    //
+    // That case is exactly why the identity-only path is restricted to a
+    // sealed XPrivateSourceBuffer, whose backing block provably has no such
+    // pointer into it.  ANY OTHER QBuffer root - including every QBuffer a
+    // caller supplies - instead keeps baBufferSnapshot, an independent deep
+    // copy taken in bindUnpackSource() and compared byte for byte on every
+    // validation, because a caller may legally hold a char * from its own
+    // QByteArray and write through it.  That is the original mechanism,
+    // deliberately unchanged for callers' own buffers.
+    //
+    // Keeping it costs effectively NOTHING, so there is no performance case for
+    // removing it again.  An A/B of this file against the identity-only-for-all
+    // variant over the whole 42,616-file ARC corpus found ZERO differences in
+    // exit code, record count, listing hash or timeout, and zero differences in
+    // extracted file count, byte count or content hash over the 5,226 files of
+    // the 55 buffer-rooted families - at 0.97-1.00x the time, measured PAIRED
+    // (both binaries back to back per file).  The reason is simply that almost
+    // nothing reaches an unsealed QBuffer root: the formats that made this
+    // quadratic all materialize sealed buffers now.  An earlier unpaired sweep
+    // appeared to show a 1.18x corpus cost and named five slow families; that
+    // was contention artifact and is retracted - none of those five even has a
+    // QBuffer that becomes a bound source root.
+    //
+    // Do not swap the comparison for a QCryptographicHash either: SHA-256 over
+    // the same bytes through safeReadData ran the selftest in >800 s against
+    // 47-79 s for the comparison.  Do not widen the identity-only path to
+    // unsealed buffers to buy speed: the installer_corpus selftest pins this
+    // behaviour with "TAR retained raw-QBuffer mutation rejection" and
+    // "materialized source guard mutation/ownership lifecycle", both of which
+    // perform precisely that same-size in-place raw write and require it to be
+    // rejected.
     struct SOURCE_DEVICE_SNAPSHOT {
         QPointer<QIODevice> pSourceDevice;
         QPointer<QIODevice> pRootDevice;
@@ -66,6 +167,31 @@ public:
         SOURCE_DEVICE_ROOT_KIND rootKind;
         qint64 nRootSize;
         quintptr nBufferBackingIdentity;
+        quintptr nBufferBlockIdentity;
+        qint64 nBufferBlockSize;
+        QByteArray baBufferBlockGuard;
+        // Whether the root was a SEALED XPrivateSourceBuffer when this snapshot
+        // was taken.  Recorded rather than re-derived so the matcher below
+        // rejects a buffer that gets sealed part way through a session: sealing
+        // selects the cheap identity-only check, and flipping into it mid-flight
+        // would otherwise retire the byte comparison the session started under.
+        // No default member initializer here - that would stop this struct being
+        // an aggregate and break the "= {}" initializations of it.
+        bool bBufferSealed;
+        // Unsealed QBuffer roots only: an independent deep copy of the backing
+        // bytes, so comparing it against a freshly captured (still shared)
+        // candidate is a real byte comparison rather than a pointer match.
+        // Empty for every other root kind, which keeps the comparison O(1).
+        //
+        // HISTORY, so this is not "cleaned up" a second time: this member was
+        // deleted outright and renamed to baBufferBlockGuard precisely so the
+        // byte comparison could not be reinstated.  That went too far.  The pin
+        // plus block identity does cover all SEVEN QByteArray-API mutation
+        // routes, but not the eighth - a raw char * taken before the pin and
+        // written through in place - and two selftests already required that
+        // one to be rejected.  It is therefore back, but ONLY for unsealed
+        // buffers; the materialized filter/tar buffers that made it quadratic
+        // are XPrivateSourceBuffers and never populate it.
         QByteArray baBufferSnapshot;
         QString sFilePath;
         QByteArray baFilePhysicalIdentity;

@@ -96,7 +96,16 @@ QIODevice *XTAR_GZ::decompressData(PDSTRUCT *pPdStruct)
         gzip.finishUnpack(&state, nullptr);
         return nullptr;
     }
-    std::unique_ptr<QBuffer> result(new (std::nothrow) QBuffer());
+    // XPrivateSourceBuffer, not QBuffer: this is the decompressed image that
+    // XTARCOMPRESSED keeps as m_pDecompressedData and rebinds a fresh XTAR over
+    // on every record operation.  It decodes into QBuffer's own internal array
+    // and is never exposed, so sealing it below lets each of those binds
+    // authenticate it by block identity instead of re-comparing the whole image
+    // byte for byte - the difference between linear and quadratic listing time.
+    // The other
+    // XTARCOMPRESSED backends get the same treatment through
+    // createMemoryBuffer(); this one materializes its buffer itself.
+    std::unique_ptr<XPrivateSourceBuffer> result(new (std::nothrow) XPrivateSourceBuffer());
     if (!result || !result->open(QIODevice::ReadWrite)) {
         gzip.finishUnpack(&state, nullptr);
         return nullptr;
@@ -105,6 +114,10 @@ QIODevice *XTAR_GZ::decompressData(PDSTRUCT *pPdStruct)
     const bool bFinished = gzip.finishUnpack(&state, nullptr);
     if (!guardedThis || !source || !bDecoded || !bFinished || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime)) ||
         !XBinary::isPdStructNotCanceled(pPdStruct) || (result->size() <= 0) || (result->size() > nOutputLimit) || !result->seek(0)) return nullptr;
+    // The decode is complete and every byte came from here; nothing writes to
+    // this buffer again.  Seal before it can be snapshotted.
+    result->seal();
+    if (!result->isSealed()) return nullptr;
     return result.release();
 }
 

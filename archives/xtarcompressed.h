@@ -75,6 +75,42 @@ protected:
     HANDLE_METHOD m_outerHandleMethod;
     qint64 m_nMaterializedOutputLimit;
 
+    // Session-long copy-on-write reference to m_pDecompressedData's backing
+    // block, plus the address and length that reference pins.  This is the
+    // enforcement of the seal that createMemoryBuffer()/XTAR_GZ::decompressData()
+    // merely assert, and it costs one refcount and two integer compares - never
+    // a byte copy - so it does not reintroduce the O(size x records) walk that
+    // the sealed-buffer shortcut exists to avoid.
+    //
+    // Why session-long and not per record operation: infoCurrent(),
+    // moveToNext() and unpackCurrent() each bind a FRESH inner XTAR over this
+    // buffer and release it again, so the XArchive snapshot that pins the block
+    // exists only inside one operation.  Between two operations the block is
+    // unshared, which is precisely when QBuffer::buffer().data() hands out a
+    // raw char * that does NOT detach - one aliasing the very block the next
+    // bind will record as its baseline.  An in-place write through it moves
+    // neither the address nor the size, so the per-operation identity check
+    // cannot see it.  Holding the reference for the whole session removes that
+    // window: the block is permanently shared, so data() must reallocate, which
+    // moves the address away from the one recorded here and is rejected on the
+    // next operation.
+    //
+    // m_nMaterializedBlockIdentity == 0 means "no guard held"; the size is only
+    // meaningful alongside a non-zero identity.
+    QByteArray m_baMaterializedBlockGuard;
+    quintptr m_nMaterializedBlockIdentity;
+    qint64 m_nMaterializedBlockSize;
+
+    // Pin the materialized buffer's block and record its identity.  Fails
+    // unless m_pDecompressedData really is a sealed XPrivateSourceBuffer, which
+    // turns createMemoryBuffer()'s PRECONDITION into a checked one for every
+    // present and future backend.
+    bool captureMaterializedSourceGuard();
+    void clearMaterializedSourceGuard();
+    // O(1) counterpart of XArchive's per-bind block-identity check, evaluated
+    // across operation boundaries rather than within one operation.
+    bool isMaterializedSourceCurrent() const;
+
     // Override in derived classes to provide the outer compressed-stream location.
     // Returns false when the information is not available (keeps legacy zero behaviour).
     virtual bool getOuterStreamInfo(qint64 &nOuterStreamOffset, qint64 &nOuterStreamSize, HANDLE_METHOD &handleMethod);
