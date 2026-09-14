@@ -843,6 +843,7 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_KWAJ_MSZIP, "KWAJ_MSZIP", QString("KWAJ MSZIP")},
     {XBinary::HANDLE_METHOD_ARC_PACK, "ARC_PACK", QString("ARC packed")},
     {XBinary::HANDLE_METHOD_ARC_SQUEEZE, "ARC_SQUEEZE", QString("ARC squeezed")},
+    {XBinary::HANDLE_METHOD_SOFTRONICS_LZW, "SOFTRONICS_LZW", QString("Softronics LZW")},
     {XBinary::HANDLE_METHOD_ARC_CRUNCH_OLD, "ARC_CRUNCH_OLD", QString("ARC crunched (old)")},
     {XBinary::HANDLE_METHOD_ARC_CRUNCH, "ARC_CRUNCH", QString("ARC crunched")},
     {XBinary::HANDLE_METHOD_ARC_CRUNCH_HASHNEW, "ARC_CRUNCH_HASHNEW", QString("ARC crunched (new hash)")},
@@ -894,6 +895,14 @@ XBinary::XCONVERT _TABLE_XBINARY_HANDLE_METHOD[] = {
     {XBinary::HANDLE_METHOD_BZIP1, "BZIP1", QString("bzip 0.21 (BWT + MTF + arithmetic coding)")},
     {XBinary::HANDLE_METHOD_XPAK, "XPAK", QString("XPAK compression (not implemented)")},
     {XBinary::HANDLE_METHOD_XOR_69, "XOR_69", QString("Humongous 0x69 XOR")},
+    {XBinary::HANDLE_METHOD_ISSETUPSTREAM, "ISSETUPSTREAM", QString("InstallShield ISSetupStream name-keyed filter")},
+    {XBinary::HANDLE_METHOD_SBX_LZHUF, "SBX_LZHUF", QString("SBX LZHUF (F=60, THRESHOLD=2)")},
+    {XBinary::HANDLE_METHOD_BWCF_LZHUF, "BWCF_LZHUF", QString("BWCF LZHUF (F=60, THRESHOLD=2)")},
+    {XBinary::HANDLE_METHOD_CHARC, "CHARC", QString("ChArc order-1 context LZ77 + static Huffman")},
+    {XBinary::HANDLE_METHOD_NINTENDO_LZ10, "NINTENDO_LZ10", QString("Nintendo LZ77 (LZ10)")},
+    {XBinary::HANDLE_METHOD_NINTENDO_LZ11, "NINTENDO_LZ11", QString("Nintendo LZ77 (LZ11)")},
+    {XBinary::HANDLE_METHOD_ASH0, "ASH0", QString("Nintendo ASH0 (Huffman + LZ)")},
+    {XBinary::HANDLE_METHOD_ADC, "ADC", QString("ADC")},
 };
 
 XBinary::XCONVERT _TABLE_XBinary_FILEPART[] = {
@@ -1181,6 +1190,12 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_UNIX_PACK, "UNIX_PACK", QString("Unix Pack compression")},
     {XBinary::FT_BINHEX, "BINHEX", QString("BinHex 4.0")},
     {XBinary::FT_BTOA, "BTOA", QString("xbtoa/Base85")},
+    {XBinary::FT_YENC, "YENC", QString("yEnc encoded data")},
+    {XBinary::FT_QT_QM, "QT_QM", QString("Qt compiled translation")},
+    {XBinary::FT_EML, "EML", QString("E-mail message (RFC 822/MIME)")},
+    {XBinary::FT_MHTML, "MHTML", QString("MIME HTML archive")},
+    {XBinary::FT_MBOX, "MBOX", QString("Unix mailbox")},
+    {XBinary::FT_GETTEXT_MO, "GETTEXT_MO", QString("GNU gettext message catalog")},
     {XBinary::FT_APPLE_2IMG, "APPLE_2IMG", QString("Apple II 2IMG disk image")},
     {XBinary::FT_WINTERMUTE_DCP, "WINTERMUTE_DCP", QString("Wintermute Engine package")},
     {XBinary::FT_PYINSTALLER_PYZ, "PYINSTALLER_PYZ", QString("PyInstaller PYZ archive")},
@@ -1268,6 +1283,8 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_SCL, "SCL", QString("Sinclair TR-DOS SCL image")},
     {XBinary::FT_COPYQM, "COPYQM", QString("CopyQM disk image")},
     {XBinary::FT_KBOOM, "KBOOM", QString("KBOOM 1.1 compressed file")},
+    {XBinary::FT_LZWD, "LZWD", QString("HP NewWave LZW compressed file")},
+    {XBinary::FT_EDC_PACKED, "EDC_PACKED", QString("EDC packed file")},
     {XBinary::FT_EA_BIG, "EA_BIG", QString("Electronic Arts BIG archive")},
     {XBinary::FT_FDI, "FDI", QString("FDI floppy image")},
     {XBinary::FT_PCM, "PCM", QString("PCM floppy image")},
@@ -1282,6 +1299,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_CLP, "CLP", QString("Windows Clipboard file")},
     {XBinary::FT_LIM, "LIM", QString("LIM archive")},
     {XBinary::FT_AIN, "AIN", QString("AIN archive")},
+    {XBinary::FT_ESP, "ESP", QString("ESP archive")},
     {XBinary::FT_OBFUSCATED_ARCHIVE, "OBFUSCATED", QString("Obfuscated archive")},
     {XBinary::FT_ULEAD, "ULEAD", QString("ULEAD archive")},
     {XBinary::FT_TOPSPEED, "TOPSPEED", QString("TopSpeed archive")},
@@ -1312,6 +1330,8 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_QDA, "QDA", QString("QDA archive")},
     {XBinary::FT_DPK, "DPK", QString("DPK archive")},
     {XBinary::FT_DSL2, "DSL2", QString("DSL 2 archive")},
+    {XBinary::FT_BWF, "BWF", QString("Beame & Whiteside distribution file")},
+    {XBinary::FT_BWCF, "BWCF", QString("BWCF distribution set")},
     {XBinary::FT_ZLWB, "ZLWB", QString("ZLWB archive")},
     {XBinary::FT_C64WRAPTOR, "C64WRAPTOR", QString("C64 Wraptor")},
     {XBinary::FT_VMSDATABASE, "VMSDATABASE", QString("VMS database")},
@@ -1342,6 +1362,19 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_COREL_LTEC, "COREL_LTEC", QString("Corel LTEC installer archive")},
     {XBinary::FT_IRWINPAC, "IRWINPAC", QString("IrwinPac compressed install file")},
     {XBinary::FT_DT_PACK, "DT_PACK", QString("Delrina DT packed file")},
+    {XBinary::FT_LOGITECH_COMPRESS, "LOGITECH_COMPRESS", QString("Logitech Compress packed file")},
+    {XBinary::FT_DMA_PACK, "DMA_PACK", QString("DMA packed file")},
+    {XBinary::FT_GENIUS_LIBRARY, "GENIUS_LIBRARY", QString("Genius Library")},
+    {XBinary::FT_SMSIPAK, "SMSIPAK", QString("SMS Installer PAK volume")},
+    {XBinary::FT_PSN_COMPRESS, "PSN_COMPRESS", QString("PSNcompress packed file")},
+    {XBinary::FT_ANDROID_BOOT, "ANDROID_BOOT", QString("Android boot image")},
+    {XBinary::FT_NERO_NRG, "NERO_NRG", QString("Nero disc image")},
+    {XBinary::FT_ECM, "ECM", QString("Error Code Modeler image")},
+    {XBinary::FT_WII_U8, "WII_U8", QString("Nintendo Wii U8 archive")},
+    {XBinary::FT_WII_WAD, "WII_WAD", QString("Nintendo Wii WAD package")},
+    {XBinary::FT_WII_LZ77, "WII_LZ77", QString("Nintendo LZ77 compressed file")},
+    {XBinary::FT_ASH0, "ASH0", QString("Nintendo ASH0 compressed file")},
+    {XBinary::FT_AP4, "AP4", QString("Reading pen AP4 audio container")},
     {XBinary::FT_GAS_HUFF, "GAS_HUFF", QString("Huffman packed file (GAS)")},
     {XBinary::FT_POWERBOARD_BBS, "POWERBOARD_BBS", QString("Powerboard BBS library")},
     {XBinary::FT_SILMARILS, "SILMARILS", QString("Silmarils game resource container")},
@@ -1416,9 +1449,16 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_ORACLE_SQUEEZE, "ORACLE_SQUEEZE", QString("Oracle squeezed file")},
     {XBinary::FT_ZPAK_SFX, "ZPAK_SFX", QString("ZPAK self-extracting installer")},
     {XBinary::FT_SYDEX_SFX, "SYDEX_SFX", QString("Sydex self-extracting disk image")},
+    {XBinary::FT_ARCV2SFX, "ARCV2SFX", QString("Eschalon Setup ARCV 2.00 self-extractor")},
+    {XBinary::FT_CHZ, "CHZ", QString("ChArc CHZ archive")},
     {XBinary::FT_LARC_PFX, "LARC_PFX", QString("LArc PFX self-extracting Atari program")},
     {XBinary::FT_PCINSTALL_SFX, "PCINSTALL_SFX", QString("PC-Install self-extracting installer")},
     {XBinary::FT_GENTEE, "GENTEE", QString("Gentee installer")},
+    {XBinary::FT_QSETUP, "QSETUP", QString("QSetup installer")},
+    {XBinary::FT_SBX_SFX, "SBX_SFX", QString("SBX self-extracting archive")},
+    {XBinary::FT_ARNI_SFX, "ARNI_SFX", QString("ARNI self-extracting installer")},
+    {XBinary::FT_INSTALL4J_SFX, "INSTALL4J_SFX", QString("install4j/exe4j self-extracting launcher")},
+    {XBinary::FT_CREATEINSTALL_SFX, "CREATEINSTALL_SFX", QString("CreateInstall installer")},
     {XBinary::FT_SW, "SW", QString("SGI IRIX inst/swmgr distribution image")},
     {XBinary::FT_SAF, "SAF", QString("Stac Electronics SAF archive")},
     {XBinary::FT_IGF2, "IGF2", QString("IGF installer SETUP.IGF container")},
@@ -1454,11 +1494,418 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_SQZ, "SQZ", QString("Squeeze It SQZ archive")},
     {XBinary::FT_SQZSFX, "SQZSFX", QString("Squeeze It SQZ SFX")},
     {XBinary::FT_BSNSFX, "BSNSFX", QString("PTS BSA SFX")},
+    {XBinary::FT_ISSETUPSTREAM, "ISSETUPSTREAM", QString("InstallShield setup stream")},
+    {XBinary::FT_TGCFSFX, "TGCFSFX", QString("Setup Specialist TGCF SFX")},
+    {XBinary::FT_WARPIN, "WARPIN", QString("WarpIN package")},
     {XBinary::FT_RTPATCHSFX, "RTPATCHSFX", QString("RTPatch SFX")},
+    {XBinary::FT_RTA, "RTA", QString("RTPatch RTA archive")},
+    {XBinary::FT_RTASFX, "RTASFX", QString("RTPatch RTA SFX")},
+    {XBinary::FT_ACESFX, "ACESFX", QString("ACE SFX")},
+    {XBinary::FT_ASYMETRIXSFX, "ASYMETRIXSFX", QString("Asymetrix ToolBook Setup SFX")},
+    {XBinary::FT_EPSF_SFX, "EPSF_SFX", QString("Eschalon Setup EPSF SFX")},
+    {XBinary::FT_ARDI1_SFX, "ARDI1_SFX", QString("ARDI diskette SFX")},
+    {XBinary::FT_ARDI2_SFX, "ARDI2_SFX", QString("ARDI installer SFX")},
     {XBinary::FT_AMIGA_ADF, "AMIGA_ADF", QString("AmigaDOS disk image")},
     {XBinary::FT_GODOT_PCK, "GODOT_PCK", QString("Godot PCK package")},
+    {XBinary::FT_NSCRIPTER_NSA, "NSCRIPTER_NSA", QString("NScripter NSA archive")},
+    {XBinary::FT_NSCRIPTER_NS2, "NSCRIPTER_NS2", QString("NScripter NS2 archive")},
+    {XBinary::FT_NSCRIPTER_SAR, "NSCRIPTER_SAR", QString("NScripter SAR archive")},
+    {XBinary::FT_RGSSAD, "RGSSAD", QString("RPG Maker RGSSAD archive")},
+    {XBinary::FT_RPGMV_RESOURCE, "RPGMV_RESOURCE", QString("RPG Maker MV encrypted resource")},
+    {XBinary::FT_RENPY_RPA, "RENPY_RPA", QString("Ren'Py archive")},
     {XBinary::FT_WBFS, "WBFS", QString("Wii Backup File System image")},
     {XBinary::FT_RVZ, "RVZ", QString("Dolphin RVZ disc image")},
+    {XBinary::FT_SOFTRONICS, "SOFTRONICS", QString("Softronics compressed file")},
+};
+
+// What each reader in this tree actually decodes, keyed by FT.
+//
+// This is the source of truth behind the `-i` tables and behind the format
+// tables in doc/CURRENT.md.  Three rules keep it worth reading:
+//
+//   1. A cell is only filled when the claim was read out of the reader.  Every
+//      populated pszCodecs/pszNotSupported cell below carries a file:line in
+//      its comment or is the verbatim content of a method-dispatch switch.
+//   2. A missing row, or a null cell in a row, prints as empty.  Empty means
+//      "not audited", never "none" - a guess here would make the rest useless.
+//   3. pszNotSupported is for things the FORMAT defines and this reader refuses.
+//      The refusal may be at detection (the reader does not claim the file) or
+//      at extraction (the member fails closed); either way nothing is silently
+//      mis-decoded, and this column is where those cases are named.  A name
+//      that appears nowhere in this tree does not belong here - list what the
+//      reader enumerates and refuses, not what the published format defines.
+//
+// nClassMask decides which `-i` table a type appears in, and a type may appear
+// in several (UPX is a COM, MS-DOS, PE32, PE64, ELF and Mach-O packer at once).
+XBinary::FORMATINFO _TABLE_XBinary_FORMATINFO[] = {
+    // ---- archives and containers ------------------------------------------
+    // xzip.cpp:2202-2235 (method -> HANDLE_METHOD) and :2584-2630
+    // (unpackImplemented).  CMETHOD_PKWARE_DCL_IMPLODING is in the enum
+    // (xzip.h:89) but has no arm in the dispatch, so it resolves to UNKNOWN.
+    // Scope: :1217-1223 skips any end-of-central-directory record whose disk
+    // fields disagree or whose count/size/offset carries a 0xFFFF/0xFFFFFFFF
+    // sentinel, i.e. the reader refuses multi-disk and ZIP64 archives instead
+    // of reinterpreting their sentinels as ordinary 32-bit values.  The only
+    // ZIP64 code in the file (:1323-1412) reads the local-header size
+    // placeholders of a streamed data descriptor; it never reads a ZIP64
+    // end-of-central-directory locator or record.
+    {XBinary::FT_ZIP, XBinary::FTCLASS_ARCHIVE, "single-disk, non-ZIP64",
+     "Store, Shrink, Reduce 1-4, Implode, Deflate, Deflate64, BZip2, LZMA, XZ, Zstd, PPMd, WavPack, WinZip JPEG, ZipCrypto, AES-128/192/256",
+     "PKWARE DCL Implode (method 10), ZIP64 archives, multi-disk volumes"},
+    // xjar.h:27 XJAR : XZip, xapk.h:27 XAPK : XJAR, xapks.h:26 XAPKS : XAPK,
+    // xipa.h:26 XIPA : XJAR - all four inherit the reader above unchanged.
+    {XBinary::FT_JAR, XBinary::FTCLASS_ARCHIVE, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_APK, XBinary::FTCLASS_ARCHIVE, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_APKS, XBinary::FTCLASS_ARCHIVE, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_IPA, XBinary::FTCLASS_ARCHIVE, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_NPM, XBinary::FTCLASS_ARCHIVE | XBinary::FTCLASS_PACKAGE, nullptr, "as tar.gz", nullptr},
+    // xsevenzip.cpp:410-444 (unpackImplemented) and :664-745 (codec id ->
+    // method).  The 1-byte filter ids stop at 0x0A, so the RISC-V filter has no
+    // arm; every listed codec may be wrapped in AES-256.
+    {XBinary::FT_7Z, XBinary::FTCLASS_ARCHIVE, nullptr,
+     "Copy, LZMA, LZMA2, PPMd, BZip2, Deflate, Deflate64, Zstd, Brotli, LZ4, LZ5, Lizard, BCJ, BCJ2, ARM, ARMT, ARM64, PPC, SPARC, IA64, Delta, AES-256",
+     "RISC-V filter (codec 0x0B)"},
+    // xrar.cpp:2140-2155 (unpackImplemented); :2300-2311 identifies a RAR4
+    // header-encrypted archive and stops rather than parsing ciphertext.
+    {XBinary::FT_RAR, XBinary::FTCLASS_ARCHIVE, "1.5, 2.0, 2.9/3.x, 5.0, 7.0", "Store, RAR15, RAR20, RAR29, RAR50, RAR70, RAR5 AES-256",
+     "RAR 2.x-4.x encrypted headers and entries"},
+    // xlha.cpp:127-148.  The comment at :127 is explicit that lh2/lh3 have no
+    // decoder; levels 0-3 are parsed at :185-242.
+    {XBinary::FT_LHA, XBinary::FTCLASS_ARCHIVE, "header levels 0, 1, 2, 3", "lh0, lh1, lh4, lh5, lh6, lh7, lhd, lz4, lz5, lzs, lhx, lk7, pm0, pm1, pm2", "lh2, lh3"},
+    // xarj.cpp:357-362; the GARBLE flag is reported as encrypted at :554/:678
+    // and no decoder is wired for it.
+    {XBinary::FT_ARJ, XBinary::FTCLASS_ARCHIVE, nullptr, "Store (m0/m8/m9), ARJ m1-m3, ARJ m4 (fastest)", "GARBLE (password) entries"},
+    // xace.cpp:45-47 (CTYPE_BLOCKED is named but never mapped), :361-364
+    // (_isRawAce1Main rejects the 2.0 block layout), :740-751 (solid,
+    // password and split members resolve to UNKNOWN).
+    {XBinary::FT_ACE, XBinary::FTCLASS_ARCHIVE, "1.x block layout, extract version 1.0-2.0", "Stored, LZ77+Huffman (ACE 1.x)",
+     "ACE 2.x blocked stream, password entries, solid non-stored members, split volumes"},
+    // xcab.cpp method mapping; decoders at xdecompress.cpp:5574 (Store/MSZIP)
+    // and :5687-5691 (LZX/Quantum).
+    {XBinary::FT_CAB, XBinary::FTCLASS_ARCHIVE, nullptr, "Store, MSZIP, LZX, Quantum", nullptr},
+    {XBinary::FT_ARC, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_FREEARC, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_ZPAQ, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_PEA, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    // xlha.cpp:145-147 maps the SAR " LH0 "/" LH4 "/" LH5 " spellings onto the
+    // LHA store/lh4/lh5 decoders.
+    {XBinary::FT_SAR, XBinary::FTCLASS_ARCHIVE, nullptr, "LH0, LH4, LH5", nullptr},
+    {XBinary::FT_ARX, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    // xalzarchive.cpp:124: method 0 -> Store, 2 -> Deflate, everything else and
+    // any entry with the low descriptor bit set resolve to UNKNOWN.
+    {XBinary::FT_ALZ, XBinary::FTCLASS_ARCHIVE, nullptr, "Store, Deflate", "method 1 (bzip2), encrypted entries"},
+    {XBinary::FT_RZIP, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_SHAR, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_UU, XBinary::FTCLASS_ARCHIVE, nullptr, "uuencode, XXencode, base64", nullptr},
+    // xyenc.cpp: single-part and in-order multi-part posts; pcrc32/crc32 verified when present.
+    {XBinary::FT_YENC, XBinary::FTCLASS_ARCHIVE, "yEnc 1.2", "yEnc, CRC32", "out-of-order or missing parts"},
+    // xqtqm.cpp: one synthesised Qt Linguist .ts member from the Messages block.
+    {XBinary::FT_QT_QM, XBinary::FTCLASS_ARCHIVE, "Qt 4/5 .qm", "Store (synthesised .ts text)", nullptr},
+    // xmimemail.cpp: RFC 2045 bodies; unknown Content-Transfer-Encodings are stored raw.
+    {XBinary::FT_EML, XBinary::FTCLASS_ARCHIVE, "RFC 822/2045/2046", "Store, base64, quoted-printable", "x-uuencode and other non-standard transfer encodings (stored raw)"},
+    {XBinary::FT_MHTML, XBinary::FTCLASS_ARCHIVE, "RFC 2557", "Store, base64, quoted-printable", "x-uuencode and other non-standard transfer encodings (stored raw)"},
+    {XBinary::FT_MBOX, XBinary::FTCLASS_ARCHIVE, "RFC 4155 (mboxo)", "Store, base64, quoted-printable", "x-uuencode and other non-standard transfer encodings (stored raw)"},
+    // xgettextmo.cpp: one synthesised .po member laid out like msgunfmt's output.
+    {XBinary::FT_GETTEXT_MO, XBinary::FTCLASS_ARCHIVE, "revision 0.x and 1.x, LE and BE", "Store (synthesised .po text)", "major revision 2 and later"},
+    {XBinary::FT_WARC, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_MTREE, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_AR, XBinary::FTCLASS_ARCHIVE, nullptr, "Store", nullptr},
+    {XBinary::FT_CPIO, XBinary::FTCLASS_ARCHIVE, nullptr, "Store", nullptr},
+    // xtar.cpp:73/:261-285 (GNU sparse via pax keys), :387-388 (old GNU vs
+    // ustar prefix), STRUCTID_POSIX_HEADER.
+    {XBinary::FT_TAR, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU (incl. sparse)", "Store", nullptr},
+    {XBinary::FT_TAR_GZ, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "Deflate", nullptr},
+    {XBinary::FT_TAR_BZIP2, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "BZip2", nullptr},
+    {XBinary::FT_TAR_LZIP, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "LZMA (lzip)", nullptr},
+    {XBinary::FT_TAR_LZMA, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "LZMA (alone)", nullptr},
+    {XBinary::FT_TAR_LZOP, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "LZO", nullptr},
+    {XBinary::FT_TAR_XZ, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "LZMA2 (xz)", nullptr},
+    {XBinary::FT_TAR_Z, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "LZW (compress)", nullptr},
+    {XBinary::FT_TAR_ZSTD, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "Zstandard", nullptr},
+    {XBinary::FT_TAR_LZ4, XBinary::FTCLASS_ARCHIVE, "v7, ustar, POSIX pax, GNU", "LZ4", nullptr},
+
+    // ---- single compressed streams ----------------------------------------
+    // xgzip.cpp:814-821 (unpackImplemented) lists exactly one method.
+    {XBinary::FT_GZIP, XBinary::FTCLASS_STREAM, nullptr, "Deflate", nullptr},
+    {XBinary::FT_ZLIB, XBinary::FTCLASS_STREAM, nullptr, "Deflate", nullptr},
+    {XBinary::FT_BZIP2, XBinary::FTCLASS_STREAM, nullptr, "BZip2", nullptr},
+    // xlzmadecoder.cpp:831 (only filter id 0x21 may be the last filter),
+    // :834-841 and :997-1013 (delta 0x03 and branch filters 0x04-0x0A).  The
+    // range check stops at 0x0A, so the RISC-V filter (0x0B) has no arm.
+    {XBinary::FT_XZ, XBinary::FTCLASS_STREAM, nullptr, "LZMA2, Delta, x86, PPC, IA64, ARM, ARMT, SPARC, ARM64", "RISC-V filter (0x0B)"},
+    {XBinary::FT_LZMA, XBinary::FTCLASS_STREAM, nullptr, "LZMA (alone)", nullptr},
+    {XBinary::FT_LZIP, XBinary::FTCLASS_STREAM, nullptr, "LZMA (lzip)", nullptr},
+    {XBinary::FT_ZSTD, XBinary::FTCLASS_STREAM, nullptr, "Zstandard", nullptr},
+    {XBinary::FT_LZ4, XBinary::FTCLASS_STREAM, nullptr, "LZ4", nullptr},
+    {XBinary::FT_LZ5, XBinary::FTCLASS_STREAM, nullptr, "LZ5", nullptr},
+    {XBinary::FT_LIZARD, XBinary::FTCLASS_STREAM, nullptr, "Lizard", nullptr},
+    {XBinary::FT_BROTLI, XBinary::FTCLASS_STREAM, nullptr, "Brotli", nullptr},
+    {XBinary::FT_LZO, XBinary::FTCLASS_STREAM, nullptr, "LZO", nullptr},
+    {XBinary::FT_COMPRESS, XBinary::FTCLASS_STREAM, nullptr, "LZW", nullptr},
+    {XBinary::FT_BCM, XBinary::FTCLASS_STREAM, nullptr, nullptr, nullptr},
+    {XBinary::FT_LPAQ8, XBinary::FTCLASS_STREAM, nullptr, nullptr, nullptr},
+    // xszdd.cpp maps the single method; xkwaj.cpp maps four plus Store.
+    {XBinary::FT_SZDD, XBinary::FTCLASS_STREAM, nullptr, "LZSS (SZDD)", nullptr},
+    {XBinary::FT_KWAJ, XBinary::FTCLASS_STREAM, nullptr, "Store, XOR, LZSS, LZH, MSZIP", nullptr},
+
+    // ---- packages ----------------------------------------------------------
+    {XBinary::FT_DEB, XBinary::FTCLASS_PACKAGE, nullptr, "as ar + tar.*", nullptr},
+    // xrpm.cpp method mapping.
+    {XBinary::FT_RPM, XBinary::FTCLASS_PACKAGE, nullptr, "Store, Deflate, BZip2, LZMA, XZ, Zstandard", nullptr},
+    // xwim.cpp:717-718 (unpackImplemented) and :1348-1357: LZMS is a named
+    // header flag that initUnpack rejects outright.
+    {XBinary::FT_WIM, XBinary::FTCLASS_PACKAGE, nullptr, "Store, XPRESS, LZX", "LZMS"},
+    {XBinary::FT_CFBF, XBinary::FTCLASS_DOCUMENT | XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_CHM, XBinary::FTCLASS_DOCUMENT, nullptr, nullptr, nullptr},
+
+    // ---- file systems and disk images --------------------------------------
+    {XBinary::FT_ISO9660, XBinary::FTCLASS_DISKIMAGE | XBinary::FTCLASS_FILESYSTEM, nullptr, "Store", nullptr},
+    {XBinary::FT_UDF, XBinary::FTCLASS_DISKIMAGE | XBinary::FTCLASS_FILESYSTEM, nullptr, "Store", nullptr},
+    // xsquashfsarchive.cpp:180-189 (compressorToString) names all six
+    // compressor ids, so the listing can label an image it cannot extract.
+    // The decode dispatch is xsquashfsdecoder.cpp:174-181 and has exactly two
+    // arms, SQFS_COMP_ZLIB -> sqfsInflate and SQFS_COMP_LZMA -> sqfsLzmaAlone;
+    // :180 spells out the rest ("XZ, LZO, LZ4 and ZSTD blocks are not decoded
+    // here").  nOrder[] at :147 is a trial ORDER for those two decoders, not a
+    // decoder list - XZ appearing in it decodes nothing.
+    {XBinary::FT_SQUASHFS, XBinary::FTCLASS_FILESYSTEM, nullptr, "zlib, LZMA", "XZ, LZO, LZ4, Zstandard"},
+    {XBinary::FT_NTFS, XBinary::FTCLASS_FILESYSTEM, nullptr, nullptr, nullptr},
+    // xdmg.cpp method mapping.
+    {XBinary::FT_DMG, XBinary::FTCLASS_DISKIMAGE, nullptr, "Store, zlib, BZip2, ADC", nullptr},
+    // xandroidbootimage.cpp: header v0-v4, page-aligned raw blobs + cmdline.txt.
+    {XBinary::FT_ANDROID_BOOT, XBinary::FTCLASS_DISKIMAGE, "header v0-v4", "Store", nullptr},
+    // xnerodiscimage.cpp: DAOI/DAOX/ETNF/ETN2 data tracks reduced to 2048-byte
+    // user data; audio tracks are listed but refused.
+    {XBinary::FT_NERO_NRG, XBinary::FTCLASS_DISKIMAGE, "footer v1/v2, DAO and TAO data tracks", "Store, raw-sector unwrap", "audio tracks"},
+    // xecmimage.cpp: record types 0-3 with ECMA-130 EDC/ECC regeneration.
+    {XBinary::FT_ECM, XBinary::FTCLASS_DISKIMAGE, nullptr, "ECM sector regeneration (EDC, P/Q ECC)", nullptr},
+    {XBinary::FT_VHD, XBinary::FTCLASS_DISKIMAGE, nullptr, nullptr, nullptr},
+    {XBinary::FT_VHDX, XBinary::FTCLASS_DISKIMAGE, nullptr, nullptr, nullptr},
+    {XBinary::FT_VDI, XBinary::FTCLASS_DISKIMAGE, nullptr, nullptr, nullptr},
+    {XBinary::FT_QCOW2, XBinary::FTCLASS_DISKIMAGE, nullptr, nullptr, nullptr},
+    {XBinary::FT_MINIDUMP, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_SQLITE, XBinary::FTCLASS_ARCHIVE, nullptr, nullptr, nullptr},
+    {XBinary::FT_GIT_OBJECT, XBinary::FTCLASS_STREAM, nullptr, "Deflate", nullptr},
+
+    // ---- game and engine containers ----------------------------------------
+    {XBinary::FT_MPQ, XBinary::FTCLASS_GAME, nullptr, nullptr, nullptr},
+    {XBinary::FT_BOHEMIA_PBO, XBinary::FTCLASS_GAME, nullptr, nullptr, nullptr},
+    {XBinary::FT_DESCENT_HOG2, XBinary::FTCLASS_GAME, nullptr, nullptr, nullptr},
+    // NScripter (xnscripter.cpp): NSA codec byte 0/1/2/4 are all decoded; SPB is
+    // emitted as the 24-bit BMP the engine and GARbro produce.
+    {XBinary::FT_NSCRIPTER_NSA, XBinary::FTCLASS_GAME, nullptr, "Store, NScripter LZSS, NBZ (BZip2), SPB image (to BMP)", nullptr},
+    {XBinary::FT_NSCRIPTER_NS2, XBinary::FTCLASS_GAME, nullptr, "Store", nullptr},
+    {XBinary::FT_NSCRIPTER_SAR, XBinary::FTCLASS_GAME, nullptr, "Store", nullptr},
+    {XBinary::FT_RGSSAD, XBinary::FTCLASS_GAME, "v1 (XP/VX), v3 (VX Ace)", "RGSSAD XOR key stream", nullptr},
+    {XBinary::FT_RPGMV_RESOURCE, XBinary::FTCLASS_GAME, "key from data/System.json (up to 4 parent levels) or a 32-hex password",
+     "XOR of the first 16 bytes", nullptr},
+    {XBinary::FT_RENPY_RPA, XBinary::FTCLASS_GAME, "RPA-2.0, RPA-3.0, RPA-3.2; pickle protocol 2/3 indexes", "Store (zlib-compressed pickle index)",
+     "RPA-1.0 and ALT-1.0/ZiX headers; indexes using any pickle opcode outside the documented subset (GLOBAL/REDUCE, FRAME, ...)"},
+
+    // ---- self-extracting archives, stub architecture not fixed --------------
+    // xbinary.h: "Legacy archive-family SFX identities. These are
+    // architecture-neutral because the same payloads occur in DOS MZ/COM,
+    // Windows NE/PE, and other executable stubs."  XSFX locates the payload and
+    // delegates to the matching XArchive reader (xsfx.h class comment), so the
+    // codecs are exactly the base format's.
+    {XBinary::FT_ARCSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "as ARC", nullptr},
+    {XBinary::FT_ARJSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "as ARJ", "as ARJ"},
+    {XBinary::FT_LHASFX, XBinary::FTCLASS_SFX_ANY, "header levels 0, 1, 2, 3", "as LHA", "lh2, lh3"},
+    {XBinary::FT_ZIPSFX, XBinary::FTCLASS_SFX_ANY, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_RARSFX, XBinary::FTCLASS_SFX_ANY, "1.5, 2.0, 2.9/3.x, 5.0, 7.0", "as RAR", "as RAR"},
+    {XBinary::FT_CABSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "as CAB", nullptr},
+    {XBinary::FT_FREEARCSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "as FreeARC", nullptr},
+    {XBinary::FT_ZPAQSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "as ZPAQ", nullptr},
+    {XBinary::FT_GZIPSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "Deflate", nullptr},
+    {XBinary::FT_SZDDSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "LZSS (SZDD)", nullptr},
+    {XBinary::FT_KWAJSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "Store, XOR, LZSS, LZH, MSZIP", nullptr},
+    {XBinary::FT_BZIP2SFX, XBinary::FTCLASS_SFX_ANY, nullptr, "BZip2", nullptr},
+    {XBinary::FT_ARQSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "as ARQ", nullptr},
+    {XBinary::FT_SQZSFX, XBinary::FTCLASS_SFX_ANY, nullptr, "as SQZ", nullptr},
+    {XBinary::FT_BSNSFX, XBinary::FTCLASS_SFX_ANY, nullptr, nullptr, nullptr},
+    {XBinary::FT_TGCFSFX, XBinary::FTCLASS_SFX_ANY, nullptr, nullptr, nullptr},
+    {XBinary::FT_RTPATCHSFX, XBinary::FTCLASS_SFX_ANY, nullptr, nullptr, nullptr},
+    {XBinary::FT_RTASFX, XBinary::FTCLASS_SFX_ANY, nullptr, nullptr, nullptr},
+    {XBinary::FT_PYINSTALLER_SFX, XBinary::FTCLASS_SFX_ANY, nullptr, nullptr, nullptr},
+
+    // ---- MS-DOS carried ----------------------------------------------------
+    // xmsdoscopyqm / diskimages/xcopyqm*: a CopyQM image behind an MZ screen.
+    {XBinary::FT_MSDOS_COPYQM, XBinary::FTCLASS_SFX_MSDOS | XBinary::FTCLASS_DISKIMAGE, nullptr, nullptr, nullptr},
+    {XBinary::FT_DSKEXP, XBinary::FTCLASS_SFX_MSDOS | XBinary::FTCLASS_DISKIMAGE, nullptr, nullptr, nullptr},
+    {XBinary::FT_SYDEX_SFX, XBinary::FTCLASS_SFX_MSDOS | XBinary::FTCLASS_DISKIMAGE, nullptr, nullptr, nullptr},
+    {XBinary::FT_ARCV2SFX, XBinary::FTCLASS_SFX_MSDOS, nullptr, "Store, ARCV LZHUF, ARCV2 LZHUF+delta, ARCV XOR+delta", nullptr},
+    {XBinary::FT_SOFTPAQ1_SFX, XBinary::FTCLASS_SFX_MSDOS, nullptr, nullptr, nullptr},
+    {XBinary::FT_INSTALIT_SFX, XBinary::FTCLASS_INSTALLER_MSDOS, nullptr, nullptr, nullptr},
+    {XBinary::FT_ZPAK_SFX, XBinary::FTCLASS_SFX_MSDOS, nullptr, "PKWARE DCL Implode", nullptr},
+    {XBinary::FT_PCINSTALL_SFX, XBinary::FTCLASS_INSTALLER_MSDOS, nullptr, "Store, PKWARE DCL Implode", nullptr},
+    // xis3sfxarchive.cpp maps STORE and DEFLATE and nothing else.
+    {XBinary::FT_INSTALLSHIELD3_SFX, XBinary::FTCLASS_INSTALLER_MSDOS, nullptr, "Store, Deflate", nullptr},
+    {XBinary::FT_GPINSTALL_SFX, XBinary::FTCLASS_INSTALLER_MSDOS, nullptr, nullptr, nullptr},
+    {XBinary::FT_SBX_SFX, XBinary::FTCLASS_INSTALLER_MSDOS, nullptr, "Store, SBX LZHUF (F=60, THRESHOLD=2)", nullptr},
+
+    // ---- installers on a PE32/PE64 stub -------------------------------------
+    // Every FT_PE64_* identity below is chosen by the same test: the reader
+    // opens the file as a PE and returns the 64-bit identity when pe.is64()
+    // (xnsis.cpp:398-407 is the pattern).  So the split is the carrier, not a
+    // different payload format.
+    // xnsis.cpp:632-660 (method sniffing), :920-925 (decode dispatch); the
+    // BZip2 arm is NSIS's modified stream, decoded by the vendored
+    // Algos/nsis_bzip2 (:840-850).
+    {XBinary::FT_PE32_NSIS, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store, Deflate, LZMA, BZip2 (NSIS variant), solid and non-solid", nullptr},
+    {XBinary::FT_PE64_NSIS, XBinary::FTCLASS_INSTALLER_PE64, nullptr, "Store, Deflate, LZMA, BZip2 (NSIS variant), solid and non-solid", nullptr},
+    // xinnosetup.cpp:673-678 (compression -> method), :1716 (BCJ filter),
+    // :850-852 and :886 (ARC4-MD5/SHA1 and XChaCha20), :2678-2702 (the exact
+    // set of setup-data versions accepted).
+    {XBinary::FT_PE32_INNOSETUP, XBinary::FTCLASS_INSTALLER_PE32, "1.3-4.2 (listed IDs), 5.x, 6.x, 7.0.0.3",
+     "Store, zlib, BZip2, LZMA1, LZMA2, BCJ, ARC4-MD5, ARC4-SHA1, XChaCha20", nullptr},
+    {XBinary::FT_PE64_INNOSETUP, XBinary::FTCLASS_INSTALLER_PE64, "1.3-4.2 (listed IDs), 5.x, 6.x, 7.0.0.3",
+     "Store, zlib, BZip2, LZMA1, LZMA2, BCJ, ARC4-MD5, ARC4-SHA1, XChaCha20", nullptr},
+    {XBinary::FT_PE32_INSTALLSHIELD, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_INSTALLSHIELD, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    {XBinary::FT_INSTALLSHIELD_LAUNCHER, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    // xis14sfxarchive.cpp:208 is the only method assignment in the reader.
+    {XBinary::FT_IS14_SFX, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store", nullptr},
+    {XBinary::FT_ISCAB, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    // xissetupstream.cpp: zlib plus the name-keyed descrambling filter.
+    {XBinary::FT_ISSETUPSTREAM, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store, zlib, ISSetupStream name-keyed filter", nullptr},
+    // xsetupfactory.cpp method mapping.
+    {XBinary::FT_PE32_SETUPFACTORY, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store, PKWARE DCL Implode", nullptr},
+    {XBinary::FT_PE64_SETUPFACTORY, XBinary::FTCLASS_INSTALLER_PE64, nullptr, "Store, PKWARE DCL Implode", nullptr},
+    {XBinary::FT_PE32_ACTUALINSTALLER, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_ACTUALINSTALLER, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE32_ADVANCEDINSTALLER, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_ADVANCEDINSTALLER, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE32_CLICKTEAM, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_CLICKTEAM, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    // xcreateinstallsfx.cpp method mapping.
+    {XBinary::FT_PE32_CREATEINSTALL, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store, CreateInstall LZ", nullptr},
+    {XBinary::FT_PE64_CREATEINSTALL, XBinary::FTCLASS_INSTALLER_PE64, nullptr, "Store, CreateInstall LZ", nullptr},
+    {XBinary::FT_CREATEINSTALL_SFX, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store, CreateInstall LZ", nullptr},
+    {XBinary::FT_PE32_IEXPRESS, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "as CAB", nullptr},
+    {XBinary::FT_PE64_IEXPRESS, XBinary::FTCLASS_INSTALLER_PE64, nullptr, "as CAB", nullptr},
+    // xinstallforge.cpp method mapping.
+    {XBinary::FT_PE32_INSTALLFORGE, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "BZip2", nullptr},
+    {XBinary::FT_PE64_INSTALLFORGE, XBinary::FTCLASS_INSTALLER_PE64, nullptr, "BZip2", nullptr},
+    {XBinary::FT_PE32_INSTALLSIMPLE, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_INSTALLSIMPLE, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE32_SMARTINSTALL, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_SMARTINSTALL, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE32_TARMA, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_TARMA, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE32_WIXBURN, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_WIXBURN, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    {XBinary::FT_CFBF_WIX, XBinary::FTCLASS_INSTALLER_PE32 | XBinary::FTCLASS_DOCUMENT, nullptr, nullptr, nullptr},
+    {XBinary::FT_CFBF_MSI, XBinary::FTCLASS_INSTALLER_PE32 | XBinary::FTCLASS_DOCUMENT, nullptr, "as CAB (embedded and external)", nullptr},
+    {XBinary::FT_PE32_PFTW, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE64_PFTW, XBinary::FTCLASS_INSTALLER_PE64, nullptr, nullptr, nullptr},
+    {XBinary::FT_PE32_JUGGLOR, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_GENTEE, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store, Gentee LZ", nullptr},
+    {XBinary::FT_ARNI_SFX, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "ARNI LZHUF (F=60, THRESHOLD=2)", nullptr},
+    {XBinary::FT_QSETUP, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "zlib", nullptr},
+    {XBinary::FT_WISE_SFX, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store, Deflate, Wise Deflate", nullptr},
+    {XBinary::FT_VISE_SFX, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_PIMP_SFX, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_INSTALLANYWHERE_SFX, XBinary::FTCLASS_INSTALLER_PE32, nullptr, "Store", nullptr},
+    {XBinary::FT_SPIS, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_SPISSFX, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+    {XBinary::FT_RIB, XBinary::FTCLASS_INSTALLER_PE32, nullptr, nullptr, nullptr},
+
+    // ---- SFX on a PE32/PE64/ELF stub ----------------------------------------
+    {XBinary::FT_PE32_7ZSFX, XBinary::FTCLASS_SFX_PE32, nullptr, "as 7-Zip", "as 7-Zip"},
+    {XBinary::FT_PE64_7ZSFX, XBinary::FTCLASS_SFX_PE64, nullptr, "as 7-Zip", "as 7-Zip"},
+    {XBinary::FT_PE32_ZIPSFX, XBinary::FTCLASS_SFX_PE32, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_PE64_ZIPSFX, XBinary::FTCLASS_SFX_PE64, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_ELF32_ZIPSFX, XBinary::FTCLASS_SFX_ELF, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_ELF64_ZIPSFX, XBinary::FTCLASS_SFX_ELF, "single-disk, non-ZIP64", "as ZIP", "as ZIP"},
+    {XBinary::FT_PE32_RARSFX, XBinary::FTCLASS_SFX_PE32, "1.5, 2.0, 2.9/3.x, 5.0, 7.0", "as RAR", "as RAR"},
+    {XBinary::FT_PE64_RARSFX, XBinary::FTCLASS_SFX_PE64, "1.5, 2.0, 2.9/3.x, 5.0, 7.0", "as RAR", "as RAR"},
+    {XBinary::FT_ELF32_RARSFX, XBinary::FTCLASS_SFX_ELF, "1.5, 2.0, 2.9/3.x, 5.0, 7.0", "as RAR", "as RAR"},
+    {XBinary::FT_ELF64_RARSFX, XBinary::FTCLASS_SFX_ELF, "1.5, 2.0, 2.9/3.x, 5.0, 7.0", "as RAR", "as RAR"},
+    {XBinary::FT_PE32_WINRARSFX, XBinary::FTCLASS_SFX_PE32, "1.5, 2.0, 2.9/3.x, 5.0, 7.0", "as RAR", "as RAR"},
+    {XBinary::FT_PE64_WINRARSFX, XBinary::FTCLASS_SFX_PE64, "1.5, 2.0, 2.9/3.x, 5.0, 7.0", "as RAR", "as RAR"},
+    {XBinary::FT_PE32_CABSFX, XBinary::FTCLASS_SFX_PE32, nullptr, "as CAB", nullptr},
+    {XBinary::FT_PE64_CABSFX, XBinary::FTCLASS_SFX_PE64, nullptr, "as CAB", nullptr},
+    {XBinary::FT_ELF32_CABSFX, XBinary::FTCLASS_SFX_ELF, nullptr, "as CAB", nullptr},
+    {XBinary::FT_ELF64_CABSFX, XBinary::FTCLASS_SFX_ELF, nullptr, "as CAB", nullptr},
+    {XBinary::FT_PE32_FREEARCSFX, XBinary::FTCLASS_SFX_PE32, nullptr, "as FreeARC", nullptr},
+    {XBinary::FT_PE64_FREEARCSFX, XBinary::FTCLASS_SFX_PE64, nullptr, "as FreeARC", nullptr},
+    {XBinary::FT_ELF32_FREEARCSFX, XBinary::FTCLASS_SFX_ELF, nullptr, "as FreeARC", nullptr},
+    {XBinary::FT_ELF64_FREEARCSFX, XBinary::FTCLASS_SFX_ELF, nullptr, "as FreeARC", nullptr},
+    {XBinary::FT_PE32_ZPAQSFX, XBinary::FTCLASS_SFX_PE32, nullptr, "as ZPAQ", nullptr},
+    {XBinary::FT_PE64_ZPAQSFX, XBinary::FTCLASS_SFX_PE64, nullptr, "as ZPAQ", nullptr},
+    {XBinary::FT_ELF32_ZPAQSFX, XBinary::FTCLASS_SFX_ELF, nullptr, "as ZPAQ", nullptr},
+    {XBinary::FT_ELF64_ZPAQSFX, XBinary::FTCLASS_SFX_ELF, nullptr, "as ZPAQ", nullptr},
+    {XBinary::FT_PE32_SFX, XBinary::FTCLASS_SFX_PE32, nullptr, "as the detected payload archive", nullptr},
+    {XBinary::FT_PE64_SFX, XBinary::FTCLASS_SFX_PE64, nullptr, "as the detected payload archive", nullptr},
+    {XBinary::FT_ELF32_SFX, XBinary::FTCLASS_SFX_ELF, nullptr, "as the detected payload archive", nullptr},
+    {XBinary::FT_ELF64_SFX, XBinary::FTCLASS_SFX_ELF, nullptr, "as the detected payload archive", nullptr},
+    // xautoit.cpp: the streams are AutoIt's own, not zlib (the file contains
+    // no zlib, inflateInit or z_stream).  :281 _inflate is the EA05/EA06
+    // MSB-first bit reader (:130) with a literal/back-reference loop; :334
+    // _inflateV2 requires the literal "JB01" magic and serves the v2 records.
+    // :492-504, :585-601 and :690-708 are the three call sites: compression
+    // id 1 decodes, anything else is stored with csize == usize.  The version
+    // strings the reader produces are at :748/:770 ("v2"), :781 and :790.
+    {XBinary::FT_PE32_AUTOIT, XBinary::FTCLASS_SFX_PE32, "v2, EA05, EA06", "Store, AutoIt EA05/EA06 LZ, JB01 (v2)", nullptr},
+    {XBinary::FT_PE64_AUTOIT, XBinary::FTCLASS_SFX_PE64, "v2, EA05, EA06", "Store, AutoIt EA05/EA06 LZ, JB01 (v2)", nullptr},
+
+    // ---- executable packers and protectors ----------------------------------
+    // xupx.cpp:551-569 (upxIsMethodSupported), :1638-1740 (the decode switch:
+    // UCL NRV2B/2D/2E in all three variants, LZMA, raw Deflate), :437/:442/:447
+    // and :781-783 (ELF, Mach-O, MS-DOS EXE and COM carriers), :988-999 (the
+    // PE32/PE64 identities).  :848-866 handles pack-header layouts <=3, 4-9
+    // and >=10.
+    {XBinary::FT_PE32_UPX, XBinary::FTCLASS_PACKER_PE32, "pack header <=3, 4-9, >=10", "NRV2B, NRV2D, NRV2E (8/LE16/LE32), LZMA, Deflate", nullptr},
+    {XBinary::FT_PE64_UPX, XBinary::FTCLASS_PACKER_PE64, "pack header <=3, 4-9, >=10", "NRV2B, NRV2D, NRV2E (8/LE16/LE32), LZMA, Deflate", nullptr},
+    {XBinary::FT_UPX, XBinary::FTCLASS_PACKER_COM | XBinary::FTCLASS_PACKER_MSDOS | XBinary::FTCLASS_PACKER_OTHER, "pack header <=3, 4-9, >=10",
+     "NRV2B, NRV2D, NRV2E (8/LE16/LE32), LZMA, Deflate", nullptr},
+    // xaspack.cpp:49-65 g_aspackLayouts[] is the supported-version list
+    // verbatim; :64-65 are the only two rows inside #ifdef USE_XEMULATOR,
+    // because 2.11/2.11c wrap the stub head in a per-file polymorphic
+    // self-decryptor.  Stating that inside the Versions cell keeps the row
+    // true for a build with the emulator and for one without; the old
+    // Not-supported wording contradicted this row's own Versions cell in the
+    // reference build, which has USE_XEMULATOR.  :289 is the decoder.
+    // Not supported: g_aspackLayouts[] carries no 1.x row, and the binary
+    // agrees - all six ASPack 1.x folders of F:\tests\packers\ASPack
+    // (1.02b, 1.05b, 1.061b, 1.07b, 1.08.03, 1.08.04) report
+    // "Container: none recognised", while every 2.x folder reports
+    // "PE32: ASPack".
+    {XBinary::FT_PE32_ASPACK, XBinary::FTCLASS_PACKER_PE32, "2.00, 2.01/2.1, 2.12, 2.2, 2.42, 2.xx; 2.11/2.11r and 2.11c/2.11d only with XEmulator",
+     "ASPack LZ + Huffman", "1.x stubs"},
+    // xfsg.cpp:431-460.
+    {XBinary::FT_PE32_FSG, XBinary::FTCLASS_PACKER_PE32, "1.0-1.3, 1.31, 1.33, 2.0", "aPLib", nullptr},
+    // xmew.cpp.
+    {XBinary::FT_PE32_MEW, XBinary::FTCLASS_PACKER_PE32, nullptr, "aPLib, LZMA", nullptr},
+    // xnspack.cpp:1067 calls the matched prologue the "Common NsPack
+    // loader-stub prologue (1.x/2.x/3.x)"; :1071 sets b2x from the 2.x stub's
+    // "mov eax,7" and :1077-1099 is the 2.x branch (its own start-of-stuff
+    // delta and the OEP jmp at EP+0x27a), :1101 the 1.4 / 3.x branch.  The
+    // import helpers carry both field strides by name, 3.1-3.7 at :580/:650
+    // and 1.4 at :580/:675.  The "fail-safe"/"fail closed" returns at :593 and
+    // :677 are that two-stride classifier's fall-through inside import
+    // reconstruction - they are not a version gate on the unpacker.
+    {XBinary::FT_PE32_NSPACK, XBinary::FTCLASS_PACKER_PE32, "1.4, 2.x, 3.1-3.7", "NsPack LZ + range coder", nullptr},
+    // xpetite.cpp:445-447 banners the decoder as "core inflate
+    // (petite_inflate2x_1to9)"; that is Petite's own bit-oriented LZ77
+    // (_doubledl bit getter at :395-407, op table located by _findOpTable at
+    // :414, literal-XOR/back-reference loop at :665-700), NOT zlib - the file
+    // contains no zlib, inflateInit or z_stream at all.  :891 is the only
+    // version string the reader produces, :885-888 refuses level-zero
+    // compression outright.
+    {XBinary::FT_PE32_PETITE, XBinary::FTCLASS_PACKER_PE32, "2.x, 2.x (level 1)", "Petite bit-stream LZ77", "level-0 compression"},
+    {XBinary::FT_PE32_YODA, XBinary::FTCLASS_PACKER_PE32, nullptr, nullptr, nullptr},
+    // xenigmavb.cpp, xboxedapp.cpp: virtualised-file containers rather than
+    // whole-image packers, but the same PE32/PE64 split.
+    {XBinary::FT_PE32_ENIGMAVB, XBinary::FTCLASS_PACKER_PE32, nullptr, "aPLib", nullptr},
+    {XBinary::FT_PE64_ENIGMAVB, XBinary::FTCLASS_PACKER_PE64, nullptr, "aPLib", nullptr},
+    {XBinary::FT_PE32_BOXEDAPP, XBinary::FTCLASS_PACKER_PE32, nullptr, "Deflate", nullptr},
+    {XBinary::FT_PE64_BOXEDAPP, XBinary::FTCLASS_PACKER_PE64, nullptr, "Deflate", nullptr},
+
+    // ---- plain executables opened as containers ------------------------------
+    {XBinary::FT_MACHOFAT, XBinary::FTCLASS_EXECUTABLE, nullptr, "Store", nullptr},
+    {XBinary::FT_DOS16M, XBinary::FTCLASS_EXECUTABLE, nullptr, nullptr, nullptr},
+    {XBinary::FT_DOS4G, XBinary::FTCLASS_EXECUTABLE, nullptr, nullptr, nullptr},
 };
 
 XBinary::XIDSTRING _TABLE_XBinary_VT[] = {
@@ -5069,6 +5516,106 @@ XBinary::FT XBinary::ftStringToFileTypeId(QString sFileType)
 QString XBinary::fileTypeIdToFtString(FT fileType)
 {
     return XCONVERT_idToFtString(fileType, _TABLE_XBinary_FT, sizeof(_TABLE_XBinary_FT) / sizeof(XBinary::XCONVERT));
+}
+
+// ---- format registry ------------------------------------------------------
+// A type with no row, and a row with a null cell, both answer "nothing known".
+// Callers render that as an empty cell; see the comment on
+// _TABLE_XBinary_FORMATINFO for why guessing instead is not an option.
+
+static XBinary::FORMATINFO *_findFormatInfo(XBinary::FT fileType)
+{
+    const qint32 nNumberOfRecords = qint32(sizeof(_TABLE_XBinary_FORMATINFO) / sizeof(XBinary::FORMATINFO));
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (_TABLE_XBinary_FORMATINFO[i].fileType == fileType) {
+            return &(_TABLE_XBinary_FORMATINFO[i]);
+        }
+    }
+
+    return nullptr;
+}
+
+bool XBinary::isFormatInfoPresent(XBinary::FT fileType)
+{
+    return (_findFormatInfo(fileType) != nullptr);
+}
+
+XBinary::FORMATINFO XBinary::getFormatInfo(XBinary::FT fileType)
+{
+    XBinary::FORMATINFO result = {};
+    result.fileType = fileType;
+    result.nClassMask = FTCLASS_NONE;
+    result.pszVersions = nullptr;
+    result.pszCodecs = nullptr;
+    result.pszNotSupported = nullptr;
+
+    XBinary::FORMATINFO *pRecord = _findFormatInfo(fileType);
+
+    if (pRecord) {
+        result = *pRecord;
+    }
+
+    return result;
+}
+
+quint32 XBinary::getFormatClassMask(XBinary::FT fileType)
+{
+    XBinary::FORMATINFO *pRecord = _findFormatInfo(fileType);
+
+    if (pRecord) {
+        return pRecord->nClassMask;
+    }
+
+    return FTCLASS_NONE;
+}
+
+QString XBinary::getFormatVersions(XBinary::FT fileType)
+{
+    XBinary::FORMATINFO *pRecord = _findFormatInfo(fileType);
+
+    if (pRecord && pRecord->pszVersions) {
+        return QString(pRecord->pszVersions);
+    }
+
+    return QString();
+}
+
+QString XBinary::getFormatCodecs(XBinary::FT fileType)
+{
+    XBinary::FORMATINFO *pRecord = _findFormatInfo(fileType);
+
+    if (pRecord && pRecord->pszCodecs) {
+        return QString(pRecord->pszCodecs);
+    }
+
+    return QString();
+}
+
+QString XBinary::getFormatNotSupported(XBinary::FT fileType)
+{
+    XBinary::FORMATINFO *pRecord = _findFormatInfo(fileType);
+
+    if (pRecord && pRecord->pszNotSupported) {
+        return QString(pRecord->pszNotSupported);
+    }
+
+    return QString();
+}
+
+QList<XBinary::FT> XBinary::getFileTypesByClass(quint32 nClassMask)
+{
+    QList<XBinary::FT> listResult;
+
+    const qint32 nNumberOfRecords = qint32(sizeof(_TABLE_XBinary_FORMATINFO) / sizeof(XBinary::FORMATINFO));
+
+    for (qint32 i = 0; i < nNumberOfRecords; i++) {
+        if (_TABLE_XBinary_FORMATINFO[i].nClassMask & nClassMask) {
+            listResult.append(_TABLE_XBinary_FORMATINFO[i].fileType);
+        }
+    }
+
+    return listResult;
 }
 
 QString XBinary::fileTypesToString(const QSet<XBinary::FT> &stResult)
@@ -14578,10 +15125,23 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_ISCAB,
         FT_SPISSFX,
         FT_GENTEE,
+        FT_QSETUP,
+        FT_CREATEINSTALL_SFX,
+        FT_SBX_SFX,
+        FT_ARNI_SFX,
+        FT_INSTALL4J_SFX,
         FT_ARQSFX,
         FT_SQZSFX,
         FT_RTPATCHSFX,
+        FT_RTASFX,
+        FT_ACESFX,
+        FT_ASYMETRIXSFX,
+        FT_EPSF_SFX,
+        FT_ARDI1_SFX,
+        FT_ARDI2_SFX,
         FT_BSNSFX,
+        FT_TGCFSFX,
+        FT_ISSETUPSTREAM,
         FT_SPIS,
         FT_RIB,
         FT_PE64_SETUPFACTORY,
@@ -14735,7 +15295,6 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_PYINSTALLER_PYZ,
         FT_AMIGA_LZX,
         FT_MI10,
-        FT_DEARK_LEGACY_ARCHIVE,
         FT_LIBDSK_IMAGE,
         FT_WOLF_VSWAP,
         FT_COMPACT_PRO,
@@ -14771,6 +15330,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_FTCOMP,
         FT_FLS,
         FT_RTPATCH,
+        FT_RTA,
         FT_ARQ,
         FT_ARQSFX,
         FT_ALDUS,
@@ -14812,6 +15372,9 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_POWERARC,
         FT_APRICOT,
         FT_CISO,
+        FT_ANDROID_BOOT,
+        FT_NERO_NRG,
+        FT_ECM,
         FT_CLOOP,
         FT_AIX_BIGAF,
         FT_ROMFS,
@@ -14821,13 +15384,25 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_CLP,
         FT_LIM,
         FT_AIN,
+        FT_ESP,
+        FT_LZWD,
+        FT_EDC_PACKED,
+        FT_LOGITECH_COMPRESS,
+        FT_DMA_PACK,
+        FT_GENIUS_LIBRARY,
+        FT_SMSIPAK,
+        FT_PSN_COMPRESS,
+        FT_WII_U8,
+        FT_WII_WAD,
+        FT_WII_LZ77,
+        FT_ASH0,
+        FT_AP4,
         FT_OBFUSCATED_ARCHIVE,
         FT_ULEAD,
         FT_TOPSPEED,
         FT_TWS,
         FT_ZZ,
         FT_CRU,
-        FT_SFXGZIP,
         FT_TARX2,
         FT_SQX,
         FT_PAKLEO,
@@ -14851,6 +15426,8 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_QDA,
         FT_DPK,
         FT_DSL2,
+        FT_BWF,
+        FT_BWCF,
         FT_ZLWB,
         FT_C64WRAPTOR,
         FT_VMSDATABASE,
@@ -14934,6 +15511,7 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_SETTLERS_FT,
         FT_RIVERSOFT,
         FT_GKSETUP,
+        FT_WARPIN,
         FT_OPC,
         FT_GOB2,
         FT_SQ,
@@ -14951,9 +15529,14 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_XPAK,
         FT_HE_TLKB,
         FT_ORACLE_SQUEEZE,
+        FT_SOFTRONICS,
         FT_ZPAK_SFX,
         FT_PCINSTALL_SFX,
         FT_SYDEX_SFX,
+        // Ranked with the other MZ-carrier self-extractors and therefore
+        // above FT_NE: the carrier is the less specific reading of the file.
+        FT_ARCV2SFX,
+        FT_CHZ,
         FT_LARC_PFX,
         FT_SW,
         FT_SAF,
@@ -14992,6 +15575,12 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_RTPATCHSFX,
         FT_AMIGA_ADF,
         FT_GODOT_PCK,
+        FT_NSCRIPTER_NSA,
+        FT_NSCRIPTER_NS2,
+        FT_NSCRIPTER_SAR,
+        FT_RGSSAD,
+        FT_RPGMV_RESOURCE,
+        FT_RENPY_RPA,
         FT_WBFS,
         FT_RVZ,
         FT_DN_ARCHIVE,
@@ -15026,6 +15615,10 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_TAR_ZSTD,
         FT_TAR_LZ4,
         FT_TAR,
+        // A UDZO disk image starts with a bare zlib stream, so the two-byte
+        // zlib prefix probe can insert FT_ZLIB beside FT_DMG; the koly/mish/CRC
+        // validated identity must win that election (ISSUE-34, G30).
+        FT_DMG,
         FT_GZIP,
         FT_ZLIB,
         FT_7Z,
@@ -15052,7 +15645,6 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_UDF,
         FT_SQUASHFS,
         FT_MINIDUMP,
-        FT_DMG,
         FT_VHD,
         FT_VDI,
         FT_QCOW2,
@@ -15080,6 +15672,12 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_MTREE,
         FT_SHAR,
         FT_UU,
+        FT_YENC,
+        FT_QT_QM,
+        FT_EML,
+        FT_MHTML,
+        FT_MBOX,
+        FT_GETTEXT_MO,
 
         // Android resources and bytecode
         FT_ANDROIDXML,
@@ -15140,6 +15738,14 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_UNICODE,
         FT_UTF8,
         FT_TEXT,
+
+        // Fallback archive identities (ISSUE-34).  Both accept whatever their
+        // engine can decode somewhere in the file, so they must lose the
+        // election to every structured identity above: the Deark bridge
+        // outranked FT_DMG, and the gzip-SFX carve outranked deb, rpm, XAR,
+        // ISO 9660 and the Solaris datastream.
+        FT_DEARK_LEGACY_ARCHIVE,
+        FT_SFXGZIP,
 
         // Generic
         FT_DATA,
@@ -15296,6 +15902,12 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_MTREE, FT_FLAG_ARCHIVES},
         {FT_SHAR, FT_FLAG_ARCHIVES},
         {FT_UU, FT_FLAG_ARCHIVES},
+        {FT_YENC, FT_FLAG_ARCHIVES},
+        {FT_QT_QM, FT_FLAG_ARCHIVES},
+        {FT_EML, FT_FLAG_ARCHIVES},
+        {FT_MHTML, FT_FLAG_ARCHIVES},
+        {FT_MBOX, FT_FLAG_ARCHIVES},
+        {FT_GETTEXT_MO, FT_FLAG_ARCHIVES},
         {FT_QUAKE_PAK, FT_FLAG_ARCHIVES},
         {FT_DOOM_WAD, FT_FLAG_ARCHIVES},
         {FT_BUILD_GRP, FT_FLAG_ARCHIVES},
@@ -15373,6 +15985,18 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_ARTIPACK, FT_FLAG_ARCHIVES},
         {FT_BINSH_SFX, FT_FLAG_ARCHIVES},
         {FT_NETWARE_PACK, FT_FLAG_ARCHIVES},
+        {FT_EDC_PACKED, FT_FLAG_ARCHIVES},
+        {FT_LZWD, FT_FLAG_ARCHIVES},
+        {FT_LOGITECH_COMPRESS, FT_FLAG_ARCHIVES},
+        {FT_DMA_PACK, FT_FLAG_ARCHIVES},
+        {FT_GENIUS_LIBRARY, FT_FLAG_ARCHIVES},
+        {FT_SMSIPAK, FT_FLAG_ARCHIVES},
+        {FT_PSN_COMPRESS, FT_FLAG_ARCHIVES},
+        {FT_WII_U8, FT_FLAG_ARCHIVES},
+        {FT_WII_WAD, FT_FLAG_ARCHIVES},
+        {FT_WII_LZ77, FT_FLAG_ARCHIVES},
+        {FT_ASH0, FT_FLAG_ARCHIVES},
+        {FT_AP4, FT_FLAG_ARCHIVES},
         {FT_POVLAB_LZH, FT_FLAG_ARCHIVES},
         {FT_EA_REFPACK, FT_FLAG_ARCHIVES},
         {FT_PRINTSHOP_DELUXE, FT_FLAG_ARCHIVES},
@@ -15390,6 +16014,9 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_POWERARC, FT_FLAG_ARCHIVES},
         {FT_APRICOT, FT_FLAG_ARCHIVES},
         {FT_CISO, FT_FLAG_ARCHIVES},
+        {FT_ANDROID_BOOT, FT_FLAG_ARCHIVES},
+        {FT_NERO_NRG, FT_FLAG_ARCHIVES},
+        {FT_ECM, FT_FLAG_ARCHIVES},
         {FT_CLOOP, FT_FLAG_ARCHIVES},
         {FT_AIX_BIGAF, FT_FLAG_ARCHIVES},
         {FT_ROMFS, FT_FLAG_ARCHIVES},
@@ -15398,6 +16025,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_CLP, FT_FLAG_ARCHIVES},
         {FT_LIM, FT_FLAG_ARCHIVES},
         {FT_AIN, FT_FLAG_ARCHIVES},
+        {FT_ESP, FT_FLAG_ARCHIVES},
         {FT_OBFUSCATED_ARCHIVE, FT_FLAG_ARCHIVES},
         {FT_ULEAD, FT_FLAG_ARCHIVES},
         {FT_TOPSPEED, FT_FLAG_ARCHIVES},
@@ -15428,6 +16056,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_QDA, FT_FLAG_ARCHIVES},
         {FT_DPK, FT_FLAG_ARCHIVES},
         {FT_DSL2, FT_FLAG_ARCHIVES},
+        {FT_BWF, FT_FLAG_ARCHIVES},
+        {FT_BWCF, FT_FLAG_ARCHIVES},
         {FT_ZLWB, FT_FLAG_ARCHIVES},
         {FT_C64WRAPTOR, FT_FLAG_ARCHIVES},
         {FT_VMSDATABASE, FT_FLAG_ARCHIVES},
@@ -15513,6 +16143,7 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_SETTLERS_FT, FT_FLAG_ARCHIVES},
         {FT_RIVERSOFT, FT_FLAG_ARCHIVES},
         {FT_GKSETUP, FT_FLAG_ARCHIVES},
+        {FT_WARPIN, FT_FLAG_ARCHIVES},
         {FT_OPC, FT_FLAG_ARCHIVES},
         {FT_GOB2, FT_FLAG_ARCHIVES},
         {FT_SQ, FT_FLAG_ARCHIVES},
@@ -15530,8 +16161,11 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_XPAK, FT_FLAG_ARCHIVES},
         {FT_HE_TLKB, FT_FLAG_ARCHIVES},
         {FT_ORACLE_SQUEEZE, FT_FLAG_ARCHIVES},
+        {FT_SOFTRONICS, FT_FLAG_ARCHIVES},
         {FT_ZPAK_SFX, FT_FLAG_ARCHIVES},
         {FT_SYDEX_SFX, FT_FLAG_ARCHIVES},
+        {FT_ARCV2SFX, FT_FLAG_ARCHIVES},
+        {FT_CHZ, FT_FLAG_ARCHIVES},
         {FT_LARC_PFX, FT_FLAG_ARCHIVES},
         {FT_PCINSTALL_SFX, FT_FLAG_ARCHIVES},
         {FT_SW, FT_FLAG_ARCHIVES},
@@ -15570,9 +16204,24 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_SQZ, FT_FLAG_ARCHIVES},
         {FT_SQZSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_BSNSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_ISSETUPSTREAM, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_TGCFSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_RTPATCHSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_RTA, FT_FLAG_ARCHIVES},
+        {FT_RTASFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_ACESFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_ASYMETRIXSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_EPSF_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_ARDI1_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_ARDI2_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_AMIGA_ADF, FT_FLAG_ARCHIVES},
         {FT_GODOT_PCK, FT_FLAG_ARCHIVES},
+        {FT_NSCRIPTER_NSA, FT_FLAG_ARCHIVES},
+        {FT_NSCRIPTER_NS2, FT_FLAG_ARCHIVES},
+        {FT_NSCRIPTER_SAR, FT_FLAG_ARCHIVES},
+        {FT_RGSSAD, FT_FLAG_ARCHIVES},
+        {FT_RPGMV_RESOURCE, FT_FLAG_ARCHIVES},
+        {FT_RENPY_RPA, FT_FLAG_ARCHIVES},
         {FT_WBFS, FT_FLAG_ARCHIVES},
         {FT_RVZ, FT_FLAG_ARCHIVES},
         {FT_DN_ARCHIVE, FT_FLAG_ARCHIVES},
@@ -15589,6 +16238,11 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_SPIS, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_SPISSFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_GENTEE, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_QSETUP, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_SBX_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_ARNI_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_INSTALL4J_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
+        {FT_CREATEINSTALL_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_INSTALLSHIELD_LAUNCHER, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_IS14_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_MSDOS_COPYQM, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
@@ -26952,6 +27606,17 @@ QList<QString> XBinary::getSearchSignatures()
         return listResult;
     }
 
+    if (XBinary::checkFileType(FT_RTA, fileType) ||
+        XBinary::checkFileType(FT_RTASFX, fileType)) {
+        listResult.append("'KJd'00");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_EPSF_SFX, fileType)) {
+        listResult.append("'EPSF'0300");
+        return listResult;
+    }
+
     if (XBinary::checkFileType(FT_ARQ, fileType) ||
         XBinary::checkFileType(FT_ARQSFX, fileType)) {
         listResult.append("67570402");
@@ -27024,6 +27689,11 @@ QList<QString> XBinary::getSearchSignatures()
     }
 
     if (XBinary::checkFileType(FT_NETWARE_PACK, fileType)) {
+
+    if (XBinary::checkFileType(FT_EDC_PACKED, fileType)) {
+        listResult.append("' EDC Packed '");
+        return listResult;
+    }
         listResult.append("'Packed File '");
         return listResult;
     }
@@ -27044,6 +27714,18 @@ QList<QString> XBinary::getSearchSignatures()
     }
 
     if (XBinary::checkFileType(FT_ECM_PACK, fileType)) {
+        listResult.append("'ECM'00");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ANDROID_BOOT, fileType)) {
+        listResult.append("'ANDROID!'");
+        return listResult;
+    }
+
+    // Corlett's Error Code Modeler shares the four magic bytes with EmmaSetup's
+    // FT_ECM_PACK; the detection chain probes the ECM record stream first.
+    if (XBinary::checkFileType(FT_ECM, fileType)) {
         listResult.append("'ECM'00");
         return listResult;
     }
@@ -27253,6 +27935,11 @@ QList<QString> XBinary::getSearchSignatures()
         return listResult;
     }
 
+    if (XBinary::checkFileType(FT_WARPIN, fileType)) {
+        listResult.append("770402BE");
+        return listResult;
+    }
+
     if (XBinary::checkFileType(FT_OPC, fileType)) {
         listResult.append("'OS2POINT'");
         return listResult;
@@ -27444,6 +28131,10 @@ QList<QString> XBinary::getSearchSignatures()
     if (XBinary::checkFileType(FT_AMIGA_ADF, fileType)) {
         listResult.append("'DOS'00");
         listResult.append("'DOS'01");
+        listResult.append("'DOS'02");
+        listResult.append("'DOS'03");
+        listResult.append("'DOS'04");
+        listResult.append("'DOS'05");
         return listResult;
     }
 
@@ -27452,8 +28143,46 @@ QList<QString> XBinary::getSearchSignatures()
         return listResult;
     }
 
+    if (XBinary::checkFileType(FT_RGSSAD, fileType)) {
+        listResult.append("'RGSSAD'00");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RPGMV_RESOURCE, fileType)) {
+        listResult.append("'RPGMV'000000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_RENPY_RPA, fileType)) {
+        listResult.append("'RPA-'");
+        return listResult;
+    }
+
     if (XBinary::checkFileType(FT_WBFS, fileType)) {
         listResult.append("'WBFS'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_WII_U8, fileType)) {
+        listResult.append("55AA382D00000020");
+        listResult.append("494D4435........0000000000000000................................55AA382D00000020");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_WII_WAD, fileType)) {
+        listResult.append("00000020'Is'0000");
+        listResult.append("00000020'ib'0000");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_WII_LZ77, fileType)) {
+        listResult.append("4C5A373710");
+        listResult.append("4C5A373711");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_ASH0, fileType)) {
+        listResult.append("'ASH0'");
         return listResult;
     }
 
@@ -27512,6 +28241,22 @@ QList<QString> XBinary::getSearchSignatures()
 
     if (XBinary::checkFileType(FT_BTOA, fileType)) {
         listResult.append("'xbtoa Begin'");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_YENC, fileType)) {
+        listResult.append("'=ybegin '");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_QT_QM, fileType)) {
+        listResult.append("3CB86418CAEF9C95CD211CBF60A1BDDD");
+        return listResult;
+    }
+
+    if (XBinary::checkFileType(FT_GETTEXT_MO, fileType)) {
+        listResult.append("DE120495");
+        listResult.append("950412DE");
         return listResult;
     }
 

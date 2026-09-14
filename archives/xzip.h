@@ -23,6 +23,8 @@
 
 #include "xarchive.h"
 
+class XVolumeSetDevice;
+
 // TODO OSNAME
 class XZip : public XArchive {
     Q_OBJECT
@@ -31,6 +33,10 @@ public:
     struct INTERNAL_INFO : XArchive::INTERNAL_INFO {
         bool bECDOffsetCached = false;
         qint64 nECDOffset = -1;
+        // The cached offset addresses the joined volume set, not the last
+        // segment alone; an instance that has not joined the set must not
+        // reuse it (see setInternalInfo).
+        bool bVolumeSet = false;
     };
 
     bool handleInternalInfo(PDSTRUCT *pPdStruct) override;
@@ -42,7 +48,10 @@ public:
     enum SIGNATURE {
         SIGNATURE_ECD = 0x06054B50,
         SIGNATURE_CFD = 0x02014B50,
-        SIGNATURE_LFD = 0x04034B50
+        SIGNATURE_LFD = 0x04034B50,
+        SIGNATURE_ZIP64_ECD = 0x06064B50,      // ZIP64 end of central directory record (APPNOTE 4.3.14)
+        SIGNATURE_ZIP64_LOCATOR = 0x07064B50,  // ZIP64 end of central directory locator (APPNOTE 4.3.15)
+        SIGNATURE_SPLIT = 0x08074B50           // split/spanned archive marker at the start of segment 0 (APPNOTE 8.5.3)
     };
 
     enum STRUCTID {
@@ -182,6 +191,29 @@ public:
                                      // 0x03 = 256-bit
         quint16 nCompressionMethod;  // Actual compression method used
     };
+
+    // APPNOTE 4.3.15: sits immediately before the EOCD record.
+    struct ZIP64ENDOFCENTRALDIRECTORYLOCATOR {
+        quint32 nSignature;  // SIGNATURE_ZIP64_LOCATOR
+        quint32 nStartDiskOfZip64ECD;
+        quint64 nOffsetOfZip64ECD;  // relative to the start of that disk
+        quint32 nTotalNumberOfDisks;
+    };
+
+    // APPNOTE 4.3.14: the fixed part; nSizeOfRecord counts everything after
+    // itself (44 bytes here plus any extensible data).
+    struct ZIP64ENDOFCENTRALDIRECTORYRECORD {
+        quint32 nSignature;  // SIGNATURE_ZIP64_ECD
+        quint64 nSizeOfRecord;
+        quint16 nVersion;
+        quint16 nMinVersion;
+        quint32 nDiskNumber;
+        quint32 nStartDisk;
+        quint64 nDiskNumberOfRecords;
+        quint64 nTotalNumberOfRecords;
+        quint64 nSizeOfCentralDirectory;
+        quint64 nOffsetToCentralDirectory;
+    };
 #pragma pack(pop)
 
     struct ZIPFILE_RECORD {
@@ -224,6 +256,36 @@ public:
         qint64 nCentralDirectoryEnd;
     };
 
+    // The end-of-central-directory geometry after the ZIP64 record (when a
+    // locator precedes the EOCD) and the volume-set translation have been
+    // applied: every offset addresses the device the reader is bound to.
+    struct ZIP_DIRECTORY {
+        bool bValid;
+        bool bZip64;
+        qint64 nECDOffset;             // the PK\5\6 record
+        qint64 nRecordOffset;          // the ZIP64 record when present, else nECDOffset
+        qint64 nNumberOfRecords;       // total entries
+        qint64 nDiskNumberOfRecords;   // entries on the disk holding the EOCD
+        qint64 nCentralDirectoryOffset;
+        qint64 nCentralDirectorySize;
+        quint32 nCommentLength;
+        quint32 nDiskNumber;           // disk holding the EOCD
+        quint32 nStartDisk;            // disk where the central directory starts
+    };
+
+    // One central directory entry with the 0x0001 ZIP64 extra field applied
+    // and the local header offset translated into the bound device.
+    struct ZIP_CENTRAL_RECORD {
+        bool bValid;
+        bool bZip64;  // the record carries a ZIP64 extra field
+        CENTRALDIRECTORYFILEHEADER cdfh;
+        qint64 nRecordSize;  // fixed part + name + extra + comment
+        qint64 nCompressedSize;
+        qint64 nUncompressedSize;
+        qint64 nLocalHeaderOffset;
+        quint32 nDisk;
+    };
+
     explicit XZip(QIODevice *pDevice = nullptr);
     virtual bool isValid(PDSTRUCT *pPdStruct = nullptr) override;
     static bool isValid(QIODevice *pDevice, PDSTRUCT *pPdStruct = nullptr);
@@ -250,6 +312,20 @@ public:
     LOCALFILEHEADER read_LOCALFILEHEADER(qint64 nOffset, PDSTRUCT *pPdStruct);
     AES_EXTRA_FIELD read_AES_EXTRA_FIELD(qint64 nOffset, PDSTRUCT *pPdStruct);
     qint64 findECDOffset(PDSTRUCT *pPdStruct);
+    // The directory geometry behind an authenticated EOCD offset: ZIP64 record
+    // applied, volume offsets translated. bValid is false when the ZIP64
+    // structures are inconsistent with the EOCD or do not fit the device.
+    ZIP_DIRECTORY readDirectory(qint64 nECDOffset, PDSTRUCT *pPdStruct);
+    // One central directory entry at nOffset with its ZIP64 extra field
+    // applied; bValid is false when a sentinel has no value in the extra field
+    // or a value does not fit.
+    ZIP_CENTRAL_RECORD readCentralRecord(qint64 nOffset, PDSTRUCT *pPdStruct);
+    // True once the reader is bound to a joined .z01/.z02/.zip volume set.
+    bool isVolumeSet();
+    // Translate a (disk, offset-in-disk) pair into an offset in the bound
+    // device; -1 when the disk does not exist in the set. Without a volume
+    // set only disk 0 (and the InstallShield 3 legacy disk 1) resolve.
+    qint64 diskOffsetToLogical(quint32 nDisk, qint64 nOffset);
 
     bool isAPK(qint64 nECDOffset, PDSTRUCT *pPdStruct);
     bool isIPA(qint64 nECDOffset, PDSTRUCT *pPdStruct);
@@ -299,9 +375,18 @@ protected:
     bool _isRecordNamePresent(qint64 nECDOffset, QString sRecordName1, QString sRecordName2, PDSTRUCT *pPdStruct, bool bStartWith, bool bRequireNonEmpty = false);
     qint32 _getNumberOfLocalFileHeaders(qint64 nOffset, qint64 nSize, qint64 *pnRealSize, PDSTRUCT *pPdStruct);
     bool _isECDSignaturePresent(qint64 nOffset, PDSTRUCT *pPdStruct);
+    // The EOCD says the source is disk nLastDiskNumber of a split set: when
+    // the source is a named file, resolve name.z01 .. name.zNN beside it,
+    // join them with the source into an XVolumeSetDevice, bind that and set
+    // *pbJoined. Returns false only when a segment is missing or unreadable
+    // (fail closed); a source without a file name is left alone (*pbJoined
+    // stays false) and returns true.
+    bool _prepareVolumeSet(quint32 nLastDiskNumber, PDSTRUCT *pPdStruct, bool *pbJoined);
 
 private:
     INTERNAL_INFO m_internalInfo;
+    XVolumeSetDevice *m_pVolumeSet;  // owned as a QObject child of this reader
+    QList<qint64> m_listVolumeStarts;
 };
 
 #endif  // XZIP_H

@@ -594,6 +594,116 @@ public:
         // must also be added to the whole-buffer method list that materialises
         // packed/unpacked in XDecompress::decompress.
         HANDLE_METHOD_GENTEE,
+        // InstallShield ISSetupStream member: a nibble-swap-plus-XOR stream
+        // filter keyed by the member's OWN name, with an optional zlib stream
+        // underneath it.  XISSetupStream publishes the cipher selector, the
+        // storage flag and the plain UTF-8 name as FPART_PROP_COMPRESSPROPERTIES;
+        // the four-byte key salt lives ONLY in decISSetupStream() in
+        // XArchive/core/xdecompress.cpp.  It must NOT join the whole-buffer
+        // decoder group in XDecompress::decompress: the container records no
+        // inflated length and that group requires one.
+        HANDLE_METHOD_ISSETUPSTREAM,
+        // CreateInstall "instcrin" member codec: LZ77 over an adaptive Huffman coder, 629 symbols (256 = end of stream, 257..628 a combined length/distance-slot pair, length = (sym-257)%62+3, slot = (sym-257)/62), distance extra bits {4,6,8,10,12,14} over bases {0,16,80,336,1360,5456} plus the length, 32 KiB window restarted per stream, MSB-first bits, no header. A member over 4,000,000 bytes is a chain of such streams, so `packed` is the member's whole stream extent. Decoded by XCreateInstallDecoder::decode(). NOTE: besides the helper decCreateInstallWholeBuffer() it must also be added to the whole-buffer method list in the guarding if-condition of that same branch in XDecompress::decompress (the branch that materialises `packed`/`unpacked`), next to HANDLE_METHOD_GENTEE. It requires FPART_PROP_UNCOMPRESSEDSIZE, which XCreateInstallSFX always publishes. Append at the tail of the HANDLE_METHOD enum (after HANDLE_METHOD_ISSETUPSTREAM) so persisted ids do not move.
+        HANDLE_METHOD_CREATEINSTALL,
+        // SBX (SpinnerBaker eXtractor) member codec: plain Yoshizaki LZHUF - LZSS over an adaptive Huffman tree - with no framing and no method field; dist variant 1, F = 0x3c, THRESHOLD = 2, no end symbol, MAX_FREQ 0x8000, 0x2000-byte ring prefilled with 0x20, i.e. XLZHUFDecoder::getOptions(1, 1, 0, false, false, false) - the same parameter set HANDLE_METHOD_ZTC uses, so this needs a dispatch and not a decoder. Appended at the tail of the enum so persisted ids do not move. Must ALSO be added to the buffered-decoder method group in XDecompress::decompress (xdecompress.cpp, next to HANDLE_METHOD_ZTC); it requires FPART_PROP_UNCOMPRESSEDSIZE, which XSBX always publishes.
+        HANDLE_METHOD_SBX_LZHUF,
+        // ChArc method 1: order-1 context-modelled LZ77 with STATIC per-context Huffman tables
+        // transmitted in a model header (259 contexts, MSB-first 16-bit bit accumulator, non-canonical
+        // [count][symbols] table layout, flat 64 KiB ring). Decoded by XChArcDecoder in
+        // XArchive/Algos/xcharcdecoder.*; method 0 is stored and reuses HANDLE_METHOD_STORE. Append at
+        // the TRUE tail of the HANDLE_METHOD enum in Formats/xbinary.h.
+        HANDLE_METHOD_CHARC,
+        // install4j/exe4j launcher payload codec: one constant XOR byte (0x88) over the whole member,
+        // length preserving, so FPART_PROP_COMPRESSEDSIZE == FPART_PROP_UNCOMPRESSEDSIZE. Append at the
+        // TRUE tail of the HANDLE_METHOD enum in Formats/xbinary.h so persisted ids do not move.
+        // IMPORTANT: do NOT give it an else-if arm of its own in XDecompress::decompress - that overruns
+        // MSVC's block-nesting limit and the whole TU fails with C1061 (measured). The edits below
+        // instead fold it into the existing HANDLE_METHOD_XOR_A9 arm, which adds no nesting level; it
+        // also has to be added to the whole-buffer method list that materialises packed/unpacked, and it
+        // requires FPART_PROP_UNCOMPRESSEDSIZE, which XInstall4jSFX always publishes.
+        HANDLE_METHOD_XOR_88,
+        // // ARNI member codec: plain Yoshizaki LZHUF - LZSS over an adaptive Huffman tree
+        // // - with no framing and no method field; dist variant 1, F = 0x3c, THRESHOLD =
+        // // 2, no end symbol, MAX_FREQ 0x8000, 0x2000-byte ring prefilled with 0x20, i.e.
+        // // XLZHUFDecoder::getOptions(1, 1, 0, false, false, false) - the same parameter
+        // // set HANDLE_METHOD_ZTC and HANDLE_METHOD_SBX_LZHUF use, so this needs a
+        // // dispatch and not a decoder.  Its arm goes in the FLAT helper
+        // // decArc5WholeBuffer() in XArchive/core/xdecompress.cpp, next to
+        // // HANDLE_METHOD_SBX_LZHUF, so it adds no block-nesting level (C1061).  It must
+        // // ALSO be added to the buffered-decoder method group in XDecompress::decompress;
+        // // it requires FPART_PROP_UNCOMPRESSEDSIZE, which XArniSFX always publishes.
+        // // Appended at the TRUE tail of the enum so persisted ids do not move.
+        HANDLE_METHOD_ARNI_LZHUF,
+        // HP NewWave "<FC>LZW" member codec: twelve-bit MSB-first LZW with TIFF-style early width change
+        // that RESTARTS itself - dictionary, code width and previous phrase - the moment the free slot
+        // reaches 0xFFF, instead of widening to a thirteenth bit.  Decoded by XNewWaveLZWDecoder.  It
+        // must ALSO be added to the whole-buffer method list in XDecompress::decompress next to
+        // HANDLE_METHOD_KBOOM_LZW, not only to the else-if arm, and it requires
+        // FPART_PROP_UNCOMPRESSEDSIZE, which XLZWDArchive always publishes.  (At the time of writing the
+        // tail entry is HANDLE_METHOD_ARNI_LZHUF; re-derive the tail at apply time.)
+        HANDLE_METHOD_LZWD_LZW,
+        // Nintendo LZ77 type 0x10 (LZ10): flag byte per 8 items, MSB first; a set bit is a 16-bit
+        // big-endian reference (length = (hi >> 4) + 3, distance = low 12 bits + 1). The plaintext
+        // length comes from the container header (FPART_PROP_UNCOMPRESSEDSIZE). Whole-buffer decoder
+        // XArchive/Algos/xnintendolzdecoder.*; add to the buffered-decoder method group in
+        // XDecompress::decompress (xdecompress.cpp) as well as the dispatch arm.
+        HANDLE_METHOD_NINTENDO_LZ10,
+        // Nintendo LZ77 type 0x11 (LZ11): same flag scheme, 2-4 byte references with lengths up to
+        // 0x10110. Same decoder unit and the same two xdecompress.cpp registrations.
+        HANDLE_METHOD_NINTENDO_LZ11,
+        // Nintendo ASH0: symbol tree (9-bit leaves, 0x000-0x0FF literals, 0x100+ = length - 3) and
+        // distance tree (11-bit leaves, 15 for My Pokemon Ranch) read from two big-endian word bit
+        // streams; the header carries the distance stream offset at +8, the symbol stream starts at
+        // +0xC. Whole-buffer decoder XArchive/Algos/xash0decoder.*; same two xdecompress.cpp
+        // registrations as HANDLE_METHOD_NINTENDO_LZ10.
+        HANDLE_METHOD_ASH0,
+        // Apple Data Compression (UDCO disk images, blkx stripe type 0x80000004): byte-oriented
+        // LZ77, literal runs of 1..128, short copies (3..18 @ 1..1024) and long copies
+        // (4..67 @ 1..65536). Streaming decoder XArchive/Algos/xadcdecoder.*, called by XDMG
+        // per stripe with the stripe's exact output size; not dispatched through xdecompress.cpp.
+        HANDLE_METHOD_ADC,
+        // Append at the TRUE TAIL of the HANDLE_METHOD enum, after HANDLE_METHOD_ASH0, so persisted ids
+        // do not move. Preceding comment to carry: "BWCF member method 1: plain Yoshizaki LZHUF - LZSS
+        // over an adaptive Huffman tree - with no framing; dist variant 1, F = 0x3c, THRESHOLD = 2, no
+        // end symbol, MAX_FREQ 0x8000, 0x2000-byte ring prefilled with 0x20, i.e.
+        // XLZHUFDecoder::getOptions(1, 1, 0, false, false, false) - the same parameter set
+        // HANDLE_METHOD_ZTC, HANDLE_METHOD_SBX_LZHUF and HANDLE_METHOD_ARNI_LZHUF use, so this needs a
+        // dispatch and NOT a decoder. Its arm goes in the FLAT helper decArc5WholeBuffer() in
+        // XArchive/core/xdecompress.cpp next to HANDLE_METHOD_ARNI_LZHUF, so it adds no block-nesting
+        // level (C1061). It must ALSO be added to the buffered-decoder method group in
+        // XDecompress::decompress; it requires FPART_PROP_UNCOMPRESSEDSIZE, which XBWCFArchive always
+        // publishes. Method 3 is stored and reuses HANDLE_METHOD_STORE."
+        HANDLE_METHOD_BWCF_LZHUF,
+        // // "GENIUS LIBRARY" (.GPL) compressed member: NOT one PKWARE DCL Implode stream but a CHAIN of
+        // them -
+        // // [quint32 packed length][one complete DCL stream] repeated until 8 bytes are left, then
+        // [quint32
+        // // plaintext length][quint32 CRC-32]. Each block restarts the dictionary and carries its own
+        // prelude and
+        // // end-of-stream code, so HANDLE_METHOD_PKWARE_DCL_IMPLODE cannot be pointed at it; the block
+        // walk lives
+        // // in XGeniusLibraryDecoder (Algos/xgeniuslibrarydecoder.*) and the explode inside it is the
+        // existing
+        // // XDclDecoder, so no new codec maths is added. The trailing CRC-32 is the EDB88320 accumulator
+        // seeded
+        // // with 0xFFFFFFFF and left UNFINALISED, i.e. XBinary::_getCRC32 as it stands. Besides the arm
+        // in
+        // // decArc5WholeBuffer() it must ALSO be added to the whole-buffer method list in
+        // // XDecompress::decompress, next to HANDLE_METHOD_PKWARE_DCL_IMPLODE; it requires
+        // // FPART_PROP_UNCOMPRESSEDSIZE, which XGeniusLibrary always publishes. Appended at the TRUE
+        // tail of the
+        // // HANDLE_METHOD enum so persisted ids do not move. (At the time of writing the tail entry is
+        // // HANDLE_METHOD_LZWD_LZW - re-derive the tail at apply time.)
+        HANDLE_METHOD_GENIUS_BLOCKS,
+        // Softronics "Compressed File" 2.00 member codec: the GIF dialect of LZW - 9..12 bit codes,
+        // LSB-first, clear = 0x100, end = 0x101, first free slot = 0x102, no early change and no block
+        // padding - i.e. XSharedLZWDecoder::OPTIONS with bHasClearCode and bHasEndCode set and everything
+        // else at its default.  This needs a dispatch and not a decoder.  Its arm goes in the FLAT helper
+        // decArc5WholeBuffer() in XArchive/core/xdecompress.cpp, next to HANDLE_METHOD_ZPAK_LZW, so it
+        // adds no block-nesting level (C1061).  It must ALSO be added to the whole-buffer method group in
+        // XDecompress::decompress; it requires FPART_PROP_UNCOMPRESSEDSIZE, which XSoftronics always
+        // publishes.  Appended at the TRUE tail of the enum so persisted ids do not move.
+        HANDLE_METHOD_SOFTRONICS_LZW,
 
     };
 
@@ -1595,6 +1705,12 @@ public:
         FT_INSTALLANYWHERE_SFX,
         FT_ASCEND_BACKUP,
         FT_BORLAND_PACK,
+        FT_YENC,
+        FT_QT_QM,
+        FT_EML,
+        FT_MHTML,
+        FT_MBOX,
+        FT_GETTEXT_MO,
 
         // TODO more
         // ARC3 extensions: append to preserve persisted identifiers.
@@ -1829,6 +1945,220 @@ public:
         // container appended behind the declared executable image. Distinct from
         // FT_BSN, which is the bare container at offset 0.
         FT_BSNSFX,
+        // WarpIN package (".wpi"), the OS/2 - eComStation - ArcaOS installer
+        // archive: 0x214 header + one bzip2 install script + a package table +
+        // a flat chain of 0x11d member records.  Plain container at offset 0.
+        FT_WARPIN,
+        // "Setup Specialist" TGCF self-extractor: a 16-bit NE stub with the
+        // complete TGCF container appended at the NE overlay offset. Distinct
+        // from FT_TGCF, which is the bare container at offset 0.
+        FT_TGCFSFX,
+        // InstallShield "ISSetupStream" payload block, carried INSIDE the data
+        // of a PE32 Setup.exe or of the Binary.ISSetup.dll stream of an
+        // InstallShield-authored MSI.  Distinct from FT_PE32_INSTALLSHIELD,
+        // which is the launcher stub, and from FT_ISCAB, which is the separate
+        // .cab data file the older engine ships beside setup.exe.
+        FT_ISSETUPSTREAM,
+        // Pantaray QSetup Installation Suite self-extractor: a PE32 setup
+        // stub whose overlay carries two declared strings and then one
+        // complete zlib member per installed file.  Appended at the tail so
+        // persisted FT identifiers do not move.
+        FT_QSETUP,
+        // Eschalon Setup ARCV 2.00 self-extractor: an MZ/NE setup stub followed by a chain of complete ARCV 2.00 containers. Append at the TRUE tail of XBinary::FT in F:\ownCloud\prepare\qt5\_mylibs\Formats\xbinary.h (currently after FT_QSETUP) so persisted FT identifiers do not move. No HANDLE_METHOD append is needed: the reader reuses the existing HANDLE_METHOD_ARCV_LZHUF / HANDLE_METHOD_STORE / HANDLE_METHOD_ARCV_XOR_DELTA / HANDLE_METHOD_ARCV_XOR_DELTA_TRIAL / HANDLE_METHOD_ARCV2_LZHUF_DELTA / HANDLE_METHOD_ARCV2_LZHUF_DELTA_TRIAL unchanged.
+        FT_ARCV2SFX,
+        // CreateInstall self-extractor, "instcrin" generation: a PE32 stub whose overlay opens with the compressed installer runtime (constant first eight bytes 61 57 41 57 AE 40 60 1B), then a builder prelude, then a flat record chain. Distinct from FT_PE32_CREATEINSTALL / FT_PE64_CREATEINSTALL, which are the LATER Gentee-engine builds with a .gentee section and a GEA container. Append at the tail of the FT enum (after FT_QSETUP) so persisted ids do not move.
+        FT_CREATEINSTALL_SFX,
+        // RTA container of the Pocket Soft RTPatch tooling: "KJd\0" plus a flat chain of length-prefixed records, each one complete RTPatch adaptive Huffman/LZSS stream. The bare container at offset 0. Appended at the TRUE tail of the FT enum so persisted identifiers do not move.
+        FT_RTA,
+        // RTA self-extractor: a 16-bit DOS MZ stub with the complete RTA container appended at the MZ overlay offset. Distinct from FT_RTA, which is the bare container at offset 0. Appended at the TRUE tail of the FT enum, immediately after FT_RTA, so persisted identifiers do not move.
+        FT_RTASFX,
+        // SBX "SpinnerBaker eXtractor" self-extracting archive / SBSETUP installer: a PE32 or NE stub whose overlay carries a bare chain of "SB1\0" member records that closes on the last byte of the file. Appended at the tail so persisted FT identifiers do not move.
+        FT_SBX_SFX,
+        // ACE self-extractor: a 16-bit DOS MZ stub with the complete ACE container appended at the MZ
+        // overlay offset, or the WinACE 32-bit stub that keeps the same container in its "ARCDATA"/"DATA"
+        // PE resource. Distinct from FT_ACE, which is the bare container at offset 0. Appended at the
+        // TRUE tail of the FT enum (Formats/xbinary.h) so persisted identifiers do not move.
+        FT_ACESFX,
+        // ChArc CHZ container (S.Chernivetsky / SP "Dialog", 1990): a flat "SChF" / "SChD" / "SChd"
+        // record chain that ends on the last byte of the file, either bare as a ".chz" archive at offset
+        // 0 or behind the 16-bit DOS "ChSFX (small)" self-extracting stub. ONE type covers both because
+        // the container is byte-identical in the two shapes and the stub length is never assumed. Append
+        // at the TRUE tail of the FT enum in Formats/xbinary.h so persisted FT identifiers do not move.
+        FT_CHZ,
+        // ej-technologies install4j/exe4j self-extracting launcher: a PE32 stub whose overlay opens with
+        // the 0xE8E413D5 builder-variable table (first entry key 101), carries the ';'-terminated member
+        // name list in variable key 2003, and stores each member as a quint32 size plus an optional zero
+        // pad word plus data XORed with 0x88. Append at the TRUE tail of XBinary::FT in Formats/xbinary.h
+        // so persisted FT identifiers do not move.
+        FT_INSTALL4J_SFX,
+        // Eschalon Setup 3 "EPSF" self-extractor: a 32-bit Delphi PE stub whose OVERLAY opens with an
+        // 18-byte "EPSF" header, followed by the ARCV4-codec-packed installer runtime (SETUPMN.DLL), the
+        // ARCV4-codec-packed setup script, and -- on the carriers that ship a product payload -- a
+        // complete ARCV 4.00 container running to end of file. Distinct from FT_ARCV4 (the bare container
+        // at offset 0) and unrelated to FT_EPFS_ARCHIVE (East Point Software, transposed tag). Append at
+        // the TRUE tail of XBinary::FT in F:\ownCloud\prepare\qt5\_mylibs\Formats\xbinary.h so persisted
+        // FT identifiers do not move. No HANDLE_METHOD append is needed: the reader reuses
+        // HANDLE_METHOD_ARCV4_M2 and HANDLE_METHOD_STORE unchanged.
+        FT_EPSF_SFX,
+        // // ARNI self-extracting installer: a PE32 stub whose RCDATA resource - NOT its
+        // // overlay - carries a flat chain of "ARNI" + decoded-size records closed by
+        // // "ARNIARNI\r\n".  The mIRC setup stub is the only builder observed.  Appended
+        // // at the TRUE tail of the enum so persisted FT identifiers do not move; the
+        // // contiguous XStaticUnpacker ranges in XFormats::isStaticUnpacker() are NOT
+        // // widened - FT_ARNI_SFX is listed there explicitly instead.
+        FT_ARNI_SFX,
+        // XBinary::FT, declared in _mylibs/Formats/xbinary.h. Append at the TRUE tail of the enum (as of
+        // this measurement the tail entry is FT_ARNI_SFX) so persisted FT identifiers do not move. //
+        // ARDI self-extracting DISKETTE IMAGE (Daniel F Valot, "ARDI   Version 4.31", built by
+        // IMG2ARDI.EXE): a 16-bit MZ+NE DOS/OS-2 stub whose 0x33-byte BPB-shaped record header sits at
+        // the end of the NE segment data and is followed by ONE raw DEFLATE stream carrying a short
+        // tagged prologue plus a raw FAT12 diskette image; the file ends with the 51-byte
+        // "ARDI-(C)1991-<year>-Daniel Valot" trailer. Distinct from FT_ARDI2_SFX: the two are the same
+        // author's two CONCURRENT tools (their shared version counter interleaves - ARDI 2 is
+        // 4.22/4.33/4.34, this is 4.31) and they share no tag, constant or field. No HANDLE_METHOD append
+        // is needed: the reader reuses HANDLE_METHOD_DEFLATE unchanged.
+        FT_ARDI1_SFX,
+        // XBinary::FT, declared in _mylibs/Formats/xbinary.h. Append immediately after FT_ARDI1_SFX, at
+        // the TRUE tail of the enum. // ARDI self-extracting INSTALLER ("Ardi installer Version
+        // 4.33"/"4.34", "Ardi unpacker Version 4.22", Daniel F Valot): a 32-bit OS/2 LX stub followed by
+        // a backward-linked chain of [quint32 tag][payload][quint32 length] blocks running to a 50-byte
+        // "Copyright Daniel F Valot ... TSHTSH - 1991-<year> " trailer; members are header/data block
+        // pairs (0x12345677 / 0x12345678) whose data is raw DEFLATE, and block 0x11221122 carries the
+        // installer's destination directory. NOTE that the 50-byte trailer alone is the author's
+        // copyright watermark and appears on his ordinary products too, so detection requires the trailer
+        // AND a complete chain walk. Distinct from FT_ARDI1_SFX. No HANDLE_METHOD append is needed: the
+        // reader reuses HANDLE_METHOD_DEFLATE unchanged.
+        FT_ARDI2_SFX,
+        // ESP "Extension Sort Packer" (GyikSoft & MikroLab, 1996-97): the "ESP>" container either bare as
+        // a ".esp" archive at offset 0 or behind its 16-bit DOS ESP2EXE stub. ONE type covers both
+        // because the container is byte-identical in the two shapes and the stub length is never assumed.
+        // Append at the TRUE tail of XBinary::FT in Formats/xbinary.h so persisted FT identifiers do not
+        // move. No HANDLE_METHOD append is needed: the reader materializes its members and publishes them
+        // without an extent.
+        FT_ESP,
+        // Asymetrix ToolBook Setup self-extractor: a 16-bit Windows NE "appsetup" stub carrying a
+        // complete Asymetrix disk-set volume whose directory offsets are container-relative, so the
+        // located region parses exactly like a bare ".001" file. Distinct from FT_ASYMETRIX, which is
+        // that bare volume at offset 0. Must go at the TRUE TAIL of the FT enum so persisted FT
+        // identifiers do not move and the XStaticUnpacker contiguous range is not split.
+        FT_ASYMETRIXSFX,
+        // HP NewWave "<FC>LZW" compressed file; the ARC8 corpus and the reference tool both label this
+        // family LZWD.  Appended at the TRUE tail so persisted ids do not move.  (At the time of writing
+        // the tail entry is FT_ARDI2_SFX, but re-derive the tail at apply time - do not trust that name.)
+        FT_LZWD,
+        // "EDC Packed" container of the Novell DOS-era NetWare client disks: a chain of 41-byte
+        // self-describing member headers, each followed by one NetWare pack stream (the codec
+        // Algos/xnetwarepackdecoder.* already carries for FT_NETWARE_PACK). Distinct from
+        // FT_NETWARE_PACK, which is the single-member "Packed File " container with no member-size field,
+        // and from FT_NETWARE_PACK2, which is the tagged-chunk NWUNPACK container. Append at the TRUE
+        // tail of the FT enum in _mylibs/Formats/xbinary.h (as of this measurement the tail entry is
+        // FT_ARDI2_SFX) so persisted FT identifiers do not move. No HANDLE_METHOD append is needed: the
+        // reader reuses HANDLE_METHOD_NETWARE_PACK unchanged, so xdecompress.cpp, xzip.cmake and xzip.pri
+        // need no edit.
+        FT_EDC_PACKED,
+        // Logitech Compress (LGEXPAND): the DA FA single-file compressor on the Logitech MouseWare and
+        // Logitech Scanner install media - an 8-byte header (magic, the character the file name's '~'
+        // replaced, one unreported byte, quint32 plaintext length) followed by one PKWARE DCL Implode
+        // stream. Appended at the TRUE tail of XBinary::FT so persisted FT identifiers do not move. No
+        // HANDLE_METHOD append is needed: the reader reuses HANDLE_METHOD_PKWARE_DCL_IMPLODE unchanged.
+        FT_LOGITECH_COMPRESS,
+        // Nintendo Wii U8 archive (magic 55 AA 38 2D): the node-table + string-pool container used for
+        // .arc/.app/opening.bnr payloads, optionally behind an IMD5 (0x20) or IMET (0x600/0x640) wrapper.
+        // Members are stored; the reader reuses HANDLE_METHOD_STORE. Appended at the TRUE tail so
+        // persisted FT identifiers do not move.
+        FT_WII_U8,
+        // Nintendo Wii WAD installable package (00 00 00 20 'Is'/'ib'): 0x40-aligned certificate chain,
+        // ticket, TMD, AES-128-CBC encrypted contents and footer. Contents are materialised by the
+        // reader (HANDLE_METHOD_ARCHIVE_STREAM) when a common key is supplied; metadata sections are
+        // HANDLE_METHOD_STORE. Distinct from FT_DOOM_WAD (PC Doom IWAD/PWAD).
+        FT_WII_WAD,
+        // Nintendo LZ77 single-stream file: optional 'LZ77' tag, then the 0x10 (LZ10) or 0x11 (LZ11)
+        // type byte and a 24-bit little-endian plaintext length. Decoded by
+        // HANDLE_METHOD_NINTENDO_LZ10 / HANDLE_METHOD_NINTENDO_LZ11.
+        FT_WII_LZ77,
+        // Nintendo ASH0 compressed file ('ASH0'): two canonical Huffman trees (symbols, distances)
+        // over an LZ stream, big-endian 32-bit word bit reader. Decoded by HANDLE_METHOD_ASH0.
+        FT_ASH0,
+        // Reading-pen AP4 audio container: a 00 01 NN 01 NN table of contents of 9-byte big-endian
+        // (start, size, flag) records pointing at MP3 members, some XOR-obfuscated with a per-member
+        // key derived from the first byte. Members are materialised by the reader
+        // (HANDLE_METHOD_ARCHIVE_STREAM) because the XOR key varies per member.
+        FT_AP4,
+        // APPEND AT THE TRUE TAIL of XBinary::FT in _mylibs/Formats/xbinary.h, re-derived against the
+        // tree as it stands at apply time (the tail has already moved once during this round:
+        // FT_WII_U8/FT_WII_WAD/FT_WII_LZ77/FT_ASH0/FT_AP4 landed after my snapshot). Comment to carry
+        // with it:
+        // // SMS Installer distribution media: a 14-byte "SMSIPAK " header, a flat chain of 34-byte
+        // // member records and a trailing volume index. Members are either stored or one PKWARE DCL
+        // // Implode stream, so no HANDLE_METHOD append is needed - the reader reuses
+        // // HANDLE_METHOD_STORE and HANDLE_METHOD_PKWARE_DCL_IMPLODE unchanged, and xdecompress.cpp,
+        // // xzip.cmake and xzip.pri need no edit. Appended at the TRUE tail of XBinary::FT so
+        // // persisted FT identifiers do not move.
+        FT_SMSIPAK,
+        // Appended immediately after FT_SMSIPAK at the true tail of XBinary::FT in
+        // _mylibs/Formats/xbinary.h. Comment to carry with it:
+        // // PSNcompress: the per-file wrapper of 3M's Post-it Software Notes setup - a 65-byte ASCII
+        // // header (copyright literal, "0001", plaintext size as eight hex digits or "FFFFFFFF" when
+        // // unknown) and one PKWARE DCL Implode stream. Reuses HANDLE_METHOD_PKWARE_DCL_IMPLODE.
+        FT_PSN_COMPRESS,
+        // UniExtract parity, Tier A batch A3a (game-engine containers).
+        // NScripter archives (GARbro-documented layouts).  FT_NSCRIPTER_SAR is
+        // NOT FT_SAR: that one is Streamline SAR, an LHA dialect.
+        FT_NSCRIPTER_NSA,
+        FT_NSCRIPTER_NS2,
+        FT_NSCRIPTER_SAR,
+        // RPG Maker XP/VX/VX Ace RGSSAD/RGSS2A/RGSS3A ("RGSSAD\0" + version 1 or 3).
+        FT_RGSSAD,
+        // RPG Maker MV per-file encrypted resource ("RPGMV\0\0\0" + 16-byte XOR key
+        // from the game's data/System.json).
+        FT_RPGMV_RESOURCE,
+        // Ren'Py RPA-2.0/3.0/3.2 (zlib-compressed pickle index).
+        FT_RENPY_RPA,
+        // UniExtract parity plan, batch A2 (disk images): appended at the
+        // true tail so persisted identifiers do not move.
+        FT_ANDROID_BOOT,
+        FT_NERO_NRG,
+        FT_ECM,
+        // Append at the TRUE TAIL of the FT enum, after FT_AP4, so persisted ids do not move. Preceding
+        // comment to carry: "Beame & Whiteside BW-Connect distribution file: magic-less chain of 22-byte
+        // records (tag 0x01, 12-byte 8.3 name, DOS date/time, packed size) each followed by a PKWARE DCL
+        // implode stream; the chain tiles the file exactly to EOF."
+        FT_BWF,
+        // Append immediately after FT_BWF, still at the TRUE TAIL of the FT enum. Preceding comment to
+        // carry: "McAfee / Network Associates 'BWCF' distribution set (*.SET): 0x56-byte header then
+        // version-1 fixed-name or version-2 'MFTS' records; members are stored or plain Yoshizaki LZHUF
+        // (HANDLE_METHOD_BWCF_LZHUF). Unrelated to FT_BWF."
+        FT_BWCF,
+        // // DMA packed file (".PK$"): the single-file compressor Dynamic Microprocessor Associates
+        // shipped its
+        // // DOS pcANYWHERE install diskettes with - a 0x22-byte header (magic 'dm' 10 11, a 14-byte
+        // name, the
+        // // plaintext length, a DOS date/time pair, the tag "PAKPAK" and a version word) followed by one
+        // PKWARE
+        // // DCL Implode stream. Appended at the TRUE tail of XBinary::FT so persisted FT identifiers do
+        // not move.
+        // // No HANDLE_METHOD append is needed: the reader reuses HANDLE_METHOD_PKWARE_DCL_IMPLODE
+        // unchanged.
+        // // NOT the same as the existing FT_DMA, which is an audio/executable type; the two tokens are
+        // distinct.
+        // // (At the time of writing the tail entry is FT_LOGITECH_COMPRESS - re-derive the tail at apply
+        // time.)
+        FT_DMA_PACK,
+        // // "GENIUS LIBRARY" (".GPL"): the part-library container of the Genius CAD/CAM products - a
+        // 0x20-byte
+        // // header, then a flat chain of 0x36-byte member records each followed by its name and its
+        // data. A
+        // // member is either stored or a CHAIN of length-prefixed PKWARE DCL Implode blocks, which is
+        // what
+        // // HANDLE_METHOD_GENIUS_BLOCKS names. Appended at the TRUE tail so persisted FT identifiers do
+        // not move.
+        FT_GENIUS_LIBRARY,
+        // Softronics "Compressed File" Version 2.00 single-member container (Softronics Softerm / TSU
+        // distribution disks).  Fixed 40-byte banner at offset 2; the quint8 at offset 0 is the data
+        // offset and must equal 0x2e + strlen(name) + 9 AND, added to the stored compressed size, the
+        // file size.  Append at the TRUE tail of XBinary::FT so persisted FT identifiers do not move. 
+        // The reader reuses HANDLE_METHOD_SOFTRONICS_LZW.
+        FT_SOFTRONICS,
 
     };
 
@@ -3271,6 +3601,74 @@ public:
         FT_FLAG_SYMBOLS = 0x00000100U,
         FT_FLAG_FORMATS = FT_FLAG_EXECUTABLES | FT_FLAG_ARCHIVES | FT_FLAG_DOCUMENTS | FT_FLAG_IMAGES | FT_FLAG_AUDIO | FT_FLAG_VIDEO | FT_FLAG_TEXT
     };
+
+    // Carrier/target class of a format, for the registry below.
+    //
+    // FT_FLAG_* answers "which broad category is this in" and one type gets one
+    // answer; FTCLASS_* answers "what kind of container is it, and what
+    // executable carries it", and one type may legitimately get several.  UPX
+    // is the reason: the same reader unpacks COM, MS-DOS EXE, PE32, PE64, ELF
+    // and Mach-O stubs (xupx.cpp: _isDOSFormat/_isELFFormat/_isMachFormat and
+    // getFileType), so a single "packers" table would hide which carriers are
+    // actually covered.
+    enum FTCLASS : quint32 {
+        FTCLASS_NONE = 0x00000000U,
+        FTCLASS_ARCHIVE = 0x00000001U,     // multi-member container
+        FTCLASS_STREAM = 0x00000002U,      // one compressed stream, no member table
+        FTCLASS_DISKIMAGE = 0x00000004U,   // disk/disc/tape image
+        FTCLASS_FILESYSTEM = 0x00000008U,  // mountable file system image
+        FTCLASS_PACKAGE = 0x00000010U,     // OS/software package
+        FTCLASS_GAME = 0x00000020U,        // game or engine asset container
+        FTCLASS_DOCUMENT = 0x00000040U,    // document/compound container
+        // Self-extracting archives: the payload is an ordinary archive, the
+        // difference is the stub it is glued to.
+        FTCLASS_SFX_ANY = 0x00000100U,    // stub architecture not fixed by the identity
+        FTCLASS_SFX_MSDOS = 0x00000200U,  // MZ / COM stub
+        FTCLASS_SFX_PE32 = 0x00000400U,
+        FTCLASS_SFX_PE64 = 0x00000800U,
+        FTCLASS_SFX_ELF = 0x00001000U,
+        // Installers: a setup program with its own payload format.
+        FTCLASS_INSTALLER_MSDOS = 0x00002000U,
+        FTCLASS_INSTALLER_PE32 = 0x00004000U,
+        FTCLASS_INSTALLER_PE64 = 0x00008000U,
+        // Executable packers/protectors: one program in, one program out.
+        FTCLASS_PACKER_COM = 0x00010000U,
+        FTCLASS_PACKER_MSDOS = 0x00020000U,
+        FTCLASS_PACKER_PE32 = 0x00040000U,
+        FTCLASS_PACKER_PE64 = 0x00080000U,
+        FTCLASS_PACKER_OTHER = 0x00100000U,  // ELF, Mach-O and other carriers
+        FTCLASS_EXECUTABLE = 0x00200000U,    // plain executable, opened as a container
+        FTCLASS_MASK_SFX = FTCLASS_SFX_ANY | FTCLASS_SFX_MSDOS | FTCLASS_SFX_PE32 | FTCLASS_SFX_PE64 | FTCLASS_SFX_ELF,
+        FTCLASS_MASK_INSTALLER = FTCLASS_INSTALLER_MSDOS | FTCLASS_INSTALLER_PE32 | FTCLASS_INSTALLER_PE64,
+        FTCLASS_MASK_PACKER = FTCLASS_PACKER_COM | FTCLASS_PACKER_MSDOS | FTCLASS_PACKER_PE32 | FTCLASS_PACKER_PE64 | FTCLASS_PACKER_OTHER,
+        FTCLASS_MASK_EXECUTABLECARRIED = FTCLASS_MASK_SFX | FTCLASS_MASK_INSTALLER | FTCLASS_MASK_PACKER
+    };
+
+    // One row of the format registry: what the readers in this tree actually
+    // decode for a type, and what the format defines that they do not.
+    //
+    // Every non-empty cell is a claim about code that exists here, not about
+    // the published format: pszCodecs lists what a decoder is wired to,
+    // pszNotSupported lists what the reader recognises and refuses.  A null
+    // cell means "nobody has audited this type yet" and must print as empty -
+    // guessing here would make the whole table worthless.
+    struct FORMATINFO {
+        FT fileType;
+        quint32 nClassMask;
+        const char *pszVersions;      // format versions/levels/revisions handled
+        const char *pszCodecs;        // codecs and ciphers decoded
+        const char *pszNotSupported;  // defined by the format, refused by the reader
+    };
+
+    static bool isFormatInfoPresent(FT fileType);
+    static FORMATINFO getFormatInfo(FT fileType);
+    static quint32 getFormatClassMask(FT fileType);
+    static QString getFormatVersions(FT fileType);
+    static QString getFormatCodecs(FT fileType);
+    static QString getFormatNotSupported(FT fileType);
+    // Every type the registry has a row for whose class mask intersects
+    // nClassMask, in registry order.
+    static QList<FT> getFileTypesByClass(quint32 nClassMask);
 
     QSet<FT> getFileTypes(quint32 nFTFlags);
     static QSet<FT> getFileTypes(QIODevice *pDevice, quint32 nFTFlags);  // mb TODO isImage

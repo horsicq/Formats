@@ -42,6 +42,9 @@
 #include "Algos/xzipcryptodecoder.h"
 #include "Algos/xaesdecoder.h"
 #include "Algos/xppmddecoder.h"
+#include <QFileInfo>
+#include "xcompanionfile.h"
+#include "xvolumesetdevice.h"
 
 XBinary::XCONVERT _TABLE_XZip_STRUCTID[] = {
     {XZip::STRUCTID_UNKNOWN, "Unknown", QObject::tr("Unknown")},
@@ -543,7 +546,7 @@ bool zipAppendCentralDirectory(QIODevice *pDest, QList<XZip::ZIPFILE_RECORD> *pR
 }
 }  // namespace
 
-XZip::XZip(QIODevice *pDevice) : XArchive(pDevice)
+XZip::XZip(QIODevice *pDevice) : XArchive(pDevice), m_pVolumeSet(nullptr)
 {
 }
 
@@ -1497,6 +1500,283 @@ qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
     }
 
     return guardedArchive && guardedSource && XBinary::isPdStructNotCanceled(pPdStruct) ? nResult : -1;
+}
+
+bool XZip::isVolumeSet()
+{
+    return (m_pVolumeSet != nullptr) && (getDevice() == static_cast<QIODevice *>(m_pVolumeSet));
+}
+
+qint64 XZip::diskOffsetToLogical(quint32 nDisk, qint64 nOffset)
+{
+    if (nOffset < 0) return -1;
+
+    if (!isVolumeSet()) {
+        // InstallShield 3's single-volume ZIP writer used one-based disk
+        // numbers in central records while its EOCD used the standard
+        // zero-based value. Accept exactly that legacy 1.
+        return (nDisk <= 1) ? nOffset : -1;
+    }
+
+    if (nDisk >= (quint32)m_listVolumeStarts.size()) return -1;
+
+    const qint64 nStart = m_listVolumeStarts.at((qint32)nDisk);
+    if (nOffset > (LLONG_MAX - nStart)) return -1;
+
+    return nStart + nOffset;
+}
+
+XZip::ZIP_DIRECTORY XZip::readDirectory(qint64 nECDOffset, PDSTRUCT *pPdStruct)
+{
+    Q_UNUSED(pPdStruct)
+    ZIP_DIRECTORY result = {};
+    result.bValid = false;
+
+    const qint64 nSize = getSize();
+    if ((nECDOffset < 0) || (nSize < (qint64)sizeof(ENDOFCENTRALDIRECTORYRECORD)) || (nECDOffset > (nSize - (qint64)sizeof(ENDOFCENTRALDIRECTORYRECORD)))) {
+        return result;
+    }
+
+    ENDOFCENTRALDIRECTORYRECORD ecd = {};
+    if ((read_array(nECDOffset, reinterpret_cast<char *>(&ecd), sizeof(ecd)) != sizeof(ecd)) || (ecd.nSignature != SIGNATURE_ECD)) {
+        return result;
+    }
+
+    result.nECDOffset = nECDOffset;
+    result.nRecordOffset = nECDOffset;
+    result.nCommentLength = ecd.nCommentLength;
+    result.nDiskNumber = ecd.nDiskNumber;
+    result.nStartDisk = ecd.nStartDisk;
+    result.nDiskNumberOfRecords = ecd.nDiskNumberOfRecords;
+    result.nNumberOfRecords = ecd.nTotalNumberOfRecords;
+    result.nCentralDirectorySize = ecd.nSizeOfCentralDirectory;
+    qint64 nCentralDirectoryOffset = ecd.nOffsetToCentralDirectory;
+
+    const bool bSentinel = (ecd.nDiskNumber == 0xFFFF) || (ecd.nStartDisk == 0xFFFF) || (ecd.nDiskNumberOfRecords == 0xFFFF) || (ecd.nTotalNumberOfRecords == 0xFFFF) ||
+                           (ecd.nSizeOfCentralDirectory == 0xFFFFFFFF) || (ecd.nOffsetToCentralDirectory == 0xFFFFFFFF);
+
+    // APPNOTE 4.3.15: the ZIP64 locator sits immediately before the EOCD.
+    ZIP64ENDOFCENTRALDIRECTORYLOCATOR locator = {};
+    bool bLocator = false;
+    const qint64 nLocatorOffset = nECDOffset - (qint64)sizeof(ZIP64ENDOFCENTRALDIRECTORYLOCATOR);
+    if ((nLocatorOffset >= 0) && (read_array(nLocatorOffset, reinterpret_cast<char *>(&locator), sizeof(locator)) == sizeof(locator)) &&
+        (locator.nSignature == SIGNATURE_ZIP64_LOCATOR)) {
+        bLocator = true;
+    }
+
+    if (bLocator) {
+        // Every bound the 32-bit record had, kept on the 64-bit one: the
+        // record lies wholly before the locator, its counts fit a record
+        // list, and the EOCD fields agree with it unless they carry the
+        // sentinel (APPNOTE 4.4.1.4).
+        if (locator.nOffsetOfZip64ECD > (quint64)LLONG_MAX) return result;
+        const qint64 nRecordOffset = diskOffsetToLogical(locator.nStartDiskOfZip64ECD, (qint64)locator.nOffsetOfZip64ECD);
+        if ((nRecordOffset < 0) || (nRecordOffset > (nLocatorOffset - (qint64)sizeof(ZIP64ENDOFCENTRALDIRECTORYRECORD)))) return result;
+
+        ZIP64ENDOFCENTRALDIRECTORYRECORD zip64 = {};
+        if ((read_array(nRecordOffset, reinterpret_cast<char *>(&zip64), sizeof(zip64)) != sizeof(zip64)) || (zip64.nSignature != SIGNATURE_ZIP64_ECD)) {
+            return result;
+        }
+        // nSizeOfRecord counts the bytes after itself: the 44 fixed ones at
+        // least, and the whole record ends at or before the locator.
+        if ((zip64.nSizeOfRecord < 44) || (zip64.nSizeOfRecord > (quint64)(nLocatorOffset - nRecordOffset - 12))) return result;
+        if ((zip64.nTotalNumberOfRecords > 0x7FFFFFFF) || (zip64.nDiskNumberOfRecords > zip64.nTotalNumberOfRecords) ||
+            (zip64.nSizeOfCentralDirectory > (quint64)LLONG_MAX) || (zip64.nOffsetToCentralDirectory > (quint64)LLONG_MAX)) {
+            return result;
+        }
+        if (((ecd.nDiskNumber != 0xFFFF) && (ecd.nDiskNumber != zip64.nDiskNumber)) || ((ecd.nStartDisk != 0xFFFF) && (ecd.nStartDisk != zip64.nStartDisk)) ||
+            ((ecd.nDiskNumberOfRecords != 0xFFFF) && (ecd.nDiskNumberOfRecords != zip64.nDiskNumberOfRecords)) ||
+            ((ecd.nTotalNumberOfRecords != 0xFFFF) && (ecd.nTotalNumberOfRecords != zip64.nTotalNumberOfRecords)) ||
+            ((ecd.nSizeOfCentralDirectory != 0xFFFFFFFF) && (ecd.nSizeOfCentralDirectory != zip64.nSizeOfCentralDirectory)) ||
+            ((ecd.nOffsetToCentralDirectory != 0xFFFFFFFF) && (ecd.nOffsetToCentralDirectory != zip64.nOffsetToCentralDirectory))) {
+            return result;
+        }
+
+        result.bZip64 = true;
+        result.nRecordOffset = nRecordOffset;
+        result.nDiskNumber = zip64.nDiskNumber;
+        result.nStartDisk = zip64.nStartDisk;
+        result.nDiskNumberOfRecords = (qint64)zip64.nDiskNumberOfRecords;
+        result.nNumberOfRecords = (qint64)zip64.nTotalNumberOfRecords;
+        result.nCentralDirectorySize = (qint64)zip64.nSizeOfCentralDirectory;
+        nCentralDirectoryOffset = (qint64)zip64.nOffsetToCentralDirectory;
+    } else if (bSentinel) {
+        // A sentinel promises a ZIP64 record; without a locator nothing backs it.
+        return result;
+    }
+
+    result.nCentralDirectoryOffset = diskOffsetToLogical(result.nStartDisk, nCentralDirectoryOffset);
+    if (result.nCentralDirectoryOffset < 0) return result;
+
+    // The central directory ends exactly where the directory records begin.
+    if ((result.nCentralDirectoryOffset > result.nRecordOffset) || (result.nCentralDirectorySize != (result.nRecordOffset - result.nCentralDirectoryOffset))) {
+        return result;
+    }
+
+    result.bValid = true;
+
+    return result;
+}
+
+XZip::ZIP_CENTRAL_RECORD XZip::readCentralRecord(qint64 nOffset, PDSTRUCT *pPdStruct)
+{
+    ZIP_CENTRAL_RECORD result = {};
+    result.bValid = false;
+
+    const qint64 nSize = getSize();
+    if ((nOffset < 0) || (nSize < (qint64)sizeof(CENTRALDIRECTORYFILEHEADER)) || (nOffset > (nSize - (qint64)sizeof(CENTRALDIRECTORYFILEHEADER)))) {
+        return result;
+    }
+
+    result.cdfh = read_CENTRALDIRECTORYFILEHEADER(nOffset, pPdStruct);
+    if (result.cdfh.nSignature != SIGNATURE_CFD) return result;
+
+    result.nRecordSize =
+        sizeof(CENTRALDIRECTORYFILEHEADER) + (qint64)result.cdfh.nFileNameLength + (qint64)result.cdfh.nExtraFieldLength + (qint64)result.cdfh.nFileCommentLength;
+    if (result.nRecordSize > (nSize - nOffset)) return result;
+
+    result.nCompressedSize = result.cdfh.nCompressedSize;
+    result.nUncompressedSize = result.cdfh.nUncompressedSize;
+    result.nDisk = result.cdfh.nStartDisk;
+    qint64 nLocalHeaderOffset = result.cdfh.nOffsetToLocalFileHeader;
+
+    const bool bNeedUncompressed = (result.cdfh.nUncompressedSize == 0xFFFFFFFF);
+    const bool bNeedCompressed = (result.cdfh.nCompressedSize == 0xFFFFFFFF);
+    const bool bNeedOffset = (result.cdfh.nOffsetToLocalFileHeader == 0xFFFFFFFF);
+    const bool bNeedDisk = (result.cdfh.nStartDisk == 0xFFFF);
+    const bool bNeedZip64 = bNeedUncompressed || bNeedCompressed || bNeedOffset || bNeedDisk;
+
+    // APPNOTE 4.5.3: the 0x0001 field carries, in this fixed order, only the
+    // values whose 32-bit field holds the sentinel. A field longer than that
+    // (a writer that stores every value regardless) is tolerated; a shorter
+    // one, or a sentinel with no field at all, is refused.
+    if (result.cdfh.nExtraFieldLength > 0) {
+        const qint64 nExtraOffset = nOffset + (qint64)sizeof(CENTRALDIRECTORYFILEHEADER) + (qint64)result.cdfh.nFileNameLength;
+        QByteArray baExtra = read_array(nExtraOffset, result.cdfh.nExtraFieldLength);
+        if (baExtra.size() != (qint32)result.cdfh.nExtraFieldLength) return result;
+        char *pExtra = baExtra.data();
+
+        qint32 nPos = 0;
+        while ((baExtra.size() - nPos) >= 4) {
+            const quint16 nTag = XBinary::_read_uint16(pExtra + nPos);
+            const quint16 nLength = XBinary::_read_uint16(pExtra + nPos + 2);
+            nPos += 4;
+            if (nLength > (baExtra.size() - nPos)) return result;
+
+            if (nTag == 0x0001) {
+                if (result.bZip64) return result;  // two ZIP64 fields
+                result.bZip64 = true;
+                qint32 nValuePos = nPos;
+                const qint32 nEnd = nPos + nLength;
+                if (bNeedUncompressed) {
+                    if ((nEnd - nValuePos) < 8) return result;
+                    const quint64 nValue = XBinary::_read_uint64(pExtra + nValuePos);
+                    if (nValue > (quint64)LLONG_MAX) return result;
+                    result.nUncompressedSize = (qint64)nValue;
+                    nValuePos += 8;
+                }
+                if (bNeedCompressed) {
+                    if ((nEnd - nValuePos) < 8) return result;
+                    const quint64 nValue = XBinary::_read_uint64(pExtra + nValuePos);
+                    if (nValue > (quint64)LLONG_MAX) return result;
+                    result.nCompressedSize = (qint64)nValue;
+                    nValuePos += 8;
+                }
+                if (bNeedOffset) {
+                    if ((nEnd - nValuePos) < 8) return result;
+                    const quint64 nValue = XBinary::_read_uint64(pExtra + nValuePos);
+                    if (nValue > (quint64)LLONG_MAX) return result;
+                    nLocalHeaderOffset = (qint64)nValue;
+                    nValuePos += 8;
+                }
+                if (bNeedDisk) {
+                    if ((nEnd - nValuePos) < 4) return result;
+                    result.nDisk = XBinary::_read_uint32(pExtra + nValuePos);
+                }
+            }
+            nPos += nLength;
+        }
+    }
+
+    if (bNeedZip64 && !result.bZip64) return result;
+
+    result.nLocalHeaderOffset = diskOffsetToLogical(result.nDisk, nLocalHeaderOffset);
+    if (result.nLocalHeaderOffset < 0) return result;
+
+    result.bValid = true;
+
+    return result;
+}
+
+bool XZip::_prepareVolumeSet(quint32 nLastDiskNumber, PDSTRUCT *pPdStruct, bool *pbJoined)
+{
+    if (pbJoined) *pbJoined = false;
+
+    QPointer<XZip> guardedThis(this);
+    QPointer<QIODevice> guardedSource(getDevice());
+    if (!guardedSource || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
+    if (m_pVolumeSet || (nLastDiskNumber == 0)) return true;
+
+    // Only a named regular file can have segments beside it.
+    const QString sSourcePath = XCompanionFile::sourcePath(guardedSource.data());
+    if (!guardedThis || !guardedSource) return false;
+    if (sSourcePath.isEmpty()) return true;
+
+    // Info-ZIP names segments name.z01 .. name.z99999; 1024 segments is the
+    // bound the 7-Zip volume join uses as well.
+    if (nLastDiskNumber > 1024) {
+        if (pPdStruct) XBinary::setPdStructErrorString(pPdStruct, tr("Too many ZIP segments: %1").arg(nLastDiskNumber + 1));
+        return false;
+    }
+
+    const qint64 nSourceSize = guardedSource->size();
+    if (!guardedThis || !guardedSource || (nSourceSize < 0)) return false;
+
+    const QString sStem = QFileInfo(sSourcePath).completeBaseName();
+    XVolumeSetDevice *pSet = new XVolumeSetDevice(nullptr);
+
+    for (quint32 i = 1; i <= nLastDiskNumber; i++) {
+        const QString sName = QString("%1.z%2").arg(sStem).arg(i, 2, 10, QChar('0'));
+        const QString sPath = XCompanionFile::resolve(guardedSource.data(), sName);
+        if (!guardedThis || !guardedSource || sPath.isEmpty() || !pSet->appendFile(sPath)) {
+            delete pSet;
+            if (guardedThis && pPdStruct) XBinary::setPdStructErrorString(pPdStruct, tr("Volume %1 missing").arg(sName));
+            return false;
+        }
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
+            delete pSet;
+            return false;
+        }
+    }
+
+    if (!pSet->appendSegment(guardedSource.data(), 0, nSourceSize) || !pSet->open(QIODevice::ReadOnly)) {
+        delete pSet;
+        return false;
+    }
+
+    QList<qint64> listStarts;
+    const qint32 nNumberOfSegments = pSet->getNumberOfSegments();
+    for (qint32 i = 0; i < nNumberOfSegments; i++) {
+        listStarts.append(pSet->getSegmentStart(i));
+    }
+
+    // Binding the joined stream is a device replacement, which an unpack
+    // operation in progress forbids: initUnpack() therefore authenticates the
+    // directory before it takes its guard.
+    setDevice(pSet);
+    if (!guardedThis || (getDevice() != static_cast<QIODevice *>(pSet))) {
+        delete pSet;
+        return false;
+    }
+    pSet->setParent(this);
+    m_pVolumeSet = pSet;
+    m_listVolumeStarts = listStarts;
+    m_internalInfo.bECDOffsetCached = false;
+    m_internalInfo.nECDOffset = -1;
+    m_internalInfo.bVolumeSet = true;
+    if (pbJoined) *pbJoined = true;
+
+    return true;
 }
 
 bool XZip::isAPK(qint64 nECDOffset, PDSTRUCT *pPdStruct)
@@ -2798,6 +3078,50 @@ bool XZip::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &m
     return bResult;
 }
 
+// DynaZIP "Active Delivery" self-extractor (DZSelfEx / sfxfe32.EXE).  Its payload
+// section opens with a 12-byte "AD01" header - the tag, a checksum word and the
+// payload size - directly followed by the first local file header, so the tag sits
+// exactly 12 bytes before the offset the central directory publishes for its first
+// member.  Nothing else answers this shape: a predicate sweep of F:/ARC and
+// F:/tests matched 12 files out of 77469, all of them this family.
+static const char ZIP_AD01_SFX_TAG[] = "AD01";
+static const char ZIP_AD01_SFX_PASSWORD[] = "BdqtkdzmAktd";
+static const qint64 N_ZIP_AD01_SFX_HEADER_SIZE = 12;
+
+static bool zipIsActiveDeliverySFX(XZip *pZip, qint64 nCentralDirectoryOffset, XBinary::PDSTRUCT *pPdStruct)
+{
+    qint64 nTotalSize = pZip->getSize();
+
+    if ((nCentralDirectoryOffset <= 0) || (nCentralDirectoryOffset > (nTotalSize - (qint64)sizeof(XZip::CENTRALDIRECTORYFILEHEADER)))) {
+        return false;
+    }
+
+    if (pZip->read_uint32(nCentralDirectoryOffset) != XZip::SIGNATURE_CFD) {
+        return false;
+    }
+
+    XZip::CENTRALDIRECTORYFILEHEADER cdfh = pZip->read_CENTRALDIRECTORYFILEHEADER(nCentralDirectoryOffset, pPdStruct);
+
+    qint64 nLocalHeaderOffset = (qint64)cdfh.nOffsetToLocalFileHeader;
+    qint64 nTagOffset = nLocalHeaderOffset - N_ZIP_AD01_SFX_HEADER_SIZE;
+
+    if ((nTagOffset < 0) || (nLocalHeaderOffset > (nTotalSize - (qint64)sizeof(XZip::LOCALFILEHEADER)))) {
+        return false;
+    }
+
+    if (pZip->read_uint32(nLocalHeaderOffset) != XZip::SIGNATURE_LFD) {
+        return false;
+    }
+
+    if (pZip->read_array(nTagOffset, 4) != QByteArray(ZIP_AD01_SFX_TAG, 4)) {
+        return false;
+    }
+
+    quint32 nPayloadSize = pZip->read_uint32(nTagOffset + 8);
+
+    return (nPayloadSize > 0) && ((qint64)nPayloadSize <= (nTotalSize - nLocalHeaderOffset));
+}
+
 XBinary::ARCHIVERECORD XZip::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 {
     UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress, &m_bNestedUnpackInfoAuthorized);
@@ -3030,6 +3354,32 @@ XBinary::ARCHIVERECORD XZip::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStru
         if (nFlags & 0x01) {
             result.mapProperties.insert(XBinary::FPART_PROP_ENCRYPTED, true);
             result.mapProperties.insert(XBinary::FPART_PROP_HANDLEMETHOD2, HANDLE_METHOD_ZIPCRYPTO);
+
+            // An "Active Delivery" SFX encrypts the members its own front end
+            // installs with one fixed password.  The stub copies it out of a
+            // literal in its .data before handing the options block to
+            // DZSelfEx():
+            //     lstrcpyA(szPassword, "BdqtkdzmAktd");
+            //     dzOptions.pszPassword = szPassword;
+            // Without it every member of such an archive answers "Cannot unpack
+            // archive member" although the archive lists cleanly - the shape
+            // ISSUE-33 is about.  Supplying it is one-sided: a password the
+            // caller gave always wins, and a member whose publisher encrypted it
+            // under its own key still fails, on its own, instead of taking the
+            // whole archive down with it.  It belongs here rather than in
+            // initUnpack() because unpackToFolder() overwrites
+            // state.mapUnpackProperties with the caller's map after initUnpack()
+            // returns, and unpackCurrent() calls infoCurrent() after that.
+            const bool bPasswordSupplied = !pState->mapUnpackProperties.value(XBinary::UNPACK_PROP_PASSWORD).toString().isEmpty() ||
+                                           !pState->mapUnpackProperties.value(XBinary::UNPACK_PROP_PASSWORD_BYTES).toByteArray().isEmpty();
+
+            if (!bPasswordSupplied && zipIsActiveDeliverySFX(guardedArchive, pContext->nCentralDirectoryOffset, pPdStruct)) {
+                pState->mapUnpackProperties.insert(XBinary::UNPACK_PROP_PASSWORD, QString::fromLatin1(ZIP_AD01_SFX_PASSWORD));
+            }
+
+            if (!guardedArchive || !guardedSource) {
+                return XBinary::ARCHIVERECORD();
+            }
         }
 
         if (nMethod == CMETHOD_AES) {
