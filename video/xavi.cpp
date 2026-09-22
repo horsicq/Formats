@@ -301,30 +301,28 @@ XBinary *XAVI::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
 bool XAVI::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XAVI> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XRiff::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
+        bResult = XRiff::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
 
-        XRiff::INTERNAL_INFO *pInfo = static_cast<XRiff::INTERNAL_INFO *>(guardedThis->XRiff::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
+        XRiff::INTERNAL_INFO *pInfo = static_cast<XRiff::INTERNAL_INFO *>(XRiff::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
 
-        static_cast<XRiff::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
-        guardedThis->setIsInternalInfoHandled(true);
+        static_cast<XRiff::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
+        setIsInternalInfoHandled(true);
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XAVI::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XAVI> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XAVI::setInternalInfo(void *pInternalInfo)

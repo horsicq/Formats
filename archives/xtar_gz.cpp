@@ -82,17 +82,16 @@ bool XTAR_GZ::getOuterStreamInfo(qint64 &nOuterStreamOffset, qint64 &nOuterStrea
 
 QIODevice *XTAR_GZ::decompressData(PDSTRUCT *pPdStruct)
 {
-    QPointer<XTAR_GZ> guardedThis(this);
-    QPointer<QIODevice> source(getDevice());
+    QIODevice *source = getDevice();
     const PDSTRUCTLIFETIME progressLifetime = pPdStruct ? retainPdStructLifetime(pPdStruct) : PDSTRUCTLIFETIME();
     const qint64 nOutputLimit = m_nMaterializedOutputLimit;
     if (!source || (nOutputLimit < 0) || !XBinary::isPdStructNotCanceled(pPdStruct)) return nullptr;
-    XGzip gzip(source.data());
+    XGzip gzip(source);
     UNPACK_STATE state = {};
     QMap<UNPACK_PROP, QVariant> properties;
     properties.insert(UNPACK_PROP_MAX_OUTPUT_SIZE, nOutputLimit);
     const bool bInitialized = gzip.initUnpack(&state, properties, pPdStruct);
-    if (!guardedThis || !source || !bInitialized || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime))) {
+    if (!source || !bInitialized || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime))) {
         gzip.finishUnpack(&state, nullptr);
         return nullptr;
     }
@@ -112,7 +111,7 @@ QIODevice *XTAR_GZ::decompressData(PDSTRUCT *pPdStruct)
     }
     const bool bDecoded = gzip.unpackCurrent(&state, result.get(), pPdStruct);
     const bool bFinished = gzip.finishUnpack(&state, nullptr);
-    if (!guardedThis || !source || !bDecoded || !bFinished || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime)) ||
+    if (!source || !bDecoded || !bFinished || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime)) ||
         !XBinary::isPdStructNotCanceled(pPdStruct) || (result->size() <= 0) || (result->size() > nOutputLimit) || !result->seek(0)) return nullptr;
     // The decode is complete and every byte came from here; nothing writes to
     // this buffer again.  Seal before it can be snapshotted.
@@ -123,27 +122,25 @@ QIODevice *XTAR_GZ::decompressData(PDSTRUCT *pPdStruct)
 
 bool XTAR_GZ::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XTAR_GZ> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XTARCOMPRESSED::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
-        XTARCOMPRESSED::INTERNAL_INFO *pInfo = static_cast<XTARCOMPRESSED::INTERNAL_INFO *>(guardedThis->XTARCOMPRESSED::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
-        static_cast<XTARCOMPRESSED::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
+        bResult = XTARCOMPRESSED::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
+        XTARCOMPRESSED::INTERNAL_INFO *pInfo = static_cast<XTARCOMPRESSED::INTERNAL_INFO *>(XTARCOMPRESSED::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
+        static_cast<XTARCOMPRESSED::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XTAR_GZ::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XTAR_GZ> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XTAR_GZ::setInternalInfo(void *pInternalInfo)

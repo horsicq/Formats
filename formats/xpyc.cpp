@@ -135,9 +135,8 @@ XBinary::FT XPYC::getFileType()
 
 QString XPYC::getVersion()
 {
-    QPointer<XPYC> guardedThis(this);
-    const INFO *pInfo = static_cast<const INFO *>(guardedThis->getInternalInfo(nullptr));
-    return (guardedThis && pInfo) ? pInfo->sVersion : QString();
+    const INFO *pInfo = static_cast<const INFO *>(getInternalInfo(nullptr));
+    return (pInfo) ? pInfo->sVersion : QString();
 }
 
 QString XPYC::getFileFormatExt()
@@ -153,11 +152,10 @@ QString XPYC::getFileFormatExtsString()
 qint64 XPYC::getFileFormatSize(PDSTRUCT *pPdStruct)
 {
     qint64 nResult = 0;
-    QPointer<XPYC> guardedThis(this);
 
-    if (guardedThis->isValid(pPdStruct) && guardedThis) {
-        const INFO *pInfo = static_cast<const INFO *>(guardedThis->getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return nResult;
+    if (isValid(pPdStruct)) {
+        const INFO *pInfo = static_cast<const INFO *>(getInternalInfo(pPdStruct));
+        if (!pInfo) return nResult;
         const INFO info = *pInfo;
         qint32 nMajor = 0;
         qint32 nMinor = 0;
@@ -303,9 +301,8 @@ QList<XBinary::XFRECORD> XPYC::getXFRecords(FT fileType, quint32 nStructID, cons
     QList<XBinary::XFRECORD> listResult;
 
     if (nStructID == STRUCTID_HEADER) {
-        QPointer<XPYC> guardedThis(this);
-        const INFO *pInfo = static_cast<const INFO *>(guardedThis->getInternalInfo(nullptr));
-        if (!guardedThis || !pInfo) return listResult;
+        const INFO *pInfo = static_cast<const INFO *>(getInternalInfo(nullptr));
+        if (!pInfo) return listResult;
         const INFO info = *pInfo;
 
         qint32 nMajor = 0;
@@ -335,39 +332,35 @@ QList<XBinary::XFRECORD> XPYC::getXFRecords(FT fileType, quint32 nStructID, cons
 
 bool XPYC::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XPYC> guardedThis(this);
-    const bool bAlreadyHandled = guardedThis->isInternalInfoHandled();
-    if (!guardedThis) return false;
+    const bool bAlreadyHandled = isInternalInfoHandled();
 
     if (!bAlreadyHandled) {
-        const quint64 nTransaction = guardedThis->beginInternalInfoTransaction();
+        const quint64 nTransaction = beginInternalInfoTransaction();
         if (!nTransaction) return false;
 
         // The transaction supplies the recursion sentinel. Keep every
         // source-derived value local until the same binding is revalidated.
-        guardedThis->m_internalInfo = INTERNAL_INFO();
-        INTERNAL_INFO info = guardedThis->_getInternalInfo(pPdStruct);
-        if (!guardedThis) return false;
-        if (!guardedThis->isInternalInfoTransactionCurrent(nTransaction) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
-            guardedThis->rollbackInternalInfoTransaction(nTransaction);
+        m_internalInfo = INTERNAL_INFO();
+        INTERNAL_INFO info = _getInternalInfo(pPdStruct);
+        if (!isInternalInfoTransactionCurrent(nTransaction) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+            rollbackInternalInfoTransaction(nTransaction);
             return false;
         }
 
-        const XBinary::_MEMORY_MAP memoryMap = guardedThis->getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
-        if (!guardedThis) return false;
-        if (!guardedThis->isInternalInfoTransactionCurrent(nTransaction) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
-            guardedThis->rollbackInternalInfoTransaction(nTransaction);
+        const XBinary::_MEMORY_MAP memoryMap = getMemoryMap(MAPMODE_UNKNOWN, pPdStruct);
+        if (!isInternalInfoTransactionCurrent(nTransaction) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
+            rollbackInternalInfoTransaction(nTransaction);
             return false;
         }
         info.memoryMap = memoryMap;
 
-        if (!guardedThis->isInternalInfoTransactionCurrent(nTransaction)) {
-            guardedThis->rollbackInternalInfoTransaction(nTransaction);
+        if (!isInternalInfoTransactionCurrent(nTransaction)) {
+            rollbackInternalInfoTransaction(nTransaction);
             return false;
         }
-        guardedThis->m_internalInfo = info;
-        if (!guardedThis->commitInternalInfoTransaction(nTransaction, static_cast<XBinary::INTERNAL_INFO *>(&guardedThis->m_internalInfo))) {
-            guardedThis->rollbackInternalInfoTransaction(nTransaction);
+        m_internalInfo = info;
+        if (!commitInternalInfoTransaction(nTransaction, static_cast<XBinary::INTERNAL_INFO *>(&m_internalInfo))) {
+            rollbackInternalInfoTransaction(nTransaction);
             return false;
         }
     }
@@ -377,11 +370,10 @@ bool XPYC::handleInternalInfo(PDSTRUCT *pPdStruct)
 
 void *XPYC::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XPYC> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XPYC::setInternalInfo(void *pInternalInfo)
@@ -734,13 +726,12 @@ XPYC::CODE_OBJECT XPYC::getCodeObject(PDSTRUCT *pPdStruct)
     codeObject.nStackSize = 0;
     codeObject.nFlags = 0;
 
-    QPointer<XPYC> guardedThis(this);
-    if (!guardedThis->isValid(pPdStruct) || !guardedThis) {
+    if (!isValid(pPdStruct)) {
         return codeObject;
     }
 
-    const INFO *pInfo = static_cast<const INFO *>(guardedThis->getInternalInfo(pPdStruct));
-    if (!guardedThis || !pInfo) return codeObject;
+    const INFO *pInfo = static_cast<const INFO *>(getInternalInfo(pPdStruct));
+    if (!pInfo) return codeObject;
     const INFO info = *pInfo;
     qint32 nMajor = 0;
     qint32 nMinor = 0;
@@ -1011,18 +1002,15 @@ XBinary::_MEMORY_MAP XPYC::getMemoryMap(MAPMODE mapMode, PDSTRUCT *pPdStruct)
 QList<XBinary::FPART> XPYC::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTRUCT *pPdStruct)
 {
     QList<FPART> listResult;
-    QPointer<XPYC> guardedThis(this);
 
     if ((nLimit < -1) || (nLimit == 0)) {
         return listResult;
     }
 
-    qint64 nTotalSize = guardedThis->getSize();
-    if (!guardedThis) return listResult;
-    qint64 nFormatSize = guardedThis->getFileFormatSize(pPdStruct);
-    if (!guardedThis) return listResult;
-    const INFO *pInfo = static_cast<const INFO *>(guardedThis->getInternalInfo(pPdStruct));
-    if (!guardedThis || !pInfo) return listResult;
+    qint64 nTotalSize = getSize();
+    qint64 nFormatSize = getFileFormatSize(pPdStruct);
+    const INFO *pInfo = static_cast<const INFO *>(getInternalInfo(pPdStruct));
+    if (!pInfo) return listResult;
     const INFO info = *pInfo;
 
     // Calculate header size (magic + marker + metadata)

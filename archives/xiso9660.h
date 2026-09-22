@@ -22,7 +22,6 @@
 #define XISO9660_H
 
 #include <QFile>
-#include <QPointer>
 
 #include "xarchive.h"
 
@@ -190,8 +189,8 @@ private:
     QString m_sModificationDateTime;
     QString m_sExpirationDateTime;
     QString m_sEffectiveDateTime;
-    QPointer<QIODevice> m_pLogicalImageDevice;
-    QPointer<QFile> m_pOwnedImageFile;
+    QIODevice *m_pLogicalImageDevice = nullptr;
+    QFile *m_pOwnedImageFile = nullptr;
     qint64 m_nVolumeDescriptorOffset;
     bool m_bJoliet;
     bool m_bCueSource;

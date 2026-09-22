@@ -185,7 +185,6 @@ QList<XArchive::RECORD> XDOS16::getRecords(qint32 nLimit, PDSTRUCT *pPdStruct)
 
 bool XDOS16::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
-    QPointer<XDOS16> guardedThis(this);
     if (m_bUnpackOperationInProgress) {
         return false;
     }
@@ -194,52 +193,46 @@ bool XDOS16::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> 
         return false;
     }
 
-    if ((pState->pContext || !pState->baUnpackSourceToken.isEmpty()) && !guardedThis->ownsUnpackSource(pState)) {
+    if ((pState->pContext || !pState->baUnpackSourceToken.isEmpty()) && !ownsUnpackSource(pState)) {
         return false;
     }
 
     DOS16_UNPACK_CONTEXT *pOldContext = static_cast<DOS16_UNPACK_CONTEXT *>(pState->pContext);
-    guardedThis->releaseUnpackSource(pState);
+    releaseUnpackSource(pState);
     pState->pContext = nullptr;
     *pState = UNPACK_STATE();
     delete pOldContext;
 
-    if (!guardedThis || !XBinary::isPdStructNotCanceled(pPdStruct) || !guardedThis->bindUnpackSource(pState, pPdStruct) || !guardedThis) {
+    if (!XBinary::isPdStructNotCanceled(pPdStruct) || !bindUnpackSource(pState, pPdStruct)) {
         return false;
     }
 
-    const bool bValid = guardedThis->isValid(pPdStruct);
-    if (!guardedThis || !bValid) {
-        if (guardedThis) guardedThis->releaseUnpackSource(pState);
+    const bool bValid = isValid(pPdStruct);
+    if (!bValid) {
+        releaseUnpackSource(pState);
         *pState = UNPACK_STATE();
         return false;
     }
 
-    const QList<RECORD> listRecords = guardedThis->getRecords(-1, pPdStruct);
-    if (!guardedThis) {
-        return false;
-    }
-    const qint64 nSourceSize = guardedThis->getSize();
-    if (!guardedThis) {
-        return false;
-    }
+    const QList<RECORD> listRecords = getRecords(-1, pPdStruct);
+    const qint64 nSourceSize = getSize();
 
     if (listRecords.isEmpty() || (nSourceSize < 0) || !XBinary::isPdStructNotCanceled(pPdStruct)) {
-        guardedThis->releaseUnpackSource(pState);
+        releaseUnpackSource(pState);
         *pState = UNPACK_STATE();
         return false;
     }
 
     DOS16_UNPACK_CONTEXT *pContext = new (std::nothrow) DOS16_UNPACK_CONTEXT;
     if (!pContext) {
-        guardedThis->releaseUnpackSource(pState);
+        releaseUnpackSource(pState);
         *pState = UNPACK_STATE();
         return false;
     }
 
     for (const RECORD &record : listRecords) {
         if ((record.nDataOffset < 0) || (record.nDataSize < 0) || (record.nDataOffset > nSourceSize) || (record.nDataSize > (nSourceSize - record.nDataOffset))) {
-            guardedThis->releaseUnpackSource(pState);
+            releaseUnpackSource(pState);
             delete pContext;
             *pState = UNPACK_STATE();
             return false;
@@ -254,10 +247,9 @@ bool XDOS16::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> 
     pState->nTotalSize = nSourceSize;
     pState->mapUnpackProperties = mapProperties;
 
-    if (!guardedThis->validateAndFinalizeUnpackSource(pState, pContext, pPdStruct)) {
-        if (!guardedThis) return false;
+    if (!validateAndFinalizeUnpackSource(pState, pContext, pPdStruct)) {
         pState->pContext = nullptr;
-        guardedThis->releaseUnpackSource(pState);
+        releaseUnpackSource(pState);
         delete pContext;
         *pState = UNPACK_STATE();
         return false;
@@ -268,14 +260,13 @@ bool XDOS16::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> 
 
 XBinary::ARCHIVERECORD XDOS16::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 {
-    QPointer<XDOS16> guardedThis(this);
     UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress, &m_bNestedUnpackInfoAuthorized);
     if (!operationGuard.isAllowed() || !pState || !pState->pContext) {
         return ARCHIVERECORD();
     }
 
-    const bool bSourceCurrent = guardedThis->isUnpackSourceCurrent(pState, pPdStruct);
-    if (!guardedThis || !bSourceCurrent || (pState->nCurrentIndex < 0) || (pState->nCurrentIndex >= pState->nNumberOfRecords)) {
+    const bool bSourceCurrent = isUnpackSourceCurrent(pState, pPdStruct);
+    if (!bSourceCurrent || (pState->nCurrentIndex < 0) || (pState->nCurrentIndex >= pState->nNumberOfRecords)) {
         return ARCHIVERECORD();
     }
 
@@ -299,14 +290,13 @@ XBinary::ARCHIVERECORD XDOS16::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdSt
 
 bool XDOS16::moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 {
-    QPointer<XDOS16> guardedThis(this);
     UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress);
     if (!operationGuard.isAcquired() || !pState || !pState->pContext) {
         return false;
     }
 
-    const bool bSourceCurrent = guardedThis->isUnpackSourceCurrent(pState, pPdStruct);
-    if (!guardedThis || !bSourceCurrent || (pState->nCurrentIndex < 0) || (pState->nCurrentIndex >= pState->nNumberOfRecords)) {
+    const bool bSourceCurrent = isUnpackSourceCurrent(pState, pPdStruct);
+    if (!bSourceCurrent || (pState->nCurrentIndex < 0) || (pState->nCurrentIndex >= pState->nNumberOfRecords)) {
         return false;
     }
 
@@ -322,7 +312,6 @@ bool XDOS16::moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 
 bool XDOS16::finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 {
-    QPointer<XDOS16> guardedThis(this);
     UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress);
     if (!operationGuard.isAcquired() || !pState) {
         return false;
@@ -330,17 +319,17 @@ bool XDOS16::finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 
     Q_UNUSED(pPdStruct)
 
-    if ((pState->pContext || !pState->baUnpackSourceToken.isEmpty()) && !guardedThis->ownsUnpackSource(pState)) {
+    if ((pState->pContext || !pState->baUnpackSourceToken.isEmpty()) && !ownsUnpackSource(pState)) {
         return false;
     }
 
     DOS16_UNPACK_CONTEXT *pContext = static_cast<DOS16_UNPACK_CONTEXT *>(pState->pContext);
-    guardedThis->releaseUnpackSource(pState);
+    releaseUnpackSource(pState);
     pState->pContext = nullptr;
     *pState = UNPACK_STATE();
     delete pContext;
 
-    return guardedThis;
+    return true;
 }
 
 static bool dos16CanAppendPart(qint32 nLimit, const QList<XBinary::FPART> &listResult)
@@ -814,27 +803,25 @@ XBinary *XDOS16::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModule
 
 bool XDOS16::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XDOS16> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XArchive::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
-        XArchive::INTERNAL_INFO *pInfo = static_cast<XArchive::INTERNAL_INFO *>(guardedThis->XArchive::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
-        static_cast<XArchive::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
+        bResult = XArchive::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
+        XArchive::INTERNAL_INFO *pInfo = static_cast<XArchive::INTERNAL_INFO *>(XArchive::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
+        static_cast<XArchive::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XDOS16::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XDOS16> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XDOS16::setInternalInfo(void *pInternalInfo)

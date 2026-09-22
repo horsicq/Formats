@@ -41,7 +41,7 @@ public:
     }
 
 private:
-    QPointer<QIODevice> m_pDevice;
+    QIODevice * m_pDevice;
     qint64 m_nPosition;
 };
 }  // namespace
@@ -181,27 +181,25 @@ quint32 XNPM::ftStringToStructID(const QString &sFtString)
 
 bool XNPM::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XNPM> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XTAR_GZ::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
-        XTAR_GZ::INTERNAL_INFO *pInfo = static_cast<XTAR_GZ::INTERNAL_INFO *>(guardedThis->XTAR_GZ::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
-        static_cast<XTAR_GZ::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
+        bResult = XTAR_GZ::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
+        XTAR_GZ::INTERNAL_INFO *pInfo = static_cast<XTAR_GZ::INTERNAL_INFO *>(XTAR_GZ::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
+        static_cast<XTAR_GZ::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XNPM::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XNPM> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XNPM::setInternalInfo(void *pInternalInfo)

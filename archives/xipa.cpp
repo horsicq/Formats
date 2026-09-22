@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    QPointer<QIODevice> m_pDevice;
+    QIODevice * m_pDevice;
     qint64 m_nPosition;
 };
 
@@ -159,27 +159,25 @@ QString XIPA::getFileFormatExt()
 
 bool XIPA::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XIPA> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XJAR::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
-        XJAR::INTERNAL_INFO *pInfo = static_cast<XJAR::INTERNAL_INFO *>(guardedThis->XJAR::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
-        static_cast<XJAR::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
+        bResult = XJAR::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
+        XJAR::INTERNAL_INFO *pInfo = static_cast<XJAR::INTERNAL_INFO *>(XJAR::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
+        static_cast<XJAR::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XIPA::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XIPA> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XIPA::setInternalInfo(void *pInternalInfo)

@@ -317,29 +317,27 @@ XMUS::HEADER XMUS::_read_HEADER(qint64 nOffset)
 
 bool XMUS::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XMUS> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
+        bResult = XBinary::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
-        guardedThis->setIsInternalInfoHandled(true);
+        static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
+        setIsInternalInfoHandled(true);
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XMUS::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XMUS> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
-    return &guardedThis->m_internalInfo;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
+    return &m_internalInfo;
 }
 
 void XMUS::setInternalInfo(void *pInternalInfo)

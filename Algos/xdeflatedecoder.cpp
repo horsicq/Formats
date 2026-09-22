@@ -9487,7 +9487,6 @@ uLong ZEXPORT adler32_combine64(uLong adler1, uLong adler2, z_off64_t len2)
 #endif
 
 #include "xdeflatedecoder.h"
-#include <QPointer>
 #include <limits>
 #include "algo_utils.h"
 #include "xalgo_local.h"
@@ -10566,8 +10565,8 @@ bool XDeflateDecoder::decompress_zlib(XBinary::DATAPROCESS_STATE *pDecompressSta
         return false;
     }
 
-    QPointer<QIODevice> guardedInput(pDecompressState->pDeviceInput);
-    QPointer<QIODevice> guardedOutput(pDecompressState->pDeviceOutput);
+    QIODevice *guardedInput = pDecompressState->pDeviceInput;
+    QIODevice *guardedOutput = pDecompressState->pDeviceOutput;
     const XBinary::PDSTRUCTLIFETIME progressLifetime = pPdStruct ? XBinary::retainPdStructLifetime(pPdStruct) : XBinary::PDSTRUCTLIFETIME();
 
     Algo_utils::prepareState(pDecompressState);
@@ -10577,7 +10576,7 @@ bool XDeflateDecoder::decompress_zlib(XBinary::DATAPROCESS_STATE *pDecompressSta
     }
 
     struct DEFLATE_GUARDED_EXACT_READER {
-        const QPointer<QIODevice> &guardedInput;
+        QIODevice *const &guardedInput;
 
         bool operator()(qint64 nOffset,char *pData,qint32 nSize) const
         {
@@ -10659,7 +10658,7 @@ bool XDeflateDecoder::decompress_zlib(XBinary::DATAPROCESS_STATE *pDecompressSta
         if (pPdStruct) {
             XBinary::setPdStructCallback(&adlerProgress, deflateAdlerProgressCallback, &adlerBridge);
         }
-        const quint32 nActualAdler = XBinary::getAdler32(guardedOutput.data(), &adlerProgress);
+        const quint32 nActualAdler = XBinary::getAdler32(guardedOutput, &adlerProgress);
         if (!guardedOutput || (pPdStruct && !XBinary::isPdStructLifetimeAlive(progressLifetime))) {
             return false;
         }

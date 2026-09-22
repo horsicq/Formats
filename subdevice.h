@@ -21,7 +21,6 @@
 #ifndef SUBDEVICE_H
 #define SUBDEVICE_H
 
-#include <QPointer>
 #include <QVariant>
 
 #include "xiodevice.h"
@@ -47,7 +46,7 @@ protected:
 private:
     void handleBackingDeviceDestroyed();
 
-    QPointer<QIODevice> m_pDevice;
+    QIODevice *m_pDevice = nullptr;
     bool m_bIsRangeValid;
 };
 

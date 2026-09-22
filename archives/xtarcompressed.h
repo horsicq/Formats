@@ -64,8 +64,8 @@ public:
     virtual bool finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr) override;
 
 protected:
-    QPointer<QIODevice> m_pDecompressedData;
-    QPointer<QIODevice> m_pOriginalDevice;
+    QIODevice *m_pDecompressedData = nullptr;
+    QIODevice *m_pOriginalDevice = nullptr;
     COMPRESSION_TYPE m_compressionType;
 
     // Outer (compressed) stream location in the original file, populated during initUnpack

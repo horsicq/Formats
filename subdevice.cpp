@@ -43,9 +43,9 @@ SubDevice::SubDevice(QIODevice *pDevice, qint64 nOffset, qint64 nSize, QObject *
 
     if (!m_pDevice) return;
 
-    connect(m_pDevice.data(), &QObject::destroyed, this, &SubDevice::handleBackingDeviceDestroyed);
+    connect(m_pDevice, &QObject::destroyed, this, &SubDevice::handleBackingDeviceDestroyed);
     if (!m_pDevice) return;
-    connect(m_pDevice.data(), &QIODevice::aboutToClose, this, &SubDevice::handleBackingDeviceDestroyed);
+    connect(m_pDevice, &QIODevice::aboutToClose, this, &SubDevice::handleBackingDeviceDestroyed);
 
     // Do not propagate raw-pointer dynamic properties. The backing QObject is
     // tracked by QPointer and getBackupDevice() recognizes SubDevice directly.
@@ -60,25 +60,23 @@ SubDevice::~SubDevice()
 
 QIODevice *SubDevice::getOrigDevice()
 {
-    return m_pDevice.data();
+    return m_pDevice;
 }
 
 bool SubDevice::open(OpenMode mode)
 {
-    QPointer<SubDevice> guardedThis(this);
     if (isOpen()) {
         close();
-        if (!guardedThis) return false;
     }
 
     const OpenMode accessMode = mode & QIODevice::ReadWrite;
-    QPointer<QIODevice> guardedDevice(m_pDevice);
+    QIODevice *guardedDevice = m_pDevice;
     if (!m_bIsRangeValid || !guardedDevice || (accessMode == NotOpen) || (mode & (QIODevice::Append | QIODevice::Truncate))) {
         return false;
     }
 
     const qint64 nDeviceSize = guardedDevice->size();
-    if (!guardedThis || !guardedDevice) return false;
+    if (!guardedDevice) return false;
     const quint64 nInitLocation = getInitLocation();
     const qint64 nRangeSize = size();
     if ((nDeviceSize < 0) || (nInitLocation > (quint64)(std::numeric_limits<qint64>::max)()) || ((qint64)nInitLocation > nDeviceSize) || (nRangeSize < 0) ||
@@ -87,20 +85,20 @@ bool SubDevice::open(OpenMode mode)
     }
 
     const bool bBackingOpen = guardedDevice->isOpen();
-    if (!guardedThis || !guardedDevice || !bBackingOpen) return false;
+    if (!guardedDevice || !bBackingOpen) return false;
     const bool bSequential = guardedDevice->isSequential();
-    if (!guardedThis || !guardedDevice || bSequential) return false;
+    if (!guardedDevice || bSequential) return false;
     if (mode & QIODevice::ReadOnly) {
         const bool bReadable = guardedDevice->isReadable();
-        if (!guardedThis || !guardedDevice || !bReadable) return false;
+        if (!guardedDevice || !bReadable) return false;
     }
     if (mode & QIODevice::WriteOnly) {
         const bool bWritable = guardedDevice->isWritable();
-        if (!guardedThis || !guardedDevice || !bWritable) return false;
+        if (!guardedDevice || !bWritable) return false;
     }
 
     const bool bPositioned = guardedDevice->seek((qint64)nInitLocation);
-    if (!guardedThis || !guardedDevice || !bPositioned) return false;
+    if (!guardedDevice || !bPositioned) return false;
 
     if (!XIODevice::open(mode) || !QIODevice::seek(0)) {
         close();
@@ -122,8 +120,7 @@ void SubDevice::handleBackingDeviceDestroyed()
 
 bool SubDevice::seek(qint64 nPos)
 {
-    QPointer<SubDevice> guardedThis(this);
-    QPointer<QIODevice> guardedDevice(m_pDevice);
+    QIODevice *guardedDevice = m_pDevice;
     const qint64 nRangeSize = size();
     const quint64 nInitLocation = getInitLocation();
     if (!isOpen() || !guardedDevice || (nPos < 0) || (nPos > nRangeSize) || (nInitLocation > (quint64)(std::numeric_limits<qint64>::max)()) ||
@@ -132,12 +129,12 @@ bool SubDevice::seek(qint64 nPos)
     }
 
     const bool bBackingOpen = guardedDevice->isOpen();
-    if (!guardedThis || !guardedDevice || !bBackingOpen) return false;
+    if (!guardedDevice || !bBackingOpen) return false;
     const qint64 nAbsolutePosition = (qint64)nInitLocation + nPos;
     const qint64 nOldBackingPosition = guardedDevice->pos();
-    if (!guardedThis || !guardedDevice) return false;
+    if (!guardedDevice) return false;
     const bool bPositioned = guardedDevice->seek(nAbsolutePosition);
-    if (!guardedThis || !guardedDevice || !bPositioned) return false;
+    if (!guardedDevice || !bPositioned) return false;
 
     if (!QIODevice::seek(nPos)) {
         if ((nOldBackingPosition >= 0) && guardedDevice) {
@@ -156,15 +153,14 @@ bool SubDevice::reset()
 
 qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
 {
-    QPointer<SubDevice> guardedThis(this);
-    QPointer<QIODevice> guardedDevice(m_pDevice);
+    QIODevice *guardedDevice = m_pDevice;
     const qint64 nPosition = pos();
     const qint64 nRangeSize = size();
     if (!isOpen() || !isReadable() || !guardedDevice || (nMaxSize < 0) || ((nMaxSize > 0) && !pData) || (nPosition < 0) || (nPosition > nRangeSize)) return -1;
     const bool bBackingOpen = guardedDevice->isOpen();
-    if (!guardedThis || !guardedDevice || !bBackingOpen) return -1;
+    if (!guardedDevice || !bBackingOpen) return -1;
     const bool bBackingReadable = guardedDevice->isReadable();
-    if (!guardedThis || !guardedDevice || !bBackingReadable) return -1;
+    if (!guardedDevice || !bBackingReadable) return -1;
     nMaxSize = qMin(nMaxSize, nRangeSize - nPosition);
 
     // The backing device can be shared by multiple SubDevice instances (and by
@@ -172,37 +168,36 @@ qint64 SubDevice::readData(char *pData, qint64 nMaxSize)
     // still match this view's logical cursor from the constructor or last seek.
     const qint64 nAbsolutePosition = (qint64)getInitLocation() + nPosition;
     const qint64 nBackingPosition = guardedDevice->pos();
-    if (!guardedThis || !guardedDevice) return -1;
+    if (!guardedDevice) return -1;
     if (nBackingPosition != nAbsolutePosition) {
         const bool bPositioned = guardedDevice->seek(nAbsolutePosition);
-        if (!guardedThis || !guardedDevice || !bPositioned) return -1;
+        if (!guardedDevice || !bPositioned) return -1;
     }
 
     const qint64 nResult = guardedDevice->read(pData, nMaxSize);
-    return (guardedThis && guardedDevice) ? nResult : -1;
+    return (guardedDevice) ? nResult : -1;
 }
 
 qint64 SubDevice::writeData(const char *pData, qint64 nMaxSize)
 {
-    QPointer<SubDevice> guardedThis(this);
-    QPointer<QIODevice> guardedDevice(m_pDevice);
+    QIODevice *guardedDevice = m_pDevice;
     const qint64 nPosition = pos();
     const qint64 nRangeSize = size();
     if (!isOpen() || !isWritable() || !guardedDevice || (nMaxSize < 0) || ((nMaxSize > 0) && !pData) || (nPosition < 0) || (nPosition > nRangeSize)) return -1;
     const bool bBackingOpen = guardedDevice->isOpen();
-    if (!guardedThis || !guardedDevice || !bBackingOpen) return -1;
+    if (!guardedDevice || !bBackingOpen) return -1;
     const bool bBackingWritable = guardedDevice->isWritable();
-    if (!guardedThis || !guardedDevice || !bBackingWritable) return -1;
+    if (!guardedDevice || !bBackingWritable) return -1;
     nMaxSize = qMin(nMaxSize, nRangeSize - nPosition);
 
     const qint64 nAbsolutePosition = (qint64)getInitLocation() + nPosition;
     const qint64 nBackingPosition = guardedDevice->pos();
-    if (!guardedThis || !guardedDevice) return -1;
+    if (!guardedDevice) return -1;
     if (nBackingPosition != nAbsolutePosition) {
         const bool bPositioned = guardedDevice->seek(nAbsolutePosition);
-        if (!guardedThis || !guardedDevice || !bPositioned) return -1;
+        if (!guardedDevice || !bPositioned) return -1;
     }
 
     const qint64 nResult = guardedDevice->write(pData, nMaxSize);
-    return (guardedThis && guardedDevice) ? nResult : -1;
+    return (guardedDevice) ? nResult : -1;
 }

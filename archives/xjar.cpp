@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    QPointer<QIODevice> m_pDevice;
+    QIODevice * m_pDevice;
     qint64 m_nPosition;
 };
 }  // namespace
@@ -250,27 +250,25 @@ quint32 XJAR::ftStringToStructID(const QString &sFtString)
 
 bool XJAR::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XJAR> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XZip::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
-        XZip::INTERNAL_INFO *pInfo = static_cast<XZip::INTERNAL_INFO *>(guardedThis->XZip::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
-        static_cast<XZip::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
+        bResult = XZip::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
+        XZip::INTERNAL_INFO *pInfo = static_cast<XZip::INTERNAL_INFO *>(XZip::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
+        static_cast<XZip::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XJAR::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XJAR> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XJAR::setInternalInfo(void *pInternalInfo)

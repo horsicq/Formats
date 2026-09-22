@@ -552,8 +552,8 @@ XZip::XZip(QIODevice *pDevice) : XArchive(pDevice), m_pVolumeSet(nullptr)
 
 bool XZip::isValid(PDSTRUCT *pPdStruct)
 {
-    QPointer<XZip> guardedArchive(this);
-    QPointer<QIODevice> guardedSource(getDevice());
+    XZip *guardedArchive = this;
+    QIODevice *guardedSource = getDevice();
     if (!XBinary::isPdStructNotCanceled(pPdStruct)) return false;
     if (!guardedSource) return false;
     const qint64 nSize = guardedSource->size();
@@ -564,7 +564,7 @@ bool XZip::isValid(PDSTRUCT *pPdStruct)
     if (nECDOffset != -1) return true;
 
     if (nSize < (qint64)sizeof(quint32)) return false;
-    const QByteArray baSignature = XBinary::read_array_process(guardedSource.data(), 0, sizeof(quint32), pPdStruct);
+    const QByteArray baSignature = XBinary::read_array_process(guardedSource, 0, sizeof(quint32), pPdStruct);
     if (!guardedArchive || !guardedSource || (baSignature.size() != (qint64)sizeof(quint32)) ||
         (XBinary::_read_uint32(const_cast<char *>(baSignature.constData())) != SIGNATURE_LFD)) {
         return false;
@@ -1050,7 +1050,7 @@ XZip::AES_EXTRA_FIELD XZip::read_AES_EXTRA_FIELD(qint64 nOffset, PDSTRUCT *pPdSt
 
 bool XZip::_readFileName(qint64 nFileNameOffset, qint64 nFileNameLength, quint16 nFlags, qint64 nExtraFieldOffset, qint64 nExtraFieldLength, QString *pFileName)
 {
-    QPointer<XZip> guardedArchive(this);
+    XZip *guardedArchive = this;
     if (!pFileName) {
         return false;
     }
@@ -1075,13 +1075,13 @@ bool XZip::_readFileName(qint64 nFileNameOffset, qint64 nFileNameLength, quint16
     return decodeZipFileName(baRawName, nFlags, baExtraField, pFileName);
 }
 
-static bool zipReadExact(QPointer<XZip> *pGuardedArchive, QPointer<QIODevice> *pGuardedSource, qint64 nSize, XBinary::PDSTRUCT *pPdStruct, qint64 nOffset, qint64 nLength,
+static bool zipReadExact(XZip **pGuardedArchive, QIODevice **pGuardedSource, qint64 nSize, XBinary::PDSTRUCT *pPdStruct, qint64 nOffset, qint64 nLength,
                          QByteArray *pData)
 {
-    if (!pData || pGuardedArchive->isNull() || pGuardedSource->isNull() || (nOffset < 0) || (nLength < 0) || (nOffset > nSize) || (nLength > (nSize - nOffset)))
+    if (!pData || !*pGuardedArchive || !*pGuardedSource || (nOffset < 0) || (nLength < 0) || (nOffset > nSize) || (nLength > (nSize - nOffset)))
         return false;
-    *pData = XBinary::read_array_process(pGuardedSource->data(), nOffset, nLength, pPdStruct);
-    return !pGuardedArchive->isNull() && !pGuardedSource->isNull() && (pData->size() == nLength);
+    *pData = XBinary::read_array_process(*pGuardedSource, nOffset, nLength, pPdStruct);
+    return *pGuardedArchive && *pGuardedSource && (pData->size() == nLength);
 }
 
 // PKZIP for Windows writes the OEM (DOS codepage) spelling of a member name
@@ -1154,8 +1154,8 @@ static quint32 zipDeviceStamp(QIODevice *pDevice, qint64 nSize, XBinary::PDSTRUC
 
 qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
 {
-    QPointer<XZip> guardedArchive(this);
-    QPointer<QIODevice> guardedSource(getDevice());
+    XZip *guardedArchive = this;
+    QIODevice *guardedSource = getDevice();
     qint64 nResult = -1;
     if (!guardedSource) return -1;
     const qint64 nSize = guardedSource->size();
@@ -1169,7 +1169,7 @@ qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
 
     // Second level: on the device, so it survives the throwaway probe instances.
     // Only honoured while the stamp still describes the bytes actually there.
-    const quint32 nStamp = zipDeviceStamp(guardedSource.data(), nSize, pPdStruct);
+    const quint32 nStamp = zipDeviceStamp(guardedSource, nSize, pPdStruct);
     if (!guardedArchive || !guardedSource) return -1;
 
     if (guardedSource->property(ZIP_ECD_CACHED).toBool() && (guardedSource->property(ZIP_ECD_SIZE).toLongLong() == nSize) &&
@@ -1184,7 +1184,7 @@ qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
     {
         const qint64 nMaxECDSearchSize = 0xFFFF + (qint64)sizeof(ENDOFCENTRALDIRECTORYRECORD);
         const qint64 nSearchOffset = qMax((qint64)0, nSize - nMaxECDSearchSize);
-        const QByteArray baSearch = XBinary::read_array_process(guardedSource.data(), nSearchOffset, nSize - nSearchOffset, pPdStruct);
+        const QByteArray baSearch = XBinary::read_array_process(guardedSource, nSearchOffset, nSize - nSearchOffset, pPdStruct);
         if (!guardedArchive || !guardedSource || (baSearch.size() != (nSize - nSearchOffset))) return -1;
 
         static const QByteArray baECDSignature("PK\x05\x06", 4);
@@ -1712,14 +1712,13 @@ bool XZip::_prepareVolumeSet(quint32 nLastDiskNumber, PDSTRUCT *pPdStruct, bool 
 {
     if (pbJoined) *pbJoined = false;
 
-    QPointer<XZip> guardedThis(this);
-    QPointer<QIODevice> guardedSource(getDevice());
+    QIODevice *guardedSource = getDevice();
     if (!guardedSource || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
     if (m_pVolumeSet || (nLastDiskNumber == 0)) return true;
 
     // Only a named regular file can have segments beside it.
-    const QString sSourcePath = XCompanionFile::sourcePath(guardedSource.data());
-    if (!guardedThis || !guardedSource) return false;
+    const QString sSourcePath = XCompanionFile::sourcePath(guardedSource);
+    if (!guardedSource) return false;
     if (sSourcePath.isEmpty()) return true;
 
     // Info-ZIP names segments name.z01 .. name.z99999; 1024 segments is the
@@ -1730,17 +1729,17 @@ bool XZip::_prepareVolumeSet(quint32 nLastDiskNumber, PDSTRUCT *pPdStruct, bool 
     }
 
     const qint64 nSourceSize = guardedSource->size();
-    if (!guardedThis || !guardedSource || (nSourceSize < 0)) return false;
+    if (!guardedSource || (nSourceSize < 0)) return false;
 
     const QString sStem = QFileInfo(sSourcePath).completeBaseName();
     XVolumeSetDevice *pSet = new XVolumeSetDevice(nullptr);
 
     for (quint32 i = 1; i <= nLastDiskNumber; i++) {
         const QString sName = QString("%1.z%2").arg(sStem).arg(i, 2, 10, QChar('0'));
-        const QString sPath = XCompanionFile::resolve(guardedSource.data(), sName);
-        if (!guardedThis || !guardedSource || sPath.isEmpty() || !pSet->appendFile(sPath)) {
+        const QString sPath = XCompanionFile::resolve(guardedSource, sName);
+        if (!guardedSource || sPath.isEmpty() || !pSet->appendFile(sPath)) {
             delete pSet;
-            if (guardedThis && pPdStruct) XBinary::setPdStructErrorString(pPdStruct, tr("Volume %1 missing").arg(sName));
+            if (pPdStruct) XBinary::setPdStructErrorString(pPdStruct, tr("Volume %1 missing").arg(sName));
             return false;
         }
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) {
@@ -1749,7 +1748,7 @@ bool XZip::_prepareVolumeSet(quint32 nLastDiskNumber, PDSTRUCT *pPdStruct, bool 
         }
     }
 
-    if (!pSet->appendSegment(guardedSource.data(), 0, nSourceSize) || !pSet->open(QIODevice::ReadOnly)) {
+    if (!pSet->appendSegment(guardedSource, 0, nSourceSize) || !pSet->open(QIODevice::ReadOnly)) {
         delete pSet;
         return false;
     }
@@ -1764,7 +1763,7 @@ bool XZip::_prepareVolumeSet(quint32 nLastDiskNumber, PDSTRUCT *pPdStruct, bool 
     // operation in progress forbids: initUnpack() therefore authenticates the
     // directory before it takes its guard.
     setDevice(pSet);
-    if (!guardedThis || (getDevice() != static_cast<QIODevice *>(pSet))) {
+    if ((getDevice() != static_cast<QIODevice *>(pSet))) {
         delete pSet;
         return false;
     }
@@ -2400,8 +2399,8 @@ bool XZip::_isRecordNamePresent(qint64 nECDOffset, QString sRecordName1, QString
 
 qint32 XZip::_getNumberOfLocalFileHeaders(qint64 nOffset, qint64 nSize, qint64 *pnRealSize, PDSTRUCT *pPdStruct)
 {
-    QPointer<XZip> guardedArchive(this);
-    QPointer<QIODevice> guardedSource(getDevice());
+    XZip *guardedArchive = this;
+    QIODevice *guardedSource = getDevice();
     qint32 nResult = 0;
     if (pnRealSize) *pnRealSize = 0;
     if (!guardedSource) return 0;
@@ -2417,7 +2416,7 @@ qint32 XZip::_getNumberOfLocalFileHeaders(qint64 nOffset, qint64 nSize, qint64 *
                 break;
             }
 
-            const QByteArray baHeader = XBinary::read_array_process(guardedSource.data(), nCurrentOffset, sizeof(LOCALFILEHEADER), pPdStruct);
+            const QByteArray baHeader = XBinary::read_array_process(guardedSource, nCurrentOffset, sizeof(LOCALFILEHEADER), pPdStruct);
             if (!guardedArchive || !guardedSource || (baHeader.size() != (qint64)sizeof(LOCALFILEHEADER))) {
                 return 0;
             }
@@ -2465,14 +2464,14 @@ qint32 XZip::_getNumberOfLocalFileHeaders(qint64 nOffset, qint64 nSize, qint64 *
 
 bool XZip::_isECDSignaturePresent(qint64 nOffset, PDSTRUCT *pPdStruct)
 {
-    QPointer<XZip> guardedArchive(this);
-    QPointer<QIODevice> guardedSource(getDevice());
+    XZip *guardedArchive = this;
+    QIODevice *guardedSource = getDevice();
     if (!guardedSource) return false;
     const qint64 nTotalSize = guardedSource->size();
     if (!guardedArchive || !guardedSource) return false;
     if ((nOffset < 0) || (nOffset >= nTotalSize)) return false;
 
-    XBinary sourceBinary(guardedSource.data());
+    XBinary sourceBinary(guardedSource);
     const qint64 nFound = sourceBinary.find_uint32(nOffset, nTotalSize - nOffset, SIGNATURE_ECD, false, pPdStruct);
     return guardedArchive && guardedSource && (nFound != -1);
 }
@@ -2933,7 +2932,7 @@ QMap<XBinary::UNPACK_PROP, QVariant> XZip::getDefaultUnpackProperties()
 
 bool XZip::initUnpack(UNPACK_STATE *pState, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct)
 {
-    QPointer<XZip> guardedArchive(this);
+    XZip *guardedArchive = this;
     if (m_bUnpackOperationInProgress) {
         return false;
     }
@@ -3127,8 +3126,8 @@ XBinary::ARCHIVERECORD XZip::infoCurrent(UNPACK_STATE *pState, PDSTRUCT *pPdStru
     UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress, &m_bNestedUnpackInfoAuthorized);
     if (!operationGuard.isAllowed()) return XBinary::ARCHIVERECORD();
 
-    QPointer<XZip> guardedArchive(this);
-    QPointer<QIODevice> guardedSource(getDevice());
+    XZip *guardedArchive = this;
+    QIODevice *guardedSource = getDevice();
     XBinary::ARCHIVERECORD result = {};
 
     bool bSourceCurrent = false;
@@ -3518,8 +3517,8 @@ bool XZip::moveToNext(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
     UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress);
     if (!operationGuard.isAcquired()) return false;
 
-    QPointer<XZip> guardedArchive(this);
-    QPointer<QIODevice> guardedSource(getDevice());
+    XZip *guardedArchive = this;
+    QIODevice *guardedSource = getDevice();
     bool bResult = false;
 
     bool bSourceCurrent = false;
@@ -3568,7 +3567,7 @@ bool XZip::finishUnpack(UNPACK_STATE *pState, PDSTRUCT *pPdStruct)
 
     Q_UNUSED(pPdStruct)
 
-    QPointer<XZip> guardedArchive(this);
+    XZip *guardedArchive = this;
     if (!pState) {
         return false;
     }
@@ -3936,27 +3935,25 @@ XBinary *XZip::createInstance(QIODevice *pDevice, bool bIsImage, XADDR nModuleAd
 
 bool XZip::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XZip> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XArchive::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
-        XArchive::INTERNAL_INFO *pInfo = static_cast<XArchive::INTERNAL_INFO *>(guardedThis->XArchive::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
-        static_cast<XArchive::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
+        bResult = XArchive::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
+        XArchive::INTERNAL_INFO *pInfo = static_cast<XArchive::INTERNAL_INFO *>(XArchive::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
+        static_cast<XArchive::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XZip::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XZip> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XZip::setInternalInfo(void *pInternalInfo)

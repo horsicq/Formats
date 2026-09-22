@@ -15693,30 +15693,28 @@ QMap<quint64, QString> XPE::getResourcesFixedFileInfoFileTypesS()
 
 bool XPE::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XPE> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XMSDOS::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
+        bResult = XMSDOS::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
 
-        XMSDOS::INTERNAL_INFO *pInfo = static_cast<XMSDOS::INTERNAL_INFO *>(guardedThis->XMSDOS::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
+        XMSDOS::INTERNAL_INFO *pInfo = static_cast<XMSDOS::INTERNAL_INFO *>(XMSDOS::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
 
-        static_cast<XMSDOS::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
-        guardedThis->setIsInternalInfoHandled(true);
+        static_cast<XMSDOS::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
+        setIsInternalInfoHandled(true);
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XPE::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XPE> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XPE::setInternalInfo(void *pInternalInfo)

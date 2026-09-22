@@ -2377,30 +2377,28 @@ bool XCLIAssembly::isSignatureInBlobPresent_NET(const QString &sSignature, PDSTR
 
 bool XCLIAssembly::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XCLIAssembly> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XBinary::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
+        bResult = XBinary::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
 
-        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(guardedThis->XBinary::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
+        XBinary::INTERNAL_INFO *pInfo = static_cast<XBinary::INTERNAL_INFO *>(XBinary::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
 
-        static_cast<XBinary::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
-        guardedThis->setIsInternalInfoHandled(true);
+        static_cast<XBinary::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
+        setIsInternalInfoHandled(true);
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XCLIAssembly::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XCLIAssembly> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XCLIAssembly::setInternalInfo(void *pInternalInfo)

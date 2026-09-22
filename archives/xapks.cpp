@@ -56,7 +56,7 @@ public:
     }
 
 private:
-    QPointer<QIODevice> m_pDevice;
+    QIODevice * m_pDevice;
     qint64 m_nPosition;
 };
 
@@ -247,27 +247,25 @@ XBinary::FILEFORMATINFO XAPKS::getFileFormatInfo(PDSTRUCT *pPdStruct)
 
 bool XAPKS::handleInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XAPKS> guardedThis(this);
     bool bResult = true;
 
     if (!isInternalInfoHandled()) {
-        bResult = guardedThis->XAPK::handleInternalInfo(pPdStruct);
-        if (!guardedThis || !bResult) return false;
-        XAPK::INTERNAL_INFO *pInfo = static_cast<XAPK::INTERNAL_INFO *>(guardedThis->XAPK::getInternalInfo(pPdStruct));
-        if (!guardedThis || !pInfo) return false;
-        static_cast<XAPK::INTERNAL_INFO &>(guardedThis->m_internalInfo) = *pInfo;
+        bResult = XAPK::handleInternalInfo(pPdStruct);
+        if (!bResult) return false;
+        XAPK::INTERNAL_INFO *pInfo = static_cast<XAPK::INTERNAL_INFO *>(XAPK::getInternalInfo(pPdStruct));
+        if (!pInfo) return false;
+        static_cast<XAPK::INTERNAL_INFO &>(m_internalInfo) = *pInfo;
     }
 
-    return guardedThis && bResult;
+    return bResult;
 }
 
 void *XAPKS::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-    QPointer<XAPKS> guardedThis(this);
-    const bool bHandled = guardedThis->handleInternalInfo(pPdStruct);
-    if (!guardedThis || !bHandled) return nullptr;
+    const bool bHandled = handleInternalInfo(pPdStruct);
+    if (!bHandled) return nullptr;
 
-    return &guardedThis->m_internalInfo;
+    return &m_internalInfo;
 }
 
 void XAPKS::setInternalInfo(void *pInternalInfo)

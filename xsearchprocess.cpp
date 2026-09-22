@@ -81,7 +81,7 @@ class SEARCH_PROCESS_CLEANUP {
 public:
     using CLEAR_CALLBACK_FUNCTION = void (XSearchProcess::*)();
 
-    SEARCH_PROCESS_CLEANUP(QPointer<XSearchProcess> &guardedProcess, QPointer<QIODevice> &guardedDevice, QPointer<XBinary> &guardedBinary,
+    SEARCH_PROCESS_CLEANUP(XSearchProcess *&guardedProcess, QIODevice *&guardedDevice, XBinary *&guardedBinary,
                            qint64 &nOriginalPosition, const XBinary::INDATA &inData, CLEAR_CALLBACK_FUNCTION clearCallbackFunction)
         : m_guardedProcess(guardedProcess),
           m_guardedDevice(guardedDevice),
@@ -94,22 +94,22 @@ public:
 
     void operator()() const
     {
-        XBinary *pBinary = m_guardedBinary.data();
+        XBinary *pBinary = m_guardedBinary;
         if (pBinary) delete pBinary;
 
         if (m_guardedDevice && (m_nOriginalPosition >= 0)) {
             m_guardedDevice->seek(m_nOriginalPosition);
         }
-        XFormats::removeDevice(m_guardedDevice.data(), m_inData);
+        XFormats::removeDevice(m_guardedDevice, m_inData);
 
-        XSearchProcess *pProcess = m_guardedProcess.data();
+        XSearchProcess *pProcess = m_guardedProcess;
         if (pProcess) (pProcess->*m_clearCallbackFunction)();
     }
 
 private:
-    QPointer<XSearchProcess> &m_guardedProcess;
-    QPointer<QIODevice> &m_guardedDevice;
-    QPointer<XBinary> &m_guardedBinary;
+    XSearchProcess *&m_guardedProcess;
+    QIODevice *&m_guardedDevice;
+    XBinary *&m_guardedBinary;
     qint64 &m_nOriginalPosition;
     const XBinary::INDATA &m_inData;
     CLEAR_CALLBACK_FUNCTION m_clearCallbackFunction;
@@ -117,7 +117,7 @@ private:
 
 class SEARCH_PROCESS_PROGRESS_OWNER_CHECKER {
 public:
-    SEARCH_PROCESS_PROGRESS_OWNER_CHECKER(const QPointer<XSearchProcess> &guardedProcess, const QPointer<QIODevice> &guardedDevice,
+    SEARCH_PROCESS_PROGRESS_OWNER_CHECKER(XSearchProcess *const &guardedProcess, QIODevice *const &guardedDevice,
                                           const XBinary::PDSTRUCTLIFETIME &progressLifetime)
         : m_guardedProcess(guardedProcess), m_guardedDevice(guardedDevice), m_progressLifetime(progressLifetime)
     {
@@ -129,8 +129,8 @@ public:
     }
 
 private:
-    QPointer<XSearchProcess> m_guardedProcess;
-    QPointer<QIODevice> m_guardedDevice;
+    XSearchProcess * m_guardedProcess;
+    QIODevice * m_guardedDevice;
     XBinary::PDSTRUCTLIFETIME m_progressLifetime;
 };
 }  // namespace
@@ -165,7 +165,6 @@ void XSearchProcess::setData(const XBinary::INDATA &inData, XBinary::XLOC locati
 
 void XSearchProcess::process()
 {
-    QPointer<XSearchProcess> guardedThis(this);
     clearPdStructCallback();
 
     // Copy every member needed by the synchronous operation before installing
@@ -204,9 +203,10 @@ void XSearchProcess::process()
         m_pdCallbackSubscription = XBinary::subscribePdStructCallback(pRequestedPdStruct, XSearchProcess::pdStructCallback, this);
     }
 
-    QPointer<QIODevice> guardedDevice(XFormats::createDevice(inData));
-    QPointer<XBinary> guardedBinary;
+    QIODevice *guardedDevice = XFormats::createDevice(inData);
+    XBinary * guardedBinary;
     qint64 nOriginalPosition = -1;
+    XSearchProcess *guardedThis = this;
 
     // This cleanup never dereferences the worker. If a device callback or a
     // progress slot deleted it, its destructor already removed the callback
@@ -236,13 +236,13 @@ void XSearchProcess::process()
         return;
     }
 
-    guardedBinary = XFormats::createClass(inData.fileType, guardedDevice.data(), inData.bIsImage, inData.nModuleAddress);
+    guardedBinary = XFormats::createClass(inData.fileType, guardedDevice, inData.bIsImage, inData.nModuleAddress);
     if (!progressOwnerAlive() || !guardedBinary) {
         cleanup();
         return;
     }
 
-    connect(guardedBinary.data(), SIGNAL(errorMessage(QString)), guardedThis.data(), SIGNAL(errorMessage(QString)));
+    connect(guardedBinary, SIGNAL(errorMessage(QString)), guardedThis, SIGNAL(errorMessage(QString)));
 
     if (memoryMap.listRecords.isEmpty()) {
         memoryMap = guardedBinary->getMemoryMap(XBinary::MAPMODE_UNKNOWN, pPdStruct);
@@ -304,7 +304,7 @@ QString XSearchProcess::getTitle()
 void XSearchProcess::pdStructCallback(void *pUserData, XBinary::PDSTRUCT *pPdStruct)
 {
     XSearchProcess *pSearchProcess = static_cast<XSearchProcess *>(pUserData);
-    QPointer<XSearchProcess> guardedSearchProcess(pSearchProcess);
+    XSearchProcess *guardedSearchProcess = pSearchProcess;
 
     if (!guardedSearchProcess || !pPdStruct) {
         return;

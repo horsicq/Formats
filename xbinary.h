@@ -36,7 +36,6 @@
 #include <QMap>
 #include <QMutex>
 #include <QPair>
-#include <QPointer>
 #include <QSet>
 #include <QSharedPointer>
 #include <QTemporaryFile>
@@ -4476,7 +4475,6 @@ private:
     static qint32 _getSignatureBytes(QList<SIGNATURE_RECORD> *pListSignatureRecords, const QString &sSignature, qint32 nStartIndex, bool *pbValid, PDSTRUCT *pPdStruct);
 
 protected:
-    virtual bool isDeviceReplacementAllowed() const;
     bool _isOffsetValid(qint64 nOffset);
     void _errorMessage(const QString &sErrorMessage, PDSTRUCT *pPdStruct = nullptr);
     void _infoMessage(const QString &sInfoMessage, PDSTRUCT *pPdStruct = nullptr);
@@ -4491,13 +4489,13 @@ private:
     // Input devices are normally owned by the caller.  Track their QObject
     // lifetime so a destroyed external device cannot leave every format parser
     // with a dangling pointer.
-    QPointer<QIODevice> m_pDevice;
+    QIODevice *m_pDevice = nullptr;
     quint64 m_nDeviceGeneration;
     const char *m_pConstMemory;
     QString m_sFileName;
     // Filename construction owns this QFile independently of whichever
     // external device is later selected through setData()/setDevice().
-    QPointer<QFile> m_pFile;
+    QFile *m_pFile = nullptr;
     QMutex *m_pReadWriteMutex;
     bool m_bIsImage;
     XADDR m_nBaseAddress;

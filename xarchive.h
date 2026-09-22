@@ -81,7 +81,7 @@ public:
     struct INTERNAL_INFO : XBinary::INTERNAL_INFO {};
 
     struct SOURCE_DEVICE_CHAIN_ITEM {
-        QPointer<QIODevice> pDevice;
+        QIODevice *pDevice = nullptr;
         bool bIsSubDevice;
         quint64 nInitLocation;
         qint64 nSize;
@@ -161,8 +161,8 @@ public:
     // perform precisely that same-size in-place raw write and require it to be
     // rejected.
     struct SOURCE_DEVICE_SNAPSHOT {
-        QPointer<QIODevice> pSourceDevice;
-        QPointer<QIODevice> pRootDevice;
+        QIODevice *pSourceDevice = nullptr;
+        QIODevice *pRootDevice = nullptr;
         QList<SOURCE_DEVICE_CHAIN_ITEM> listChain;
         SOURCE_DEVICE_ROOT_KIND rootKind;
         qint64 nRootSize;
@@ -281,23 +281,17 @@ public:
             return false;
         }
 
-        QPointer<XArchive> guardedArchive(this);
         if (!registerUnpackContextCleanup(pState, pContext, &deleteUnpackContext<T>)) {
             return false;
         }
 
         const bool bValidated = validateAndFinalizeUnpackSource(pState, pPdStruct);
-        if (!guardedArchive) {
-            // Archive destruction transfers the registered context to the
-            // shared operation guard.  The caller must not touch it.
-            return false;
-        }
         if (!bValidated) {
             // A failed final source callback must not leave the provisional
             // deleter armed.  releaseUnpackSource() normally performs the
             // same removal, but this keeps the template safe if validation
             // failed before the caller reaches its common cleanup path.
-            guardedArchive->unregisterUnpackContextCleanup(pContext);
+            unregisterUnpackContextCleanup(pContext);
         }
         return bValidated;
     }
@@ -434,11 +428,6 @@ protected:
     // position-zero destination if publication itself fails.
     bool isUnpackOutputSupported(QIODevice *pDevice) const;
     bool publishUnpackOutput(QIODevice *pStageDevice, QIODevice *pOutputDevice, const UNPACK_STATE *pState, PDSTRUCT *pPdStruct = nullptr);
-
-    bool isDeviceReplacementAllowed() const override
-    {
-        return !m_pUnpackGuardState || !m_pUnpackGuardState->bOperationInProgress;
-    }
 
     // QIODevice implementations are caller-controlled and may re-enter an
     // archive while size/seek/read/write is in progress.  Streaming methods
