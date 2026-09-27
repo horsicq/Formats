@@ -8319,6 +8319,113 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, const QString &sSig
     return isContextAlive() ? nResult : -1;
 }
 
+QList<qint64> XBinary::find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize,
+                                      const QStringList &signatures, PDSTRUCT *pPdStruct)
+{
+    QList<qint64> results;
+    if (signatures.size() > 128) return results;
+    qint64 budget = 0;
+    for (const QString &signature : signatures) {
+        budget += signature.size();
+        if (budget > 65536) return results;
+        results.append(-1);
+    }
+    if (signatures.isEmpty()) return results;
+    XBinary *guardedThis = this;
+    PDSTRUCT fallback = createPdStruct();
+    if (!pPdStruct) pPdStruct = &fallback;
+    const PDSTRUCTLIFETIME lifetime = retainPdStructLifetime(pPdStruct);
+    QIODevice *guardedDevice = m_pDevice;
+    const quint64 generation = m_nDeviceGeneration;
+    const XBINARY_UPPER_BOUND_CONTEXT_CHECKER alive(guardedThis, guardedDevice, &m_pDevice,
+        &m_nDeviceGeneration, generation, lifetime);
+    const qint64 fileSize = getSize();
+    if (!alive() || !pMemoryMap || nOffset < 0 || nOffset > fileSize || nSize < -1) return results;
+    if (nSize == -1 || nSize > fileSize - nOffset) nSize = fileSize - nOffset;
+    if (nSize <= 0) return results;
+    if (signatures.size() == 1) {
+        results[0] = find_signature(pMemoryMap, nOffset, nSize, signatures[0], nullptr, pPdStruct);
+        return results;
+    }
+    struct Pattern {
+        QByteArray bytes;
+        qint64 prefix = 0;
+        qint64 anchorSize = 0;
+        qint64 length = 0;
+        bool extended = false;
+    };
+    QVector<Pattern> patterns(signatures.size());
+    QVector<int> buckets[256];
+    QList<int> fallbacks;
+    qint64 maxPrefix = 0, maxLength = 1;
+    int pending = 0;
+    for (int id = 0; id < signatures.size(); ++id) {
+        const QString normalized = convertSignature(signatures[id]);
+        if (normalized.isEmpty() || !isSignatureValid(normalized, pPdStruct)) continue;
+        if (!alive()) return QList<qint64>();
+        if (normalized.contains('$') || normalized.contains('#') || normalized.contains('+')) {
+            fallbacks.append(id);
+            continue;
+        }
+        Pattern &pattern = patterns[id];
+        pattern.bytes = _signatureToSigBytes(normalized, pPdStruct);
+        if (!alive()) return QList<qint64>();
+        pattern.length = pattern.bytes.size() / 2;
+        if (!pattern.length) continue;
+        while (pattern.prefix < pattern.length &&
+            (quint8)pattern.bytes.at((int)pattern.prefix * 2) != SIGBYTETYPE_HEX) ++pattern.prefix;
+        if (pattern.prefix == pattern.length) {
+            fallbacks.append(id);
+            continue;
+        }
+        while (pattern.prefix + pattern.anchorSize < pattern.length &&
+            (quint8)pattern.bytes.at((int)(pattern.prefix + pattern.anchorSize) * 2) == SIGBYTETYPE_HEX)
+            ++pattern.anchorSize;
+        /* The old >=3-byte leading-wildcard optimization bounds the anchor,
+         * then compares the full signature against the file. Preserve it. */
+        pattern.extended = pattern.prefix >= 3 && pattern.anchorSize >= 3;
+        maxPrefix = qMax(maxPrefix, pattern.prefix);
+        maxLength = qMax(maxLength, pattern.length);
+        buckets[(quint8)pattern.bytes.at((int)pattern.prefix * 2 + 1)].append(id);
+        ++pending;
+    }
+    const qint64 end = nOffset + nSize;
+    for (qint64 base = nOffset; base < end && pending;) {
+        if (!alive() || !isPdStructNotCanceled(pPdStruct)) return QList<qint64>();
+        const qint64 block = qMin<qint64>(65536, end - base);
+        const qint64 begin = qMax(nOffset, base - maxPrefix);
+        const qint64 readEnd = base + block + qMin(maxLength - 1, fileSize - (base + block));
+        const QByteArray data = read_array(begin, readEnd - begin);
+        if (!alive()) return QList<qint64>();
+        if (data.size() != readEnd - begin) return QList<qint64>();
+        for (qint64 pos = base; pos < base + block && pending; ++pos) {
+            const QVector<int> &ids = buckets[(quint8)data.at((int)(pos - begin))];
+            for (int id : ids) {
+                if (results[id] != -1) continue;
+                Pattern &pattern = patterns[id];
+                const qint64 start = pos - pattern.prefix;
+                if (start < nOffset || pattern.length > fileSize - start) continue;
+                if (pattern.extended ? pattern.anchorSize > end - pos : pattern.length > end - start) continue;
+                if (_compareSigBytesWithLifetime(pattern.bytes.constData(), pattern.bytes.size(),
+                        data.constData() + (start - begin), data.size() - (start - begin), pPdStruct, lifetime)) {
+                    results[id] = start;
+                    --pending;
+                }
+                if (!alive()) return QList<qint64>();
+            }
+        }
+        base += block;
+    }
+    /* Address-following and anchorless forms keep their existing semantics;
+     * the common fixed-byte/mask forms share the bounded chunk pass above. */
+    for (int id : fallbacks) {
+        if (!alive() || !isPdStructNotCanceled(pPdStruct)) return QList<qint64>();
+        results[id] = find_signature(pMemoryMap, nOffset, nSize, signatures[id], nullptr, pPdStruct);
+        if (!alive()) return QList<qint64>();
+    }
+    return results;
+}
+
 qint64 XBinary::find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize, PDSTRUCT *pPdStruct)
 {
     XBinary *guardedThis = this;

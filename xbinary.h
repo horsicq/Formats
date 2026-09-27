@@ -3291,6 +3291,8 @@ public:
                                       const PDSTRUCTLIFETIME &progressLifetime);
     qint64 _findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigBytes, qint64 nSigBytesSize, PDSTRUCT *pPdStruct = nullptr);
 
+    QList<qint64> find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize,
+                                 const QStringList &signatures, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize = 0, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize = nullptr,
                           PDSTRUCT *pPdStruct = nullptr);
