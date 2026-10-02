@@ -3794,6 +3794,9 @@ public:
     double getBinaryStatus(BSTATUS bstatus, qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
     double getBinaryStatus(BSTATUS bstatus, qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct, qint32 nBufferSize);
     bool isZeroFilled(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
+    static QString scanBufferForEncryptedPe(const char *pData, qint64 nDataSize);
+    static QString scanBufferForEncryptedPe(const QByteArray &baData);
+    QString scanBufferForEncryptedPe(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct = nullptr);
 
     BYTE_COUNTS getByteCounts(qint64 nOffset = 0, qint64 nSize = -1, PDSTRUCT *pPdStruct = nullptr);
 

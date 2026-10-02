@@ -18630,6 +18630,179 @@ bool XBinary::isZeroFilled(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
     return bResult;
 }
 
+QString XBinary::scanBufferForEncryptedPe(const char *pData, qint64 nDataSize)
+{
+    if (!pData || (nDataSize < 0x100)) {
+        return QString();
+    }
+
+    static const quint8 key0Offsets[21] = {
+        0, 40, 40, 42, 40, 40, 42, 42, 40, 45, 40, 44, 48, 52, 42, 45, 48, 51, 54, 57, 40
+    };
+    static const quint8 key1Offsets[21] = {
+        0, 40, 41, 40, 41, 41, 43, 43, 41, 46, 41, 45, 49, 40, 43, 46, 49, 52, 55, 58, 41
+    };
+    static const quint8 lfa0Offsets[21] = {
+        0, 40, 40, 42, 40, 40, 42, 46, 44, 42, 40, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40
+    };
+    static const quint8 lfa1Offsets[21] = {
+        0, 40, 41, 40, 41, 41, 43, 40, 45, 43, 41, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41
+    };
+    static const quint8 lfa2Offsets[21] = {
+        0, 40, 40, 41, 42, 42, 44, 41, 46, 44, 42, 40, 50, 49, 48, 47, 46, 45, 44, 43, 42
+    };
+
+    auto decryptByte = [](quint8 cipher, quint8 encZero, int mode) -> quint8 {
+        switch (mode) {
+            case 0: return (quint8)(cipher ^ encZero);
+            case 1: return (quint8)((cipher - encZero) & 0xFF);
+            case 2: return (quint8)((encZero - cipher) & 0xFF);
+            default: return 0;
+        }
+    };
+
+    auto verifyPe = [&](const quint8 *buf, qint64 peStartOffset, qint64 maxValidLfaNew, int keyLength, int mode) -> bool {
+        quint8 encZero = buf[peStartOffset + lfa2Offsets[keyLength]];
+        quint8 cipherByte = buf[peStartOffset + 0x3E];
+        quint32 valLfa2 = decryptByte(cipherByte, encZero, mode);
+
+        if (((qint64)valLfa2 << 16) >= maxValidLfaNew) return false;
+
+        encZero = buf[peStartOffset + lfa1Offsets[keyLength]];
+        cipherByte = buf[peStartOffset + 0x3D];
+        quint32 valLfa1 = decryptByte(cipherByte, encZero, mode);
+
+        encZero = buf[peStartOffset + lfa0Offsets[keyLength]];
+        cipherByte = buf[peStartOffset + 0x3C];
+        quint32 valLfa0 = decryptByte(cipherByte, encZero, mode);
+
+        quint32 lfaNewOffset = valLfa0 | (valLfa1 << 8) | (valLfa2 << 16);
+
+        if (lfaNewOffset <= 0x40 || (qint64)lfaNewOffset >= maxValidLfaNew) return false;
+
+        qint64 baseZeroOffset = peStartOffset + 40;
+        qint64 peSignatureOffset = peStartOffset + lfaNewOffset;
+        quint32 baseRemainder = (quint32)((lfaNewOffset - 40) % (quint32)keyLength);
+
+        if (decryptByte(buf[peSignatureOffset], buf[baseZeroOffset + (baseRemainder % (quint32)keyLength)], mode) != 0x50) return false;
+        if (decryptByte(buf[peSignatureOffset + 1], buf[baseZeroOffset + ((baseRemainder + 1) % (quint32)keyLength)], mode) != 0x45) return false;
+        if (decryptByte(buf[peSignatureOffset + 2], buf[baseZeroOffset + ((baseRemainder + 2) % (quint32)keyLength)], mode) != 0x00) return false;
+        if (decryptByte(buf[peSignatureOffset + 3], buf[baseZeroOffset + ((baseRemainder + 3) % (quint32)keyLength)], mode) != 0x00) return false;
+
+        quint16 magic1 = decryptByte(buf[peSignatureOffset + 0x18], buf[baseZeroOffset + ((baseRemainder + 0x18) % (quint32)keyLength)], mode);
+        quint16 magic2 = decryptByte(buf[peSignatureOffset + 0x19], buf[baseZeroOffset + ((baseRemainder + 0x19) % (quint32)keyLength)], mode);
+        quint16 headerMagic = (quint16)(magic1 | (magic2 << 8));
+        if (headerMagic != 0x010B && headerMagic != 0x020B) return false;
+
+        quint16 sec1 = decryptByte(buf[peSignatureOffset + 0x06], buf[baseZeroOffset + ((baseRemainder + 0x06) % (quint32)keyLength)], mode);
+        quint16 sec2 = decryptByte(buf[peSignatureOffset + 0x07], buf[baseZeroOffset + ((baseRemainder + 0x07) % (quint32)keyLength)], mode);
+        quint16 totalSections = (quint16)(sec1 | (sec2 << 8));
+        if (totalSections == 0 || totalSections > 48) return false;
+
+        quint16 char1 = decryptByte(buf[peSignatureOffset + 0x16], buf[baseZeroOffset + ((baseRemainder + 0x16) % (quint32)keyLength)], mode);
+        quint16 char2 = decryptByte(buf[peSignatureOffset + 0x17], buf[baseZeroOffset + ((baseRemainder + 0x17) % (quint32)keyLength)], mode);
+        quint16 characteristics = (quint16)(char1 | (char2 << 8));
+
+        return (characteristics & 0x0002) != 0;
+    };
+
+    const quint8 *buf = reinterpret_cast<const quint8 *>(pData);
+    const qint64 maxSearchIndex = nDataSize - 0x100;
+
+    for (qint64 offset = 0; offset < maxSearchIndex; offset++) {
+        const quint8 cipherByte3 = buf[offset + 3];
+        const quint8 cipherLfaMsb = buf[offset + 0x3F];
+        quint32 candidateKeyLengths = 0;
+
+        if (cipherByte3 == buf[offset + 40] && cipherLfaMsb == buf[offset + 40]) {
+            candidateKeyLengths |= 0x00001;
+        }
+        if (cipherByte3 == buf[offset + 41]) {
+            if (cipherLfaMsb == buf[offset + 41]) candidateKeyLengths |= 0x00002;
+            if (cipherLfaMsb == buf[offset + 44]) candidateKeyLengths |= 0x40000;
+        }
+        if (cipherByte3 == buf[offset + 42]) {
+            if (cipherLfaMsb == buf[offset + 42]) candidateKeyLengths |= 0x00004;
+            if (cipherLfaMsb == buf[offset + 50]) candidateKeyLengths |= 0x01000;
+        }
+        if (cipherByte3 == buf[offset + 43]) {
+            if (cipherLfaMsb == buf[offset + 43]) candidateKeyLengths |= 0x80218;
+            if (cipherLfaMsb == buf[offset + 47]) candidateKeyLengths |= 0x00080;
+        }
+        if (cipherByte3 == buf[offset + 45]) {
+            if (cipherLfaMsb == buf[offset + 45]) candidateKeyLengths |= 0x00020;
+            if (cipherLfaMsb == buf[offset + 42]) candidateKeyLengths |= 0x00040;
+            if (cipherLfaMsb == buf[offset + 49]) candidateKeyLengths |= 0x02000;
+        }
+        if (cipherByte3 == buf[offset + 47] && cipherLfaMsb == buf[offset + 41]) {
+            candidateKeyLengths |= 0x00400;
+        }
+        if (cipherByte3 == buf[offset + 48]) {
+            if (cipherLfaMsb == buf[offset + 45]) candidateKeyLengths |= 0x00100;
+            if (cipherLfaMsb == buf[offset + 48]) candidateKeyLengths |= 0x04000;
+        }
+        if (cipherByte3 == buf[offset + 51]) {
+            if (cipherLfaMsb == buf[offset + 51]) candidateKeyLengths |= 0x00800;
+            if (cipherLfaMsb == buf[offset + 47]) candidateKeyLengths |= 0x08000;
+        }
+        if (cipherByte3 == buf[offset + 54] && cipherLfaMsb == buf[offset + 46]) {
+            candidateKeyLengths |= 0x10000;
+        }
+        if (cipherByte3 == buf[offset + 57] && cipherLfaMsb == buf[offset + 45]) {
+            candidateKeyLengths |= 0x20000;
+        }
+
+        if (candidateKeyLengths == 0) continue;
+
+        const quint8 cipherM = buf[offset];
+        const quint8 cipherZ = buf[offset + 1];
+
+        if (cipherM == 0x4D && cipherZ == 0x5A) continue;
+
+        const quint8 keyXorM = cipherM ^ 0x4D;
+        const quint8 keyXorZ = cipherZ ^ 0x5A;
+        const quint8 keyAddM = (quint8)((cipherM - 0x4D) & 0xFF);
+        const quint8 keyAddZ = (quint8)((cipherZ - 0x5A) & 0xFF);
+        const quint8 keyRevM = (quint8)((cipherM + 0x4D) & 0xFF);
+        const quint8 keyRevZ = (quint8)((cipherZ + 0x5A) & 0xFF);
+        const qint64 maxValidLfaNew = nDataSize - offset - 0x20;
+
+        for (int keyLength = 1, keyLengthBit = 1; candidateKeyLengths != 0; keyLength++, keyLengthBit <<= 1) {
+            if (!(candidateKeyLengths & (quint32)keyLengthBit)) continue;
+
+            candidateKeyLengths ^= (quint32)keyLengthBit;
+
+            const quint8 cipherByteKey0 = buf[offset + key0Offsets[keyLength]];
+            const quint8 cipherByteKey1 = buf[offset + key1Offsets[keyLength]];
+
+            if (cipherByteKey0 == keyXorM && cipherByteKey1 == keyXorZ) {
+                if (verifyPe(buf, offset, maxValidLfaNew, keyLength, 0)) return "XOR-XNOR";
+            } else if (cipherByteKey0 == keyAddM) {
+                if (cipherByteKey1 == keyAddZ && verifyPe(buf, offset, maxValidLfaNew, keyLength, 1)) return "ADD-SUB";
+            } else if (cipherByteKey0 == keyRevM) {
+                if (cipherByteKey1 == keyRevZ && verifyPe(buf, offset, maxValidLfaNew, keyLength, 2)) return "SUB-REV";
+            }
+        }
+    }
+
+    return QString();
+}
+
+QString XBinary::scanBufferForEncryptedPe(const QByteArray &baData)
+{
+    return scanBufferForEncryptedPe(baData.constData(), baData.size());
+}
+
+QString XBinary::scanBufferForEncryptedPe(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
+{
+    if (nSize <= 0) return QString();
+    OFFSETSIZE osRegion = convertOffsetAndSize(nOffset, nSize);
+    if ((osRegion.nOffset == -1) || (osRegion.nSize < 0x100)) return QString();
+
+    QByteArray baData = read_array_process(osRegion.nOffset, osRegion.nSize, pPdStruct);
+    return scanBufferForEncryptedPe(baData);
+}
+
 XBinary::BYTE_COUNTS XBinary::getByteCounts(qint64 nOffset, qint64 nSize, PDSTRUCT *pPdStruct)
 {
     BYTE_COUNTS result = {};
