@@ -789,6 +789,7 @@ public:
     bool isSignPresent();
     virtual bool isSymbolsPresent() override;
     bool isExceptionPresent();
+    bool isAmd64UnwindMetadataValid(QString *psError = nullptr);
     bool isLoadConfigPresent();
     bool isBoundImportPresent();
     bool isDelayImportPresent();

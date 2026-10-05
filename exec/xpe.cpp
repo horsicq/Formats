@@ -15009,6 +15009,285 @@ bool XPE::isExceptionPresent()
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
 }
 
+bool XPE::isAmd64UnwindMetadataValid(QString *psError)
+{
+    if (psError) {
+        psError->clear();
+    }
+
+    if (getFileHeader_Machine() != XPE_DEF::S_IMAGE_FILE_MACHINE_AMD64) {
+        return true;
+    }
+
+    if (!isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION)) {
+        return true;
+    }
+
+    XPE_DEF::IMAGE_DATA_DIRECTORY excDir = getOptionalHeader_DataDirectory(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_EXCEPTION);
+    if (excDir.VirtualAddress == 0 || excDir.Size == 0) {
+        return true;
+    }
+
+    qint64 nFileSize = getSize();
+    QList<XPE_DEF::IMAGE_SECTION_HEADER> listSectionHeaders = getSectionHeaders();
+    qint32 nNumberOfSections = listSectionHeaders.count();
+    if (nNumberOfSections == 0) {
+        return true;
+    }
+
+    auto isRvaRangeFileBacked = [&](quint32 nRva, quint32 nSize, quint32 nRequiredFlags) -> bool {
+        if (nSize == 0 || (nRva + nSize) < nRva) return false;
+        for (int i = 0; i < nNumberOfSections; ++i) {
+            const auto &sec = listSectionHeaders.at(i);
+            if ((sec.Characteristics & nRequiredFlags) != nRequiredFlags) continue;
+            if (nRva >= sec.VirtualAddress && (nRva + nSize) <= (sec.VirtualAddress + sec.SizeOfRawData)) {
+                qint64 nFileOffset = (qint64)sec.PointerToRawData + (nRva - sec.VirtualAddress);
+                if (nFileOffset >= 0 && (nFileOffset + nSize) <= nFileSize) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    if (!isRvaRangeFileBacked(excDir.VirtualAddress, excDir.Size, 0)) {
+        return true;
+    }
+
+    if (excDir.Size < 12 || (excDir.Size % 12 != 0)) {
+        if (psError) {
+            *psError = "AMD64 unwind table ends with an incomplete function entry";
+        }
+        return false;
+    }
+
+    auto rvaToFileOffset = [&](quint32 nRva) -> qint64 {
+        for (int i = 0; i < nNumberOfSections; ++i) {
+            const auto &sec = listSectionHeaders.at(i);
+            if (nRva >= sec.VirtualAddress && nRva < (sec.VirtualAddress + sec.SizeOfRawData)) {
+                qint64 nOffset = (qint64)sec.PointerToRawData + (nRva - sec.VirtualAddress);
+                if (nOffset >= 0 && nOffset < nFileSize) {
+                    return nOffset;
+                }
+            }
+        }
+        return -1;
+    };
+
+    qint64 nExcOffset = rvaToFileOffset(excDir.VirtualAddress);
+    if (nExcOffset < 0) {
+        return true;
+    }
+
+    QByteArray baExceptionData = read_array(nExcOffset, excDir.Size);
+    if ((quint32)baExceptionData.size() < excDir.Size) {
+        return true;
+    }
+
+    quint64 nImageBase = getOptionalHeader_ImageBase();
+
+    QMap<quint32, bool> mapWordAlignedCache;
+
+    auto isValidWordAlignedUnwindInfo = [&](quint32 unwindRva) -> bool {
+        if (mapWordAlignedCache.contains(unwindRva)) {
+            return mapWordAlignedCache.value(unwindRva);
+        }
+        auto cacheAndReturn = [&](bool bValid) -> bool {
+            mapWordAlignedCache.insert(unwindRva, bValid);
+            return bValid;
+        };
+
+        if (!isRvaRangeFileBacked(unwindRva, 4, 0)) return cacheAndReturn(false);
+
+        qint64 unwindOffset = rvaToFileOffset(unwindRva);
+        if (unwindOffset < 0) return cacheAndReturn(false);
+
+        quint8 unwindHeader[4] = {0};
+        if (read_array(unwindOffset, (char *)unwindHeader, 4) != 4) return cacheAndReturn(false);
+
+        quint8 versionAndFlags = unwindHeader[0];
+        quint8 version = versionAndFlags & 0x07;
+        quint8 flags = versionAndFlags >> 3;
+        quint8 prologSize = unwindHeader[1];
+        quint8 unwindCodeCount = unwindHeader[2];
+        quint8 frameRegister = unwindHeader[3] & 0x0F;
+        quint8 frameOffset = unwindHeader[3] >> 4;
+
+        if (version != 1 || flags > 0x07 ||
+            ((flags & 0x04) != 0 && (flags & 0x03) != 0) ||
+            (frameRegister == 0 && frameOffset != 0)) {
+            return cacheAndReturn(false);
+        }
+
+        quint32 alignedUnwindCodeCount = unwindCodeCount + (unwindCodeCount % 2);
+        quint32 unwindInfoSize = 4 + alignedUnwindCodeCount * 2;
+
+        if ((flags & 0x04) != 0) {
+            unwindInfoSize += 12; // Chained RUNTIME_FUNCTION
+        } else if ((flags & 0x03) != 0) {
+            unwindInfoSize += 4;  // Exception-handler RVA
+        }
+
+        if (!isRvaRangeFileBacked(unwindRva, unwindInfoSize, 0)) return cacheAndReturn(false);
+
+        QByteArray baUnwindInfo = read_array(unwindOffset, unwindInfoSize);
+        if ((quint32)baUnwindInfo.size() < unwindInfoSize) return cacheAndReturn(false);
+
+        const quint8 *pUnwindInfo = (const quint8 *)baUnwindInfo.constData();
+        quint32 unwindCodeIndex = 0;
+
+        while (unwindCodeIndex < unwindCodeCount) {
+            quint32 unwindCodeOffset = 4 + unwindCodeIndex * 2;
+            quint8 codeOffset = pUnwindInfo[unwindCodeOffset];
+            quint8 operationAndInfo = pUnwindInfo[unwindCodeOffset + 1];
+            quint8 unwindOperation = operationAndInfo & 0x0F;
+            quint8 operationInfo = operationAndInfo >> 4;
+            quint32 occupiedSlots = 1;
+
+            if (codeOffset > prologSize) return cacheAndReturn(false);
+
+            if (unwindOperation == 1) {
+                if (operationInfo == 0) occupiedSlots = 2;
+                else if (operationInfo == 1) occupiedSlots = 3;
+                else return cacheAndReturn(false);
+            } else if (unwindOperation == 3) {
+                if (operationInfo != 0) return cacheAndReturn(false);
+            } else if (unwindOperation == 4 || unwindOperation == 8) {
+                occupiedSlots = 2;
+            } else if (unwindOperation == 5 || unwindOperation == 9) {
+                occupiedSlots = 3;
+            } else if (unwindOperation == 6 || unwindOperation == 7 || unwindOperation > 10 || (unwindOperation == 10 && operationInfo > 1)) {
+                return cacheAndReturn(false);
+            }
+
+            if (unwindCodeIndex + occupiedSlots > unwindCodeCount) return cacheAndReturn(false);
+
+            unwindCodeIndex += occupiedSlots;
+        }
+
+        return cacheAndReturn(true);
+    };
+
+    struct MAPPED_RANGE {
+        quint32 nRva;
+        quint32 nEndRva;
+        quint32 nMaxEndRva;
+        qint32 nMaxEndRangeIndex;
+    };
+
+    QVector<MAPPED_RANGE> mappedRanges;
+    mappedRanges.reserve(nNumberOfSections);
+    for (int d = 0; d < nNumberOfSections; ++d) {
+        const auto &sec = listSectionHeaders.at(d);
+        quint32 nSecRva = sec.VirtualAddress;
+        quint32 nSecEndRva = nSecRva + qMax(sec.Misc.VirtualSize, sec.SizeOfRawData);
+        mappedRanges.append({nSecRva, nSecEndRva, 0, -1});
+    }
+
+    std::sort(mappedRanges.begin(), mappedRanges.end(), [](const MAPPED_RANGE &a, const MAPPED_RANGE &b) {
+        return a.nRva < b.nRva;
+    });
+
+    quint32 maximumEndRva = 0;
+    qint32 maximumEndRangeIndex = -1;
+    for (int r = 0; r < mappedRanges.size(); ++r) {
+        if (mappedRanges[r].nEndRva > maximumEndRva) {
+            maximumEndRva = mappedRanges[r].nEndRva;
+            maximumEndRangeIndex = r;
+        }
+        mappedRanges[r].nMaxEndRva = maximumEndRva;
+        mappedRanges[r].nMaxEndRangeIndex = maximumEndRangeIndex;
+    }
+
+    auto findRuntimeFunctionRangeIndex = [&](quint32 beginRva, quint32 endRva) -> qint32 {
+        qint32 lowerIndex = 0;
+        qint32 upperIndex = mappedRanges.size();
+        while (lowerIndex < upperIndex) {
+            qint32 middleIndex = lowerIndex + (upperIndex - lowerIndex) / 2;
+            if (mappedRanges[middleIndex].nRva <= beginRva) {
+                lowerIndex = middleIndex + 1;
+            } else {
+                upperIndex = middleIndex;
+            }
+        }
+        qint32 matchingRangeIndex = lowerIndex - 1;
+        if (matchingRangeIndex >= 0 && mappedRanges[matchingRangeIndex].nMaxEndRva >= endRva) {
+            return mappedRanges[matchingRangeIndex].nMaxEndRangeIndex;
+        }
+        return -1;
+    };
+
+    qint32 cachedRuntimeFunctionMappedRangeIndex = -1;
+    qint32 cachedRuntimeFunctionBodyRangeIndex = -1;
+    const quint8 *pEntries = (const quint8 *)baExceptionData.constData();
+    quint32 nEntryCount = excDir.Size / 12;
+
+    for (quint32 i = 0; i < nEntryCount; ++i) {
+        const quint8 *p = pEntries + i * 12;
+        quint32 runtimeFunctionBeginRva = (quint32)p[0] | ((quint32)p[1] << 8) | ((quint32)p[2] << 16) | ((quint32)p[3] << 24);
+        quint32 runtimeFunctionEndRva   = (quint32)p[4] | ((quint32)p[5] << 8) | ((quint32)p[6] << 16) | ((quint32)p[7] << 24);
+        quint32 runtimeFunctionUnwindRva= (quint32)p[8] | ((quint32)p[9] << 8) | ((quint32)p[10] << 16) | ((quint32)p[11] << 24);
+
+        quint32 runtimeFunctionSize = (runtimeFunctionEndRva >= runtimeFunctionBeginRva) ? (runtimeFunctionEndRva - runtimeFunctionBeginRva) : 0;
+        bool isRuntimeFunctionBodyRangeValid = false;
+        bool isRuntimeFunctionUnwindPointerValid = (runtimeFunctionBeginRva == 0 && runtimeFunctionEndRva == 0 && runtimeFunctionUnwindRva == 0);
+        bool isRuntimeFunctionIndirect = (runtimeFunctionUnwindRva % 2 != 0);
+
+        if (runtimeFunctionSize > 0) {
+            if (cachedRuntimeFunctionBodyRangeIndex >= 0 &&
+                runtimeFunctionBeginRva >= mappedRanges[cachedRuntimeFunctionBodyRangeIndex].nRva &&
+                runtimeFunctionEndRva <= mappedRanges[cachedRuntimeFunctionBodyRangeIndex].nEndRva) {
+                isRuntimeFunctionBodyRangeValid = true;
+            } else {
+                qint32 idx = findRuntimeFunctionRangeIndex(runtimeFunctionBeginRva, runtimeFunctionEndRva);
+                if (idx != -1) {
+                    cachedRuntimeFunctionBodyRangeIndex = idx;
+                    isRuntimeFunctionBodyRangeValid = true;
+                }
+            }
+        }
+
+        if (isRuntimeFunctionIndirect) {
+            quint32 indirectRuntimeFunctionRva = runtimeFunctionUnwindRva - 1;
+            qint64 indirectRuntimeFunctionOffset = (qint64)indirectRuntimeFunctionRva - excDir.VirtualAddress;
+            isRuntimeFunctionUnwindPointerValid = (indirectRuntimeFunctionOffset >= 0 &&
+                                                   indirectRuntimeFunctionOffset + 12 <= excDir.Size &&
+                                                   indirectRuntimeFunctionOffset % 12 == 0);
+        } else if (runtimeFunctionUnwindRva % 2 == 0) {
+            if (cachedRuntimeFunctionMappedRangeIndex >= 0 &&
+                runtimeFunctionUnwindRva >= mappedRanges[cachedRuntimeFunctionMappedRangeIndex].nRva &&
+                runtimeFunctionUnwindRva + 4 <= mappedRanges[cachedRuntimeFunctionMappedRangeIndex].nEndRva) {
+                isRuntimeFunctionUnwindPointerValid = (runtimeFunctionUnwindRva % 4 == 0) || isValidWordAlignedUnwindInfo(runtimeFunctionUnwindRva);
+            } else {
+                qint32 idx = findRuntimeFunctionRangeIndex(runtimeFunctionUnwindRva, runtimeFunctionUnwindRva + 4);
+                if (idx != -1) {
+                    cachedRuntimeFunctionMappedRangeIndex = idx;
+                    isRuntimeFunctionUnwindPointerValid = (runtimeFunctionUnwindRva % 4 == 0) || isValidWordAlignedUnwindInfo(runtimeFunctionUnwindRva);
+                }
+            }
+        }
+
+        if (runtimeFunctionSize > 0 && !isRuntimeFunctionBodyRangeValid) {
+            if (psError) {
+                *psError = QString("AMD64 unwind function entry #%1 references an unmapped range from VA 0x%2 to VA 0x%3")
+                           .arg(i)
+                           .arg(nImageBase + runtimeFunctionBeginRva, 0, 16)
+                           .arg(nImageBase + runtimeFunctionEndRva, 0, 16);
+            }
+            return false;
+        } else if (!isRuntimeFunctionUnwindPointerValid) {
+            if (psError) {
+                *psError = QString("AMD64 unwind function entry #%1 references invalid metadata at VA 0x%2")
+                           .arg(i)
+                           .arg(nImageBase + runtimeFunctionUnwindRva, 0, 16);
+            }
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool XPE::isLoadConfigPresent()
 {
     return isOptionalHeader_DataDirectoryPresent(XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG);
