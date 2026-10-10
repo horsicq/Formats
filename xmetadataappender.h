@@ -24,8 +24,7 @@
 
 #include "xbinary.h"
 
-class XMetadataAppender
-{
+class XMetadataAppender {
 public:
     XMetadataAppender(XBinary *pBinary, QVector<XBinary::XMETADATA_STRUCT> *pListResult, qint64 nOffsetBias = 0, const QString &sNamePrefix = QString())
         : m_pBinary(pBinary), m_pListResult(pListResult), m_nOffsetBias(nOffsetBias), m_sNamePrefix(sNamePrefix)

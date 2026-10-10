@@ -203,7 +203,7 @@ QVector<XBinary::XMETADATA_STRUCT> XPYC::getMetadataStructs()
     struct PYC_METADATA_APPENDER {
         QVector<XBinary::XMETADATA_STRUCT> &listResult;
 
-        void operator()(qint64 nOffset,qint64 nSize,XBinary::XMETADATA_ID id,const QString &sName,const QVariant &varValue) const
+        void operator()(qint64 nOffset, qint64 nSize, XBinary::XMETADATA_ID id, const QString &sName, const QVariant &varValue) const
         {
             XBinary::XMETADATA_STRUCT record = {};
             record.nOffset = nOffset;

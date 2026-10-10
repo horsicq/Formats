@@ -26,8 +26,8 @@ namespace {
 const qint32 XTIFF_MAX_IFD_TABLES = 4096;
 const quint64 XTIFF_MAX_IFD_ENTRIES = 256 * 1024;
 
-void appendUnsignedTagMetadata(XTiff *pTiff, QVector<XBinary::XMETADATA_STRUCT> *pListResult, QList<XTiff::CHUNK> *pListChunks, bool bIsBigEndian,
-                               quint16 nTag, XBinary::XMETADATA_ID id, const QString &sName, bool bForceUInt16)
+void appendUnsignedTagMetadata(XTiff *pTiff, QVector<XBinary::XMETADATA_STRUCT> *pListResult, QList<XTiff::CHUNK> *pListChunks, bool bIsBigEndian, quint16 nTag,
+                               XBinary::XMETADATA_ID id, const QString &sName, bool bForceUInt16)
 {
     const QList<XTiff::CHUNK> listValues = XTiff::_getChunksByTag(pListChunks, nTag);
     for (qint32 i = 0; i < listValues.count(); ++i) {
@@ -36,8 +36,7 @@ void appendUnsignedTagMetadata(XTiff *pTiff, QVector<XBinary::XMETADATA_STRUCT> 
             continue;
         }
 
-        const quint32 nValue = (!bForceUInt16 && (chunk.nSize == 4)) ? pTiff->read_uint32(chunk.nOffset, bIsBigEndian)
-                                                                    : pTiff->read_uint16(chunk.nOffset, bIsBigEndian);
+        const quint32 nValue = (!bForceUInt16 && (chunk.nSize == 4)) ? pTiff->read_uint32(chunk.nOffset, bIsBigEndian) : pTiff->read_uint16(chunk.nOffset, bIsBigEndian);
         XBinary::XMETADATA_STRUCT record = {};
         record.nOffset = chunk.nOffset;
         record.nSize = bForceUInt16 || (chunk.nSize != 4) ? 2 : 4;
@@ -49,8 +48,8 @@ void appendUnsignedTagMetadata(XTiff *pTiff, QVector<XBinary::XMETADATA_STRUCT> 
     }
 }
 
-void appendDateTagMetadata(XTiff *pTiff, QVector<XBinary::XMETADATA_STRUCT> *pListResult, QList<XTiff::CHUNK> *pListChunks, quint16 nTag,
-                           XBinary::XMETADATA_ID id, const QString &sName)
+void appendDateTagMetadata(XTiff *pTiff, QVector<XBinary::XMETADATA_STRUCT> *pListResult, QList<XTiff::CHUNK> *pListChunks, quint16 nTag, XBinary::XMETADATA_ID id,
+                           const QString &sName)
 {
     const QList<XTiff::CHUNK> listDates = XTiff::_getChunksByTag(pListChunks, nTag);
     for (qint32 i = 0; i < listDates.count(); ++i) {

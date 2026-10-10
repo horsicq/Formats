@@ -57,8 +57,7 @@ QString decodeID3Text(const QByteArray &baData)
             }
         }
         for (qint32 i = nStart; i + 1 < baText.size(); i += 2) {
-            const quint16 nCharacter =
-                bBigEndian ? (((quint8)baText.at(i) << 8) | (quint8)baText.at(i + 1)) : (((quint8)baText.at(i + 1) << 8) | (quint8)baText.at(i));
+            const quint16 nCharacter = bBigEndian ? (((quint8)baText.at(i) << 8) | (quint8)baText.at(i + 1)) : (((quint8)baText.at(i + 1) << 8) | (quint8)baText.at(i));
             if (!nCharacter) {
                 break;
             }

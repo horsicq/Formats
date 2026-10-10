@@ -111,8 +111,9 @@ QIODevice *XTAR_GZ::decompressData(PDSTRUCT *pPdStruct)
     }
     const bool bDecoded = gzip.unpackCurrent(&state, result.get(), pPdStruct);
     const bool bFinished = gzip.finishUnpack(&state, nullptr);
-    if (!source || !bDecoded || !bFinished || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime)) ||
-        !XBinary::isPdStructNotCanceled(pPdStruct) || (result->size() <= 0) || (result->size() > nOutputLimit) || !result->seek(0)) return nullptr;
+    if (!source || !bDecoded || !bFinished || (pPdStruct && !isPdStructLifetimeAlive(progressLifetime)) || !XBinary::isPdStructNotCanceled(pPdStruct) ||
+        (result->size() <= 0) || (result->size() > nOutputLimit) || !result->seek(0))
+        return nullptr;
     // The decode is complete and every byte came from here; nothing writes to
     // this buffer again.  Seal before it can be snapshotted.
     result->seal();

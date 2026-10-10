@@ -81,10 +81,7 @@ class ArchiveContextAlive {
 public:
     ArchiveContextAlive(QIODevice *const &guardedSource, QIODevice *const &guardedDestination, XBinary::PDSTRUCT *const &pPdStruct,
                         const XBinary::PDSTRUCTLIFETIME &progressLifetime)
-        : m_guardedSource(guardedSource),
-          m_guardedDestination(guardedDestination),
-          m_pPdStruct(pPdStruct),
-          m_progressLifetime(progressLifetime)
+        : m_guardedSource(guardedSource), m_guardedDestination(guardedDestination), m_pPdStruct(pPdStruct), m_progressLifetime(progressLifetime)
     {
     }
 
@@ -174,8 +171,8 @@ private:
 
 class ArchiveTransactionErrorReporter {
 public:
-    ArchiveTransactionErrorReporter(const ArchiveTransactionError &transactionError, const ArchiveProgressAlive &isProgressAlive,
-                                    XBinary::PDSTRUCT *const &pPdStruct, XArchive *&guardedArchive)
+    ArchiveTransactionErrorReporter(const ArchiveTransactionError &transactionError, const ArchiveProgressAlive &isProgressAlive, XBinary::PDSTRUCT *const &pPdStruct,
+                                    XArchive *&guardedArchive)
         : m_transactionError(transactionError), m_isProgressAlive(isProgressAlive), m_pPdStruct(pPdStruct), m_guardedArchive(guardedArchive)
     {
     }
@@ -377,7 +374,7 @@ protected:
     }
 
 private:
-    QIODevice * m_pSource;
+    QIODevice *m_pSource;
     qint64 m_nLimit;
     qint64 m_nRead;
     bool m_bSourceSeekable;
@@ -503,7 +500,7 @@ protected:
     }
 
 private:
-    QIODevice * m_pDestination;
+    QIODevice *m_pDestination;
     qint64 m_nOffset;
     qint64 m_nSize;
     qint64 m_nProduced;
@@ -1000,14 +997,12 @@ bool XArchive::captureSourceDeviceSnapshot(QIODevice *pDevice, SOURCE_DEVICE_SNA
 // in-place write through a raw pointer; see the SOURCE_DEVICE_SNAPSHOT comment.
 static bool archiveSnapshotStructureMatches(const XArchive::SOURCE_DEVICE_SNAPSHOT &snapshot, const XArchive::SOURCE_DEVICE_SNAPSHOT &candidate)
 {
-    if ((candidate.pRootDevice != snapshot.pRootDevice) || (candidate.listChain.size() != snapshot.listChain.size()) ||
-        (candidate.rootKind != snapshot.rootKind) || (candidate.nRootSize != snapshot.nRootSize) ||
-        (candidate.nBufferBackingIdentity != snapshot.nBufferBackingIdentity) || (candidate.nBufferBlockIdentity != snapshot.nBufferBlockIdentity) ||
-        (candidate.nBufferBlockSize != snapshot.nBufferBlockSize) || (candidate.bBufferSealed != snapshot.bBufferSealed) ||
-        (candidate.baBufferSnapshot != snapshot.baBufferSnapshot) ||
-        (candidate.sFilePath != snapshot.sFilePath) || (candidate.baFilePhysicalIdentity != snapshot.baFilePhysicalIdentity) ||
-        (candidate.baFileMutationIdentity != snapshot.baFileMutationIdentity) || (candidate.bContentFingerprintRequired != snapshot.bContentFingerprintRequired) ||
-        (candidate.nOwnerDeviceGeneration != snapshot.nOwnerDeviceGeneration)) {
+    if ((candidate.pRootDevice != snapshot.pRootDevice) || (candidate.listChain.size() != snapshot.listChain.size()) || (candidate.rootKind != snapshot.rootKind) ||
+        (candidate.nRootSize != snapshot.nRootSize) || (candidate.nBufferBackingIdentity != snapshot.nBufferBackingIdentity) ||
+        (candidate.nBufferBlockIdentity != snapshot.nBufferBlockIdentity) || (candidate.nBufferBlockSize != snapshot.nBufferBlockSize) ||
+        (candidate.bBufferSealed != snapshot.bBufferSealed) || (candidate.baBufferSnapshot != snapshot.baBufferSnapshot) || (candidate.sFilePath != snapshot.sFilePath) ||
+        (candidate.baFilePhysicalIdentity != snapshot.baFilePhysicalIdentity) || (candidate.baFileMutationIdentity != snapshot.baFileMutationIdentity) ||
+        (candidate.bContentFingerprintRequired != snapshot.bContentFingerprintRequired) || (candidate.nOwnerDeviceGeneration != snapshot.nOwnerDeviceGeneration)) {
         return false;
     }
 
@@ -1728,13 +1723,9 @@ XArchive::COMPRESS_RESULT XArchive::_decompress(DECOMPRESSSTRUCT *pDecompressStr
         } else {
             result = COMPRESS_RESULT_DATAERROR;
         }
-    } else if ((pDecompressStruct->spInfo.compressMethod >= HANDLE_METHOD_SQZ1) &&
-               (pDecompressStruct->spInfo.compressMethod <= HANDLE_METHOD_SQZ4)) {
-        const HANDLE_METHOD handleMethod =
-            pDecompressStruct->spInfo.compressMethod;
-        const qint32 nMethod =
-            static_cast<qint32>(handleMethod) -
-            static_cast<qint32>(HANDLE_METHOD_SQZ1) + 1;
+    } else if ((pDecompressStruct->spInfo.compressMethod >= HANDLE_METHOD_SQZ1) && (pDecompressStruct->spInfo.compressMethod <= HANDLE_METHOD_SQZ4)) {
+        const HANDLE_METHOD handleMethod = pDecompressStruct->spInfo.compressMethod;
+        const qint32 nMethod = static_cast<qint32>(handleMethod) - static_cast<qint32>(HANDLE_METHOD_SQZ1) + 1;
         XBinary::DATAPROCESS_STATE decompressState = {};
         decompressState.mapProperties.insert(XBinary::FPART_PROP_HANDLEMETHOD, handleMethod);
         decompressState.mapProperties.insert(XBinary::FPART_PROP_UNCOMPRESSEDSIZE, pDecompressStruct->spInfo.nUncompressedSize);
@@ -1826,8 +1817,7 @@ XArchive::COMPRESS_RESULT XArchive::_decompress(DECOMPRESSSTRUCT *pDecompressStr
         } else {
             result = COMPRESS_RESULT_DATAERROR;
         }
-    } else if ((pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_PAK_CRUSHED) ||
-               (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_PAK_DISTILLED)) {
+    } else if ((pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_PAK_CRUSHED) || (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_PAK_DISTILLED)) {
         const HANDLE_METHOD handleMethod = pDecompressStruct->spInfo.compressMethod;
         const qint32 nMethod = (handleMethod == HANDLE_METHOD_PAK_CRUSHED) ? 10 : 11;
         XBinary::DATAPROCESS_STATE decompressState = {};
@@ -1852,8 +1842,7 @@ XArchive::COMPRESS_RESULT XArchive::_decompress(DECOMPRESSSTRUCT *pDecompressStr
         } else {
             result = COMPRESS_RESULT_DATAERROR;
         }
-    } else if ((pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_SSM_PICTOOLS) ||
-               (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_SSM_PICTOOLS5)) {
+    } else if ((pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_SSM_PICTOOLS) || (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_SSM_PICTOOLS5)) {
         const HANDLE_METHOD handleMethod = pDecompressStruct->spInfo.compressMethod;
         const qint32 nMethod = (handleMethod == HANDLE_METHOD_SSM_PICTOOLS) ? 3 : 5;
         XBinary::DATAPROCESS_STATE decompressState = {};
@@ -1903,8 +1892,7 @@ XArchive::COMPRESS_RESULT XArchive::_decompress(DECOMPRESSSTRUCT *pDecompressStr
                 result = COMPRESS_RESULT_DATAERROR;
             }
         }
-    } else if ((pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_DEFLATE) ||
-               (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_WISE_DEFLATE)) {
+    } else if ((pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_DEFLATE) || (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_WISE_DEFLATE)) {
         XBinary::DATAPROCESS_STATE decompressState = {};
         decompressState.mapProperties.insert(XBinary::FPART_PROP_HANDLEMETHOD, HANDLE_METHOD_DEFLATE);
         decompressState.mapProperties.insert(XBinary::FPART_PROP_UNCOMPRESSEDSIZE, pDecompressStruct->spInfo.nUncompressedSize);
@@ -1915,10 +1903,7 @@ XArchive::COMPRESS_RESULT XArchive::_decompress(DECOMPRESSSTRUCT *pDecompressStr
         decompressState.nProcessedOffset = pDecompressStruct->nDecompressedOffset;
         decompressState.nProcessedLimit = pDecompressStruct->nDecompressedLimit;
 
-        if (XDeflateDecoder::decompress(
-                &decompressState, pPdStruct,
-                pDecompressStruct->spInfo.compressMethod ==
-                    HANDLE_METHOD_WISE_DEFLATE)) {
+        if (XDeflateDecoder::decompress(&decompressState, pPdStruct, pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_WISE_DEFLATE)) {
             pDecompressStruct->nInSize = decompressState.nCountInput;
             pDecompressStruct->nOutSize = decompressState.nCountOutput;
             pDecompressStruct->bLimit = (pDecompressStruct->nDecompressedLimit != -1) && (decompressState.nCountOutput >= nWindowEnd);
@@ -2079,8 +2064,7 @@ XArchive::COMPRESS_RESULT XArchive::_decompress(DECOMPRESSSTRUCT *pDecompressStr
         }
     } else if ((pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_LZH4) || (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_LZH5) ||
                (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_LZH6) || (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_LZH7) ||
-               (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_JASC_COMPRESSED) ||
-               (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_ZOO_LZH)) {
+               (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_JASC_COMPRESSED) || (pDecompressStruct->spInfo.compressMethod == HANDLE_METHOD_ZOO_LZH)) {
         qint32 nMethod = 5;
         XLZHDecoder::TERMINATION_MODE terminationMode = XLZHDecoder::TERMINATION_PHYSICAL_EOF;
 
@@ -2682,8 +2666,7 @@ QByteArray XArchive::decompress(const XArchive::RECORD *pRecord, PDSTRUCT *pPdSt
     // verify the record's stored checksum, so a write-only destination fails
     // every record that carries one.
     if (buffer.open(QIODevice::ReadWrite)) {
-        const bool bDecompressed =
-            _decompressRecord(pRecord, guardedSourceDevice, &buffer, pPdStruct, nDecompressedOffset, nDecompressedLimit, mapUnpackProperties);
+        const bool bDecompressed = _decompressRecord(pRecord, guardedSourceDevice, &buffer, pPdStruct, nDecompressedOffset, nDecompressedLimit, mapUnpackProperties);
         buffer.close();
 
         // A QByteArray return value must never expose a valid-looking prefix
@@ -3604,9 +3587,8 @@ bool XArchive::publishUnpackOutput(QIODevice *pStageDevice, QIODevice *pOutputDe
     const bool bStageSequential = guardedStage->isSequential();
     if (!guardedArchive || !guardedStage || bStageSequential || !guardedArchive->isUnpackOutputSupported(guardedOutput) || !guardedArchive || !guardedOutput ||
         !guardedSource || XBinary::devicesAlias(guardedStage, guardedOutput) || !guardedStage || !guardedOutput || !guardedSource ||
-        XBinary::devicesAlias(guardedSource, guardedOutput) || !guardedStage || !guardedOutput || !guardedSource ||
-        !XBinary::isPdStructNotCanceled(pPdStruct) || !guardedArchive || !guardedArchive->isUnpackSourceCurrent(pState, pPdStruct) || !guardedArchive || !guardedStage ||
-        !guardedOutput || !guardedSource)
+        XBinary::devicesAlias(guardedSource, guardedOutput) || !guardedStage || !guardedOutput || !guardedSource || !XBinary::isPdStructNotCanceled(pPdStruct) ||
+        !guardedArchive || !guardedArchive->isUnpackSourceCurrent(pState, pPdStruct) || !guardedArchive || !guardedStage || !guardedOutput || !guardedSource)
         return false;
 
     const qint64 nStageSize = guardedStage->size();
@@ -3841,7 +3823,6 @@ bool XArchive::handleInternalInfo(PDSTRUCT *pPdStruct)
 
 void *XArchive::getInternalInfo(PDSTRUCT *pPdStruct)
 {
-
     if (!handleInternalInfo(pPdStruct)) {
         return nullptr;
     }

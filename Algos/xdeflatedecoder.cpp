@@ -10398,9 +10398,7 @@ XDeflateDecoder::XDeflateDecoder(QObject *parent) : QObject(parent)
 {
 }
 
-bool XDeflateDecoder::decompress(XBinary::DATAPROCESS_STATE *pDecompressState,
-                                 XBinary::PDSTRUCT *pPdStruct,
-                                 bool bAcceptExactOutputAtEOF)
+bool XDeflateDecoder::decompress(XBinary::DATAPROCESS_STATE *pDecompressState, XBinary::PDSTRUCT *pPdStruct, bool bAcceptExactOutputAtEOF)
 {
     bool bResult = false;
 
@@ -10427,17 +10425,9 @@ bool XDeflateDecoder::decompress(XBinary::DATAPROCESS_STATE *pDecompressState,
                 strm.avail_in = XBinary::_readDevice(bufferIn, nBufferSize, pDecompressState);
 
                 if (strm.avail_in == 0) {
-                    const bool bExpectedSizeDefined =
-                        pDecompressState->mapProperties.contains(
-                            XBinary::FPART_PROP_UNCOMPRESSEDSIZE);
-                    const qint64 nExpectedSize = bExpectedSizeDefined
-                        ? pDecompressState->mapProperties
-                              .value(XBinary::FPART_PROP_UNCOMPRESSEDSIZE)
-                              .toLongLong()
-                        : -1;
-                    if (bAcceptExactOutputAtEOF && nExpectedSize >= 0 &&
-                        pDecompressState->nCountInput ==
-                            pDecompressState->nInputLimit &&
+                    const bool bExpectedSizeDefined = pDecompressState->mapProperties.contains(XBinary::FPART_PROP_UNCOMPRESSEDSIZE);
+                    const qint64 nExpectedSize = bExpectedSizeDefined ? pDecompressState->mapProperties.value(XBinary::FPART_PROP_UNCOMPRESSEDSIZE).toLongLong() : -1;
+                    if (bAcceptExactOutputAtEOF && nExpectedSize >= 0 && pDecompressState->nCountInput == pDecompressState->nInputLimit &&
                         pDecompressState->nCountOutput == nExpectedSize) {
                         ret = Z_STREAM_END;
                     } else {
@@ -10488,13 +10478,8 @@ bool XDeflateDecoder::decompress(XBinary::DATAPROCESS_STATE *pDecompressState,
 
             bResult = (ret == Z_STREAM_END);
             if (bResult && bAcceptExactOutputAtEOF) {
-                const qint64 nExpectedSize = pDecompressState->mapProperties
-                    .value(XBinary::FPART_PROP_UNCOMPRESSEDSIZE, -1)
-                    .toLongLong();
-                bResult = nExpectedSize >= 0 &&
-                          pDecompressState->nCountInput ==
-                              pDecompressState->nInputLimit &&
-                          pDecompressState->nCountOutput == nExpectedSize;
+                const qint64 nExpectedSize = pDecompressState->mapProperties.value(XBinary::FPART_PROP_UNCOMPRESSEDSIZE, -1).toLongLong();
+                bResult = nExpectedSize >= 0 && pDecompressState->nCountInput == pDecompressState->nInputLimit && pDecompressState->nCountOutput == nExpectedSize;
             }
         }
 
@@ -10578,7 +10563,7 @@ bool XDeflateDecoder::decompress_zlib(XBinary::DATAPROCESS_STATE *pDecompressSta
     struct DEFLATE_GUARDED_EXACT_READER {
         QIODevice *const &guardedInput;
 
-        bool operator()(qint64 nOffset,char *pData,qint32 nSize) const
+        bool operator()(qint64 nOffset, char *pData, qint32 nSize) const
         {
             if (!guardedInput || !pData || (nOffset < 0) || (nSize <= 0)) {
                 return false;
@@ -10589,7 +10574,7 @@ bool XDeflateDecoder::decompress_zlib(XBinary::DATAPROCESS_STATE *pDecompressSta
 
             qint32 nTotal = 0;
             while (nTotal < nSize) {
-                const qint64 nRead = guardedInput->read(pData + nTotal,nSize - nTotal);
+                const qint64 nRead = guardedInput->read(pData + nTotal, nSize - nTotal);
                 if (!guardedInput || (nRead <= 0) || (nRead > (nSize - nTotal))) {
                     return false;
                 }

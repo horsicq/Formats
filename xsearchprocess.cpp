@@ -81,8 +81,8 @@ class SEARCH_PROCESS_CLEANUP {
 public:
     using CLEAR_CALLBACK_FUNCTION = void (XSearchProcess::*)();
 
-    SEARCH_PROCESS_CLEANUP(XSearchProcess *&guardedProcess, QIODevice *&guardedDevice, XBinary *&guardedBinary,
-                           qint64 &nOriginalPosition, const XBinary::INDATA &inData, CLEAR_CALLBACK_FUNCTION clearCallbackFunction)
+    SEARCH_PROCESS_CLEANUP(XSearchProcess *&guardedProcess, QIODevice *&guardedDevice, XBinary *&guardedBinary, qint64 &nOriginalPosition, const XBinary::INDATA &inData,
+                           CLEAR_CALLBACK_FUNCTION clearCallbackFunction)
         : m_guardedProcess(guardedProcess),
           m_guardedDevice(guardedDevice),
           m_guardedBinary(guardedBinary),
@@ -117,8 +117,7 @@ private:
 
 class SEARCH_PROCESS_PROGRESS_OWNER_CHECKER {
 public:
-    SEARCH_PROCESS_PROGRESS_OWNER_CHECKER(XSearchProcess *const &guardedProcess, QIODevice *const &guardedDevice,
-                                          const XBinary::PDSTRUCTLIFETIME &progressLifetime)
+    SEARCH_PROCESS_PROGRESS_OWNER_CHECKER(XSearchProcess *const &guardedProcess, QIODevice *const &guardedDevice, const XBinary::PDSTRUCTLIFETIME &progressLifetime)
         : m_guardedProcess(guardedProcess), m_guardedDevice(guardedDevice), m_progressLifetime(progressLifetime)
     {
     }
@@ -129,8 +128,8 @@ public:
     }
 
 private:
-    XSearchProcess * m_guardedProcess;
-    QIODevice * m_guardedDevice;
+    XSearchProcess *m_guardedProcess;
+    QIODevice *m_guardedDevice;
     XBinary::PDSTRUCTLIFETIME m_progressLifetime;
 };
 }  // namespace
@@ -204,7 +203,7 @@ void XSearchProcess::process()
     }
 
     QIODevice *guardedDevice = XFormats::createDevice(inData);
-    XBinary * guardedBinary;
+    XBinary *guardedBinary;
     qint64 nOriginalPosition = -1;
     XSearchProcess *guardedThis = this;
 

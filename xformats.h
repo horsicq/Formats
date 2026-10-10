@@ -655,10 +655,8 @@ public:
 private:
     static QSet<XBinary::FT> _getFileTypes(QIODevice *pDevice, quint32 nFTFlags, XBinary::PDSTRUCT *pPdStruct);
     QString _getTransactionError(const XBinary::UNPACK_FOLDER_TRANSACTION &transaction) const;
-    void _reportTransactionError(const XBinary::UNPACK_FOLDER_TRANSACTION &transaction, XBinary::PDSTRUCT *pPdStruct,
-                                 const XBinary::PDSTRUCTLIFETIME &progressLifetime);
-    void _rollbackTransaction(XBinary::UNPACK_FOLDER_TRANSACTION *pTransaction, XBinary::PDSTRUCT *pPdStruct,
-                              const XBinary::PDSTRUCTLIFETIME &progressLifetime);
+    void _reportTransactionError(const XBinary::UNPACK_FOLDER_TRANSACTION &transaction, XBinary::PDSTRUCT *pPdStruct, const XBinary::PDSTRUCTLIFETIME &progressLifetime);
+    void _rollbackTransaction(XBinary::UNPACK_FOLDER_TRANSACTION *pTransaction, XBinary::PDSTRUCT *pPdStruct, const XBinary::PDSTRUCTLIFETIME &progressLifetime);
 
 public:
     void setData(MODE mode, XBinary::FT fileFormat, QIODevice *pDevice, QString sFolderName, XBinary::PDSTRUCT *pPdStruct);

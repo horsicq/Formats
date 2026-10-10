@@ -388,42 +388,90 @@ public:
         HANDLE_METHOD_PAK_CRUSHED,
         HANDLE_METHOD_PAK_DISTILLED,
         HANDLE_METHOD_SSM_PICTOOLS5,
-        // Aldus gen1 payload: block table + per-block TIFF/PDF-style LZW. Whole-buffer decoder - add the name to the whole-buffer family list at xdecompress.cpp:3141-3160 alongside HANDLE_METHOD_GPFPACK_LZW, then the dispatch else-if next to it at :3254. A single record maps to one (offset,size,method) triple, so the block loop lives inside the decoder exactly as decGpfPack does.
+        // Aldus gen1 payload: block table + per-block TIFF/PDF-style LZW. Whole-buffer decoder - add the name to the whole-buffer family list at
+        // xdecompress.cpp:3141-3160 alongside HANDLE_METHOD_GPFPACK_LZW, then the dispatch else-if next to it at :3254. A single record maps to one (offset,size,method)
+        // triple, so the block loop lives inside the decoder exactly as decGpfPack does.
         HANDLE_METHOD_ALDUS_LZW,
-        // Aldus gen2 payload: block table + one complete PKWARE DCL implode stream per block (the decoder reuses XDclDecoder). Same whole-buffer family list + dispatch site as HANDLE_METHOD_ALDUS_LZW.
+        // Aldus gen2 payload: block table + one complete PKWARE DCL implode stream per block (the decoder reuses XDclDecoder). Same whole-buffer family list + dispatch
+        // site as HANDLE_METHOD_ALDUS_LZW.
         HANDLE_METHOD_ALDUS_PKZP,
-        // Adobe gen3 payload: block table + per-block [LE16 CRC-16/ARC][u8 method][data], method 0 stored / method 1 LHA -lh5- (dicbit 13, np 14, pbit 4), 1-2 LHA sub-blocks per container block. Same whole-buffer family list + dispatch site as HANDLE_METHOD_ALDUS_LZW.
+        // Adobe gen3 payload: block table + per-block [LE16 CRC-16/ARC][u8 method][data], method 0 stored / method 1 LHA -lh5- (dicbit 13, np 14, pbit 4), 1-2 LHA
+        // sub-blocks per container block. Same whole-buffer family list + dispatch site as HANDLE_METHOD_ALDUS_LZW.
         HANDLE_METHOD_ALDUS_LZSH,
-        // Philip Gage Byte Pair Encoding (C/C++ Users Journal, Feb 1994) as used by the Park Place Productions "PAK" container. Written from the byte layout recovered from the samples; no third-party code vendored, licence clean. Append at the tail of the HANDLE_METHOD enum (after HANDLE_METHOD_SSM_PICTOOLS5) so persisted ids do not move. NOTE: besides the else-if body below, HANDLE_METHOD_BPE_GAGE must also be added to the method list in the guarding if-condition of that same branch (xdecompress.cpp ~lines 3141-3161, the branch that materialises `packed`/`unpacked` QByteArrays), next to HANDLE_METHOD_RTPATCH. It requires FPART_PROP_UNCOMPRESSEDSIZE to be defined, which XBTHPAK always publishes.
+        // Philip Gage Byte Pair Encoding (C/C++ Users Journal, Feb 1994) as used by the Park Place Productions "PAK" container. Written from the byte layout recovered
+        // from the samples; no third-party code vendored, licence clean. Append at the tail of the HANDLE_METHOD enum (after HANDLE_METHOD_SSM_PICTOOLS5) so persisted
+        // ids do not move. NOTE: besides the else-if body below, HANDLE_METHOD_BPE_GAGE must also be added to the method list in the guarding if-condition of that same
+        // branch (xdecompress.cpp ~lines 3141-3161, the branch that materialises `packed`/`unpacked` QByteArrays), next to HANDLE_METHOD_RTPATCH. It requires
+        // FPART_PROP_UNCOMPRESSEDSIZE to be defined, which XBTHPAK always publishes.
         HANDLE_METHOD_BPE_GAGE,
-        // Eschalon Setup ARCV 2.00, scrambled writer variant: prefix-XOR delta filter (seed 0x56) over the packed member, then the ordinary narrow ARCV LZHUF stream. Place next to HANDLE_METHOD_ARCV_LZHUF (xbinary.h:344). Must ALSO be added to the buffered-method list at xdecompress.cpp:3145-3162, alongside HANDLE_METHOD_ARCV_LZHUF.
+        // Eschalon Setup ARCV 2.00, scrambled writer variant: prefix-XOR delta filter (seed 0x56) over the packed member, then the ordinary narrow ARCV LZHUF stream.
+        // Place next to HANDLE_METHOD_ARCV_LZHUF (xbinary.h:344). Must ALSO be added to the buffered-method list at xdecompress.cpp:3145-3162, alongside
+        // HANDLE_METHOD_ARCV_LZHUF.
         HANDLE_METHOD_ARCV2_LZHUF_DELTA,
-        // Eschalon Setup ARCV 2.00, stored member inside a scrambled archive: the prefix-XOR delta filter (seed 0x56) is the whole codec, length-preserving. Place next to HANDLE_METHOD_ARCV_LZHUF (xbinary.h:344). Must ALSO be added to the buffered-method list at xdecompress.cpp:3145-3162.
+        // Eschalon Setup ARCV 2.00, stored member inside a scrambled archive: the prefix-XOR delta filter (seed 0x56) is the whole codec, length-preserving. Place next
+        // to HANDLE_METHOD_ARCV_LZHUF (xbinary.h:344). Must ALSO be added to the buffered-method list at xdecompress.cpp:3145-3162.
         HANDLE_METHOD_ARCV_XOR_DELTA,
-        // AMPK method 2: Okumura LZSS, N=4096, F=18, LSB-first flag byte per 8 tokens. NOT HANDLE_METHOD_LZSS_SZDD: that path starts the ring cursor at N-16 instead of N-18 and fails silently (right byte count, wrong bytes). Place the dispatch inside the existing whole-buffer block that materialises `packed`/`unpacked` (xdecompress.cpp ~3140-3520) and ALSO add `(compressMethod == XBinary::HANDLE_METHOD_AMPK_LZSS)` to the disjunction at the top of that block (~line 3140) or the branch is never reached.
+        // AMPK method 2: Okumura LZSS, N=4096, F=18, LSB-first flag byte per 8 tokens. NOT HANDLE_METHOD_LZSS_SZDD: that path starts the ring cursor at N-16 instead of
+        // N-18 and fails silently (right byte count, wrong bytes). Place the dispatch inside the existing whole-buffer block that materialises `packed`/`unpacked`
+        // (xdecompress.cpp ~3140-3520) and ALSO add `(compressMethod == XBinary::HANDLE_METHOD_AMPK_LZSS)` to the disjunction at the top of that block (~line 3140) or
+        // the branch is never reached.
         HANDLE_METHOD_AMPK_LZSS,
-        // AMPK method 1: Okumura LZARI (LZSS over an adaptive binary arithmetic coder), N=4096, F=60, THRESHOLD=2, N_CHAR=314, M=15. No existing HANDLE_METHOD decodes it. The coder primes 17 bits, so it reads 1-2 bytes past the member's declared compressedSize; the decoder returns zero bits there by design. Same placement rule as HANDLE_METHOD_AMPK_LZSS: add it to the block's disjunction as well as the else-if.
+        // AMPK method 1: Okumura LZARI (LZSS over an adaptive binary arithmetic coder), N=4096, F=60, THRESHOLD=2, N_CHAR=314, M=15. No existing HANDLE_METHOD decodes
+        // it. The coder primes 17 bits, so it reads 1-2 bytes past the member's declared compressedSize; the decoder returns zero bits there by design. Same placement
+        // rule as HANDLE_METHOD_AMPK_LZSS: add it to the block's disjunction as well as the else-if.
         HANDLE_METHOD_AMPK_LZARI,
-        // Classic SysV/AIX `pack` Huffman stream in its HEADERLESS form (no 0x1F1E magic, no embedded raw size) - what BFF 0xEA6C members contain. NO NEW ALGORITHM: it is decoded by the already-vendored XAncientPrivate::UnixPackDecoder, reached through XAncientDecoder::TYPE_UNIX_PACK, exactly as HANDLE_METHOD_RNC already reaches XAncientDecoder today, so no new licence boundary. Two central edits: (1) append HANDLE_METHOD_UNIX_PACK at the END of the HANDLE_METHOD enum in _mylibs/Formats/xbinary.h (after HANDLE_METHOD_SSM_PICTOOLS5) so persisted ids do not move; (2) in _mylibs/XArchive/xdecompress.cpp add HANDLE_METHOD_UNIX_PACK to the `||` condition list of the buffered packed/unpacked block (the list around lines 3141-3161 that already carries HANDLE_METHOD_RNC) and add the else-if arm below next to the HANDLE_METHOD_RNC arm (~line 3242). That block's preamble already enforces bUncompressedSizeDefined and buffer-size sanity. Proof this decoder is the right one: I re-implemented its exact table construction independently and the four members of 99_yzpccqpjzspqkion_U471905.bff decode to md5 fcef242d.../3ceb5ed7.../272f2045.../87606c2c..., identical to the reference implementation's extraction; the plan's author separately compiled the real in-tree decoder and ran it over all 786 compressed members of the family, ok=786 bad=0. Largest packed member in the corpus is 5,519,197 raw / 4,365,781 packed, well inside XAncientDecoder::MAX_RAW_SIZE (128 MiB).
+        // Classic SysV/AIX `pack` Huffman stream in its HEADERLESS form (no 0x1F1E magic, no embedded raw size) - what BFF 0xEA6C members contain. NO NEW ALGORITHM: it
+        // is decoded by the already-vendored XAncientPrivate::UnixPackDecoder, reached through XAncientDecoder::TYPE_UNIX_PACK, exactly as HANDLE_METHOD_RNC already
+        // reaches XAncientDecoder today, so no new licence boundary. Two central edits: (1) append HANDLE_METHOD_UNIX_PACK at the END of the HANDLE_METHOD enum in
+        // _mylibs/Formats/xbinary.h (after HANDLE_METHOD_SSM_PICTOOLS5) so persisted ids do not move; (2) in _mylibs/XArchive/xdecompress.cpp add HANDLE_METHOD_UNIX_PACK
+        // to the `||` condition list of the buffered packed/unpacked block (the list around lines 3141-3161 that already carries HANDLE_METHOD_RNC) and add the else-if
+        // arm below next to the HANDLE_METHOD_RNC arm (~line 3242). That block's preamble already enforces bUncompressedSizeDefined and buffer-size sanity. Proof this
+        // decoder is the right one: I re-implemented its exact table construction independently and the four members of 99_yzpccqpjzspqkion_U471905.bff decode to md5
+        // fcef242d.../3ceb5ed7.../272f2045.../87606c2c..., identical to the reference implementation's extraction; the plan's author separately compiled the real in-tree
+        // decoder and ran it over all 786 compressed members of the family, ok=786 bad=0. Largest packed member in the corpus is 5,519,197 raw / 4,365,781 packed, well
+        // inside XAncientDecoder::MAX_RAW_SIZE (128 MiB).
         HANDLE_METHOD_UNIX_PACK,
-        // Add the enumerator in xbinary.h next to HANDLE_METHOD_MSZIP_CAB (line ~248). IMPORTANT - xdecompress.cpp needs TWO edits, not one: (1) add `(compressMethod == XBinary::HANDLE_METHOD_ASYMETRIX_BLOCKS) ||` to the whole-buffer method list that opens the `packed`/`unpacked` branch at lines ~3141-3161 (the same chain that contains HANDLE_METHOD_PKWARE_DCL_IMPLODE at line 3151), otherwise the new arm is unreachable and every member falls through to "Unknown compression method"; (2) add the else-if arm below to that branch's dispatch chain, next to the HANDLE_METHOD_PKWARE_DCL_IMPLODE arm at line ~3269. No codec maths is being added: the arm only walks the 6-byte {u16 method, u32 packedLength} block frames, and the PKWARE DCL explode inside XAsymetrixDecoder is a port of the existing decPkwareDcl (xdecompress.cpp:1325), kept local only because that function is static in another TU. Also add Algos/xasymetrixdecoder.h and .cpp to xarchive.pri and xarchive.cmake alongside xasymetrix.h/.cpp.
+        // Add the enumerator in xbinary.h next to HANDLE_METHOD_MSZIP_CAB (line ~248). IMPORTANT - xdecompress.cpp needs TWO edits, not one: (1) add `(compressMethod ==
+        // XBinary::HANDLE_METHOD_ASYMETRIX_BLOCKS) ||` to the whole-buffer method list that opens the `packed`/`unpacked` branch at lines ~3141-3161 (the same chain that
+        // contains HANDLE_METHOD_PKWARE_DCL_IMPLODE at line 3151), otherwise the new arm is unreachable and every member falls through to "Unknown compression method";
+        // (2) add the else-if arm below to that branch's dispatch chain, next to the HANDLE_METHOD_PKWARE_DCL_IMPLODE arm at line ~3269. No codec maths is being added:
+        // the arm only walks the 6-byte {u16 method, u32 packedLength} block frames, and the PKWARE DCL explode inside XAsymetrixDecoder is a port of the existing
+        // decPkwareDcl (xdecompress.cpp:1325), kept local only because that function is static in another TU. Also add Algos/xasymetrixdecoder.h and .cpp to xarchive.pri
+        // and xarchive.cmake alongside xasymetrix.h/.cpp.
         HANDLE_METHOD_ASYMETRIX_BLOCKS,
-        // PhysTechSoft BSA member codec: LHA -lh6- static Huffman (NC=510/CBIT=9, NT=19/TBIT=5, NP=16/PBIT=5, THRESHOLD=3, 32 KiB window) with a SOLID dictionary. The bit reader and Huffman state restart byte-aligned per member, but the window carries the preceding members' plaintext, so this cannot be aliased onto the existing HANDLE_METHOD_LZH6 (measured: a fresh window decodes only 355 of 853 members; the other 498 come out as garbage). XBSN supplies the required history as FPART_PROP_COMPRESSPROPERTIES, which the dispatch already has in scope as baProperty. PLACEMENT: add HANDLE_METHOD_BSN_LH6 to the OUTER group condition of the buffer-decoder arm in XDecompress::decompress (the big `else if ((compressMethod == XBinary::HANDLE_METHOD_COMPACT_PRO_RLE) || ...)` list, currently ~xdecompress.cpp:3141) so that `packed` / `unpacked` are materialised, then add the inner else-if below alongside the other decoders (~xdecompress.cpp:3193+). baProperty is a function-scope local declared at ~line 2770 and is in scope there; it is empty for the first member of an archive, which the decoder handles as the non-solid case.
+        // PhysTechSoft BSA member codec: LHA -lh6- static Huffman (NC=510/CBIT=9, NT=19/TBIT=5, NP=16/PBIT=5, THRESHOLD=3, 32 KiB window) with a SOLID dictionary. The
+        // bit reader and Huffman state restart byte-aligned per member, but the window carries the preceding members' plaintext, so this cannot be aliased onto the
+        // existing HANDLE_METHOD_LZH6 (measured: a fresh window decodes only 355 of 853 members; the other 498 come out as garbage). XBSN supplies the required history
+        // as FPART_PROP_COMPRESSPROPERTIES, which the dispatch already has in scope as baProperty. PLACEMENT: add HANDLE_METHOD_BSN_LH6 to the OUTER group condition of
+        // the buffer-decoder arm in XDecompress::decompress (the big `else if ((compressMethod == XBinary::HANDLE_METHOD_COMPACT_PRO_RLE) || ...)` list, currently
+        // ~xdecompress.cpp:3141) so that `packed` / `unpacked` are materialised, then add the inner else-if below alongside the other decoders (~xdecompress.cpp:3193+).
+        // baProperty is a function-scope local declared at ~line 2770 and is in scope there; it is empty for the first member of an archive, which the decoder handles as
+        // the non-solid case.
         HANDLE_METHOD_BSN_LH6,
-        // // Unix compress (LZW) stream that carries only the flags byte - the 1F 9D         // magic is not stored in the container, so XCompressDecoder's entry point         // cannot be pointed at it.         HANDLE_METHOD_COMPRESS_RAW
+        // // Unix compress (LZW) stream that carries only the flags byte - the 1F 9D         // magic is not stored in the container, so XCompressDecoder's entry point
+        // // cannot be pointed at it.         HANDLE_METHOD_COMPRESS_RAW
         HANDLE_METHOD_COMPRESS_RAW,
-        // Eschalon Setup ARCV 2.00 written by the *Trial Edition* of the authoring tool: the payload is the very same prefix-XOR delta filter plus narrow ARCV LZHUF as HANDLE_METHOD_ARCV2_LZHUF_DELTA, only the filter seed is 0xab instead of the Release Edition's 0x56. Nothing in the container names the edition (SETUP.STX says "OEM=Eschalon Trial Edition" -- but that string only becomes readable after the stream is already decoded), so XARCV2::probeScramble has to try the seeds and let the stream decide. Appended at the tail of the enum so persisted ids do not move. Must ALSO be added to the buffered-method list at xdecompress.cpp:3149-3183, alongside HANDLE_METHOD_ARCV2_LZHUF_DELTA.
+        // Eschalon Setup ARCV 2.00 written by the *Trial Edition* of the authoring tool: the payload is the very same prefix-XOR delta filter plus narrow ARCV LZHUF as
+        // HANDLE_METHOD_ARCV2_LZHUF_DELTA, only the filter seed is 0xab instead of the Release Edition's 0x56. Nothing in the container names the edition (SETUP.STX says
+        // "OEM=Eschalon Trial Edition" -- but that string only becomes readable after the stream is already decoded), so XARCV2::probeScramble has to try the seeds and
+        // let the stream decide. Appended at the tail of the enum so persisted ids do not move. Must ALSO be added to the buffered-method list at
+        // xdecompress.cpp:3149-3183, alongside HANDLE_METHOD_ARCV2_LZHUF_DELTA.
         HANDLE_METHOD_ARCV2_LZHUF_DELTA_TRIAL,
-        // Stored member inside a Trial-Edition-scrambled ARCV 2.00 archive: the 0xab-seeded prefix-XOR delta filter is the whole codec, length-preserving. Same placement rule as HANDLE_METHOD_ARCV2_LZHUF_DELTA_TRIAL.
+        // Stored member inside a Trial-Edition-scrambled ARCV 2.00 archive: the 0xab-seeded prefix-XOR delta filter is the whole codec, length-preserving. Same placement
+        // rule as HANDLE_METHOD_ARCV2_LZHUF_DELTA_TRIAL.
         HANDLE_METHOD_ARCV_XOR_DELTA_TRIAL,
-        // bzip 0.21 ('BZ0') stream: RLE1 -> Burrows-Wheeler -> move-to-front -> Fenwick structured model -> Moffat/Neal/Witten adaptive arithmetic coding. NOT an alias of HANDLE_METHOD_BZIP2: bzip2 replaced the arithmetic back end with Huffman, so the two entropy stages share no code, and this container has no block magic, no cleartext CRC and no cleartext origPtr - everything after the 4-byte header is already inside the coder. Decoded by XBZIP1Decoder (Algos/xbzip1decoder.*), which is a STREAMING decoder because the uncompressed size is not knowable before decoding; it is therefore dispatched next to HANDLE_METHOD_BZIP2 in xdecompress.cpp and must NOT be added to the whole-buffer method list (that list requires bUncompressedSizeDefined).
+        // bzip 0.21 ('BZ0') stream: RLE1 -> Burrows-Wheeler -> move-to-front -> Fenwick structured model -> Moffat/Neal/Witten adaptive arithmetic coding. NOT an alias
+        // of HANDLE_METHOD_BZIP2: bzip2 replaced the arithmetic back end with Huffman, so the two entropy stages share no code, and this container has no block magic, no
+        // cleartext CRC and no cleartext origPtr - everything after the 4-byte header is already inside the coder. Decoded by XBZIP1Decoder (Algos/xbzip1decoder.*),
+        // which is a STREAMING decoder because the uncompressed size is not knowable before decoding; it is therefore dispatched next to HANDLE_METHOD_BZIP2 in
+        // xdecompress.cpp and must NOT be added to the whole-buffer method list (that list requires bUncompressedSizeDefined).
         HANDLE_METHOD_BZIP1,
         // TODO check more methods
         // ARC3 extensions: append to preserve persisted identifiers.
         HANDLE_METHOD_LHA_LEGACY,
         HANDLE_METHOD_DISKDOUBLER_LZW,
         HANDLE_METHOD_ARC_CRUNCH_HASHNEW,  // ARC 7: multiplicative hash LZW + RLE90.
-        HANDLE_METHOD_ARC_COMPRESSED,     // ARC 0x7f: flag-prefixed Unix compress.
+        HANDLE_METHOD_ARC_COMPRESSED,      // ARC 0x7f: flag-prefixed Unix compress.
         // ARC4 corpus wave 1 codecs.
         HANDLE_METHOD_NETWARE_PACK2,
         HANDLE_METHOD_MATHCAD,
@@ -602,9 +650,19 @@ public:
         // decoder group in XDecompress::decompress: the container records no
         // inflated length and that group requires one.
         HANDLE_METHOD_ISSETUPSTREAM,
-        // CreateInstall "instcrin" member codec: LZ77 over an adaptive Huffman coder, 629 symbols (256 = end of stream, 257..628 a combined length/distance-slot pair, length = (sym-257)%62+3, slot = (sym-257)/62), distance extra bits {4,6,8,10,12,14} over bases {0,16,80,336,1360,5456} plus the length, 32 KiB window restarted per stream, MSB-first bits, no header. A member over 4,000,000 bytes is a chain of such streams, so `packed` is the member's whole stream extent. Decoded by XCreateInstallDecoder::decode(). NOTE: besides the helper decCreateInstallWholeBuffer() it must also be added to the whole-buffer method list in the guarding if-condition of that same branch in XDecompress::decompress (the branch that materialises `packed`/`unpacked`), next to HANDLE_METHOD_GENTEE. It requires FPART_PROP_UNCOMPRESSEDSIZE, which XCreateInstallSFX always publishes. Append at the tail of the HANDLE_METHOD enum (after HANDLE_METHOD_ISSETUPSTREAM) so persisted ids do not move.
+        // CreateInstall "instcrin" member codec: LZ77 over an adaptive Huffman coder, 629 symbols (256 = end of stream, 257..628 a combined length/distance-slot pair,
+        // length = (sym-257)%62+3, slot = (sym-257)/62), distance extra bits {4,6,8,10,12,14} over bases {0,16,80,336,1360,5456} plus the length, 32 KiB window restarted
+        // per stream, MSB-first bits, no header. A member over 4,000,000 bytes is a chain of such streams, so `packed` is the member's whole stream extent. Decoded by
+        // XCreateInstallDecoder::decode(). NOTE: besides the helper decCreateInstallWholeBuffer() it must also be added to the whole-buffer method list in the guarding
+        // if-condition of that same branch in XDecompress::decompress (the branch that materialises `packed`/`unpacked`), next to HANDLE_METHOD_GENTEE. It requires
+        // FPART_PROP_UNCOMPRESSEDSIZE, which XCreateInstallSFX always publishes. Append at the tail of the HANDLE_METHOD enum (after HANDLE_METHOD_ISSETUPSTREAM) so
+        // persisted ids do not move.
         HANDLE_METHOD_CREATEINSTALL,
-        // SBX (SpinnerBaker eXtractor) member codec: plain Yoshizaki LZHUF - LZSS over an adaptive Huffman tree - with no framing and no method field; dist variant 1, F = 0x3c, THRESHOLD = 2, no end symbol, MAX_FREQ 0x8000, 0x2000-byte ring prefilled with 0x20, i.e. XLZHUFDecoder::getOptions(1, 1, 0, false, false, false) - the same parameter set HANDLE_METHOD_ZTC uses, so this needs a dispatch and not a decoder. Appended at the tail of the enum so persisted ids do not move. Must ALSO be added to the buffered-decoder method group in XDecompress::decompress (xdecompress.cpp, next to HANDLE_METHOD_ZTC); it requires FPART_PROP_UNCOMPRESSEDSIZE, which XSBX always publishes.
+        // SBX (SpinnerBaker eXtractor) member codec: plain Yoshizaki LZHUF - LZSS over an adaptive Huffman tree - with no framing and no method field; dist variant 1, F
+        // = 0x3c, THRESHOLD = 2, no end symbol, MAX_FREQ 0x8000, 0x2000-byte ring prefilled with 0x20, i.e. XLZHUFDecoder::getOptions(1, 1, 0, false, false, false) - the
+        // same parameter set HANDLE_METHOD_ZTC uses, so this needs a dispatch and not a decoder. Appended at the tail of the enum so persisted ids do not move. Must ALSO
+        // be added to the buffered-decoder method group in XDecompress::decompress (xdecompress.cpp, next to HANDLE_METHOD_ZTC); it requires FPART_PROP_UNCOMPRESSEDSIZE,
+        // which XSBX always publishes.
         HANDLE_METHOD_SBX_LZHUF,
         // ChArc method 1: order-1 context-modelled LZ77 with STATIC per-context Huffman tables
         // transmitted in a model header (259 contexts, MSB-first 16-bit bit accumulator, non-canonical
@@ -703,7 +761,6 @@ public:
         // XDecompress::decompress; it requires FPART_PROP_UNCOMPRESSEDSIZE, which XSoftronics always
         // publishes.  Appended at the TRUE tail of the enum so persisted ids do not move.
         HANDLE_METHOD_SOFTRONICS_LZW,
-
     };
 
     struct PM_INFO {
@@ -1468,9 +1525,9 @@ public:
         FT_CFBF_MSI,
         FT_PE32_NSIS,
         FT_PE64_NSIS,
-    FT_PE32_NSPACK,
-    FT_PE32_PETITE,
-    FT_PE32_SFX,
+        FT_PE32_NSPACK,
+        FT_PE32_PETITE,
+        FT_PE32_SFX,
         FT_PE64_SFX,
         FT_PE32_SMARTINSTALL,
         FT_PE64_SMARTINSTALL,
@@ -1963,15 +2020,23 @@ public:
         // complete zlib member per installed file.  Appended at the tail so
         // persisted FT identifiers do not move.
         FT_QSETUP,
-        // Eschalon Setup ARCV 2.00 self-extractor: an MZ/NE setup stub followed by a chain of complete ARCV 2.00 containers. Append at the TRUE tail of XBinary::FT in F:\ownCloud\prepare\qt5\_mylibs\Formats\xbinary.h (currently after FT_QSETUP) so persisted FT identifiers do not move. No HANDLE_METHOD append is needed: the reader reuses the existing HANDLE_METHOD_ARCV_LZHUF / HANDLE_METHOD_STORE / HANDLE_METHOD_ARCV_XOR_DELTA / HANDLE_METHOD_ARCV_XOR_DELTA_TRIAL / HANDLE_METHOD_ARCV2_LZHUF_DELTA / HANDLE_METHOD_ARCV2_LZHUF_DELTA_TRIAL unchanged.
+        // Eschalon Setup ARCV 2.00 self-extractor: an MZ/NE setup stub followed by a chain of complete ARCV 2.00 containers. Append at the TRUE tail of XBinary::FT in
+        // F:\ownCloud\prepare\qt5\_mylibs\Formats\xbinary.h (currently after FT_QSETUP) so persisted FT identifiers do not move. No HANDLE_METHOD append is needed: the
+        // reader reuses the existing HANDLE_METHOD_ARCV_LZHUF / HANDLE_METHOD_STORE / HANDLE_METHOD_ARCV_XOR_DELTA / HANDLE_METHOD_ARCV_XOR_DELTA_TRIAL /
+        // HANDLE_METHOD_ARCV2_LZHUF_DELTA / HANDLE_METHOD_ARCV2_LZHUF_DELTA_TRIAL unchanged.
         FT_ARCV2SFX,
-        // CreateInstall self-extractor, "instcrin" generation: a PE32 stub whose overlay opens with the compressed installer runtime (constant first eight bytes 61 57 41 57 AE 40 60 1B), then a builder prelude, then a flat record chain. Distinct from FT_PE32_CREATEINSTALL / FT_PE64_CREATEINSTALL, which are the LATER Gentee-engine builds with a .gentee section and a GEA container. Append at the tail of the FT enum (after FT_QSETUP) so persisted ids do not move.
+        // CreateInstall self-extractor, "instcrin" generation: a PE32 stub whose overlay opens with the compressed installer runtime (constant first eight bytes 61 57 41
+        // 57 AE 40 60 1B), then a builder prelude, then a flat record chain. Distinct from FT_PE32_CREATEINSTALL / FT_PE64_CREATEINSTALL, which are the LATER
+        // Gentee-engine builds with a .gentee section and a GEA container. Append at the tail of the FT enum (after FT_QSETUP) so persisted ids do not move.
         FT_CREATEINSTALL_SFX,
-        // RTA container of the Pocket Soft RTPatch tooling: "KJd\0" plus a flat chain of length-prefixed records, each one complete RTPatch adaptive Huffman/LZSS stream. The bare container at offset 0. Appended at the TRUE tail of the FT enum so persisted identifiers do not move.
+        // RTA container of the Pocket Soft RTPatch tooling: "KJd\0" plus a flat chain of length-prefixed records, each one complete RTPatch adaptive Huffman/LZSS stream.
+        // The bare container at offset 0. Appended at the TRUE tail of the FT enum so persisted identifiers do not move.
         FT_RTA,
-        // RTA self-extractor: a 16-bit DOS MZ stub with the complete RTA container appended at the MZ overlay offset. Distinct from FT_RTA, which is the bare container at offset 0. Appended at the TRUE tail of the FT enum, immediately after FT_RTA, so persisted identifiers do not move.
+        // RTA self-extractor: a 16-bit DOS MZ stub with the complete RTA container appended at the MZ overlay offset. Distinct from FT_RTA, which is the bare container
+        // at offset 0. Appended at the TRUE tail of the FT enum, immediately after FT_RTA, so persisted identifiers do not move.
         FT_RTASFX,
-        // SBX "SpinnerBaker eXtractor" self-extracting archive / SBSETUP installer: a PE32 or NE stub whose overlay carries a bare chain of "SB1\0" member records that closes on the last byte of the file. Appended at the tail so persisted FT identifiers do not move.
+        // SBX "SpinnerBaker eXtractor" self-extracting archive / SBSETUP installer: a PE32 or NE stub whose overlay carries a bare chain of "SB1\0" member records that
+        // closes on the last byte of the file. Appended at the tail so persisted FT identifiers do not move.
         FT_SBX_SFX,
         // ACE self-extractor: a 16-bit DOS MZ stub with the complete ACE container appended at the MZ
         // overlay offset, or the WinACE 32-bit stub that keeps the same container in its "ARCDATA"/"DATA"
@@ -2155,10 +2220,9 @@ public:
         // Softronics "Compressed File" Version 2.00 single-member container (Softronics Softerm / TSU
         // distribution disks).  Fixed 40-byte banner at offset 2; the quint8 at offset 0 is the data
         // offset and must equal 0x2e + strlen(name) + 9 AND, added to the stored compressed size, the
-        // file size.  Append at the TRUE tail of XBinary::FT so persisted FT identifiers do not move. 
+        // file size.  Append at the TRUE tail of XBinary::FT so persisted FT identifiers do not move.
         // The reader reuses HANDLE_METHOD_SOFTRONICS_LZW.
         FT_SOFTRONICS,
-
     };
 
     enum INDATA_MODE {
@@ -2802,7 +2866,7 @@ public:
         //        bool bSuccess; // TODO important
         QString sInfoString;
         QString sErrorString;
-        QAtomicInteger<bool> bForceStop;         // TODO !!!
+        QAtomicInteger<bool> bForceStop;  // TODO !!!
         // Absolute monotonic QDeadlineTimer timestamp in nanoseconds.
         //  0: no caller policy (a probing API may install its default)
         // -1: explicitly disabled
@@ -3291,8 +3355,7 @@ public:
                                       const PDSTRUCTLIFETIME &progressLifetime);
     qint64 _findSigBytes(qint64 nOffset, qint64 nSize, const char *pSigBytes, qint64 nSigBytesSize, PDSTRUCT *pPdStruct = nullptr);
 
-    QList<qint64> find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize,
-                                 const QStringList &signatures, PDSTRUCT *pPdStruct = nullptr);
+    QList<qint64> find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QStringList &signatures, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize = 0, PDSTRUCT *pPdStruct = nullptr);
     qint64 find_signature(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QString &sSignature, qint64 *pnResultSize = nullptr,
                           PDSTRUCT *pPdStruct = nullptr);
@@ -4337,8 +4400,7 @@ public:
 
     // pnSkippedEntries (optional): number of members skipped by
     // UNPACK_PROP_CONTINUEONERROR on a successful best-effort run; 0 otherwise.
-    bool unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr,
-                        qint32 *pnSkippedEntries = nullptr);
+    bool unpackToFolder(const QString &sFolderName, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr, qint32 *pnSkippedEntries = nullptr);
     bool unpackSingleStream(QIODevice *pOutDevice, const QMap<UNPACK_PROP, QVariant> &mapProperties, PDSTRUCT *pPdStruct = nullptr);
     // Safely re-open the session, revalidate the expected record identity and
     // publish exactly one member transactionally to a seekable output device.

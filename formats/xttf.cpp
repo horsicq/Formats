@@ -24,8 +24,8 @@
 
 namespace {
 
-void appendLongDateTimeMetadata(XTTF *pTTF, QVector<XBinary::XMETADATA_STRUCT> *pListResult, qint64 nOffset, XBinary::XMETADATA_ID id,
-                                const QString &sName, qint64 nMacToUnixEpoch)
+void appendLongDateTimeMetadata(XTTF *pTTF, QVector<XBinary::XMETADATA_STRUCT> *pListResult, qint64 nOffset, XBinary::XMETADATA_ID id, const QString &sName,
+                                qint64 nMacToUnixEpoch)
 {
     const qint64 nMacSeconds = (qint64)pTTF->read_uint64(nOffset, true);
     const QDateTime dateTime = QDateTime::fromSecsSinceEpoch(nMacSeconds - nMacToUnixEpoch, QTimeZone(0));

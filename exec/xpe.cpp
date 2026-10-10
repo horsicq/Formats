@@ -15113,9 +15113,7 @@ bool XPE::isAmd64UnwindMetadataValid(QString *psError)
         quint8 frameRegister = unwindHeader[3] & 0x0F;
         quint8 frameOffset = unwindHeader[3] >> 4;
 
-        if (version != 1 || flags > 0x07 ||
-            ((flags & 0x04) != 0 && (flags & 0x03) != 0) ||
-            (frameRegister == 0 && frameOffset != 0)) {
+        if (version != 1 || flags > 0x07 || ((flags & 0x04) != 0 && (flags & 0x03) != 0) || (frameRegister == 0 && frameOffset != 0)) {
             return cacheAndReturn(false);
         }
 
@@ -15123,7 +15121,7 @@ bool XPE::isAmd64UnwindMetadataValid(QString *psError)
         quint32 unwindInfoSize = 4 + alignedUnwindCodeCount * 2;
 
         if ((flags & 0x04) != 0) {
-            unwindInfoSize += 12; // Chained RUNTIME_FUNCTION
+            unwindInfoSize += 12;  // Chained RUNTIME_FUNCTION
         } else if ((flags & 0x03) != 0) {
             unwindInfoSize += 4;  // Exception-handler RVA
         }
@@ -15184,9 +15182,7 @@ bool XPE::isAmd64UnwindMetadataValid(QString *psError)
         mappedRanges.append({nSecRva, nSecEndRva, 0, -1});
     }
 
-    std::sort(mappedRanges.begin(), mappedRanges.end(), [](const MAPPED_RANGE &a, const MAPPED_RANGE &b) {
-        return a.nRva < b.nRva;
-    });
+    std::sort(mappedRanges.begin(), mappedRanges.end(), [](const MAPPED_RANGE &a, const MAPPED_RANGE &b) { return a.nRva < b.nRva; });
 
     quint32 maximumEndRva = 0;
     qint32 maximumEndRangeIndex = -1;
@@ -15225,8 +15221,8 @@ bool XPE::isAmd64UnwindMetadataValid(QString *psError)
     for (quint32 i = 0; i < nEntryCount; ++i) {
         const quint8 *p = pEntries + i * 12;
         quint32 runtimeFunctionBeginRva = (quint32)p[0] | ((quint32)p[1] << 8) | ((quint32)p[2] << 16) | ((quint32)p[3] << 24);
-        quint32 runtimeFunctionEndRva   = (quint32)p[4] | ((quint32)p[5] << 8) | ((quint32)p[6] << 16) | ((quint32)p[7] << 24);
-        quint32 runtimeFunctionUnwindRva= (quint32)p[8] | ((quint32)p[9] << 8) | ((quint32)p[10] << 16) | ((quint32)p[11] << 24);
+        quint32 runtimeFunctionEndRva = (quint32)p[4] | ((quint32)p[5] << 8) | ((quint32)p[6] << 16) | ((quint32)p[7] << 24);
+        quint32 runtimeFunctionUnwindRva = (quint32)p[8] | ((quint32)p[9] << 8) | ((quint32)p[10] << 16) | ((quint32)p[11] << 24);
 
         quint32 runtimeFunctionSize = (runtimeFunctionEndRva >= runtimeFunctionBeginRva) ? (runtimeFunctionEndRva - runtimeFunctionBeginRva) : 0;
         bool isRuntimeFunctionBodyRangeValid = false;
@@ -15234,8 +15230,7 @@ bool XPE::isAmd64UnwindMetadataValid(QString *psError)
         bool isRuntimeFunctionIndirect = (runtimeFunctionUnwindRva % 2 != 0);
 
         if (runtimeFunctionSize > 0) {
-            if (cachedRuntimeFunctionBodyRangeIndex >= 0 &&
-                runtimeFunctionBeginRva >= mappedRanges[cachedRuntimeFunctionBodyRangeIndex].nRva &&
+            if (cachedRuntimeFunctionBodyRangeIndex >= 0 && runtimeFunctionBeginRva >= mappedRanges[cachedRuntimeFunctionBodyRangeIndex].nRva &&
                 runtimeFunctionEndRva <= mappedRanges[cachedRuntimeFunctionBodyRangeIndex].nEndRva) {
                 isRuntimeFunctionBodyRangeValid = true;
             } else {
@@ -15250,12 +15245,10 @@ bool XPE::isAmd64UnwindMetadataValid(QString *psError)
         if (isRuntimeFunctionIndirect) {
             quint32 indirectRuntimeFunctionRva = runtimeFunctionUnwindRva - 1;
             qint64 indirectRuntimeFunctionOffset = (qint64)indirectRuntimeFunctionRva - excDir.VirtualAddress;
-            isRuntimeFunctionUnwindPointerValid = (indirectRuntimeFunctionOffset >= 0 &&
-                                                   indirectRuntimeFunctionOffset + 12 <= excDir.Size &&
-                                                   indirectRuntimeFunctionOffset % 12 == 0);
+            isRuntimeFunctionUnwindPointerValid =
+                (indirectRuntimeFunctionOffset >= 0 && indirectRuntimeFunctionOffset + 12 <= excDir.Size && indirectRuntimeFunctionOffset % 12 == 0);
         } else if (runtimeFunctionUnwindRva % 2 == 0) {
-            if (cachedRuntimeFunctionMappedRangeIndex >= 0 &&
-                runtimeFunctionUnwindRva >= mappedRanges[cachedRuntimeFunctionMappedRangeIndex].nRva &&
+            if (cachedRuntimeFunctionMappedRangeIndex >= 0 && runtimeFunctionUnwindRva >= mappedRanges[cachedRuntimeFunctionMappedRangeIndex].nRva &&
                 runtimeFunctionUnwindRva + 4 <= mappedRanges[cachedRuntimeFunctionMappedRangeIndex].nEndRva) {
                 isRuntimeFunctionUnwindPointerValid = (runtimeFunctionUnwindRva % 4 == 0) || isValidWordAlignedUnwindInfo(runtimeFunctionUnwindRva);
             } else {
@@ -15270,16 +15263,14 @@ bool XPE::isAmd64UnwindMetadataValid(QString *psError)
         if (runtimeFunctionSize > 0 && !isRuntimeFunctionBodyRangeValid) {
             if (psError) {
                 *psError = QString("AMD64 unwind function entry #%1 references an unmapped range from VA 0x%2 to VA 0x%3")
-                           .arg(i)
-                           .arg(nImageBase + runtimeFunctionBeginRva, 0, 16)
-                           .arg(nImageBase + runtimeFunctionEndRva, 0, 16);
+                               .arg(i)
+                               .arg(nImageBase + runtimeFunctionBeginRva, 0, 16)
+                               .arg(nImageBase + runtimeFunctionEndRva, 0, 16);
             }
             return false;
         } else if (!isRuntimeFunctionUnwindPointerValid) {
             if (psError) {
-                *psError = QString("AMD64 unwind function entry #%1 references invalid metadata at VA 0x%2")
-                           .arg(i)
-                           .arg(nImageBase + runtimeFunctionUnwindRva, 0, 16);
+                *psError = QString("AMD64 unwind function entry #%1 references invalid metadata at VA 0x%2").arg(i).arg(nImageBase + runtimeFunctionUnwindRva, 0, 16);
             }
             return false;
         }

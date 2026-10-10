@@ -46,8 +46,7 @@ struct CD_SOURCE_LAYOUT {
     qint32 nPayloadOffset;
     bool bAllowTerminalZeroSector;
 
-    CD_SOURCE_LAYOUT()
-        : bValid(false), bCue(false), nSourceOffset(0), nSourceSize(0), nSectorSize(0), nPayloadOffset(0), bAllowTerminalZeroSector(false)
+    CD_SOURCE_LAYOUT() : bValid(false), bCue(false), nSourceOffset(0), nSourceSize(0), nSectorSize(0), nPayloadOffset(0), bAllowTerminalZeroSector(false)
     {
     }
 };
@@ -817,9 +816,8 @@ bool detectCueLayout(QIODevice *pCueDevice, CD_SOURCE_LAYOUT *pLayout)
                 const qint64 nBoundaryOffset = nBoundaryFrames * nSectorSize;
                 nSourceEnd = qMin(nSourceEnd, nBoundaryOffset);
                 bMixedModePregapBoundary = (nSectorSize == 2352) && (nPayloadOffset == 16) &&
-                                           (nextTrack.sMode.compare(QStringLiteral("AUDIO"), Qt::CaseInsensitive) == 0) &&
-                                           (nextTrack.nIndex00 >= track.nIndex01) && (nextTrack.nIndex01 > nextTrack.nIndex00) &&
-                                           (nBoundaryFrames == nextTrack.nIndex01) && (nSourceEnd == nBoundaryOffset);
+                                           (nextTrack.sMode.compare(QStringLiteral("AUDIO"), Qt::CaseInsensitive) == 0) && (nextTrack.nIndex00 >= track.nIndex01) &&
+                                           (nextTrack.nIndex01 > nextTrack.nIndex00) && (nBoundaryFrames == nextTrack.nIndex01) && (nSourceEnd == nBoundaryOffset);
             }
             break;
         }
@@ -951,14 +949,14 @@ XISO9660::XISO9660(QIODevice *pDevice)
 XISO9660::~XISO9660()
 {
     if (m_pLogicalImageDevice) {
-        QIODevice * guardedLogical = m_pLogicalImageDevice;
+        QIODevice *guardedLogical = m_pLogicalImageDevice;
         if (getDevice() == guardedLogical) setDevice(nullptr);
         if (guardedLogical) guardedLogical->close();
         if (guardedLogical) delete guardedLogical;
         m_pLogicalImageDevice = nullptr;
     }
     if (m_pOwnedImageFile) {
-        QFile * guardedFile = m_pOwnedImageFile;
+        QFile *guardedFile = m_pOwnedImageFile;
         guardedFile->close();
         if (guardedFile) delete guardedFile;
         m_pOwnedImageFile = nullptr;
@@ -984,10 +982,10 @@ bool XISO9660::_configureLogicalImage(QIODevice *pDevice)
         if (layout.nSourceSize == nDeviceSize) return true;
     }
 
-    QIODevice * guardedImageDevice = guardedSource;
+    QIODevice *guardedImageDevice = guardedSource;
     if (layout.bCue) {
         m_pOwnedImageFile = new (std::nothrow) QFile(layout.sImageFileName);
-        QFile * guardedFile = m_pOwnedImageFile;
+        QFile *guardedFile = m_pOwnedImageFile;
         if (!guardedFile) return false;
         const bool bOpened = guardedFile->open(QIODevice::ReadOnly);
         if (!guardedFile || !bOpened) {
@@ -998,13 +996,12 @@ bool XISO9660::_configureLogicalImage(QIODevice *pDevice)
         guardedImageDevice = guardedFile;
     }
 
-    CDLogicalSectorDevice * guardedLogicalDevice =
-        new (std::nothrow) CDLogicalSectorDevice(guardedImageDevice, layout.nSourceOffset, layout.nSourceSize, layout.nSectorSize, layout.nPayloadOffset,
-                                                layout.bAllowTerminalZeroSector);
+    CDLogicalSectorDevice *guardedLogicalDevice = new (std::nothrow)
+        CDLogicalSectorDevice(guardedImageDevice, layout.nSourceOffset, layout.nSourceSize, layout.nSectorSize, layout.nPayloadOffset, layout.bAllowTerminalZeroSector);
     if (!guardedImageDevice || !guardedLogicalDevice) {
         if (guardedLogicalDevice) delete guardedLogicalDevice;
         if (m_pOwnedImageFile) {
-            QFile * guardedFile = m_pOwnedImageFile;
+            QFile *guardedFile = m_pOwnedImageFile;
             guardedFile->close();
             if (guardedFile) delete guardedFile;
             m_pOwnedImageFile = nullptr;
@@ -1015,7 +1012,7 @@ bool XISO9660::_configureLogicalImage(QIODevice *pDevice)
     if (!guardedImageDevice || !guardedLogicalDevice || !bLogicalOpened) {
         if (guardedLogicalDevice) delete guardedLogicalDevice;
         if (m_pOwnedImageFile) {
-            QFile * guardedFile = m_pOwnedImageFile;
+            QFile *guardedFile = m_pOwnedImageFile;
             guardedFile->close();
             if (guardedFile) delete guardedFile;
             m_pOwnedImageFile = nullptr;

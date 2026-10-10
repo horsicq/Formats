@@ -25,8 +25,7 @@
 
 namespace {
 
-class XMP4DateTimeAppender
-{
+class XMP4DateTimeAppender {
 public:
     XMP4DateTimeAppender(XMP4 *pMP4, QVector<XBinary::XMETADATA_STRUCT> *pListResult, qint64 nMacToUnixEpoch)
         : m_pMP4(pMP4), m_pListResult(pListResult), m_nMacToUnixEpoch(nMacToUnixEpoch)

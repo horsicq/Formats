@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    QIODevice * m_pDevice;
+    QIODevice *m_pDevice;
     qint64 m_nPosition;
 };
 }  // namespace

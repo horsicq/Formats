@@ -743,9 +743,9 @@ bool XTARCOMPRESSED::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDS
     }
     QIODevice *guardedOriginal = guardedArchive->m_pOriginalDevice;
     QIODevice *guardedDecompressed = guardedArchive->m_pDecompressedData;
-    if (!guardedOriginal || !guardedDecompressed || !guardedArchive->isMaterializedSourceCurrent() || !guardedArchive || !guardedOutput ||
-        !guardedOutput->isOpen() || !guardedArchive || !guardedOutput || !guardedOutput->isWritable() || !guardedArchive || !guardedOutput ||
-        guardedOutput->isSequential() || !guardedArchive || !guardedOutput) {
+    if (!guardedOriginal || !guardedDecompressed || !guardedArchive->isMaterializedSourceCurrent() || !guardedArchive || !guardedOutput || !guardedOutput->isOpen() ||
+        !guardedArchive || !guardedOutput || !guardedOutput->isWritable() || !guardedArchive || !guardedOutput || guardedOutput->isSequential() || !guardedArchive ||
+        !guardedOutput) {
         return false;
     }
     const QIODevice::OpenMode outputMode = guardedOutput->openMode();

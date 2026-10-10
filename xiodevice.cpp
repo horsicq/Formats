@@ -20,7 +20,6 @@
  */
 #include "xiodevice.h"
 
-
 XIODevice::XIODevice(QObject *pParent) : QIODevice(pParent)
 {
     m_nSize = 0;

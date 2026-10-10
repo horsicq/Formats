@@ -268,7 +268,8 @@ bool tarParsePaxPayload(const QByteArray &baPayload, QMap<QByteArray, QByteArray
         } else if (baKey == "GNU.sparse.numbytes") {
             quint64 value = 0;
             if (!bSparseOffsetPending || (++nSparsePairs > TAR_MAX_SPARSE_BLOCKS) ||
-                !tarParseUnsignedDecimal(baValue, quint64((std::numeric_limits<qint64>::max)()), &value)) return false;
+                !tarParseUnsignedDecimal(baValue, quint64((std::numeric_limits<qint64>::max)()), &value))
+                return false;
             if (!baSparseMap.isEmpty()) baSparseMap.append(',');
             baSparseMap += baSparseOffset + ',' + baValue;
             bSparseOffsetPending = false;
@@ -359,16 +360,16 @@ bool tarValidateSparseBlocks(const QList<QPair<qint64, qint64> > &blocks, qint64
     if ((logicalSize < 0) || (storedSize < 0) || (blocks.size() > TAR_MAX_SPARSE_BLOCKS)) return false;
     qint64 end = 0, used = 0;
     for (const QPair<qint64, qint64> &block : blocks) {
-        if ((block.first < end) || (block.first > logicalSize) || (block.second < 0) ||
-            (block.second > logicalSize - block.first) || (block.second > storedSize - used)) return false;
+        if ((block.first < end) || (block.first > logicalSize) || (block.second < 0) || (block.second > logicalSize - block.first) || (block.second > storedSize - used))
+            return false;
         end = block.first + block.second;
         used += block.second;
     }
     return used == storedSize;
 }
 
-bool tarWriteSparseZeros(qint64 count, const QByteArray &zeros, XBinary::DATAPROCESS_STATE *pOutputState, XTAR *const &guardedArchive,
-                         QIODevice *const &guardedSource, QIODevice *const &guardedOutput, XBinary::PDSTRUCT *pPdStruct)
+bool tarWriteSparseZeros(qint64 count, const QByteArray &zeros, XBinary::DATAPROCESS_STATE *pOutputState, XTAR *const &guardedArchive, QIODevice *const &guardedSource,
+                         QIODevice *const &guardedOutput, XBinary::PDSTRUCT *pPdStruct)
 {
     while (count > 0) {
         if (!guardedArchive || !guardedSource || !guardedOutput || !XBinary::isPdStructNotCanceled(pPdStruct)) return false;
@@ -1038,13 +1039,15 @@ bool XTAR::_prepareSparseRecord(TAR_RECORD *pRecord, qint64 nTotalSize, PDSTRUCT
     for (QMap<QByteArray, QByteArray>::const_iterator it = metadata.constBegin(); it != metadata.constEnd(); ++it) {
         if (!it.key().startsWith("GNU.sparse.")) continue;
         paxSparse = true;
-        if ((it.key() != "GNU.sparse.size") && (it.key() != "GNU.sparse.numblocks") && (it.key() != "GNU.sparse.offset") &&
-            (it.key() != "GNU.sparse.numbytes") && (it.key() != "GNU.sparse.map") && (it.key() != "GNU.sparse.name") &&
-            (it.key() != "GNU.sparse.major") && (it.key() != "GNU.sparse.minor") && (it.key() != "GNU.sparse.realsize")) return false;
+        if ((it.key() != "GNU.sparse.size") && (it.key() != "GNU.sparse.numblocks") && (it.key() != "GNU.sparse.offset") && (it.key() != "GNU.sparse.numbytes") &&
+            (it.key() != "GNU.sparse.map") && (it.key() != "GNU.sparse.name") && (it.key() != "GNU.sparse.major") && (it.key() != "GNU.sparse.minor") &&
+            (it.key() != "GNU.sparse.realsize"))
+            return false;
     }
     if (!oldGnu && !paxSparse) return true;
-    if ((oldGnu && paxSparse) || pRecord->bHasLinkPath || (pRecord->nDataOffset < 0) || (pRecord->nDataOffset > nTotalSize) ||
-        (pRecord->nStoredSize < 0) || (pRecord->nStoredSize > nTotalSize - pRecord->nDataOffset)) return false;
+    if ((oldGnu && paxSparse) || pRecord->bHasLinkPath || (pRecord->nDataOffset < 0) || (pRecord->nDataOffset > nTotalSize) || (pRecord->nStoredSize < 0) ||
+        (pRecord->nStoredSize > nTotalSize - pRecord->nDataOffset))
+        return false;
 
     QList<QPair<qint64, qint64> > blocks;
     qint64 logicalSize = 0;
@@ -1097,9 +1100,10 @@ bool XTAR::_prepareSparseRecord(TAR_RECORD *pRecord, qint64 nTotalSize, PDSTRUCT
         const bool versioned = metadata.contains("GNU.sparse.major") || metadata.contains("GNU.sparse.minor");
         quint64 size = 0;
         if (versioned) {
-            if ((metadata.value("GNU.sparse.major") != "1") || (metadata.value("GNU.sparse.minor") != "0") ||
-                metadata.contains("GNU.sparse.size") || metadata.contains("GNU.sparse.map") || metadata.contains("GNU.sparse.numblocks") ||
-                !tarParseUnsignedDecimal(metadata.value("GNU.sparse.realsize"), quint64((std::numeric_limits<qint64>::max)()), &size)) return false;
+            if ((metadata.value("GNU.sparse.major") != "1") || (metadata.value("GNU.sparse.minor") != "0") || metadata.contains("GNU.sparse.size") ||
+                metadata.contains("GNU.sparse.map") || metadata.contains("GNU.sparse.numblocks") ||
+                !tarParseUnsignedDecimal(metadata.value("GNU.sparse.realsize"), quint64((std::numeric_limits<qint64>::max)()), &size))
+                return false;
             logicalSize = qint64(size);
             // GNU PAX1.0 places a newline-delimited map before member data.
             // Read at most1MiB and require its zero padding to the next512B.
@@ -1117,14 +1121,16 @@ bool XTAR::_prepareSparseRecord(TAR_RECORD *pRecord, qint64 nTotalSize, PDSTRUCT
             }
             const qint64 mapSize = ((qint64(offset) + 511) / 512) * 512;
             if ((mapSize > map.size()) || (mapSize > pRecord->nStoredSize)) return false;
-            for (qint32 i = offset; i < mapSize; ++i) if (map.at(i) != 0) return false;
+            for (qint32 i = offset; i < mapSize; ++i)
+                if (map.at(i) != 0) return false;
             pRecord->nDataOffset += mapSize;
             pRecord->nStoredSize -= mapSize;
         } else {
             quint64 numBlocks = 0;
             if (metadata.contains("GNU.sparse.realsize") ||
                 !tarParseUnsignedDecimal(metadata.value("GNU.sparse.size"), quint64((std::numeric_limits<qint64>::max)()), &size) ||
-                !tarParseUnsignedDecimal(metadata.value("GNU.sparse.numblocks"), TAR_MAX_SPARSE_BLOCKS, &numBlocks)) return false;
+                !tarParseUnsignedDecimal(metadata.value("GNU.sparse.numblocks"), TAR_MAX_SPARSE_BLOCKS, &numBlocks))
+                return false;
             logicalSize = qint64(size);
             const QByteArray value = metadata.value("GNU.sparse.map");
             if (value.size() > TAR_MAX_METADATA_PAYLOAD) return false;
@@ -1495,11 +1501,11 @@ bool XTAR::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPd
         UNPACK_OPERATION_GUARD operationGuard(&m_bUnpackOperationInProgress);
         QIODevice *guardedOutput = pDevice;
         QIODevice *guardedSource = getDevice();
-        if (!operationGuard.isAcquired() || !pState || !guardedOutput || !guardedSource || !pState->pContext ||
-            (pState->nNumberOfRecords <= 0) || (pState->nCurrentIndex < 0) || (pState->nCurrentIndex >= pState->nNumberOfRecords) ||
-            !isPdStructNotCanceled(pPdStruct) || !guardedArchive->isUnpackOutputSupported(guardedOutput) || !guardedArchive ||
-            !guardedArchive->isUnpackSourceCurrent(pState, pPdStruct) || !guardedArchive || !guardedOutput || !guardedSource ||
-            XBinary::devicesAlias(guardedSource, guardedOutput)) return false;
+        if (!operationGuard.isAcquired() || !pState || !guardedOutput || !guardedSource || !pState->pContext || (pState->nNumberOfRecords <= 0) ||
+            (pState->nCurrentIndex < 0) || (pState->nCurrentIndex >= pState->nNumberOfRecords) || !isPdStructNotCanceled(pPdStruct) ||
+            !guardedArchive->isUnpackOutputSupported(guardedOutput) || !guardedArchive || !guardedArchive->isUnpackSourceCurrent(pState, pPdStruct) || !guardedArchive ||
+            !guardedOutput || !guardedSource || XBinary::devicesAlias(guardedSource, guardedOutput))
+            return false;
         const UNPACK_CONTEXT *context = static_cast<const UNPACK_CONTEXT *>(pState->pContext);
         if ((pState->nCurrentIndex < 0) || (pState->nCurrentIndex >= context->listRecords.size())) return false;
         const TAR_RECORD record = context->listRecords.at(pState->nCurrentIndex);
@@ -1533,8 +1539,8 @@ bool XTAR::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPd
                     if (!guardedArchive || !guardedSource || !guardedOutput || !isPdStructNotCanceled(pPdStruct)) return false;
                     const qint32 chunk = qint32(qMin(remaining, qint64(data.size())));
                     const qint64 read = guardedArchive->read_array_process(record.nDataOffset + storedPosition, data.data(), chunk, pPdStruct);
-                    if (!guardedArchive || !guardedSource || !guardedOutput || (read != chunk) ||
-                        (XBinary::_writeDevice(data.constData(), chunk, &outputState) != chunk)) return false;
+                    if (!guardedArchive || !guardedSource || !guardedOutput || (read != chunk) || (XBinary::_writeDevice(data.constData(), chunk, &outputState) != chunk))
+                        return false;
                     storedPosition += chunk;
                     remaining -= chunk;
                 }
@@ -1543,7 +1549,8 @@ bool XTAR::unpackCurrent(UNPACK_STATE *pState, QIODevice *pDevice, PDSTRUCT *pPd
             if (!tarWriteSparseZeros(record.nFileSize - logicalPosition, zeros, &outputState, guardedArchive, guardedSource, guardedOutput, pPdStruct) ||
                 (storedPosition != record.nStoredSize) || (stage->size() != record.nFileSize) || outputState.bWriteError || !guardedArchive || !guardedSource ||
                 !guardedOutput || !guardedArchive->isUnpackSourceCurrent(pState, pPdStruct) || !guardedArchive || !guardedSource || !guardedOutput ||
-                !isPdStructNotCanceled(pPdStruct)) return false;
+                !isPdStructNotCanceled(pPdStruct))
+                return false;
             return guardedArchive->publishUnpackOutput(stage.get(), guardedOutput, pState, pPdStruct);
         }
     }

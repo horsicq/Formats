@@ -262,15 +262,15 @@ public:
     struct ZIP_DIRECTORY {
         bool bValid;
         bool bZip64;
-        qint64 nECDOffset;             // the PK\5\6 record
-        qint64 nRecordOffset;          // the ZIP64 record when present, else nECDOffset
-        qint64 nNumberOfRecords;       // total entries
-        qint64 nDiskNumberOfRecords;   // entries on the disk holding the EOCD
+        qint64 nECDOffset;            // the PK\5\6 record
+        qint64 nRecordOffset;         // the ZIP64 record when present, else nECDOffset
+        qint64 nNumberOfRecords;      // total entries
+        qint64 nDiskNumberOfRecords;  // entries on the disk holding the EOCD
         qint64 nCentralDirectoryOffset;
         qint64 nCentralDirectorySize;
         quint32 nCommentLength;
-        quint32 nDiskNumber;           // disk holding the EOCD
-        quint32 nStartDisk;            // disk where the central directory starts
+        quint32 nDiskNumber;  // disk holding the EOCD
+        quint32 nStartDisk;   // disk where the central directory starts
     };
 
     // One central directory entry with the 0x0001 ZIP64 extra field applied

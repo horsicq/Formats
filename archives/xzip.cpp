@@ -422,8 +422,7 @@ bool zipGetCentralDirectorySizes(const QList<XZip::ZIPFILE_RECORD> *pRecords, co
             return false;
         }
 
-        const qint64 nRecordSize =
-            (qint64)sizeof(XZip::CENTRALDIRECTORYFILEHEADER) + baFileName.size() + record.baExtraFieldCentral.size() + record.baFileComment.size();
+        const qint64 nRecordSize = (qint64)sizeof(XZip::CENTRALDIRECTORYFILEHEADER) + baFileName.size() + record.baExtraFieldCentral.size() + record.baFileComment.size();
         if (nCentralSize > (std::numeric_limits<quint32>::max)() - nRecordSize) return false;
         nCentralSize += nRecordSize;
     }
@@ -1078,8 +1077,7 @@ bool XZip::_readFileName(qint64 nFileNameOffset, qint64 nFileNameLength, quint16
 static bool zipReadExact(XZip **pGuardedArchive, QIODevice **pGuardedSource, qint64 nSize, XBinary::PDSTRUCT *pPdStruct, qint64 nOffset, qint64 nLength,
                          QByteArray *pData)
 {
-    if (!pData || !*pGuardedArchive || !*pGuardedSource || (nOffset < 0) || (nLength < 0) || (nOffset > nSize) || (nLength > (nSize - nOffset)))
-        return false;
+    if (!pData || !*pGuardedArchive || !*pGuardedSource || (nOffset < 0) || (nLength < 0) || (nOffset > nSize) || (nLength > (nSize - nOffset))) return false;
     *pData = XBinary::read_array_process(*pGuardedSource, nOffset, nLength, pPdStruct);
     return *pGuardedArchive && *pGuardedSource && (pData->size() == nLength);
 }
@@ -1309,14 +1307,11 @@ qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
                 // Windows additionally sets the PKWARE-reserved bit 15 only in
                 // local headers, so tolerate that bit differing too.
                 const bool bFlagsCompatible =
-                    (lfh.nFlags == cdfh.nFlags) ||
-                    ((lfh.nMethod == CMETHOD_DEFLATE) &&
-                     (((lfh.nFlags ^ cdfh.nFlags) & quint16(~0x8006U)) == 0));
+                    (lfh.nFlags == cdfh.nFlags) || ((lfh.nMethod == CMETHOD_DEFLATE) && (((lfh.nFlags ^ cdfh.nFlags) & quint16(~0x8006U)) == 0));
 
-                if (!bNamesRead || (lfh.nSignature != SIGNATURE_LFD) || (lfh.nMinVersion != cdfh.nMinVersion) || (lfh.nMinOS != cdfh.nMinOS) ||
-                    !bFlagsCompatible || (lfh.nMethod != cdfh.nMethod) || (lfh.nFileNameLength != cdfh.nFileNameLength) ||
-                    (nLocalDataOffset > nOffsetToCentralDirectory) || ((qint64)cdfh.nCompressedSize > (nOffsetToCentralDirectory - nLocalDataOffset)) ||
-                    !zipNamesEquivalent(baLocalName, baCentralName) ||
+                if (!bNamesRead || (lfh.nSignature != SIGNATURE_LFD) || (lfh.nMinVersion != cdfh.nMinVersion) || (lfh.nMinOS != cdfh.nMinOS) || !bFlagsCompatible ||
+                    (lfh.nMethod != cdfh.nMethod) || (lfh.nFileNameLength != cdfh.nFileNameLength) || (nLocalDataOffset > nOffsetToCentralDirectory) ||
+                    ((qint64)cdfh.nCompressedSize > (nOffsetToCentralDirectory - nLocalDataOffset)) || !zipNamesEquivalent(baLocalName, baCentralName) ||
                     (!(lfh.nFlags & 0x0008) &&
                      ((lfh.nCRC32 != cdfh.nCRC32) || (lfh.nCompressedSize != cdfh.nCompressedSize) || (lfh.nUncompressedSize != cdfh.nUncompressedSize)))) {
                     bValid = false;
@@ -1332,17 +1327,23 @@ qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
                         break;
                     }
                     QByteArray baExtra;
-                    if (!zipReadExact(&guardedArchive, &guardedSource, nSize, pPdStruct,
-                                      nLocalDataOffset - lfh.nExtraFieldLength, lfh.nExtraFieldLength, &baExtra)) return -1;
+                    if (!zipReadExact(&guardedArchive, &guardedSource, nSize, pPdStruct, nLocalDataOffset - lfh.nExtraFieldLength, lfh.nExtraFieldLength, &baExtra))
+                        return -1;
                     bool bFoundZip64 = false;
                     qint32 nExtraPos = 0;
                     while (nExtraPos < baExtra.size()) {
-                        if ((baExtra.size() - nExtraPos) < 4) { bValid = false; break; }
+                        if ((baExtra.size() - nExtraPos) < 4) {
+                            bValid = false;
+                            break;
+                        }
                         char *pExtra = baExtra.data() + nExtraPos;
                         const quint16 nTag = XBinary::_read_uint16(pExtra);
                         const quint16 nLength = XBinary::_read_uint16(pExtra + 2);
                         nExtraPos += 4;
-                        if (nLength > (baExtra.size() - nExtraPos)) { bValid = false; break; }
+                        if (nLength > (baExtra.size() - nExtraPos)) {
+                            bValid = false;
+                            break;
+                        }
                         if (nTag == 1) {
                             const bool bMissingUncompressed = (lfh.nUncompressedSize == 0xFFFFFFFF);
                             const bool bMissingCompressed = (lfh.nCompressedSize == 0xFFFFFFFF);
@@ -1352,7 +1353,10 @@ qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
                             // form as a narrowly bounded compatibility variant.
                             const bool bSizePair = (nLength == 16);
                             const bool bSingleSize = (nLength == 8) && (bMissingUncompressed != bMissingCompressed);
-                            if (bFoundZip64 || (!bSizePair && !bSingleSize)) { bValid = false; break; }
+                            if (bFoundZip64 || (!bSizePair && !bSingleSize)) {
+                                bValid = false;
+                                break;
+                            }
                             bFoundZip64 = true;
                             qint32 nValuePos = nExtraPos;
                             if (bSizePair || bMissingUncompressed) {
@@ -1367,14 +1371,18 @@ qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
                         }
                         nExtraPos += nLength;
                     }
-                    if (!bValid || !bFoundZip64) { bValid = false; break; }
+                    if (!bValid || !bFoundZip64) {
+                        bValid = false;
+                        break;
+                    }
                 }
 
                 qint64 nLocalRecordEnd = nLocalDataOffset + (qint64)cdfh.nCompressedSize;
                 if (lfh.nFlags & 0x0008) {
                     // With bit 3 set, local size/CRC fields are placeholders and
                     // the descriptor is the authenticated source of those values.
-                    if (((lfh.nCRC32 != 0) && (lfh.nCRC32 != cdfh.nCRC32)) || ((lfh.nCompressedSize != 0) && (lfh.nCompressedSize != 0xFFFFFFFF) && (lfh.nCompressedSize != cdfh.nCompressedSize)) ||
+                    if (((lfh.nCRC32 != 0) && (lfh.nCRC32 != cdfh.nCRC32)) ||
+                        ((lfh.nCompressedSize != 0) && (lfh.nCompressedSize != 0xFFFFFFFF) && (lfh.nCompressedSize != cdfh.nCompressedSize)) ||
                         ((lfh.nUncompressedSize != 0) && (lfh.nUncompressedSize != 0xFFFFFFFF) && (lfh.nUncompressedSize != cdfh.nUncompressedSize))) {
                         bValid = false;
                         break;
@@ -1392,21 +1400,20 @@ qint64 XZip::findECDOffset(PDSTRUCT *pPdStruct)
                     char *pDescriptor = baDescriptor.data();
                     if (bLocalZip64) {
                         if ((baDescriptor.size() >= 24) && (XBinary::_read_uint32(pDescriptor) == 0x08074B50) &&
-                            (XBinary::_read_uint32(pDescriptor + 4) == cdfh.nCRC32) &&
-                            (XBinary::_read_uint64(pDescriptor + 8) == cdfh.nCompressedSize) &&
+                            (XBinary::_read_uint32(pDescriptor + 4) == cdfh.nCRC32) && (XBinary::_read_uint64(pDescriptor + 8) == cdfh.nCompressedSize) &&
                             (XBinary::_read_uint64(pDescriptor + 16) == cdfh.nUncompressedSize)) {
                             bDescriptorValid = true;
                             nDescriptorSize = 24;
                         }
                         if (!bDescriptorValid && (baDescriptor.size() >= 20) && (XBinary::_read_uint32(pDescriptor) == cdfh.nCRC32) &&
-                            (XBinary::_read_uint64(pDescriptor + 4) == cdfh.nCompressedSize) &&
-                            (XBinary::_read_uint64(pDescriptor + 12) == cdfh.nUncompressedSize)) {
+                            (XBinary::_read_uint64(pDescriptor + 4) == cdfh.nCompressedSize) && (XBinary::_read_uint64(pDescriptor + 12) == cdfh.nUncompressedSize)) {
                             bDescriptorValid = true;
                             nDescriptorSize = 20;
                         }
                     }
-                    if (!bLocalZip64 && (baDescriptor.size() >= 16) && (XBinary::_read_uint32(pDescriptor) == 0x08074B50) && (XBinary::_read_uint32(pDescriptor + 4) == cdfh.nCRC32) &&
-                        (XBinary::_read_uint32(pDescriptor + 8) == cdfh.nCompressedSize) && (XBinary::_read_uint32(pDescriptor + 12) == cdfh.nUncompressedSize)) {
+                    if (!bLocalZip64 && (baDescriptor.size() >= 16) && (XBinary::_read_uint32(pDescriptor) == 0x08074B50) &&
+                        (XBinary::_read_uint32(pDescriptor + 4) == cdfh.nCRC32) && (XBinary::_read_uint32(pDescriptor + 8) == cdfh.nCompressedSize) &&
+                        (XBinary::_read_uint32(pDescriptor + 12) == cdfh.nUncompressedSize)) {
                         bDescriptorValid = true;
                         nDescriptorSize = 16;
                     }

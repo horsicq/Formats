@@ -28,9 +28,7 @@ class XDeflateDecoder : public QObject {
     Q_OBJECT
 public:
     explicit XDeflateDecoder(QObject *parent = nullptr);
-    static bool decompress(XBinary::DATAPROCESS_STATE *pDecompressState,
-                           XBinary::PDSTRUCT *pPdStruct = nullptr,
-                           bool bAcceptExactOutputAtEOF = false);
+    static bool decompress(XBinary::DATAPROCESS_STATE *pDecompressState, XBinary::PDSTRUCT *pPdStruct = nullptr, bool bAcceptExactOutputAtEOF = false);
     static bool decompress64(XBinary::DATAPROCESS_STATE *pDecompressState, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static bool decompress_zlib(XBinary::DATAPROCESS_STATE *pDecompressState, XBinary::PDSTRUCT *pPdStruct = nullptr);
     static bool compress(XBinary::DATAPROCESS_STATE *pCompressState, XBinary::PDSTRUCT *pPdStruct = nullptr, int nCompressionLevel = Z_DEFAULT_COMPRESSION);
@@ -54,13 +52,13 @@ public:
     struct BLOCK {
         BLOCKTYPE blockType;
         bool bFinal;
-        qint64 nBitOffset;         // where the block header starts
-        qint64 nBitSize;           // block size in bits, header included
-        qint32 nNumberOfSymbols;   // literal/length symbols, end-of-block included
-        qint64 nStoredSize;        // BLOCKTYPE_STORED only
-        qint32 nHLIT;              // BLOCKTYPE_DYNAMIC only
-        qint32 nHDIST;             // BLOCKTYPE_DYNAMIC only
-        qint32 nHCLEN;             // BLOCKTYPE_DYNAMIC only
+        qint64 nBitOffset;        // where the block header starts
+        qint64 nBitSize;          // block size in bits, header included
+        qint32 nNumberOfSymbols;  // literal/length symbols, end-of-block included
+        qint64 nStoredSize;       // BLOCKTYPE_STORED only
+        qint32 nHLIT;             // BLOCKTYPE_DYNAMIC only
+        qint32 nHDIST;            // BLOCKTYPE_DYNAMIC only
+        qint32 nHCLEN;            // BLOCKTYPE_DYNAMIC only
     };
 
     enum ENCODER {
@@ -73,8 +71,8 @@ public:
 
     struct ENCODERINFO {
         ENCODER encoder;
-        qint32 nSymbolsPerBlock;   // the repeating count, -1 when it does not repeat
-        qint32 nMemLevel;          // implied zlib memLevel, -1 when not applicable
+        qint32 nSymbolsPerBlock;  // the repeating count, -1 when it does not repeat
+        qint32 nMemLevel;         // implied zlib memLevel, -1 when not applicable
         qint32 nNumberOfBlocks;
         // A stream that never fills one block made no decision worth reading:
         // every encoder produces the same layout, so the verdict means nothing.
