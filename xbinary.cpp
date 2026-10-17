@@ -8298,12 +8298,19 @@ qint64 XBinary::find_signature(qint64 nOffset, qint64 nSize, const QString &sSig
 
 QList<qint64> XBinary::find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QStringList &signatures, PDSTRUCT *pPdStruct)
 {
+    return _findSignatures(pMemoryMap, nOffset, nSize, signatures, false, pPdStruct);
+}
+
+QList<qint64> XBinary::_findSignatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QStringList &signatures, bool bStopOnFirst,
+                                      PDSTRUCT *pPdStruct)
+{
     QList<qint64> results;
-    if (signatures.size() > 128) return results;
+    if (!bStopOnFirst && signatures.size() > 128) return results;
     qint64 budget = 0;
     for (const QString &signature : signatures) {
         budget += signature.size();
-        if (budget > 65536) return results;
+        if (!bStopOnFirst && budget > 65536) return results;
+        if (bStopOnFirst && signature.contains(QChar(0))) return QList<qint64>();
         results.append(-1);
     }
     if (signatures.isEmpty()) return results;
@@ -8336,7 +8343,10 @@ QList<qint64> XBinary::find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, 
     int pending = 0;
     for (int id = 0; id < signatures.size(); ++id) {
         const QString normalized = convertSignature(signatures[id]);
-        if (normalized.isEmpty() || !isSignatureValid(normalized, pPdStruct)) continue;
+        if (normalized.isEmpty() || (bStopOnFirst && normalized.size() > 0x200000) || !isSignatureValid(normalized, pPdStruct)) {
+            if (bStopOnFirst) return QList<qint64>();
+            continue;
+        }
         if (!alive()) return QList<qint64>();
         if (normalized.contains('$') || normalized.contains('#') || normalized.contains('+')) {
             fallbacks.append(id);
@@ -8385,6 +8395,7 @@ QList<qint64> XBinary::find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, 
                     --pending;
                 }
                 if (!alive()) return QList<qint64>();
+                if (bStopOnFirst && results[id] != -1) return results;
             }
         }
         base += block;
@@ -8395,6 +8406,7 @@ QList<qint64> XBinary::find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, 
         if (!alive() || !isPdStructNotCanceled(pPdStruct)) return QList<qint64>();
         results[id] = find_signature(pMemoryMap, nOffset, nSize, signatures[id], nullptr, pPdStruct);
         if (!alive()) return QList<qint64>();
+        if (bStopOnFirst && results[id] != -1) return results;
     }
     return results;
 }
@@ -21600,6 +21612,21 @@ bool XBinary::isSignatureInFilePartPresent(XBinary::_MEMORY_MAP *pMemoryMap, qin
     }
 
     return bResult;
+}
+
+bool XBinary::isAnySignatureInFilePartPresent(_MEMORY_MAP *pMemoryMap, qint32 nFilePartNumber, const QStringList &signatures, PDSTRUCT *pPdStruct)
+{
+    if (!pMemoryMap || signatures.isEmpty() || !isPdStructNotCanceled(pPdStruct)) return false;
+    for (const _MEMORY_RECORD &record : pMemoryMap->listRecords) {
+        if (record.nFilePartNumber == nFilePartNumber && record.nOffset != -1) {
+            const QList<qint64> results = _findSignatures(pMemoryMap, record.nOffset, record.nSize, signatures, true, pPdStruct);
+            for (qint64 offset : results) {
+                if (offset != -1) return true;
+            }
+            return false;
+        }
+    }
+    return false;
 }
 
 QString XBinary::getStringCollision(const QList<QString> *pListStrings, const QString &sString1, const QString &sString2)

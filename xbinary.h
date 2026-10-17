@@ -4013,6 +4013,8 @@ public:
 
     bool isSignatureInFilePartPresent(qint32 nFilePartNumber, const QString &sSignature);
     bool isSignatureInFilePartPresent(_MEMORY_MAP *pMemoryMap, qint32 nFilePartNumber, const QString &sSignature, PDSTRUCT *pPdStruct = nullptr);
+    // Validate all alternatives, then stop the shared search at its first match.
+    bool isAnySignatureInFilePartPresent(_MEMORY_MAP *pMemoryMap, qint32 nFilePartNumber, const QStringList &signatures, PDSTRUCT *pPdStruct = nullptr);
 
     static QString getStringCollision(const QList<QString> *pListStrings, const QString &sString1, const QString &sString2);
 
@@ -4526,6 +4528,9 @@ public:
 
 private:
     static QString qcharToHex(QChar cSymbol);
+
+    QList<qint64> _findSignatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QStringList &signatures, bool bStopOnFirst,
+                                PDSTRUCT *pPdStruct);
 
     static QList<SIGNATURE_RECORD> getSignatureRecords(const QString &sSignature, bool *pbValid, PDSTRUCT *pPdStruct);
     bool _compareSignature(_MEMORY_MAP *pMemoryMap, QList<SIGNATURE_RECORD> *pListSignatureRecords, qint64 nOffset, PDSTRUCT *pPdStruct);
