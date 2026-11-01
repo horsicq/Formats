@@ -547,7 +547,11 @@ qint64 XMSDOS::getImageSize()
 
 qint64 XMSDOS::getModuleAddress()
 {
-    return 0;
+    // getMemoryMap() maps the load module (the bytes after the header) at
+    // 0x10000000, so the module base and the CS:IP entry address
+    // (nModuleAddress + CS * 16 + IP) must use that base too, or the entry
+    // point never resolves to a file offset (DIE 3.x behaviour).
+    return 0x10000000;
 }
 
 QMap<quint64, QString> XMSDOS::getImageMagics()
