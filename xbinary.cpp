@@ -8301,8 +8301,7 @@ QList<qint64> XBinary::find_signatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, 
     return _findSignatures(pMemoryMap, nOffset, nSize, signatures, false, pPdStruct);
 }
 
-QList<qint64> XBinary::_findSignatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QStringList &signatures, bool bStopOnFirst,
-                                      PDSTRUCT *pPdStruct)
+QList<qint64> XBinary::_findSignatures(_MEMORY_MAP *pMemoryMap, qint64 nOffset, qint64 nSize, const QStringList &signatures, bool bStopOnFirst, PDSTRUCT *pPdStruct)
 {
     QList<qint64> results;
     if (!bStopOnFirst && signatures.size() > 128) return results;
