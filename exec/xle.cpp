@@ -1194,7 +1194,7 @@ QList<XLE_DEF::o32_obj> XLE::getObjects()
     }
 
     quint32 nObjTab = getImageVxdHeader_objtab();
-    if (nObjTab > (quint32)(LLONG_MAX - nHeaderOffset)) {
+    if (nObjTab > (quint64)(LLONG_MAX - nHeaderOffset)) {
         return listResult;
     }
 
@@ -1240,7 +1240,7 @@ QList<XLE_DEF::o16_map> XLE::getMapsLE()
     }
 
     quint32 nObjMap = getImageVxdHeader_objmap();
-    if (nObjMap > (quint32)(LLONG_MAX - nHeaderOffset)) {
+    if (nObjMap > (quint64)(LLONG_MAX - nHeaderOffset)) {
         return listResult;
     }
 
@@ -1278,7 +1278,7 @@ QList<XLE_DEF::o32_map> XLE::getMapsLX()
     }
 
     quint32 nObjMap = getImageVxdHeader_objmap();
-    if (nObjMap > (quint32)(LLONG_MAX - nHeaderOffset)) {
+    if (nObjMap > (quint64)(LLONG_MAX - nHeaderOffset)) {
         return listResult;
     }
 
@@ -1754,7 +1754,7 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
         qint64 nMapOff = -1;
         if (nHeaderOffset >= 0) {
             quint32 nObjMap = getImageVxdHeader_objmap();
-            if (nObjMap <= (quint32)(LLONG_MAX - nHeaderOffset)) {
+            if (nObjMap <= (quint64)(LLONG_MAX - nHeaderOffset)) {
                 nMapOff = nHeaderOffset + (qint64)nObjMap;
             }
         }
@@ -1803,6 +1803,12 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
             if (nMapBasePage > nMaxMapPage) {
                 continue;
             }
+
+            // Only the e32_mpages entries belong to the page map; later bytes are other tables
+            if (nMapBasePage >= (qint64)nPages) {
+                continue;
+            }
+            nMapSize = qMin<qint64>(nMapSize, (qint64)nPages - nMapBasePage);
 
             for (qint64 j = 0; j < nMapSize; j++) {
                 qint64 nPageDataOffset = 0;
