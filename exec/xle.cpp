@@ -1838,11 +1838,20 @@ QList<XBinary::FPART> XLE::getFileParts(quint32 nFileParts, qint32 nLimit, PDSTR
                     }
                 } else {
                     XLE_DEF::o32_map m = _read_o32_map(nMapEntryOff);
-                    if ((qint64)nDataPageOff > (nTotal - (qint64)m.o32_pagedataoffset - 1)) {
+                    // Page types 2 (invalid), 3 (zero-filled) and 4 (range) have no data in the file
+                    quint16 nPageType = (quint16)(m.o32_pageflags & 7);
+                    if ((nPageType == 2) || (nPageType == 3) || (nPageType == 4)) {
+                        continue;
+                    }
+                    // LX: the e32_lastpagesize slot is e32_pageshift; o32_pagedataoffset is in (1 << shift) units
+                    // x86 SHL semantics: only the low 5 bits of the shift count (a stored 64 means 0)
+                    quint32 nPageShift = nLastPageSize & 31;
+                    quint64 nPageRel = (quint64)m.o32_pagedataoffset << nPageShift;
+                    if ((nDataPageOff < 0) || (nDataPageOff >= nTotal) || (nPageRel > (quint64)(nTotal - nDataPageOff - 1))) {
                         continue;
                     }
 
-                    nPageDataOffset = nDataPageOff + m.o32_pagedataoffset;
+                    nPageDataOffset = nDataPageOff + (qint64)nPageRel;
                     nThisPageSize = m.o32_pagesize ? m.o32_pagesize : nPageSize;
                 }
                 // Validate page data offset is within file
