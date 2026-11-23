@@ -6926,7 +6926,7 @@ quint32 XBinary::_read_uint24(const char *pData, bool bIsBigEndian)
 
 quint32 XBinary::_read_uint32(const char *pData, bool bIsBigEndian)
 {
-    quint32 result = *(quint32 *)pData;
+    quint32 result = qFromUnaligned<quint32>(pData);
 
     if (bIsBigEndian) {
         result = qFromBigEndian(result);
