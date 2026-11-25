@@ -2223,6 +2223,12 @@ public:
         // file size.  Append at the TRUE tail of XBinary::FT so persisted FT identifiers do not move.
         // The reader reuses HANDLE_METHOD_SOFTRONICS_LZW.
         FT_SOFTRONICS,
+        // Floppy disk images the scan engine opens: a raw FAT12/FAT16 image (Atari ST .st, MSX and
+        // PC .img/.ima; XFATImage) and an Atari MSA image (Magic Shadow Archiver, per-track RLE;
+        // XMSA).  Appended at the TRUE tail of XBinary::FT so persisted FT identifiers do not move.
+        // Members are stored (HANDLE_METHOD_STORE) or index-paired archive-stream records.
+        FT_FAT,
+        FT_MSA,
     };
 
     enum INDATA_MODE {

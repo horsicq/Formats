@@ -942,7 +942,7 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_MACHO32, "Mach-O32", QString("Mach-O32")},
     {XBinary::FT_MACHO64, "Mach-O64", QString("Mach-O64")},
     {XBinary::FT_AMIGAHUNK, "Amiga Hunk", QString("Amiga Hunk")},
-    {XBinary::FT_ATARIST, "Atari ST", QString("Atari ST")},
+    {XBinary::FT_ATARIST, "GEMDOS", QString("GEMDOS")},
     {XBinary::FT_CLI_ASSEMBLY, ".NET", QString(".NET")},
     // Extra
     {XBinary::FT_7Z, "7-Zip", QString("7-Zip")},
@@ -1515,6 +1515,8 @@ XBinary::XCONVERT _TABLE_XBinary_FT[] = {
     {XBinary::FT_WBFS, "WBFS", QString("Wii Backup File System image")},
     {XBinary::FT_RVZ, "RVZ", QString("Dolphin RVZ disc image")},
     {XBinary::FT_SOFTRONICS, "SOFTRONICS", QString("Softronics compressed file")},
+    {XBinary::FT_FAT, "FAT", QString("FAT")},
+    {XBinary::FT_MSA, "MSA", QString("MSA")},
 };
 
 // What each reader in this tree actually decodes, keyed by FT.
@@ -1662,6 +1664,10 @@ XBinary::FORMATINFO _TABLE_XBinary_FORMATINFO[] = {
     // ---- file systems and disk images --------------------------------------
     {XBinary::FT_ISO9660, XBinary::FTCLASS_DISKIMAGE | XBinary::FTCLASS_FILESYSTEM, nullptr, "Store", nullptr},
     {XBinary::FT_UDF, XBinary::FTCLASS_DISKIMAGE | XBinary::FTCLASS_FILESYSTEM, nullptr, "Store", nullptr},
+    // xfatimage.cpp: raw FAT12/FAT16 floppy images by BPB and root directory; 8.3 names only.
+    {XBinary::FT_FAT, XBinary::FTCLASS_DISKIMAGE | XBinary::FTCLASS_FILESYSTEM, "FAT12, FAT16", "Store", "FAT32, long file names"},
+    // xmsa.cpp: one member, the decoded disk image.
+    {XBinary::FT_MSA, XBinary::FTCLASS_DISKIMAGE, nullptr, "Store, RLE", nullptr},
     // xsquashfsarchive.cpp:180-189 (compressorToString) names all six
     // compressor ids, so the listing can label an image it cannot extract.
     // The decode dispatch is xsquashfsdecoder.cpp:174-181 and has exactly two
@@ -15600,6 +15606,8 @@ XBinary::FT XBinary::_getPrefFileType(const QSet<FT> *pStFileTypes)
         FT_SQZ,
         FT_SQZSFX,
         FT_RTPATCHSFX,
+        FT_FAT,
+        FT_MSA,
         FT_AMIGA_ADF,
         FT_GODOT_PCK,
         FT_NSCRIPTER_NSA,
@@ -16242,6 +16250,8 @@ QList<XBinary::FT> XBinary::_getFileTypeListFromSet(const QSet<FT> &stFileTypes,
         {FT_ARDI1_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_ARDI2_SFX, FT_FLAG_ARCHIVES | FT_FLAG_STATICUNPACKERS},
         {FT_AMIGA_ADF, FT_FLAG_ARCHIVES},
+        {FT_FAT, FT_FLAG_ARCHIVES},
+        {FT_MSA, FT_FLAG_ARCHIVES},
         {FT_GODOT_PCK, FT_FLAG_ARCHIVES},
         {FT_NSCRIPTER_NSA, FT_FLAG_ARCHIVES},
         {FT_NSCRIPTER_NS2, FT_FLAG_ARCHIVES},

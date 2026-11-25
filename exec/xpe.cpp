@@ -13725,7 +13725,7 @@ qint32 XPE::getRelocsSection()
 {
     _MEMORY_MAP memoryMap = getMemoryMap();
 
-    return getImageDirectoryEntrySection(&memoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_RESOURCE);
+    return getImageDirectoryEntrySection(&memoryMap, XPE_DEF::S_IMAGE_DIRECTORY_ENTRY_BASERELOC);
 }
 
 qint32 XPE::getImageDirectoryEntrySection(_MEMORY_MAP *pMemoryMap, qint32 nImageDirectoryEntry)

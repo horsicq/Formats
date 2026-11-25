@@ -634,6 +634,8 @@ static XBinary *createInstanceArc4(XBinary::FT fileType, QIODevice *pDevice)
     if (XBinary::checkFileType(XBinary::FT_LZWD, fileType)) return new XLZWDArchive(pDevice);
     if (XBinary::checkFileType(XBinary::FT_EA_BIG, fileType)) return new XBigfArchive(pDevice);
     if (XBinary::checkFileType(XBinary::FT_FDI, fileType)) return new XFDIImage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_FAT, fileType)) return new XFATImage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_MSA, fileType)) return new XMSA(pDevice);
     if (XBinary::checkFileType(XBinary::FT_PCM, fileType)) return new XPCMImage(pDevice);
     if (XBinary::checkFileType(XBinary::FT_POWERARC, fileType)) return new XPowerArc(pDevice);
     if (XBinary::checkFileType(XBinary::FT_APRICOT, fileType)) return new XApricotImage(pDevice);
@@ -1367,6 +1369,8 @@ QList<XBinary::FT> XFormats::getAvailableFileTypes()
     listResult.append(XBinary::FT_LZWD);
     listResult.append(XBinary::FT_EA_BIG);
     listResult.append(XBinary::FT_FDI);
+    listResult.append(XBinary::FT_FAT);
+    listResult.append(XBinary::FT_MSA);
     listResult.append(XBinary::FT_PCM);
     listResult.append(XBinary::FT_POWERARC);
     listResult.append(XBinary::FT_APRICOT);
@@ -4436,6 +4440,23 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
         }
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
+
+#ifdef USE_ARCHIVE
+        // Floppy disk images come before every reader below: a raw FAT image has no magic, and its
+        // boot sector may open with the GEMDOS branch 0x601A or its last file may be a ZIP whose
+        // end record XZip would find.  xxfclib tests them at the same place (xx_scan_types.c).
+        if ((nFTFlags & XBinary::FT_FLAG_ARCHIVES) && (stResult.size() <= 1)) {
+            if (XFATImage::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_FAT);
+            } else if (XMSA::isValid(pDevice, pPdStruct)) {
+                stResult.insert(XBinary::FT_ARCHIVE);
+                stResult.insert(XBinary::FT_MSA);
+            }
+        }
+
+        if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
+#endif
 
         if ((nFTFlags & XBinary::FT_FLAG_EXECUTABLES) && (stResult.size() <= 1)) {
             if (XAmigaHunk::isValid(pDevice, pPdStruct)) {

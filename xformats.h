@@ -157,6 +157,8 @@
 #include "xlzwdarchive.h"
 #include "xbigfarchive.h"
 #include "xfdiimage.h"
+#include "xfatimage.h"
+#include "xmsa.h"
 #include "xpcmimage.h"
 #include "xpowerarc.h"
 #include "xapricotimage.h"

@@ -576,6 +576,10 @@ QMap<quint64, QString> XMSDOS::getImageMagicsS()
 
 bool XMSDOS::isLE()
 {
+    if (getSize() < (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)) {
+        return false;  // no e_lfanew: a failed read would point at offset 0
+    }
+
     quint32 nOffset = get_e_lfanew();
     quint16 nNew = read_uint16(nOffset);
 
@@ -584,6 +588,10 @@ bool XMSDOS::isLE()
 
 bool XMSDOS::isLX()
 {
+    if (getSize() < (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)) {
+        return false;  // no e_lfanew: a failed read would point at offset 0
+    }
+
     quint32 nOffset = get_e_lfanew();
     quint16 nNew = read_uint16(nOffset);
 
@@ -592,6 +600,10 @@ bool XMSDOS::isLX()
 
 bool XMSDOS::isNE()
 {
+    if (getSize() < (qint64)sizeof(XMSDOS_DEF::IMAGE_DOS_HEADEREX)) {
+        return false;  // no e_lfanew: a failed read would point at offset 0
+    }
+
     quint32 nOffset = get_e_lfanew();
     quint16 nNew = read_uint16(nOffset);
 
