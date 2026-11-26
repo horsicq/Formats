@@ -99,6 +99,10 @@
 #include "xis14sfxarchive.h"
 #include "../XArchive/installers/xissetupstream.h"
 #include "xlegacystorearchive.h"
+// Floppy disk images (FAT, MSA): Detect It Easy builds with USE_STATICUNPACKER only and
+// must still type and expand them (cdie does, xx_scan_floppy.c).
+#include "xfatimage.h"
+#include "xmsa.h"
 #endif
 #ifdef USE_ARCHIVE
 #include "x_ar.h"
@@ -157,8 +161,6 @@
 #include "xlzwdarchive.h"
 #include "xbigfarchive.h"
 #include "xfdiimage.h"
-#include "xfatimage.h"
-#include "xmsa.h"
 #include "xpcmimage.h"
 #include "xpowerarc.h"
 #include "xapricotimage.h"

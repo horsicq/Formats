@@ -715,6 +715,12 @@ static XBinary *createInstanceArc4(XBinary::FT fileType, QIODevice *pDevice)
 
 XBinary *XFormats::createClass(XBinary::FT fileType, QIODevice *pDevice, bool bIsImage, XADDR nModuleAddress)
 {
+#if !defined(USE_ARCHIVE) && defined(USE_STATICUNPACKER)
+    // Floppy disk images also without USE_ARCHIVE (Detect It Easy); a USE_ARCHIVE build creates
+    // them in its archive chain below.
+    if (XBinary::checkFileType(XBinary::FT_FAT, fileType)) return new XFATImage(pDevice);
+    if (XBinary::checkFileType(XBinary::FT_MSA, fileType)) return new XMSA(pDevice);
+#endif
 #ifdef USE_ARCHIVE
     // Keep appended exact types outside the legacy guarded-return chain,
     // whose nesting otherwise exceeds MSVC's block-depth limit.
@@ -1802,14 +1808,23 @@ QSet<XBinary::FT> XFormats::getFileTypes(QIODevice *pDevice, quint32 nFTFlags, X
     const bool bDefaultDeadlineInstalled = bInstallDefaultDeadline && XBinary::setPdStructDeadline(pPdStruct, nDefaultStaticProbeTimeoutMs);
 
     DevicePositionGuard positionGuard(pDevice);
+    const bool bWasStopped = pPdStruct->bIsStop.loadAcquire();
     result = _getFileTypes(pDevice, nFTFlags, pPdStruct);
     const bool bNotCanceled = XBinary::isPdStructNotCanceled(pPdStruct);
     const bool bDeadlineExpired = XBinary::isPdStructDeadlineExpired(pPdStruct);
     if (bDeadlineExpired) {
         XBinary::setPdStructErrorString(pPdStruct, tr("Detection budget exceeded"));
     }
-    if (bDefaultDeadlineInstalled && !bDeadlineExpired) {
+    // Remove the default deadline this call installed, also when it expired: the PDSTRUCT is
+    // shared by a whole scan (diec -r), so an expired default deadline left in place would
+    // cancel the detection of every later file. This file still reports the budget error.
+    if (bDefaultDeadlineInstalled) {
         XBinary::clearPdStructDeadline(pPdStruct);
+        // An expired deadline also stops the PDSTRUCT (isPdStructNotCanceled sets bIsStop);
+        // undo that when only this call's own default deadline caused it.
+        if (bDeadlineExpired && !bWasStopped) {
+            pPdStruct->bIsStop.storeRelease(false);
+        }
     }
     if (!bNotCanceled) {
         result.clear();
@@ -4441,7 +4456,7 @@ QSet<XBinary::FT> XFormats::_getFileTypes(QIODevice *pDevice, quint32 nFTFlags, 
 
         if (!XBinary::isPdStructNotCanceled(pPdStruct)) return {};
 
-#ifdef USE_ARCHIVE
+#if defined(USE_ARCHIVE) || defined(USE_STATICUNPACKER)
         // Floppy disk images come before every reader below: a raw FAT image has no magic, and its
         // boot sector may open with the GEMDOS branch 0x601A or its last file may be a ZIP whose
         // end record XZip would find.  xxfclib tests them at the same place (xx_scan_types.c).
