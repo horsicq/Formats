@@ -5889,23 +5889,13 @@ qint32 XBinary::getNumberOfFiles(const QString &sDirectoryName, bool bSubDirecto
 QString XBinary::regExp(const QString &sRegExp, const QString &sString, qint32 nIndex)
 {
     QString sResult;
-#if (QT_VERSION_MAJOR < 5)
-    QRegExp rxString(sRegExp);
-    rxString.indexIn(sString);
 
-    QStringList list = rxString.capturedTexts();
-
-    if (list.count() > nIndex) {
-        sResult = list.at(nIndex);
-    }
-#else
     QRegularExpression rxString(sRegExp);
     QRegularExpressionMatch matchString = rxString.match(sString);
 
     if (matchString.hasMatch()) {
         sResult = matchString.captured(nIndex);
     }
-#endif
 
     return sResult;
 }
@@ -5918,11 +5908,7 @@ bool XBinary::isRegExpPresent(const QString &sRegExp, const QString &sString)
 qint32 XBinary::getRegExpCount(const QString &sRegExp, const QString &sString)
 {
     quint32 nResult = 0;
-#if (QT_VERSION_MAJOR < 5)
-    QRegExp rxString(sRegExp);
-    rxString.indexIn(sString);
-    nResult = rxString.capturedTexts().count();
-#else
+
     QRegularExpression rxString(sRegExp);
     QRegularExpressionMatchIterator i = rxString.globalMatch(sString);
     while (i.hasNext()) {
@@ -5931,29 +5917,19 @@ qint32 XBinary::getRegExpCount(const QString &sRegExp, const QString &sString)
             nResult++;
         }
     }
-#endif
 
     return nResult;
 }
 
 QString XBinary::getRegExpSection(const QString &sRegExp, const QString &sString, qint32 nStart, qint32 nEnd)
 {
-#if (QT_VERSION_MAJOR < 5)
-    return sString.section(QRegExp(sRegExp), nStart, nEnd);
-#else
     return sString.section(QRegularExpression(sRegExp), nStart, nEnd);
-#endif
 }
 
 bool XBinary::isRegExpValid(const QString &sRegExp)
 {
-#if (QT_VERSION_MAJOR < 5)
-    QRegExp rxString(sRegExp);
-    return rxString.isValid();
-#else
     QRegularExpression rxString(sRegExp);
     return rxString.isValid();
-#endif
 }
 
 qint64 XBinary::read_array_process(qint64 nOffset, char *pBuffer, qint64 nMaxSize, PDSTRUCT *pPdStruct)
@@ -24958,15 +24934,7 @@ QString XBinary::_fromWCharArray(const wchar_t *pWString, qint32 size)
         return sResult;
     }
 
-#if (QT_VERSION_MAJOR < 5)  // TODO Check
     sResult = QString::fromWCharArray(pWString, size);
-    // set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:wchar_t-")
-    // set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Zc:wchar_t-")
-#else
-    sResult = QString::fromWCharArray(pWString, size);
-#endif
 
     return sResult;
 }
