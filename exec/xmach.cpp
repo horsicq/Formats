@@ -827,6 +827,8 @@ static const XMACH::XCODE_VERSION_RECORD _TABLE_XCODE_VERSIONS[] = {
     {"26.1", "2025-11-03", "15.6", "26.1", "26.1", "26.1", "26.1", "26.1"},
     {"26.1.1", "2025-11-11", "15.6", "26.1", "26.1", "26.1", "26.1", "26.1"},
     {"26.2", "2025-12-12", "15.6", "26.2", "26.2", "26.2", "26.2", "26.2"},
+    // Xcode 27.x
+    {"27.0", "2026-09-14", "26.5", "27.0", "27.0", "27.0", "27.0", "27.0"},
 };
 
 QString XMACH::getXcodeVersionFromSDK(const QString &sSDKVersion, XBinary::OSNAME osName)
